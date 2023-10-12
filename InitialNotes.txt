@@ -1,0 +1,22 @@
+Lazerwikil
+template/ - configurable per URL.
+index.html // Framing document for page
+site.css // Site-specific overrides of css
+static/ static image resources
+dynamic/ user-uploaded images
+Database -
+-
+Page
+CREATE TABLE page (id integer, revision id, site VARCHAR [50], namespace VARCHAR[50], page name VARCHAR [200
+text TEXT, modified DATETIME, modifiedBy VARCHAR [whatever], deleted int);
+index, PK (id, revision), site/namespace/page_name/revision
+// could have column for markupLanguage, if want to support multiple... I don't want to have to
+// rewrite all my pages, but not particularly fond of doku's syntax.
+SearchIndex
+// map id to content tokens
+Links
+// List of internal links
+Users // 1ink through 1ibusers
+ACL
+Images
+// Meta-info on images.
