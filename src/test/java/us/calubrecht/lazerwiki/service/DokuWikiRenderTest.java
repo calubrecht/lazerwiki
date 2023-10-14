@@ -41,10 +41,11 @@ class DokuWikiRendererTest {
     }
 
 
+    @Test
     void testRenderLink() {
-        when(pageService.exists(eq("wikiLinkExists"))).thenReturn(true);
-        assertEquals("<a class=\"wikiLinkMissing\" href=\"/missing\">This link is missing</a>", underTest.render("[[wikiLinkMissing|This link is missing]]"));
-        assertEquals("<a class=\"wikiLinkExists\" href=\"/missing\">This link exists</a>", underTest.render("[[wikiLinkExists|This link exists]]"));
+        when(pageService.exists(eq("exists"))).thenReturn(true);
+        assertEquals("<a class=\"wikiLinkMissing\" href=\"/missing\">This link is missing</a>", underTest.render("[[missing|This link is missing]]"));
+        assertEquals("<a class=\"wikiLink\" href=\"/exists\">This link exists</a>", underTest.render("[[exists|This link exists]]"));
 
         // Nested in header
         assertEquals("<h1>Some text in <a class=\"wikiLinkMissing\" href=\"/headerLink\">a header</a></h1>", underTest.render("======Some text in [[ headerLink |a header]]======"));

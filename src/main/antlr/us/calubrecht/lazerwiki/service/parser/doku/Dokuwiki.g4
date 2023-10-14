@@ -20,6 +20,10 @@ HEADER5: '==' ;
 
 WS: [ \t] ;
 
+LINK_START: '[[' ;
+LINK_END: ']]' ;
+PIPE: '|';
+
 CHARACTER
     : ~[\r\n]
     ;
@@ -41,16 +45,34 @@ header_tok
    : HEADER1 | HEADER2 | HEADER3 | HEADER4 | HEADER5
    ;
 
-all_char
-  : CHARACTER | WS | header_tok
+link_target
+  : (CHARACTER | WS)+
+  ;
+
+link_display
+  :
+  PIPE all_char*
+  ;
+
+link:
+ LINK_START link_target link_display? LINK_END
+ ;
+
+ all_char
+   : CHARACTER | WS | header_tok
+   ;
+
+inner_text
+  :
+    (all_char | link | PIPE) +
   ;
 
 header
-  : header_tok all_char+ header_tok
+  : header_tok inner_text header_tok
   ;
 
 line
-  : all_char*
+  : inner_text
   ;
 
 

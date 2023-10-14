@@ -15,13 +15,23 @@ public abstract class TreeRenderer {
     }
 
     public static TreeRenderer DEFAULT = new DefaultRenderer();
+
+    protected StringBuffer renderChildren(ParseTree tree, int firstChild, int lastChild) {
+        StringBuffer outBuffer = new StringBuffer();
+        for(int i = firstChild; i < lastChild; i++) {
+            ParseTree child = tree.getChild(i);
+            outBuffer.append(renderers.getRenderer(child.getClass()).render(child));
+        }
+        return outBuffer;
+    }
+
     public static class DefaultRenderer extends TreeRenderer {
         public Class getTarget() {
             return null;
         }
 
         public StringBuffer render(ParseTree tree) {
-            return new StringBuffer(tree.getText());
+            return renderChildren(tree, 0, tree.getChildCount());
         }
     }
 }

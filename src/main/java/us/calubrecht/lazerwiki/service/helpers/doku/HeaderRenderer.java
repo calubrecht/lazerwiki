@@ -6,7 +6,7 @@ import us.calubrecht.lazerwiki.service.helpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
 @Component
-public class HeaderRenderer extends SerialRenderer {
+public class HeaderRenderer extends TreeRenderer {
     public Class getTarget() {
         return DokuwikiParser.HeaderContext.class;
     }

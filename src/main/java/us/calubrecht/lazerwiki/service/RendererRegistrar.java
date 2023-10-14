@@ -22,8 +22,8 @@ public class RendererRegistrar {
         for (TreeRenderer renderer : renderers) {
             renderersForClass.put(renderer.getTarget(), renderer);
             renderer.setRenderers(this);
-
         }
+        TreeRenderer.DEFAULT.setRenderers(this);
 
     }
 
