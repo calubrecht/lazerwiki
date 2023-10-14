@@ -5,13 +5,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.service.helpers.RenderHelper_Line;
-import us.calubrecht.lazerwiki.service.helpers.doku.DokuHeader;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiLexer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
@@ -38,13 +33,5 @@ public class DokuWikiRenderer implements IMarkupRenderer {
             outBuffer.deleteCharAt(outBuffer.length()-1);
         }
         return outBuffer.toString().strip();
-    }
-
-    protected String parseLine(String line) {
-        RenderHelper_Line helper = new DokuHeader();
-        if (helper.matches(line)) {
-            return helper.render(line);
-        }
-        return line;
     }
 }

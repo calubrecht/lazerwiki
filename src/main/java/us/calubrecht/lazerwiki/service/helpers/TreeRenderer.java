@@ -10,6 +10,10 @@ public abstract class TreeRenderer {
 
     public abstract StringBuffer render(ParseTree tree);
 
+    public boolean shouldParentSanitize() {
+        return true;
+    }
+
     public void setRenderers(RendererRegistrar renderers) {
         this.renderers = renderers;
     }

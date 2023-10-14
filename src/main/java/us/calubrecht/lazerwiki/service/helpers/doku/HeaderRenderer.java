@@ -13,7 +13,6 @@ public class HeaderRenderer extends TreeRenderer {
 
     public StringBuffer render(ParseTree tree) {
         DokuwikiParser.HeaderContext context = (DokuwikiParser.HeaderContext)tree;
-        context.getChild(0).getText();
         int headerSize = context.getChild(0).getText().length();
         String hTag = "h" + (7 - headerSize);
         StringBuffer outBuffer = new StringBuffer();
@@ -22,5 +21,10 @@ public class HeaderRenderer extends TreeRenderer {
         outBuffer.append("</").append(hTag).append(">");
         return outBuffer;
 
+    }
+
+    @Override
+    public boolean shouldParentSanitize() {
+        return false;
     }
 }

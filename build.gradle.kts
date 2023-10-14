@@ -23,6 +23,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.antlr:antlr4-runtime:4.13.1")
+	implementation("org.apache.commons:commons-text:1.10.0")
 
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
