@@ -20,7 +20,12 @@ public class PageService {
         return "";
     }
 
+    public String getSource(String host, String pageDescriptor) {
+        return "<div><h1>Header is!</h1><div>This is a page</div><div>This page is %s</div></div>".formatted(pageDescriptor);
+    }
+
+    @Deprecated
     public String getSource(String pageName) {
-        return "";
+        return getSource(null, pageName);
     }
 }
