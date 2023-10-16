@@ -21,6 +21,7 @@ public class LazerWikiApplication  extends SpringBootServletInitializer {
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
 	{
+		System.out.println("Should find Lazer?");
 		return application.sources(LazerWikiApplication.class);
 	}
 
