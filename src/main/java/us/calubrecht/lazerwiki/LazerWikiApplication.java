@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 import jakarta.servlet.ServletContext;
@@ -17,6 +18,11 @@ public class LazerWikiApplication  extends SpringBootServletInitializer {
 		SpringApplication.run(LazerWikiApplication.class, args);
 	}
 
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
+	{
+		return application.sources(LazerWikiApplication.class);
+	}
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
