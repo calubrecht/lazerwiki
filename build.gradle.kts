@@ -38,6 +38,7 @@ dependencies {
 
 	testImplementation ("org.junit.jupiter:junit-jupiter")
 	testImplementation("org.mockito:mockito-core")
+	testImplementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
 	testRuntimeOnly ("com.h2database:h2")
 
 	antlr("org.antlr:antlr4:4.13.1")
