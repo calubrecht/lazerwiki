@@ -3,7 +3,7 @@ plugins {
 	antlr
 	war
 	jacoco
-	id("org.springframework.boot") version "3.1.4"
+	id("org.springframework.boot") version "2.7.16"
 	id("io.spring.dependency-management") version "1.1.3"
 }
 
@@ -22,7 +22,7 @@ repositories {
 	mavenCentral()
 }
 
-ext["jakarta-servlet.version"] = "5.0.0"
+//ext["jakarta-servlet.version"] = "5.0.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -33,12 +33,16 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-jetty")
 	implementation("org.antlr:antlr4-runtime:4.13.1")
 	implementation("org.apache.commons:commons-text:1.10.0")
+	implementation ("org.eclipse.jetty:jetty-http")
+	implementation ("org.eclipse.jetty:jetty-io")
+	implementation ("org.eclipse.jetty:jetty-util")
+
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 	testImplementation ("org.junit.jupiter:junit-jupiter")
 	testImplementation("org.mockito:mockito-core")
-	testImplementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+//	testImplementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
 	testRuntimeOnly ("com.h2database:h2")
 
 	antlr("org.antlr:antlr4:4.13.1")

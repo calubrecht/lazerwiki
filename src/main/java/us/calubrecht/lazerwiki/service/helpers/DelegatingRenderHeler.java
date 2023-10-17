@@ -1,9 +1,8 @@
 package us.calubrecht.lazerwiki.service.helpers;
 
-import ch.qos.logback.core.joran.sanity.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * A RenderHelper_Line that delegates content in that line to further RenderHelper_Inlines

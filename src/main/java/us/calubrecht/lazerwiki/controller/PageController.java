@@ -3,7 +3,7 @@ package us.calubrecht.lazerwiki.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import us.calubrecht.lazerwiki.service.PageService;
 
 import java.net.MalformedURLException;
