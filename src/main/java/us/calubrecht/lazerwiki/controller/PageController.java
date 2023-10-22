@@ -8,6 +8,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("api/page/")
@@ -16,8 +17,9 @@ public class PageController {
     PageService pageService;
 
     @RequestMapping("{pageDescriptor}")
-    public String getPage(@PathVariable String pageDescriptor, HttpServletRequest request ) throws MalformedURLException {
+    public String getPage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
-        return pageService.getSource(url.getHost(), pageDescriptor);
+        String userName = principal == null ? "Guest" : principal.getName();
+        return pageService.getSource(url.getHost(), pageDescriptor, userName);
     }
 }

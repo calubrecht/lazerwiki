@@ -13,16 +13,16 @@ public class LazerwikiDataSourceConfiguration {
 
     @Bean
     @ConfigurationProperties("lazerwiki.datasource")
-    public DataSourceProperties todosDataSourceProperties() {
+    public DataSourceProperties dataSourceProperties() {
         return new DataSourceProperties();
     }
 
 
 
-    @Bean("funkyDataSource")
+    @Bean("lazerwikiDataSource")
     @Primary
-    public DataSource topicsDataSource() {
-        return todosDataSourceProperties()
+    public DataSource dataSource() {
+        return dataSourceProperties()
                 .initializeDataSourceBuilder()
                 .build();
     }
