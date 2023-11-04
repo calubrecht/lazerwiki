@@ -29,8 +29,11 @@ public class WebSecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-           // http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
-            http.csrf().disable();
+            RequestMatcher createAdminMatcher = new AntPathRequestMatcher("/specialAdmin/createNewAdmin");
+            http.csrf((csrf) -> csrf
+                    .ignoringRequestMatchers(createAdminMatcher)
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            );
             http
                     .authorizeHttpRequests((authz) -> {
                         authz.requestMatchers(
@@ -38,7 +41,8 @@ public class WebSecurityConfig {
                                         new AntPathRequestMatcher("/error"),
                                         new AntPathRequestMatcher("/api/version"),
                                         // Ignore for CORS requests
-                                        new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString())).permitAll().
+                                        new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
+                                        createAdminMatcher).permitAll().
                         requestMatchers( new AntPathRequestMatcher("/api/page/**")).permitAll().
                         // default
                         anyRequest().authenticated();

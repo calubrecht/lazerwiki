@@ -7,7 +7,7 @@ dynamic/ user-uploaded images
 Database -
 -
 Page
-CREATE TABLE page (id integer, revision id, site VARCHAR [50], namespace VARCHAR[50], page name VARCHAR [200
+CREATE TABLE page (id integer, revision id, site VARCHAR [50], namespace VARCHAR[50], pagename VARCHAR [200], title VARCHAR [200],
 text TEXT, modified DATETIME, modifiedBy VARCHAR [whatever], deleted int);
 index, PK (id, revision), site/namespace/page_name/revision
 // could have column for markupLanguage, if want to support multiple... I don't want to have to
@@ -20,3 +20,5 @@ Users // 1ink through 1ibusers
 ACL
 Images
 // Meta-info on images.
+
+
