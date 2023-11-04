@@ -85,4 +85,5 @@ if __name__ == '__main__':
     newVersion = parseArgs();
     print("Setting version to " + newVersion);
     updateVersion(newVersion)
+    os.system('git add build.gradle.kts')
 
