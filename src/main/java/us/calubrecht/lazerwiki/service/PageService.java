@@ -30,13 +30,18 @@ public class PageService {
     @Autowired
     IdRepository idRepository;
 
-    public boolean exists(String site, String pageName) {
+    @Autowired
+    SiteService siteService;
+
+    public boolean exists(String host, String pageName) {
+        String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         return p != null;
     }
 
-    public String getTitle(String site, String pageName) {
+    public String getTitle(String host, String pageName) {
+        String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         return p == null ? Arrays.stream(pageName.split(":")).reduce((first, second) -> second)
@@ -44,8 +49,9 @@ public class PageService {
     }
 
     public String getSource(String host, String sPageDescriptor, String userName) {
+        String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
-        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(host, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         if (p == null ) {
             return "This page doesn't exist";
         }
@@ -59,9 +65,10 @@ public class PageService {
     }
 
     public void savePage(String host, String sPageDescriptor, String text) throws PageWriteException{
+        String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
-        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(host, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         long id = p == null ? getNewId() : p.getId();
         long revision = p == null ? 1 : p.getRevision() + 1;
         if (p != null ) {
@@ -69,7 +76,7 @@ public class PageService {
             pageRepository.save(p);
         }
         Page newP = new Page();
-        newP.setSite("default");
+        newP.setSite(site);
         newP.setNamespace(pageDescriptor.namespace());
         newP.setPagename(pageDescriptor.pageName());
         newP.setText(text);
