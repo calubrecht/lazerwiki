@@ -33,6 +33,7 @@ dependencies {
 	runtimeOnly("mysql:mysql-connector-java:8.0.33")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.security:spring-security-test")
 
 	testImplementation ("org.junit.jupiter:junit-jupiter")
 	testImplementation("org.mockito:mockito-core")
@@ -71,7 +72,7 @@ tasks.jacocoTestReport {
 	classDirectories.setFrom(
 			files(classDirectories.files.map {
 				fileTree(it) {
-					exclude("us/calubrecht/userAdmin/repository", "us/calubrecht/userAdmin/*.class", "us/calubrecht/userAdmin/controller/UserController$*.class", "us/calubrecht/userAdmin/config/SessionListener.class")
+					exclude("us/calubrecht/lazerwiki/LazerWikiAuth*.class", "us/calubrecht/lazerwiki/WebSecurity*.class", "us/calubrecht/lazerwiki/ServletInitializer.class")
 				}
 			})
 	)

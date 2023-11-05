@@ -28,10 +28,6 @@ public class DokuWikiRenderer implements IMarkupRenderer {
             ParseTree child = tree.getChild(i);
             outBuffer.append(renderers.getRenderer(child.getClass()).render(child));
         }
-        char l = outBuffer.charAt(outBuffer.length() -1);
-        if (outBuffer.charAt(outBuffer.length() -1) == 'a') {
-            outBuffer.deleteCharAt(outBuffer.length()-1);
-        }
         return outBuffer.toString().strip();
     }
 }
