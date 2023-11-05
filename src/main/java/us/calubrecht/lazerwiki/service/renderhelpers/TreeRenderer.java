@@ -1,4 +1,4 @@
-package us.calubrecht.lazerwiki.service.helpers;
+package us.calubrecht.lazerwiki.service.renderhelpers;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import us.calubrecht.lazerwiki.service.RendererRegistrar;

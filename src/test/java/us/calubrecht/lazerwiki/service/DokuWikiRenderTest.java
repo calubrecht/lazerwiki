@@ -14,12 +14,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
-@ComponentScan("us.calubrecht.lazerwiki.service.helpers.doku")
+@ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 class DokuWikiRendererTest {
 
     @Configuration
-    @ComponentScan("us.calubrecht.lazerwiki.service.helpers.doku")
+    @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
     public static class TestConfig {
     }
 
@@ -74,5 +74,10 @@ class DokuWikiRendererTest {
 
         assertEquals("Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/aLink\">a link</a> and &lt;b&gt;escape&lt;/b&gt; again", underTest.render("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
 
+    }
+
+    @Test
+    public void testCanGetDefaultRendererForUnknownClass() {
+        assertEquals(null, underTest.renderers.getRenderer(Integer.class).getTarget());
     }
 }

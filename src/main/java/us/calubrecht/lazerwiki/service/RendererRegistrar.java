@@ -1,10 +1,9 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.annotation.PostConstruct;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.service.helpers.TreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.Map;
 import java.util.Set;

@@ -66,6 +66,7 @@ public class PageServiceTest {
     public void testDecodeDescriptor() {
         assertEquals(new PageDescriptor("", "noNS"), pageService.decodeDescriptor("noNS"));
         assertEquals(new PageDescriptor("ns", "withNS"), pageService.decodeDescriptor("ns:withNS"));
+        assertEquals("ns:withNS", pageService.decodeDescriptor("ns:withNS").toString());
     }
 
     @Test

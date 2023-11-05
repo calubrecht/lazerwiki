@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.0.1.3"
+version = "0.0.1.4"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -72,7 +72,7 @@ tasks.jacocoTestReport {
 	classDirectories.setFrom(
 			files(classDirectories.files.map {
 				fileTree(it) {
-					exclude("us/calubrecht/lazerwiki/LazerWikiAuth*.class", "us/calubrecht/lazerwiki/WebSecurity*.class", "us/calubrecht/lazerwiki/ServletInitializer.class")
+					exclude("us/calubrecht/lazerwiki/LazerWikiApplication.class", "us/calubrecht/lazerwiki/LazerWikiAuth*.class", "us/calubrecht/lazerwiki/WebSecurity*.class", "us/calubrecht/lazerwiki/ServletInitializer.class", "us/calubrecht/lazerwiki/service/parser/doku/*")
 				}
 			})
 	)

@@ -1,4 +1,4 @@
-package us.calubrecht.lazerwiki.service.helpers.doku;
+package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.logging.log4j.LogManager;
@@ -6,13 +6,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.PageService;
-import us.calubrecht.lazerwiki.service.helpers.TreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 @Component
 public class LinkRenderer extends TreeRenderer {

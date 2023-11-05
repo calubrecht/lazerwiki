@@ -1,4 +1,4 @@
-package us.calubrecht.lazerwiki.service.helpers;
+package us.calubrecht.lazerwiki.service.renderhelpers;
 
 import ch.qos.logback.core.joran.sanity.Pair;
 

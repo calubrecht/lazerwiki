@@ -1,10 +1,10 @@
-package us.calubrecht.lazerwiki.service.helpers.doku;
+package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.springframework.stereotype.Component;
-import us.calubrecht.lazerwiki.service.helpers.TreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 @Component
 public class TerminalRenderer extends TreeRenderer {
