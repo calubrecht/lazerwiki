@@ -22,9 +22,4 @@ public class HeaderRenderer extends TreeRenderer {
         return outBuffer;
 
     }
-
-    @Override
-    public boolean shouldParentSanitize() {
-        return false;
-    }
 }

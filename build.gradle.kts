@@ -72,7 +72,7 @@ tasks.jacocoTestReport {
 	classDirectories.setFrom(
 			files(classDirectories.files.map {
 				fileTree(it) {
-					exclude("us/calubrecht/lazerwiki/LazerWikiApplication.class", "us/calubrecht/lazerwiki/LazerWikiAuth*.class", "us/calubrecht/lazerwiki/WebSecurity*.class", "us/calubrecht/lazerwiki/ServletInitializer.class", "us/calubrecht/lazerwiki/service/parser/doku/*")
+					exclude("us/calubrecht/lazerwiki/LazerWikiApplication.class", "us/calubrecht/lazerwiki/LazerWikiAuth*.class", "us/calubrecht/lazerwiki/WebSecurity*.class", "us/calubrecht/lazerwiki/ServletInitializer.class", "us/calubrecht/lazerwiki/service/parser/doku/*", "us/calubrecht/lazerwiki/model/*.class")
 				}
 			})
 	)
