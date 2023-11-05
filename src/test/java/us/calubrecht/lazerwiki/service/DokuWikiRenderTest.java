@@ -43,12 +43,12 @@ class DokuWikiRendererTest {
 
     @Test
     void testRenderLink() {
-        when(pageService.exists(eq("exists"))).thenReturn(true);
+        when(pageService.exists(eq("default"), eq("exists"))).thenReturn(true);
         assertEquals("<a class=\"wikiLinkMissing\" href=\"/missing\">This link is missing</a>", underTest.render("[[missing|This link is missing]]"));
         assertEquals("<a class=\"wikiLink\" href=\"/exists\">This link exists</a>", underTest.render("[[exists|This link exists]]"));
 
-        when(pageService.getTitle(eq("exists"))).thenReturn("This Page Exists");
-        when(pageService.getTitle(eq("someNamespace:missing"))).thenReturn("missing");
+        when(pageService.getTitle(eq("default"), eq("exists"))).thenReturn("This Page Exists");
+        when(pageService.getTitle(eq("default"), eq("someNamespace:missing"))).thenReturn("missing");
         // Without link description
         assertEquals("<a class=\"wikiLinkMissing\" href=\"/someNamespace:missing\">missing</a>", underTest.render("[[someNamespace:missing ]]"));
         assertEquals("<a class=\"wikiLink\" href=\"/exists\">This Page Exists</a>", underTest.render("[[exists]]"));

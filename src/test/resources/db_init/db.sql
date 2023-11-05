@@ -28,7 +28,7 @@ insert into page_ids () VALUES ();
 insert into page_ids () VALUES ();
 insert into page_ids () VALUES ();
 
-insert into page (id, revision, site, namespace, pagename, text, validTS, deleted) VALUES(1, 1, 'site1', 'ns', 'page1', 'old text', '2023-11-04 00:00:00', 0);
-insert into page (id, revision, site, namespace, pagename, text, deleted) VALUES(1, 2, 'site1', 'ns', 'page1', 'some text', 0);
+insert into page (id, revision, site, namespace, pagename, text, title, validTS, deleted) VALUES(1, 1, 'site1', 'ns', 'page1', 'old text', 'Page Title', '2023-11-04 00:00:00', 0);
+insert into page (id, revision, site, namespace, pagename, text, title, deleted) VALUES(1, 2, 'site1', 'ns', 'page1', 'some text', 'Page Title', 0);
 
 select * from page;

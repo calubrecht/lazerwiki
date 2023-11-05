@@ -51,14 +51,14 @@ public class LinkRenderer extends TreeRenderer {
             return tree.getChild(2).getText().substring(1).strip();
         }
         if (isInternal(linkTarget)) {
-            return pageService.getTitle(linkTarget);
+            return pageService.getTitle("default", linkTarget);
         }
         return linkTarget;
     }
 
     protected String getCssClass(String targetName) {
         if (isInternal(targetName)) {
-            return pageService.exists(targetName) ? LINK_CLASS : MISSING_LINK_CLASS;
+            return pageService.exists("default", targetName) ? LINK_CLASS : MISSING_LINK_CLASS;
         }
         return EXTERNAL_LINK_CLASS;
     }

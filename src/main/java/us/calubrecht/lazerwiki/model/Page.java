@@ -18,8 +18,8 @@ public class Page {
     String site;
     String namespace;
 
-
     String pagename;
+    String title;
 
     @Column(name="validTS")
     LocalDateTime validts;
@@ -71,6 +71,14 @@ public class Page {
 
     public void setPagename(String pagename) {
         this.pagename = pagename;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public boolean isDeleted() {

@@ -1,8 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
+import us.calubrecht.lazerwiki.repository.IdRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
@@ -29,25 +28,24 @@ public class PageService {
     PageRepository pageRepository;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    IdRepository idRepository;
 
-
-
-    public boolean exists(String pageName) {
-        return false;
+    public boolean exists(String site, String pageName) {
+        PageDescriptor pageDescriptor = decodeDescriptor(pageName);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        return p != null;
     }
 
-    public String getTitle(String pageName) {
-        if (!exists(pageName)) {
-            return Arrays.stream(pageName.split(":")).reduce((first, second) -> second)
-                    .orElse(null);
-        }
-        return "";
+    public String getTitle(String site, String pageName) {
+        PageDescriptor pageDescriptor = decodeDescriptor(pageName);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        return p == null ? Arrays.stream(pageName.split(":")).reduce((first, second) -> second)
+                .orElse(null) : p.getTitle();
     }
 
     public String getSource(String host, String sPageDescriptor, String userName) {
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
-        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("default", pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(host, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         if (p == null ) {
             return "This page doesn't exist";
         }
@@ -56,9 +54,6 @@ public class PageService {
 
     public PageDescriptor decodeDescriptor(String pageDescriptor) {
         List<String> tokens = new ArrayList<>(Arrays.asList(pageDescriptor.split(":")));
-        if (tokens.size() == 0) {
-            return new PageDescriptor("","");
-        }
         String pageName = tokens.remove(tokens.size() -1);
         return new PageDescriptor(String.join(":", tokens), pageName);
     }
@@ -66,7 +61,7 @@ public class PageService {
     public void savePage(String host, String sPageDescriptor, String text) throws PageWriteException{
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
-        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("default", pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(host, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         long id = p == null ? getNewId() : p.getId();
         long revision = p == null ? 1 : p.getRevision() + 1;
         if (p != null ) {
@@ -85,15 +80,6 @@ public class PageService {
 
     protected long getNewId() {
 
-        final String generateIdSQL = "INSERT INTO lazerwiki.page_ids () VALUES ()";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(
-                new PreparedStatementCreator() {
-                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                        return connection.prepareStatement(generateIdSQL, new String[] {"id"});
-                    }
-                }, keyHolder);
-        return (long)keyHolder.getKey();
+      return idRepository.getNewId();
     }
 }
