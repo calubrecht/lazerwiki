@@ -11,9 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.*;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.*;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +32,7 @@ public class WebSecurityConfig {
             http.csrf((csrf) -> csrf
                     .ignoringRequestMatchers(createAdminMatcher)
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()::handle)
             );
             http
                     .authorizeHttpRequests((authz) -> {
@@ -40,6 +40,7 @@ public class WebSecurityConfig {
                                         new AntPathRequestMatcher("/api/sessions/login"),
                                         new AntPathRequestMatcher("/error"),
                                         new AntPathRequestMatcher("/api/version"),
+                                        new AntPathRequestMatcher("/api/csrf"),
                                         // Ignore for CORS requests
                                         new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                         createAdminMatcher).permitAll().
