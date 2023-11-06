@@ -25,3 +25,26 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
+CREATE TABLE `userRecord` (
+	`userName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	`passwordHash` VARCHAR(75) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`userName`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
+
+CREATE TABLE `userRole` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`userName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	`role` VARCHAR(10) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `FK_USER` (`userName`) USING BTREE,
+	CONSTRAINT `FK_USER` FOREIGN KEY (`userName`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
+

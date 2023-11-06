@@ -11,16 +11,22 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component
 public class LazerWikiAuthenticationManager implements AuthenticationManager {
     Log logger = LogFactory.getLog(getClass());
+
+    @Autowired
+    UserService userService;
 
     public static final GrantedAuthority USER = new SimpleGrantedAuthority("ROLE_USER");
     public static final GrantedAuthority ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
@@ -33,10 +39,12 @@ public class LazerWikiAuthenticationManager implements AuthenticationManager {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
         String name = token.getName();
         try {
-            if (name.equals("Bill")) {
-                return new UsernamePasswordAuthenticationToken(token.getName(), null, Collections.singletonList(USER));
+            User u = userService.getUser(name);
+            if (u != null ) {
+                if (userService.verifyPassword(u, token.getCredentials().toString())) {
+                    return new UsernamePasswordAuthenticationToken(token.getName(), null, u.roles.stream().map(role -> new SimpleGrantedAuthority(role.role)).collect(Collectors.toList()));
+                }
             }
-
         }
         catch (BadCredentialsException e) {
             throw e;

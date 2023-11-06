@@ -22,4 +22,12 @@ public class PageController {
         String userName = principal == null ? "Guest" : principal.getName();
         return pageService.getSource(url.getHost(), pageDescriptor, userName);
     }
+
+    @RequestMapping("{pageDescriptor}/source")
+    public String getPageSource(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? "Guest" : principal.getName();
+        return pageService.getSource(url.getHost(), pageDescriptor, userName);
+    }
+
 }
