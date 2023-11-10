@@ -25,3 +25,5 @@ LazerWiki
 * User-uploaded media resources.
 
 LazerWiki-UI
+
+![](docs/lazerwiki.svg)
