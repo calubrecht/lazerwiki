@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.PageService;
+import us.calubrecht.lazerwiki.service.RenderService;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -29,6 +30,9 @@ public class PageControllerTest {
     @MockBean
     PageService pageService;
 
+    @MockBean
+    RenderService renderService;
+
     @Test
     public void testGetPage() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
@@ -36,7 +40,7 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageService).getPageData(eq("localhost"), eq("testPage"), eq("Bob"));
+        verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Bob"));
     }
 
     @Test
@@ -44,7 +48,7 @@ public class PageControllerTest {
         this.mockMvc.perform(get("/api/page/testPage")).
                 andExpect(status().isOk());
 
-        verify(pageService).getPageData(eq("localhost"), eq("testPage"), eq("Guest"));
+        verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Guest"));
     }
 
     @Test

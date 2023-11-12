@@ -1,15 +1,10 @@
 package us.calubrecht.lazerwiki.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.model.PageData;
@@ -19,7 +14,6 @@ import us.calubrecht.lazerwiki.repository.IdRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
-import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -75,7 +69,7 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        assertEquals(new PageData("This is raw page text", "This is raw page text", true), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", true), pageService.getPageData("host1", "ns:realPage", "Bob"));
     }
 
     @Test
@@ -126,5 +120,14 @@ public class PageServiceTest {
         assertEquals(10L, newPage.getId());
         assertEquals(3L, newPage.getRevision());
         assertEquals("site1", newPage.getSite());
+    }
+
+    @Test
+    public void testSavePage_unauthorized()  {
+        when(idRepository.getNewId()).thenReturn(55L);
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+
+        assertThrows(PageWriteException.class, () ->
+                pageService.savePage("host1", "newPage", "Some text", "Joe"));
     }
 }

@@ -20,7 +20,7 @@ public class LinkRenderer extends TreeRenderer {
     static final String EXTERNAL_LINK_CLASS ="wikiLinkExternal";
 
     @Autowired
-    PageService pageService;
+    private PageService pageService;
 
     public Class getTarget() {
         return DokuwikiParser.LinkContext.class;

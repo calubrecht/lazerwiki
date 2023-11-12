@@ -57,8 +57,7 @@ public class PageService {
             return new PageData("This page doesn't exist", "", false);
         }
         String source = p.getText();
-        String rendered = source;
-        return new PageData(source, source, true);
+        return new PageData(null, source, true);
     }
 
     public PageDescriptor decodeDescriptor(String pageDescriptor) {
@@ -69,6 +68,9 @@ public class PageService {
 
     @Transactional
     public void savePage(String host, String sPageDescriptor, String text, String user) throws PageWriteException{
+        if (user.equals("Joe")) {
+            throw new PageWriteException("You don't have permission to write this page.");
+        }
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import us.calubrecht.lazerwiki.model.PageData;
 import us.calubrecht.lazerwiki.service.PageService;
+import us.calubrecht.lazerwiki.service.RenderService;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.net.MalformedURLException;
@@ -19,19 +20,22 @@ public class PageController {
     @Autowired
     PageService pageService;
 
+    @Autowired
+    RenderService renderService;
+
     @RequestMapping("{pageDescriptor}")
     public PageData getPage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? "Guest" : principal.getName();
-        return pageService.getPageData(url.getHost(), pageDescriptor, userName);
+        return renderService.getRenderedPage(url.getHost(), pageDescriptor, userName);
     }
 
     @PostMapping("{pageDescriptor}/savePage")
     public PageData savePage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody Map<String, String> body) throws MalformedURLException, PageWriteException {
         URL url = new URL(request.getRequestURL().toString());
-        String userName = principal == null ? "Guest" : principal.getName();
+        String userName = principal.getName();
         pageService.savePage(url.getHost(), pageDescriptor, body.get("text"), userName);
-        return pageService.getPageData(url.getHost(), pageDescriptor, userName);
+        return renderService.getRenderedPage(url.getHost(), pageDescriptor, userName);
     }
 
 }
