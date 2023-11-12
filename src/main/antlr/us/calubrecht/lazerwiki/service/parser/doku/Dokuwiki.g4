@@ -33,12 +33,16 @@ CHARACTER
 //options { tokenVocab=DokuLexer; }
 
 page
-    : row* EOF
+    : (WS* header WS* NEWLINE | row | just_newline)* EOF
     ;
 
 
 row:
-  ( WS* header WS* | line ) NEWLINE
+  ( line  ) NEWLINE
+  ;
+
+just_newline
+  : ( NEWLINE | WS) +
   ;
 
 header_tok

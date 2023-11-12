@@ -3,12 +3,26 @@ package us.calubrecht.lazerwiki.service.renderhelpers;
 import org.antlr.v4.runtime.tree.ParseTree;
 import us.calubrecht.lazerwiki.service.RendererRegistrar;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public abstract class TreeRenderer {
     protected RendererRegistrar renderers;
 
     public abstract Class getTarget();
 
     public abstract StringBuffer render(ParseTree tree);
+
+    public StringBuffer render(List<ParseTree> trees) {
+        StringBuffer ret = new StringBuffer();
+        ret.append(
+         trees.stream().map(t -> render(t)).collect(Collectors.joining()));
+        return ret;
+    }
+
+    public boolean isAdditive() {
+        return false;
+    }
 
     public boolean shouldParentSanitize() {
         return true;

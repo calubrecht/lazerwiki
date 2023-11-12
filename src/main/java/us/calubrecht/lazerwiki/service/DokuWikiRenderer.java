@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiLexer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
+import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
@@ -24,9 +28,29 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         DokuwikiParser parser = new DokuwikiParser(tokens);
         ParseTree tree = parser.page();
         StringBuffer outBuffer = new StringBuffer();
+        List<ParseTree> childrenToMerge = new ArrayList<>();
+        Class<ParseTree> lastChildClass = null;
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
-            outBuffer.append(renderers.getRenderer(child.getClass()).render(child));
+            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            if (lastChildClass != null && lastChildClass != child.getClass() )
+            {
+                outBuffer.append(renderers.getRenderer(lastChildClass).render(childrenToMerge));
+                lastChildClass = null;
+                childrenToMerge.clear();
+            }
+            if (renderer.isAdditive()) {
+                lastChildClass = ( Class<ParseTree> )child.getClass();
+                childrenToMerge.add(child);
+                continue;
+            }
+            outBuffer.append(renderer.render(child));
+        }
+        if (lastChildClass != null)
+        {
+            outBuffer.append(renderers.getRenderer(lastChildClass).render(childrenToMerge));
+            lastChildClass = null;
+            childrenToMerge.clear();
         }
         return outBuffer.toString().strip();
     }
