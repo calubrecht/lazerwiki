@@ -16,7 +16,7 @@ public class MediaService {
     @Autowired
     SiteService siteService;
 
-    @Value("${static.file.root}")
+    @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
 
     public byte[] getBinaryFile(String host, String userName, String fileName) throws IOException {
