@@ -28,8 +28,7 @@ public class SessionsControllerTest {
     public void testUsername() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         this.mockMvc.perform(get("/api/sessions/username").principal(auth)).andExpect(status().isOk())
-                .andExpect(content().string("Bob"));
-
+                .andExpect(content().json("{\"userName\": \"Bob\", \"siteName\": \"localhost\"}"));
     }
 
     @Test
