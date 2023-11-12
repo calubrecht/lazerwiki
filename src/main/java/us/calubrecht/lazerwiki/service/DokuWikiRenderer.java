@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiLexer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
+import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.ArrayList;
@@ -35,7 +36,8 @@ public class DokuWikiRenderer implements IMarkupRenderer {
             TreeRenderer renderer = renderers.getRenderer(child.getClass());
             if (lastChildClass != null && lastChildClass != child.getClass() )
             {
-                outBuffer.append(renderers.getRenderer(lastChildClass).render(childrenToMerge));
+                AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass);
+                outBuffer.append(aRenderer.render(childrenToMerge));
                 lastChildClass = null;
                 childrenToMerge.clear();
             }
@@ -45,12 +47,6 @@ public class DokuWikiRenderer implements IMarkupRenderer {
                 continue;
             }
             outBuffer.append(renderer.render(child));
-        }
-        if (lastChildClass != null)
-        {
-            outBuffer.append(renderers.getRenderer(lastChildClass).render(childrenToMerge));
-            lastChildClass = null;
-            childrenToMerge.clear();
         }
         return outBuffer.toString().strip();
     }

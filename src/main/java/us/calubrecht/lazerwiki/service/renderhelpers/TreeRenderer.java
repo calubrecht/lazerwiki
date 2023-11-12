@@ -13,13 +13,6 @@ public abstract class TreeRenderer {
 
     public abstract StringBuffer render(ParseTree tree);
 
-    public StringBuffer render(List<ParseTree> trees) {
-        StringBuffer ret = new StringBuffer();
-        ret.append(
-         trees.stream().map(t -> render(t)).collect(Collectors.joining()));
-        return ret;
-    }
-
     public boolean isAdditive() {
         return false;
     }

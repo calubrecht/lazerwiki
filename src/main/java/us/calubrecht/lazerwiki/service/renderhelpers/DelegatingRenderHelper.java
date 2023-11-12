@@ -7,7 +7,7 @@ import java.util.Collection;
 /**
  * A RenderHelper_Line that delegates content in that line to further RenderHelper_Inlines
  */
-public abstract class DelegatingRenderHeler implements RenderHelper_Line{
+public abstract class DelegatingRenderHelper implements RenderHelper_Line{
     protected abstract Collection<RenderHelper_Inline> getDelegates();
 
     protected String applyDelegatesToContent(String content) {

@@ -28,6 +28,8 @@ CHARACTER
     : ~[\r\n]
     ;
 
+BOLD_TOKEN: '**' ;
+
 //parser grammar DokuParser;
 
 //options { tokenVocab=DokuLexer; }
@@ -62,13 +64,24 @@ link:
  LINK_START link_target link_display? LINK_END
  ;
 
+
+bold_span
+  :
+    BOLD_TOKEN (all_char | link | PIPE)+ BOLD_TOKEN
+  ;
+
  all_char
-   : CHARACTER | WS | header_tok
+   : WORD | CHARACTER | WS | header_tok
+   ;
+
+broken_bold_span
+   :
+     BOLD_TOKEN (all_char | link | PIPE)*
    ;
 
 inner_text
   :
-    (all_char | link | PIPE) +
+    (all_char | link | PIPE )+
   ;
 
 header
@@ -76,7 +89,7 @@ header
   ;
 
 line
-  : inner_text
+  : (inner_text | bold_span | broken_bold_span)+
   ;
 
 

@@ -97,4 +97,16 @@ class DokuWikiRendererTest {
         String input2 = "A double linebreak in the source\n\nbreaks in to paragraphs";
         assertEquals("<div>A double linebreak in the source</div>\n<div>breaks in to paragraphs</div>", underTest.render(input2));
     }
+
+    @Test
+    public void testRenderBold() {
+        String input1 = "Some words are **meant to **be bold.";
+        assertEquals("<div>Some words are <span class=\"bold\">meant to </span>be bold.</div>", underTest.render(input1));
+
+        String input2 = "Some bolds **have [[link|links]] **";
+        assertEquals("<div>Some bolds <span class=\"bold\">have <a class=\"wikiLinkMissing\" href=\"/page/link\">links</a> </span></div>", underTest.render(input2));
+
+        String input3 = "Some bolds **aren't matched";
+        assertEquals("<div>Some bolds **aren't matched</div>", underTest.render(input3));
+    }
 }
