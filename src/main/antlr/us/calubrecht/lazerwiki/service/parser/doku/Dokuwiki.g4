@@ -46,7 +46,7 @@ header_tok
    ;
 
 link_target
-  : (CHARACTER | WS)+
+  : (CHARACTER | WS)*
   ;
 
 link_display

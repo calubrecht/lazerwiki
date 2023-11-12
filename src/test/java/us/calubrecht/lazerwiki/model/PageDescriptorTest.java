@@ -22,5 +22,8 @@ public class PageDescriptorTest {
 
         PageDescriptor withMultipleCaps = new PageDescriptor("", "AIIsImportant");
         assertEquals("A I Is Important", withMultipleCaps.renderedName());
+
+        PageDescriptor homepage = new PageDescriptor("", "");
+        assertEquals("Home", homepage.renderedName());
     }
 }

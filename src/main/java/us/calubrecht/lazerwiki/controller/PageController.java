@@ -31,12 +31,12 @@ public class PageController {
         return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
     }
 
-    @PostMapping("{pageDescriptor}/savePage")
-    public PageData savePage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody Map<String, String> body) throws MalformedURLException, PageWriteException {
+    @PostMapping(value = { "/savePage", "{pageDescriptor}/savePage"})
+    public PageData savePage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody Map<String, String> body) throws MalformedURLException, PageWriteException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
-        pageService.savePage(url.getHost(), pageDescriptor, body.get("text"), userName);
-        return renderService.getRenderedPage(url.getHost(), pageDescriptor, userName);
+        pageService.savePage(url.getHost(), pageDescriptor.orElse(""), body.get("text"), userName);
+        return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
     }
 
 }

@@ -69,6 +69,14 @@ class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderLinkToHome() {
+        when(pageService.getTitle(eq("default"), eq(""))).thenReturn("Home");
+        when(pageService.exists(eq("default"), eq(""))).thenReturn(true);
+        assertEquals("<a class=\"wikiLink\" href=\"/\">Home</a>", underTest.render("[[]]"));
+        assertEquals("<a class=\"wikiLink\" href=\"/\">Name of Home</a>", underTest.render("[[|Name of Home]]"));
+    }
+
+    @Test
     public void testRenderSanitizeHtmlInText() {
         assertEquals("This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;", underTest.render("This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>"));
 

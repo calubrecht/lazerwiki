@@ -59,10 +59,19 @@ public class PageServiceTest {
         assertEquals("Titled Page", pageService.getTitle("host1", "some:ns:realPage"));
 
         Page p2 = new Page();
-        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "some:ns", "nonTitledRealPage", false)).
                 thenReturn(p2);
         assertEquals("Non Titled Real Page", pageService.getTitle("host1", "some:ns:nonTitledRealPage"));
+
+        // If no title, then title of "" should be home
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "", "", false)).
+                thenReturn(p2);
+        assertEquals("Home", pageService.getTitle("host1", ""));
+
+        when(siteService.getSiteForHostname(eq("host2"))).thenReturn("site2");
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site2", "", "", false)).
+                thenReturn(p);
+        assertEquals("Titled Page", pageService.getTitle("host2", ""));
     }
 
     @Test

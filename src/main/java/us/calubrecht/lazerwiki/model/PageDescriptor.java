@@ -17,6 +17,9 @@ public record PageDescriptor(String namespace, String pageName) {
     static Pattern WORD_FINDER = Pattern.compile("(([A-Z]?[a-z]+)|([A-Z]))");
 
     public String renderedName() {
+        if (pageName.isEmpty()) {
+            return "Home";
+        }
         Matcher matcher = WORD_FINDER.matcher(pageName);
         List<String> words = new ArrayList<>();
         while (matcher.find()) {
