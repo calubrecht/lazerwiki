@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Principal;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/page/")
@@ -23,11 +24,11 @@ public class PageController {
     @Autowired
     RenderService renderService;
 
-    @RequestMapping("{pageDescriptor}")
-    public PageData getPage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
+    @RequestMapping(value = {"{pageDescriptor}", ""})
+    public PageData getPage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? "Guest" : principal.getName();
-        return renderService.getRenderedPage(url.getHost(), pageDescriptor, userName);
+        return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
     }
 
     @PostMapping("{pageDescriptor}/savePage")

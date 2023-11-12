@@ -44,24 +44,24 @@ class DokuWikiRendererTest {
     @Test
     void testRenderLink() {
         when(pageService.exists(eq("default"), eq("exists"))).thenReturn(true);
-        assertEquals("<a class=\"wikiLinkMissing\" href=\"/missing\">This link is missing</a>", underTest.render("[[missing|This link is missing]]"));
-        assertEquals("<a class=\"wikiLink\" href=\"/exists\">This link exists</a>", underTest.render("[[exists|This link exists]]"));
+        assertEquals("<a class=\"wikiLinkMissing\" href=\"/page/missing\">This link is missing</a>", underTest.render("[[missing|This link is missing]]"));
+        assertEquals("<a class=\"wikiLink\" href=\"/page/exists\">This link exists</a>", underTest.render("[[exists|This link exists]]"));
 
         when(pageService.getTitle(eq("default"), eq("exists"))).thenReturn("This Page Exists");
         when(pageService.getTitle(eq("default"), eq("someNamespace:missing"))).thenReturn("missing");
         // Without link description
-        assertEquals("<a class=\"wikiLinkMissing\" href=\"/someNamespace:missing\">missing</a>", underTest.render("[[someNamespace:missing ]]"));
-        assertEquals("<a class=\"wikiLink\" href=\"/exists\">This Page Exists</a>", underTest.render("[[exists]]"));
+        assertEquals("<a class=\"wikiLinkMissing\" href=\"/page/someNamespace:missing\">missing</a>", underTest.render("[[someNamespace:missing ]]"));
+        assertEquals("<a class=\"wikiLink\" href=\"/page/exists\">This Page Exists</a>", underTest.render("[[exists]]"));
         assertEquals("<a class=\"wikiLinkExternal\" href=\"http://somewhere.com\">http://somewhere.com</a>", underTest.render("[[http://somewhere.com]]"));
 
         // Nested in header
-        assertEquals("<h1>Some text in <a class=\"wikiLinkMissing\" href=\"/headerLink\">a header</a></h1>", underTest.render("======Some text in [[ headerLink |a header]]======"));
+        assertEquals("<h1>Some text in <a class=\"wikiLinkMissing\" href=\"/page/headerLink\">a header</a></h1>", underTest.render("======Some text in [[ headerLink |a header]]======"));
     }
 
     @Test
     public void testRenderLinkSanitizesLinks() {
         String linkEmbeddingJS = "[[what \" onclick=\"doEvil|This link may be evil]]";
-        assertEquals("<a class=\"wikiLinkMissing\" href=\"/what_onclick_doEvil\">This link may be evil</a>", underTest.render(linkEmbeddingJS));
+        assertEquals("<a class=\"wikiLinkMissing\" href=\"/page/what_onclick_doEvil\">This link may be evil</a>", underTest.render(linkEmbeddingJS));
 
         // External Link
         assertEquals("<a class=\"wikiLinkExternal\" href=\"http://malformed.invalid\">http://malformed.invalid</a>", underTest.render("[[https://ListGoesWhere\" onclick=\"evil"));
@@ -72,7 +72,7 @@ class DokuWikiRendererTest {
     public void testRenderSanitizeHtmlInText() {
         assertEquals("This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;", underTest.render("This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>"));
 
-        assertEquals("Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/aLink\">a link</a> and &lt;b&gt;escape&lt;/b&gt; again", underTest.render("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
+        assertEquals("Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/page/aLink\">a link</a> and &lt;b&gt;escape&lt;/b&gt; again", underTest.render("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
 
     }
 

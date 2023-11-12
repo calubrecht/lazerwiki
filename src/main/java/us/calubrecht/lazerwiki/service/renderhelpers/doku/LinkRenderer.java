@@ -68,7 +68,7 @@ public class LinkRenderer extends TreeRenderer {
     public StringBuffer render(ParseTree tree) {
         DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
         String linkTarget = getLinkTarget(tree);
-        String linkURL = isInternal(linkTarget) ? "/" + linkTarget : linkTarget;
+        String linkURL = isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget;
         String cssClass = getCssClass(linkTarget);
         return new StringBuffer("<a class=\"%s\" href=\"%s\">%s</a>".
                 formatted(cssClass, linkURL, getLinkDisplay(tree, linkTarget)));

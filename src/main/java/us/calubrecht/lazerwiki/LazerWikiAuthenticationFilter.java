@@ -20,6 +20,8 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -95,11 +97,16 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
         protected String determineTargetUrl(HttpServletRequest request,
                                             HttpServletResponse response)
         {
-            Object oReferer = request.getHeader("Referer");
-            if (oReferer != null)
-            {
-                String referer = stripTrailingSlash((String)oReferer);
-                return referer + url;
+            String oReferer = (String)request.getHeader("Referer");
+
+            try {
+                URL referredUrl = new URL(oReferer);
+                if (oReferer != null)
+                {
+                    return (new URL(referredUrl.getProtocol(), referredUrl.getHost(), referredUrl.getPort(), url)).toString();
+                }
+            } catch (MalformedURLException e) {
+                return url;
             }
             return super.determineTargetUrl(request, response);
         }
