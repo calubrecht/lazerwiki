@@ -1,23 +1,30 @@
 package us.calubrecht.lazerwiki.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Page;
+import us.calubrecht.lazerwiki.model.PageData;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
+import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.repository.IdRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
+import javax.sql.DataSource;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = PageService.class)
+@SpringBootTest(classes = {PageService.class})
 @ActiveProfiles("test")
 public class PageServiceTest {
 
@@ -32,6 +39,9 @@ public class PageServiceTest {
 
     @MockBean
     SiteService siteService;
+
+    @MockBean
+    EntityManagerProxy em;
 
     @Test
     public void testExists() {
@@ -56,8 +66,8 @@ public class PageServiceTest {
     }
 
     @Test
-    public void testGetSource() {
-        assertEquals("This page doesn't exist", pageService.getSource("localhost", "nonExistantPage", "Bob"));
+    public void testGetPageData() {
+        assertEquals(new PageData("This page doesn't exist", "", false), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
 
         Page p = new Page();
         p.setText("This is raw page text");
@@ -65,7 +75,7 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        assertEquals("This is raw page text", pageService.getSource("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("This is raw page text", "This is raw page text", true), pageService.getPageData("host1", "ns:realPage", "Bob"));
     }
 
     @Test
@@ -80,7 +90,7 @@ public class PageServiceTest {
         when(idRepository.getNewId()).thenReturn(55L);
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
-        pageService.savePage("host1", "newPage", "Some text");
+        pageService.savePage("host1", "newPage", "Some text", "someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository).save(pageCaptor.capture());
         Page p = pageCaptor.getValue();
@@ -101,7 +111,7 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        pageService.savePage("host1", "ns:realPage", "Some text");
+        pageService.savePage("host1", "ns:realPage", "Some text", "someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
 

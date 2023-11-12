@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.model;
 
+
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ public class Page {
     @Id
     @Column(name="id")
     private Long id;
+
     @Id
     @Column(name="revision")
     private Long revision;
@@ -21,7 +23,7 @@ public class Page {
     String pagename;
     String title;
 
-    @Column(name="validTS")
+    @Column(name = "validTS")
     LocalDateTime validts;
     boolean deleted;
 
@@ -87,5 +89,14 @@ public class Page {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+
+    public LocalDateTime getValidts() {
+        return validts;
+    }
+
+    public void setValidts(LocalDateTime validts) {
+        this.validts = validts;
     }
 }

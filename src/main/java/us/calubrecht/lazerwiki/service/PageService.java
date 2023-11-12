@@ -1,21 +1,19 @@
 package us.calubrecht.lazerwiki.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.Page;
+import us.calubrecht.lazerwiki.model.PageData;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
+import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.repository.IdRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +31,9 @@ public class PageService {
     @Autowired
     SiteService siteService;
 
+    @Autowired
+    EntityManagerProxy em;
+
     public boolean exists(String host, String pageName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
@@ -48,14 +49,16 @@ public class PageService {
                 .orElse(null) : p.getTitle();
     }
 
-    public String getSource(String host, String sPageDescriptor, String userName) {
+    public PageData getPageData(String host, String sPageDescriptor, String userName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         if (p == null ) {
-            return "This page doesn't exist";
+            return new PageData("This page doesn't exist", "", false);
         }
-        return p.getText().formatted(userName, pageDescriptor);
+        String source = p.getText();
+        String rendered = source;
+        return new PageData(source, source, true);
     }
 
     public PageDescriptor decodeDescriptor(String pageDescriptor) {
@@ -64,7 +67,8 @@ public class PageService {
         return new PageDescriptor(String.join(":", tokens), pageName);
     }
 
-    public void savePage(String host, String sPageDescriptor, String text) throws PageWriteException{
+    @Transactional
+    public void savePage(String host, String sPageDescriptor, String text, String user) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
@@ -72,8 +76,9 @@ public class PageService {
         long id = p == null ? getNewId() : p.getId();
         long revision = p == null ? 1 : p.getRevision() + 1;
         if (p != null ) {
-            // invalidate old page.
+            p.setValidts(LocalDateTime.now());
             pageRepository.save(p);
+            em.flush(); // Flush update to DB so we can do insert afterward
         }
         Page newP = new Page();
         newP.setSite(site);
@@ -82,6 +87,7 @@ public class PageService {
         newP.setText(text);
         newP.setId(id);
         newP.setRevision(revision);
+        newP.setValidts(PageRepository.MAX_DATE);
         pageRepository.save(newP);
     }
 

@@ -44,7 +44,7 @@ public class WebSecurityConfig {
                                         // Ignore for CORS requests
                                         new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                         createAdminMatcher).permitAll().
-                        requestMatchers( new AntPathRequestMatcher("/api/page/**")).permitAll().
+                                        requestMatchers( new AntPathRequestMatcher("/api/page/*")).permitAll().
                         // default
                         anyRequest().authenticated();
         }
