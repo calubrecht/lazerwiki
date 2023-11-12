@@ -40,10 +40,6 @@ public class UserService {
     }
 
     public boolean verifyPassword(User u, String password) {
-        try {
-            return passwordUtil.matches(password, u.passwordHash);
-        } catch (Exception e) {
-            return false;
-        }
+        return passwordUtil.matches(password, u.passwordHash);
     }
 }

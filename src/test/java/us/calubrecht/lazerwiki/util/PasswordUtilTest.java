@@ -40,6 +40,11 @@ class PasswordUtilTest {
         // If provided salt from first hashing, should return same value;
         assertEquals("Matches", outContent.toString().trim());
 
+        outContent.reset();
+        PasswordUtil.main(new String[]{"wrongPassword", firstHash});
+        // If provided salt from first hashing, should return same value;
+        assertEquals("Does not match", outContent.toString().trim());
+
 
     }
 }

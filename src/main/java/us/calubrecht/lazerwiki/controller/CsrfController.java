@@ -15,9 +15,7 @@ public class CsrfController {
     @GetMapping
     public void getCsrfToken(HttpServletRequest request, HttpServletResponse response) {
         // https://github.com/spring-projects/spring-security/issues/12094#issuecomment-1294150717
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        String token = csrfToken.getToken();
-       // response.addCookie(new Cookie("XSRF-TOKEN", token));
+        request.getAttribute(CsrfToken.class.getName());
     }
 
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
@@ -14,6 +15,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {PageController.class, VersionController.class})
@@ -43,5 +45,18 @@ public class PageControllerTest {
                 andExpect(status().isOk());
 
         verify(pageService).getPageData(eq("localhost"), eq("testPage"), eq("Guest"));
+    }
+
+    @Test
+    public void testSavePage() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
+        this.mockMvc.perform(post("/api/page/testPage/savePage").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), eq("Bob"));
     }
 }
