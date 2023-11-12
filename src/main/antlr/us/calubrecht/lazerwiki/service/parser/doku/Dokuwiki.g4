@@ -30,6 +30,9 @@ CHARACTER
 
 BOLD_TOKEN: '**' ;
 
+IMG_START_TOKEN: '{{';
+IMG_END_TOKEN: '}}';
+
 //parser grammar DokuParser;
 
 //options { tokenVocab=DokuLexer; }
@@ -57,7 +60,7 @@ link_target
 
 link_display
   :
-  PIPE all_char*
+  PIPE (all_char | image)*
   ;
 
 link:
@@ -67,7 +70,7 @@ link:
 
 bold_span
   :
-    BOLD_TOKEN (all_char | link | PIPE)+ BOLD_TOKEN
+    BOLD_TOKEN (all_char | link | PIPE | NEWLINE)+ BOLD_TOKEN
   ;
 
  all_char
@@ -76,8 +79,13 @@ bold_span
 
 broken_bold_span
    :
-     BOLD_TOKEN (all_char | link | PIPE)*
+     BOLD_TOKEN (all_char | link | PIPE )*
    ;
+
+broken_image
+  :
+   IMG_START_TOKEN  | IMG_END_TOKEN
+  ;
 
 inner_text
   :
@@ -88,8 +96,12 @@ header
   : header_tok inner_text header_tok
   ;
 
+image
+  : IMG_START_TOKEN (WORD | WS | CHARACTER | PIPE )+ IMG_END_TOKEN
+  ;
+
 line
-  : (inner_text | bold_span | broken_bold_span)+
+  : (inner_text | bold_span | broken_bold_span | image | broken_image)+
   ;
 
 

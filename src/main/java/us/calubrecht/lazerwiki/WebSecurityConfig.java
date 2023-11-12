@@ -41,6 +41,7 @@ public class WebSecurityConfig {
                                         new AntPathRequestMatcher("/error"),
                                         new AntPathRequestMatcher("/api/version"),
                                         new AntPathRequestMatcher("/api/csrf"),
+                                        new AntPathRequestMatcher("/_media/**"),
                                         // Ignore for CORS requests
                                         new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                         createAdminMatcher).permitAll().

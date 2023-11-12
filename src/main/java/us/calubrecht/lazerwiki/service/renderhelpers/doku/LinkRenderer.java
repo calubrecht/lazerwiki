@@ -46,7 +46,7 @@ public class LinkRenderer extends TreeRenderer {
 
     protected String getLinkDisplay(ParseTree tree, String linkTarget) {
         if (tree.getChildCount() > 3) {
-            return tree.getChild(2).getText().substring(1).strip();
+            return renderChildren(tree, 2, 3).toString();
         }
         if (isInternal(linkTarget)) {
             return pageService.getTitle("default", linkTarget);
@@ -77,5 +77,17 @@ public class LinkRenderer extends TreeRenderer {
     @Override
     public boolean shouldParentSanitize() {
         return false;
+    }
+
+    @Component
+    public static class LinkDisplayRenderer extends TreeRenderer {
+        public Class getTarget() {
+            return DokuwikiParser.Link_displayContext.class;
+        }
+
+        public StringBuffer render(ParseTree tree) {
+            // Strip leading |
+            return renderChildren(tree, 1, tree.getChildCount());
+        }
     }
 }

@@ -80,7 +80,7 @@ class DokuWikiRendererTest {
     public void testRenderSanitizeHtmlInText() {
         assertEquals("<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>", underTest.render("This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>"));
 
-        assertEquals("<div>Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/page/aLink\">a link</a> and &lt;b&gt;escape&lt;/b&gt; again</div>", underTest.render("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
+        assertEquals("<div>Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/page/aLink\"> a link</a> and &lt;b&gt;escape&lt;/b&gt; again</div>", underTest.render("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
 
     }
 
@@ -108,5 +108,23 @@ class DokuWikiRendererTest {
 
         String input3 = "Some bolds **aren't matched";
         assertEquals("<div>Some bolds **aren't matched</div>", underTest.render(input3));
+        String input4 = "Can **bold\nspan lines?**";
+        assertEquals("<div>Can <span class=\"bold\">bold\nspan lines?</span></div>", underTest.render(input4));
+    }
+
+    @Test
+    public void testRenderImage() {
+        String input1 = "{{img.jpg}}";
+        assertEquals(
+                "<div><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"></div>",
+                underTest.render(input1)
+        );
+
+        // Image inside link
+        String input2 = "[[somePage|w {{img.jpg}} y]]";
+        assertEquals(
+                "<div><a class=\"wikiLinkMissing\" href=\"/page/somePage\">w <img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"> y</a></div>",
+                underTest.render(input2)
+        );
     }
 }
