@@ -45,8 +45,7 @@ public class PageService {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
-        return p == null ? Arrays.stream(pageName.split(":")).reduce((first, second) -> second)
-                .orElse(null) : p.getTitle();
+        return p == null ? pageDescriptor.renderedName() : (p.getTitle() == null ? pageDescriptor.renderedName() : p.getTitle());
     }
 
     public PageData getPageData(String host, String sPageDescriptor, String userName) {

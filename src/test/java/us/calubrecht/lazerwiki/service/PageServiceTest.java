@@ -49,7 +49,7 @@ public class PageServiceTest {
 
     @Test
     public void getTitle() {
-        assertEquals("nonExistentPage", pageService.getTitle("site1", "some:ns:nonExistentPage"));
+        assertEquals("Non Existent Page", pageService.getTitle("site1", "some:ns:nonExistentPage"));
 
         Page p = new Page();
         p.setTitle("Titled Page");
@@ -57,6 +57,12 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "some:ns", "realPage", false)).
                 thenReturn(p);
         assertEquals("Titled Page", pageService.getTitle("host1", "some:ns:realPage"));
+
+        Page p2 = new Page();
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "some:ns", "nonTitledRealPage", false)).
+                thenReturn(p2);
+        assertEquals("Non Titled Real Page", pageService.getTitle("host1", "some:ns:nonTitledRealPage"));
     }
 
     @Test
