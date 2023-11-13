@@ -32,11 +32,8 @@ public class LazerWikiApplication  extends SpringBootServletInitializer {
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		super.onStartup(servletContext);
 		servletContext.getSessionCookieConfig().setMaxAge(90 * 24 * 60 * 60);
-		logger.info("Started Lazerwiki Application  v:{}",   VersionController.getVersion());
-	}
-
-	@EventListener(ApplicationReadyEvent.class)
-	public void onAppStartup() throws ServletException {
+		servletContext.getSessionCookieConfig().setSecure(true);
+		servletContext.setSessionTimeout(90 * 24 * 60);
 		logger.info("Started Lazerwiki Application  v:{}",   VersionController.getVersion());
 	}
 }
