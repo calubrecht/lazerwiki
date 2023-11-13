@@ -1,0 +1,59 @@
+package us.calubrecht.lazerwiki.controller;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import us.calubrecht.lazerwiki.service.MediaService;
+
+import java.io.IOException;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(controllers = {MediaController.class, VersionController.class})
+@ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
+class MediaControllerTest {
+    @Autowired
+    MockMvc mockMvc;
+
+    @MockBean
+    MediaService mediaService;
+
+    @Test
+    void getFile() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/_media/someFile.jpg").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(mediaService).getBinaryFile(eq("localhost"), eq("Bob"), eq("someFile.jpg"));
+    }
+
+    @Test
+    void saveFile() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        MockMultipartFile mfile = new MockMultipartFile("file", "someFile.jpg", MediaType.TEXT_PLAIN_VALUE, "Hello, world".getBytes());
+
+        this.mockMvc.perform(multipart("/_media/upload").file(mfile).principal(auth)).andExpect(status().isOk()).andExpect(content().string("Uploaded for Bob"));
+
+        verify(mediaService).saveFile(eq("localhost"), eq("Bob"), eq(mfile));
+
+        Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
+        Mockito.doThrow(new IOException("")).when(mediaService).saveFile(eq("localhost"), eq("Joe"), eq(mfile));
+        this.mockMvc.perform(multipart("/_media/upload").file(mfile).principal(authJoe)).andExpect(status().isOk()).andExpect(content().string("oops"));
+    }
+}

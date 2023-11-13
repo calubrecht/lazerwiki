@@ -35,7 +35,7 @@ public class MediaController {
     }
 
     @PostMapping("upload")
-    public String getFile(@RequestParam("file") MultipartFile file, Principal principal, HttpServletRequest request) {
+    public String saveFile(@RequestParam("file") MultipartFile file, Principal principal, HttpServletRequest request) {
         try {
             URL url = new URL(request.getRequestURL().toString());
             String userName = principal == null ? null : principal.getName();
