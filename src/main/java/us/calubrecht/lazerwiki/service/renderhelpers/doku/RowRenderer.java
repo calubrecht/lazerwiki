@@ -40,7 +40,12 @@ public class RowRenderer extends AdditiveTreeRenderer {
         ret.append("</div>");
         return ret;
     }
-    
+
+    @Override
+    public String getAdditiveClass() {
+        return "Row";
+    }
+
     @Override
     public boolean isAdditive() {
         return true;
@@ -48,19 +53,22 @@ public class RowRenderer extends AdditiveTreeRenderer {
 
     List<ParseTree> flattenChildren(ParseTree tree) {
         List<ParseTree> trees = new ArrayList<>();
+        TreeRenderer lastRenderer = null;
         for (int i = 0; i < tree.getChildCount(); i++) {
             ParseTree t = tree.getChild(i);
             if (treesToFlatten.contains(t.getClass())){
                 for (int j = 0; j < t.getChildCount(); j++) {
                     ParseTree child = t.getChild(j);
-                    if (!isEOL(child)) {
+                    if (!(isEOL(child) && lastRenderer.isAdditive())) {
                         trees.add(child);
+                        lastRenderer = renderers.getRenderer(child.getClass());
                     }
                 }
             }
             else {
-                if (!isEOL(t)) {
+                if (!(isEOL(t) && lastRenderer.isAdditive())) {
                     trees.add(t);
+                    lastRenderer = renderers.getRenderer(t.getClass());
                 }
             }
         }

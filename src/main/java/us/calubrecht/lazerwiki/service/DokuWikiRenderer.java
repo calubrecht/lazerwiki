@@ -30,11 +30,11 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         ParseTree tree = parser.page();
         StringBuffer outBuffer = new StringBuffer();
         List<ParseTree> childrenToMerge = new ArrayList<>();
-        Class<ParseTree> lastChildClass = null;
+        String lastChildClass = null;
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass());
-            if (lastChildClass != null && lastChildClass != child.getClass() )
+            if (lastChildClass != null && lastChildClass != renderer.getAdditiveClass() )
             {
                 AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass);
                 outBuffer.append(aRenderer.render(childrenToMerge));
@@ -42,7 +42,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
                 childrenToMerge.clear();
             }
             if (renderer.isAdditive()) {
-                lastChildClass = ( Class<ParseTree> )child.getClass();
+                lastChildClass = renderer.getAdditiveClass();
                 childrenToMerge.add(child);
                 continue;
             }

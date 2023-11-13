@@ -132,14 +132,14 @@ class DokuWikiRendererTest {
     public void testRenderUList() {
         String input1 = " * Simple List\n *With 2 rows\nThen * non-matching\n";
         assertEquals(
-                "<div><ul><li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\nThen * non-matching</div>",
+                "<div><ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\nThen * non-matching</div>",
                 underTest.render(input1)
         );
 
         // List after blank line
         String input2 = "Something\n\n * Simple List\n *With 2 rows\nThen * non-matching\n";
         assertEquals(
-                "<div>Something</div>\n<div><ul><li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\nThen * non-matching</div>",
+                "<div>Something</div>\n<div><ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\nThen * non-matching</div>",
                 underTest.render(input2)
         );
     }
@@ -148,8 +148,25 @@ class DokuWikiRendererTest {
     public void testRenderOList() {
         String input1 = " - Simple List\n -With 2 rows\nThen * non-matching\n";
         assertEquals(
-                "<div><ol><li>Simple List</li>\n<li>With 2 rows</li>\n</ol>\nThen * non-matching</div>",
+                "<div><ol>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ol>\nThen * non-matching</div>",
                 underTest.render(input1)
+        );
+    }
+
+    @Test
+    public void testRenderNestedLists() {
+        String input1 = " - Simple List\n  -Deeper List\n   * DeepestList\n";
+        assertEquals(
+                "<div><ol>\n<li>Simple List</li>\n<ol>\n<li>Deeper List</li>\n<ul>\n<li>DeepestList</li>\n</ul>\n</ol>" +
+                        "\n</ol></div>",
+                underTest.render(input1)
+        );
+
+        String input2 = " - Simple List\n *List Changes Type\n   * DeepestList\n * and backout\n";
+        assertEquals(
+                "<div><ol>\n<li>Simple List</li>\n</ol>\n<ul>\n<li>List Changes Type</li>\n<ul>\n<li>DeepestList</li>\n" +
+                        "</ul>\n<li>and backout</li>\n</ul></div>",
+                underTest.render(input2)
         );
     }
 }

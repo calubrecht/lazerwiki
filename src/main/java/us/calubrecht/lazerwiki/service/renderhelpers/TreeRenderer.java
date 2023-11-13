@@ -18,6 +18,10 @@ public abstract class TreeRenderer {
         return false;
     }
 
+    public String getAdditiveClass() {
+        return null;
+    }
+
     public boolean shouldParentSanitize() {
         return true;
     }
@@ -43,10 +47,10 @@ public abstract class TreeRenderer {
     protected StringBuffer renderChildren(List<ParseTree> trees) {
         StringBuffer outBuffer = new StringBuffer();
         List<ParseTree> childrenToMerge = new ArrayList<>();
-        Class<ParseTree> lastChildClass = null;
+        String lastChildClass = null;
         for(ParseTree child: trees) {
             TreeRenderer renderer = renderers.getRenderer(child.getClass());
-            if (lastChildClass != null && lastChildClass != child.getClass() )
+            if (lastChildClass != null && lastChildClass != renderer.getAdditiveClass() )
             {
                 AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass);
                 outBuffer.append(aRenderer.render(childrenToMerge));
@@ -54,7 +58,7 @@ public abstract class TreeRenderer {
                 childrenToMerge.clear();
             }
             if (renderer.isAdditive()) {
-                lastChildClass = ( Class<ParseTree> )child.getClass();
+                lastChildClass = renderer.getAdditiveClass();
                 childrenToMerge.add(child);
                 continue;
             }
