@@ -71,9 +71,11 @@ public abstract class TreeRenderer {
         return outBuffer;
     }
 
+    /*
+    Unused
     protected boolean isEOL(ParseTree tree) {
         return tree.getText().equals("\n");
-    }
+    }*/
 
     public static class DefaultRenderer extends TreeRenderer {
         public Class getTarget() {
