@@ -6,6 +6,16 @@ CREATE TABLE `page_ids` (
 	PRIMARY KEY (`id`)
 );
 
+CREATE TABLE `sites` (
+	`name` VARCHAR(50) NOT NULL,
+	`hostname` VARCHAR(200) NOT NULL,
+	PRIMARY KEY (`name`),
+	UNIQUE (`hostname`)
+);
+
+INSERT INTO `sites` (`name`, `hostname`) VALUES ('default', '*');
+INSERT INTO `sites` (`name`, `hostname`) VALUES ('site1', 'site1.com');
+
 CREATE TABLE `page` (
 	`id` NUMBER(11) NOT NULL,
 	`revision` NUMBER(11) NOT NULL,

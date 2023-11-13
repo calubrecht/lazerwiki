@@ -5,6 +5,19 @@ CREATE TABLE `page_ids` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
+
+CREATE TABLE `sites` (
+	`name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`hostname` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`name`) USING BTREE,
+	UNIQUE INDEX `HostnameIdx` (`hostname`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
+INSERT INTO `sites` (`name`, `hostname`) VALUES ('default', '*');
+
 CREATE TABLE `page` (
 	`id` INT(11) NOT NULL,
 	`revision` INT(11) NOT NULL,

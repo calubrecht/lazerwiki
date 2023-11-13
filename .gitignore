@@ -42,3 +42,4 @@ out/
 .vscode/
 
 /static/
+/src/test/resources/static/default/media/small.bin
