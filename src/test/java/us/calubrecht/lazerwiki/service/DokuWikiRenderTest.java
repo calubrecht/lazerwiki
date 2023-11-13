@@ -1,6 +1,8 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -8,6 +10,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
+import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,8 +34,9 @@ class DokuWikiRendererTest {
     PageService pageService;
 
     @Test
+
     void testRenderHeader() {
-        String source = "====== Big header ======\n==== Smaller Header ====";
+        String source = "====== Big header ======\n ==== Smaller Header ====";
 
         assertEquals("<h1>Big header</h1>\n<h3>Smaller Header</h3>", underTest.render(source));
 
@@ -168,5 +173,11 @@ class DokuWikiRendererTest {
                         "</ul>\n<li>and backout</li>\n</ul></div>",
                 underTest.render(input2)
         );
+    }
+
+    @Test
+    public void testUnusedMethods() {
+        TreeRenderer rowRenderer = underTest.renderers.getRenderer(DokuwikiParser.RowContext.class);
+        assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class)));
     }
 }

@@ -23,8 +23,7 @@ public class RowRenderer extends AdditiveTreeRenderer {
 
     @Override
     public StringBuffer render(ParseTree tree) {
-        StringBuffer outBuffer = renderChildren(getChildren(tree, 0, getChildCount(tree)));
-        return new StringBuffer(outBuffer.toString().trim());
+        throw new RuntimeException("Not Implemented");
     }
 
     @Override
@@ -34,9 +33,8 @@ public class RowRenderer extends AdditiveTreeRenderer {
         List<ParseTree> children = trees.stream().flatMap(
                 (t) -> flattenChildren(t).stream()).collect(Collectors.toList());
         ret.append(renderChildren(children));
-        if (ret.charAt(ret.length() -1) == '\n') {
-            ret.deleteCharAt(ret.length() -1);
-        }
+        // Remove trailing new line
+        ret.deleteCharAt(ret.length() -1);
         ret.append("</div>");
         return ret;
     }
@@ -59,27 +57,20 @@ public class RowRenderer extends AdditiveTreeRenderer {
             if (treesToFlatten.contains(t.getClass())){
                 for (int j = 0; j < t.getChildCount(); j++) {
                     ParseTree child = t.getChild(j);
-                    if (!(isEOL(child) && lastRenderer.isAdditive())) {
-                        trees.add(child);
-                        lastRenderer = renderers.getRenderer(child.getClass());
-                    }
+                    trees.add(child);
+                    lastRenderer = renderers.getRenderer(child.getClass());
                 }
             }
             else {
-                if (!(isEOL(t) && lastRenderer.isAdditive())) {
-                    trees.add(t);
-                    lastRenderer = renderers.getRenderer(t.getClass());
+                if (isEOL(t)) {
+                    if (lastRenderer.isAdditive()) {
+                        continue;
+                    }
                 }
+                trees.add(t);
+                lastRenderer = renderers.getRenderer(t.getClass());
             }
         }
         return trees;
-    }
-
-    protected ParseTree getChild(ParseTree tree, int index) {
-        return flattenChildren(tree).get(index);
-    }
-
-    protected int getChildCount(ParseTree tree) {
-        return flattenChildren(tree).size();
     }
 }

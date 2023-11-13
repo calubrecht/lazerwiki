@@ -7,6 +7,7 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Component
 public class HeaderRenderer extends TreeRenderer {
@@ -33,9 +34,15 @@ public class HeaderRenderer extends TreeRenderer {
         return children;
     }
 
+    ParseTree getHeaderTok(ParseTree header) {
+        return IntStream.range(0, header.getChildCount()).
+                mapToObj(idx -> header.getChild(idx)).
+                filter(child -> child.getClass() == DokuwikiParser.Header_tokContext.class).findFirst().get();
+    }
+
     public StringBuffer render(ParseTree tree) {
         DokuwikiParser.HeaderContext context = (DokuwikiParser.HeaderContext)tree;
-        int headerSize = context.getChild(0).getText().length();
+        int headerSize  = getHeaderTok(tree).getText().length();
         String hTag = "h" + (7 - headerSize);
         StringBuffer outBuffer = new StringBuffer();
         outBuffer.append("<").append(hTag).append(">");
