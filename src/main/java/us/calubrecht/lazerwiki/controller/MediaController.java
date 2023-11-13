@@ -38,7 +38,7 @@ public class MediaController {
     public String saveFile(@RequestParam("file") MultipartFile file, Principal principal, HttpServletRequest request) {
         try {
             URL url = new URL(request.getRequestURL().toString());
-            String userName = principal == null ? null : principal.getName();
+            String userName = principal.getName();
             mediaService.saveFile(url.getHost(), userName, file);
             return "Uploaded for " + userName;
         } catch (IOException e) {

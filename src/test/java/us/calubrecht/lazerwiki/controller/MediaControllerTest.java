@@ -41,6 +41,10 @@ class MediaControllerTest {
                 andExpect(status().isOk());
 
         verify(mediaService).getBinaryFile(eq("localhost"), eq("Bob"), eq("someFile.jpg"));
+
+        this.mockMvc.perform(get("/_media/some.unknown_filetype")).
+                andExpect(status().isOk());
+        verify(mediaService).getBinaryFile(eq("localhost"), eq(null), eq("some.unknown_filetype"));
     }
 
     @Test
