@@ -72,7 +72,7 @@ public abstract class TreeRenderer {
     }
 
     protected boolean isEOL(ParseTree tree) {
-        return (tree.getClass() == TerminalNodeImpl.class)  && ((TerminalNodeImpl)tree).getText().equals("\n");
+        return tree.getText().equals("\n");
     }
 
     public static class DefaultRenderer extends TreeRenderer {
