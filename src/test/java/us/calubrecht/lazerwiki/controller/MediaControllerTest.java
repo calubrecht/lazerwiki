@@ -45,6 +45,12 @@ class MediaControllerTest {
         this.mockMvc.perform(get("/_media/some.unknown_filetype")).
                 andExpect(status().isOk());
         verify(mediaService).getBinaryFile(eq("localhost"), eq(null), eq("some.unknown_filetype"));
+
+        when(mediaService.getBinaryFile(eq("localhost"), eq("Bob"), eq("explosive.file"))).thenThrow(
+                new IOException(""));
+        this.mockMvc.perform(get("/_media/explosive.file").
+                        principal(auth)).
+                andExpect(status().isNotFound());
     }
 
     @Test
