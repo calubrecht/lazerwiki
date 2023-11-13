@@ -33,6 +33,6 @@ class ResourceServiceTest {
         // File from src/main/resources/static
         bytes = underTest.getBinaryFile("localhost", "site.css");
         assertTrue(bytes != null);
-        assertEquals(46, bytes.length);
+        assertEquals("/* Site specific css to override defaults */", new String(bytes).trim());
     }
 }
