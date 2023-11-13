@@ -25,7 +25,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
         int count = 0;
         ListSpec spec = null;
 
-        for (int i = 0; i < tree.getChildCount(); i++) {
+        for (int i = 0;; i++) {
             ParseTree child = tree.getChild(i);
             String token = child.getText();
             if (tokenMapping.get(token) != null) {

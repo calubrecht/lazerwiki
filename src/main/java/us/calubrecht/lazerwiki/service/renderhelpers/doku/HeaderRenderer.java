@@ -18,7 +18,7 @@ public class HeaderRenderer extends TreeRenderer {
     protected List<ParseTree> getChildren(ParseTree tree) {
         List<ParseTree> children = new ArrayList<>();
         boolean inHeader = false;
-        for (int i = 0; i < tree.getChildCount(); i++) {
+        for (int i = 0;; i++) {
             ParseTree child = tree.getChild(i);
             if (child.getClass() == DokuwikiParser.Header_tokContext.class) {
                 if (inHeader){

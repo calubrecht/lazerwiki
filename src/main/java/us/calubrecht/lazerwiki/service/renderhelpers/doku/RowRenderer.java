@@ -62,10 +62,11 @@ public class RowRenderer extends AdditiveTreeRenderer {
                 }
             }
             else {
-                if (isEOL(t)) {
-                    if (lastRenderer.isAdditive()) {
-                        continue;
-                    }
+                if (lastRenderer.isAdditive()) {
+                    // Additive renders are always alone in the row, so the following is alwayas an EOL
+                    //if (isEOL(t)) {
+                      continue;
+                    //}
                 }
                 trees.add(t);
                 lastRenderer = renderers.getRenderer(t.getClass());
