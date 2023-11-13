@@ -4,9 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.service.MediaService;
 
 import java.io.IOException;
@@ -32,6 +31,18 @@ public class MediaController {
             return ResponseEntity.ok().contentType(mediaType).body(mediaService.getBinaryFile(url.getHost(), userName, fileName));
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("upload")
+    public String getFile(@RequestParam("file") MultipartFile file, Principal principal, HttpServletRequest request) {
+        try {
+            URL url = new URL(request.getRequestURL().toString());
+            String userName = principal == null ? null : principal.getName();
+            mediaService.saveFile(url.getHost(), userName, file);
+            return "Uploaded for " + userName;
+        } catch (IOException e) {
+            return "oops";
         }
     }
 }
