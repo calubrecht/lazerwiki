@@ -127,4 +127,29 @@ class DokuWikiRendererTest {
                 underTest.render(input2)
         );
     }
+
+    @Test
+    public void testRenderUList() {
+        String input1 = " * Simple List\n *With 2 rows\nThen * non-matching\n";
+        assertEquals(
+                "<div><ul><li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\nThen * non-matching</div>",
+                underTest.render(input1)
+        );
+
+        // List after blank line
+        String input2 = "Something\n\n * Simple List\n *With 2 rows\nThen * non-matching\n";
+        assertEquals(
+                "<div>Something</div>\n<div><ul><li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\nThen * non-matching</div>",
+                underTest.render(input2)
+        );
+    }
+
+    @Test
+    public void testRenderOList() {
+        String input1 = " - Simple List\n -With 2 rows\nThen * non-matching\n";
+        assertEquals(
+                "<div><ol><li>Simple List</li>\n<li>With 2 rows</li>\n</ol>\nThen * non-matching</div>",
+                underTest.render(input1)
+        );
+    }
 }

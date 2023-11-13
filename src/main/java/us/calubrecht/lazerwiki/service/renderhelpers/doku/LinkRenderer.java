@@ -46,7 +46,7 @@ public class LinkRenderer extends TreeRenderer {
 
     protected String getLinkDisplay(ParseTree tree, String linkTarget) {
         if (tree.getChildCount() > 3) {
-            return renderChildren(tree, 2, 3).toString();
+            return renderChildren(getChildren(tree, 2, 3)).toString();
         }
         if (isInternal(linkTarget)) {
             return pageService.getTitle("default", linkTarget);
@@ -87,7 +87,7 @@ public class LinkRenderer extends TreeRenderer {
 
         public StringBuffer render(ParseTree tree) {
             // Strip leading |
-            return renderChildren(tree, 1, tree.getChildCount());
+            return renderChildren(getChildren(tree, 1, tree.getChildCount()));
         }
     }
 }

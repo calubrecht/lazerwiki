@@ -14,7 +14,7 @@ public class BoldSpanRenderer extends TreeRenderer {
     public StringBuffer render(ParseTree tree) {
         StringBuffer sb = new StringBuffer();
         sb.append("<span class=\"bold\">");
-        sb.append(renderChildren(tree, 1, tree.getChildCount()-1));
+        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1)));
         sb.append("</span>");
         return sb;
     }

@@ -1,10 +1,11 @@
 package us.calubrecht.lazerwiki.service.renderhelpers;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import us.calubrecht.lazerwiki.service.RendererRegistrar;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class TreeRenderer {
     protected RendererRegistrar renderers;
@@ -27,13 +28,47 @@ public abstract class TreeRenderer {
 
     public static TreeRenderer DEFAULT = new DefaultRenderer();
 
-    protected StringBuffer renderChildren(ParseTree tree, int firstChild, int lastChild) {
+    protected List<ParseTree> getChildren(ParseTree tree) {
+        return getChildren(tree, 0, tree.getChildCount());
+    }
+
+    protected List<ParseTree> getChildren(ParseTree tree, int start, int end) {
+        List<ParseTree> children = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            children.add(tree.getChild(i));
+        }
+        return children;
+    }
+
+    protected StringBuffer renderChildren(List<ParseTree> trees) {
         StringBuffer outBuffer = new StringBuffer();
-        for(int i = firstChild; i < lastChild; i++) {
-            ParseTree child = tree.getChild(i);
-            outBuffer.append(renderers.getRenderer(child.getClass()).render(child));
+        List<ParseTree> childrenToMerge = new ArrayList<>();
+        Class<ParseTree> lastChildClass = null;
+        for(ParseTree child: trees) {
+            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            if (lastChildClass != null && lastChildClass != child.getClass() )
+            {
+                AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass);
+                outBuffer.append(aRenderer.render(childrenToMerge));
+                lastChildClass = null;
+                childrenToMerge.clear();
+            }
+            if (renderer.isAdditive()) {
+                lastChildClass = ( Class<ParseTree> )child.getClass();
+                childrenToMerge.add(child);
+                continue;
+            }
+            outBuffer.append(renderer.render(child));
+        }
+        if (lastChildClass != null) {
+            AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer) renderers.getRenderer(lastChildClass);
+            outBuffer.append(aRenderer.render(childrenToMerge));
         }
         return outBuffer;
+    }
+
+    protected boolean isEOL(ParseTree tree) {
+        return (tree.getClass() == TerminalNodeImpl.class)  && ((TerminalNodeImpl)tree).getText().equals("\n");
     }
 
     public static class DefaultRenderer extends TreeRenderer {
@@ -42,7 +77,7 @@ public abstract class TreeRenderer {
         }
 
         public StringBuffer render(ParseTree tree) {
-            return renderChildren(tree, 0, tree.getChildCount());
+            return renderChildren(getChildren(tree));
         }
     }
 }

@@ -12,7 +12,7 @@ public class ImageRenderer  extends TreeRenderer {
     }
 
     public StringBuffer render(ParseTree tree) {
-        String inner = renderChildren(tree, 1, tree.getChildCount()-1).toString();
+        String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1)).toString();
         return parseInner(inner);
     }
 
