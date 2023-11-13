@@ -32,7 +32,9 @@ CREATE TABLE `page` (
 	`deleted` INT(11) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`, `revision`) USING BTREE,
 	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`, `validTS`) USING BTREE,
-	CONSTRAINT `FK_ID` FOREIGN KEY (`id`) REFERENCES `page_ids` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `FK_ID` FOREIGN KEY (`id`) REFERENCES `lazerwiki`.`page_ids` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+   	CONSTRAINT `FK_MODIFIEDBY` FOREIGN KEY (`modifiedBy`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  	CONSTRAINT `FK_SITE` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB

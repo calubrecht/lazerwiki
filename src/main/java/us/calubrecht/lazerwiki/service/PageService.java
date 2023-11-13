@@ -89,6 +89,7 @@ public class PageService {
         newP.setId(id);
         newP.setRevision(revision);
         newP.setValidts(PageRepository.MAX_DATE);
+        newP.setModifiedBy(user);
         pageRepository.save(newP);
     }
 

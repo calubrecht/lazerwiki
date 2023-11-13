@@ -106,6 +106,7 @@ public class PageServiceTest {
         assertEquals("Some text", p.getText());
         assertEquals(55L, p.getId());
         assertEquals("site1", p.getSite());
+        assertEquals("someUser", p.getModifiedBy());
     }
 
     @Test
