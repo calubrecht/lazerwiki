@@ -58,4 +58,9 @@ class MediaServiceTest {
             assertEquals(bytesToSave[i], bytesRead[i]);
         }
     }
+
+    @Test
+    void testListFiles() {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+    }
 }

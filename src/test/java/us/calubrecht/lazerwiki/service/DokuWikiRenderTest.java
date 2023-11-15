@@ -131,6 +131,13 @@ class DokuWikiRendererTest {
                 "<div><a class=\"wikiLinkMissing\" href=\"/page/somePage\">w <img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"> y</a></div>",
                 underTest.render(input2)
         );
+
+        // Image with dash in name
+        String input3 = "{{an-image.jpg}}";
+        assertEquals(
+                "<div><img src=\"/_media/an-image.jpg\" class=\"media\" loading=\"lazy\"></div>",
+                underTest.render(input3)
+        );
     }
 
     @Test
