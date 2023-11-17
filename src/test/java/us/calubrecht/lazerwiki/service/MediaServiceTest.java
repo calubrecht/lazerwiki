@@ -20,6 +20,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {MediaService.class})
@@ -54,6 +56,9 @@ class MediaServiceTest {
         File f = Paths.get(staticFileRoot, "default", "media", "small.bin").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
         underTest.saveFile("localhost", "Bob", file);
+        // Not real image so dimensions recorded as 0, 0
+        MediaRecord newRecord = new MediaRecord("small.bin", "default", "Bob", 7, 0, 0);
+        verify(mediaRecordRepository).save(eq(newRecord));
 
         FileInputStream fis = new FileInputStream(f);
         byte[] bytesRead = fis.readAllBytes();
@@ -63,6 +68,18 @@ class MediaServiceTest {
         for (int i = 0; i < bytesToSave.length; i++) {
             assertEquals(bytesToSave[i], bytesRead[i]);
         }
+    }
+
+    @Test
+    void saveFile_real() throws IOException {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        byte[] bytesToSave = underTest.getBinaryFile("localhost", "Bob", "circle.png");
+        MockMultipartFile file = new MockMultipartFile("file", "circle2.png", null, bytesToSave);
+        File f = Paths.get(staticFileRoot, "default", "media", "circle2.png").toFile();
+        Files.deleteIfExists(Path.of(f.getPath()));
+        underTest.saveFile("localhost", "Bob", file);
+        MediaRecord newRecord = new MediaRecord("circle2.png", "default", "Bob", 768, 20, 20);
+        verify(mediaRecordRepository).save(eq(newRecord));
     }
 
     @Test

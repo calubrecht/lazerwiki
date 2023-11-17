@@ -80,5 +80,8 @@ class MediaControllerTest {
         this.mockMvc.perform(get("/_media/list").principal(auth)).andExpect(status().isOk()).andExpect(content().json(
                 " [{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]"));
 
+        this.mockMvc.perform(get("/_media/list")).andExpect(status().isOk()).andExpect(content().json(
+                " [{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]"));
+
     }
 }

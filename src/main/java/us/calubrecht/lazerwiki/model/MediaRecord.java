@@ -100,12 +100,12 @@ public class MediaRecord {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MediaRecord that = (MediaRecord) o;
-        return fileSize == that.fileSize && height == that.height && width == that.width && id.equals(that.id) && fileName.equals(that.fileName) && site.equals(that.site) && uploadedBy.equals(that.uploadedBy);
+        return fileSize == that.fileSize && height == that.height && width == that.width && fileName.equals(that.fileName) && site.equals(that.site) && uploadedBy.equals(that.uploadedBy);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fileName, site, uploadedBy, fileSize, height, width);
+        return Objects.hash(fileName, site, uploadedBy, fileSize, height, width);
     }
 
     @Override
