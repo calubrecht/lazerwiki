@@ -91,7 +91,7 @@ class DokuWikiRendererTest {
 
     @Test
     public void testCanGetDefaultRendererForUnknownClass() {
-        assertEquals(null, underTest.renderers.getRenderer(Integer.class).getTarget());
+        assertEquals(null, underTest.renderers.getRenderer(Integer.class).getTargets());
     }
 
     @Test
@@ -115,6 +115,24 @@ class DokuWikiRendererTest {
         assertEquals("<div>Some bolds **aren't matched</div>", underTest.render(input3));
         String input4 = "Can **bold\nspan lines?**";
         assertEquals("<div>Can <span class=\"bold\">bold\nspan lines?</span></div>", underTest.render(input4));
+    }
+
+    @Test
+    public void testRenderItalic() {
+        String input1 = "Some words are //meant to //be italic.";
+        assertEquals("<div>Some words are <span class=\"italic\">meant to </span>be italic.</div>", underTest.render(input1));
+
+        String input2 = "Some italics //have [[link|links]] //";
+        assertEquals("<div>Some italics <span class=\"italic\">have <a class=\"wikiLinkMissing\" href=\"/page/link\">links</a> </span></div>", underTest.render(input2));
+
+        String input3 = "Some italics //aren't matched";
+        assertEquals("<div>Some italics //aren't matched</div>", underTest.render(input3));
+        String input4 = "Can //italic\nspan lines?//";
+        assertEquals("<div>Can <span class=\"italic\">italic\nspan lines?</span></div>", underTest.render(input4));
+        String input5 = "Can **//italic be in// bold**?";
+        assertEquals("<div>Can <span class=\"bold\"><span class=\"italic\">italic be in</span> bold</span>?</div>", underTest.render(input5));
+        String input6 = "Can //**bold be in** italic//?";
+        assertEquals("<div>Can <span class=\"italic\"><span class=\"bold\">bold be in</span> italic</span>?</div>", underTest.render(input6));
     }
 
     @Test
@@ -178,6 +196,21 @@ class DokuWikiRendererTest {
         assertEquals(
                 "<div><ol>\n<li>Simple List</li>\n</ol>\n<ul>\n<li>List Changes Type</li>\n<ul>\n<li>DeepestList</li>\n" +
                         "</ul>\n<li>and backout</li>\n</ul></div>",
+                underTest.render(input2)
+        );
+    }
+
+    @Test
+    public void testCodeBlock() {
+        String input1 = "  This is a block\n  Should all be one block\n   with more spaces?\n";
+        assertEquals(
+                "<pre class=\"code\">This is a block\nShould all be one block\n with more spaces?\n</pre>",
+                underTest.render(input1)
+        );
+
+        String input2 = "**bold on one line**\n  Raw text box, do not render **bold things**\n";
+        assertEquals(
+                "<div><span class=\"bold\">bold on one line</span></div><pre class=\"code\">Raw text box, do not render **bold things**\n</pre>",
                 underTest.render(input2)
         );
     }

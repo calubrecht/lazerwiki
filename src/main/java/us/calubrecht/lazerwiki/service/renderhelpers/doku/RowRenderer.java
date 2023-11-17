@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 @Component
 public class RowRenderer extends AdditiveTreeRenderer {
 
-    Set<Class> treesToFlatten = Set.of(DokuwikiParser.LineContext.class);
+    Set<Class> treesToFlatten = Set.of(DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class);
 
     @Override
-    public Class getTarget() {
-        return DokuwikiParser.RowContext.class;
+    public List<Class> getTargets() {
+        return List.of(DokuwikiParser.RowContext.class);
     }
 
     @Override
@@ -42,11 +42,6 @@ public class RowRenderer extends AdditiveTreeRenderer {
     @Override
     public String getAdditiveClass() {
         return "Row";
-    }
-
-    @Override
-    public boolean isAdditive() {
-        return true;
     }
 
     List<ParseTree> flattenChildren(ParseTree tree) {

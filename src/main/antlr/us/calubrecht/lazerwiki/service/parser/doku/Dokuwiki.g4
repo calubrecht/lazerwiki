@@ -32,6 +32,7 @@ CHARACTER
     ;
 
 BOLD_TOKEN: '**' ;
+ITALIC_TOKEN: '//' ;
 
 IMG_START_TOKEN: '{{';
 IMG_END_TOKEN: '}}';
@@ -41,7 +42,7 @@ IMG_END_TOKEN: '}}';
 //options { tokenVocab=DokuLexer; }
 
 page
-    : ( header | row | just_newline )* EOF
+    : ( header | row | just_newline | code_box)* EOF
     ;
 
 just_newline
@@ -53,7 +54,7 @@ header_tok
    ;
 
 link_target
-  : (CHARACTER | WS)*
+  : (CHARACTER | WS | ITALIC_TOKEN)*
   ;
 
 link_display
@@ -68,11 +69,21 @@ link:
 
 bold_span
   :
-    BOLD_TOKEN (all_char | link | PIPE | NEWLINE)+ BOLD_TOKEN
+    BOLD_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? BOLD_TOKEN
+  ;
+
+italic_span
+  :
+    ITALIC_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? ITALIC_TOKEN
   ;
 
 all_char
-   : WORD | CHARACTER | WS  | DASH | STAR | header_tok
+   : CHARACTER | WS  | DASH | STAR | header_tok
+   ;
+
+all_char_nows
+   :
+     CHARACTER | DASH | STAR | header_tok
    ;
 
 broken_bold_span
@@ -80,9 +91,15 @@ broken_bold_span
      BOLD_TOKEN (all_char | link | PIPE )*
    ;
 
-broken_image
+broken_italic_span
+   :
+     ITALIC_TOKEN (all_char | link | PIPE )*
+   ;
+
+
+styled_span
   :
-   IMG_START_TOKEN  | IMG_END_TOKEN
+    (bold_span | italic_span | broken_bold_span | broken_italic_span)
   ;
 
 olist_item
@@ -99,22 +116,42 @@ row:
   ( line  ) NEWLINE
   ;
 
+code_box:
+  ( WS WS line) NEWLINE
+  ;
+
+
+image
+  : IMG_START_TOKEN inner_text IMG_END_TOKEN
+  ;
+
+broken_image
+  :
+   IMG_START_TOKEN | IMG_END_TOKEN
+  ;
+
+
 inner_text
   :
     (all_char | link | PIPE )+
+  ;
+
+inner_text_nowsstart
+  :
+    WS? (all_char_nows | link | PIPE )+
   ;
 
 header
   : WS* header_tok inner_text header_tok WS* NEWLINE
   ;
 
-image
-  : IMG_START_TOKEN (WORD | WS | CHARACTER | DASH | STAR | PIPE )+ IMG_END_TOKEN
-  ;
-
+line_item
+ :
+   (inner_text | styled_span | image | broken_image )
+;
 
 line
-  : (ulist_item | olist_item | (inner_text | bold_span | broken_bold_span | image | broken_image ))+
+  : (ulist_item | olist_item | image | styled_span | inner_text_nowsstart | styled_span | image | broken_image  ) line_item*
   ;
 
 

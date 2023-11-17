@@ -11,4 +11,9 @@ import java.util.List;
 public abstract class AdditiveTreeRenderer extends TreeRenderer {
 
     public abstract StringBuffer render(List<ParseTree> trees);
+
+    @Override
+    public boolean isAdditive() {
+        return true;
+    }
 }

@@ -21,7 +21,7 @@ public class RendererRegistrar {
         renderersForClass = new ConcurrentHashMap<>();
         renderersForAdditiveClass = new ConcurrentHashMap();
         for (TreeRenderer renderer : renderers) {
-            renderersForClass.put(renderer.getTarget(), renderer);
+            renderer.getTargets().forEach(cl -> renderersForClass.put(cl, renderer));
             if (renderer.isAdditive()) {
                 renderersForAdditiveClass.put(renderer.getAdditiveClass(), renderer);
             }

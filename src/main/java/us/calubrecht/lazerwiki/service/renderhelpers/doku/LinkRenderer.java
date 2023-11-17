@@ -11,6 +11,7 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @Component
 public class LinkRenderer extends TreeRenderer {
@@ -22,8 +23,9 @@ public class LinkRenderer extends TreeRenderer {
     @Autowired
     private PageService pageService;
 
-    public Class getTarget() {
-        return DokuwikiParser.LinkContext.class;
+    @Override
+    public List<Class> getTargets() {
+        return List.of(DokuwikiParser.LinkContext.class);
     }
 
     protected String getLinkTarget(ParseTree tree) {
@@ -81,8 +83,9 @@ public class LinkRenderer extends TreeRenderer {
 
     @Component
     public static class LinkDisplayRenderer extends TreeRenderer {
-        public Class getTarget() {
-            return DokuwikiParser.Link_displayContext.class;
+        @Override
+        public List<Class> getTargets() {
+            return List.of(DokuwikiParser.Link_displayContext.class);
         }
 
         public StringBuffer render(ParseTree tree) {

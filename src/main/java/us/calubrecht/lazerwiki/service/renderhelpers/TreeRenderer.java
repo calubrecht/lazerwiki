@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class TreeRenderer {
     protected RendererRegistrar renderers;
 
-    public abstract Class getTarget();
+    public abstract List<Class> getTargets();
 
     public abstract StringBuffer render(ParseTree tree);
 
@@ -78,7 +78,8 @@ public abstract class TreeRenderer {
     }*/
 
     public static class DefaultRenderer extends TreeRenderer {
-        public Class getTarget() {
+        @Override
+        public List<Class> getTargets() {
             return null;
         }
 

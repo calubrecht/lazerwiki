@@ -7,10 +7,12 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
+import java.util.List;
+
 @Component
 public class InnerTextRenderer extends TreeRenderer {
-    public Class getTarget() {
-        return DokuwikiParser.Inner_textContext.class;
+    public List<Class> getTargets() {
+        return List.of(DokuwikiParser.Inner_textContext.class, DokuwikiParser.Inner_text_nowsstartContext.class);
     }
 
     protected String sanitize(String input) {

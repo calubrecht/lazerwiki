@@ -5,10 +5,13 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
+import java.util.List;
+
 @Component
 public class ImageRenderer  extends TreeRenderer {
-    public Class getTarget() {
-        return DokuwikiParser.ImageContext.class;
+    @Override
+    public List<Class> getTargets() {
+        return List.of(DokuwikiParser.ImageContext.class);
     }
 
     public StringBuffer render(ParseTree tree) {
