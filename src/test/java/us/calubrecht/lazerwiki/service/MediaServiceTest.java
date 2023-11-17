@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.MediaRecord;
+import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +31,9 @@ class MediaServiceTest {
 
     @MockBean
     SiteService siteService;
+
+    @MockBean
+    MediaRecordRepository mediaRecordRepository;
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
@@ -62,5 +68,10 @@ class MediaServiceTest {
     @Test
     void testListFiles() {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
+        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "bob", 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "bob", 0, 0, 0);
+        when(mediaRecordRepository.findAllBySiteOrderByFileName("default")).thenReturn(List.of(file1, file2));
+
+        List<MediaRecord> files = underTest.getAllFiles("host.com", "user1");
     }
 }

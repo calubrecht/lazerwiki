@@ -6,12 +6,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.service.MediaService;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -44,5 +47,12 @@ public class MediaController {
         } catch (IOException e) {
             return "oops";
         }
+    }
+
+    @GetMapping("list")
+    List<MediaRecord> listFiles(Principal principal, HttpServletRequest request) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? null : principal.getName();
+        return mediaService.getAllFiles(url.getHost(), userName);
     }
 }

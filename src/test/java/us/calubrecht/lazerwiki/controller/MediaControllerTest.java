@@ -12,10 +12,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.service.MediaService;
 
 import java.io.IOException;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,5 +68,17 @@ class MediaControllerTest {
         Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
         Mockito.doThrow(new IOException("")).when(mediaService).saveFile(eq("localhost"), eq("Joe"), eq(mfile));
         this.mockMvc.perform(multipart("/_media/upload").file(mfile).principal(authJoe)).andExpect(status().isOk()).andExpect(content().string("oops"));
+    }
+
+    @Test
+    void listFiles() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        MediaRecord file1 = new MediaRecord("file1.png", "default", "bob", 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("file2.jpg", "default", "bob", 0, 0, 0);
+        when(mediaService.getAllFiles(any(), any())).thenReturn(List.of(file1, file2));
+
+        this.mockMvc.perform(get("/_media/list").principal(auth)).andExpect(status().isOk()).andExpect(content().json(
+                " [{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]"));
+
     }
 }

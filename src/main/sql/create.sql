@@ -63,3 +63,22 @@ ENGINE=InnoDB
 ;
 
 
+CREATE TABLE `mediaRecord` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`fileName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`uploadedBy` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	`fileSize` INT(11) NOT NULL DEFAULT '0',
+	`height` INT(11) NOT NULL DEFAULT '0',
+	`width` INT(11) NOT NULL DEFAULT '0',
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `UNQ_mr` (`fileName`, `site`) USING BTREE,
+	INDEX `FKmr_site` (`site`) USING BTREE,
+	INDEX `FKmr_uploadedBy` (`uploadedBy`) USING BTREE,
+	CONSTRAINT `FKmr_site` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT `FKmr_uploadedBy` FOREIGN KEY (`uploadedBy`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=2
+;
