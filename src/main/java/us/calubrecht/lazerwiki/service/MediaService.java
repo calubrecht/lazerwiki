@@ -11,14 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
+import us.calubrecht.lazerwiki.util.ImageUtil;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -45,22 +42,6 @@ public class MediaService {
         return Files.readAllBytes(f.toPath());
     }
 
-    Pair<Integer, Integer> getImageDimension(InputStream is) throws IOException {
-        try (ImageInputStream in = ImageIO.createImageInputStream(is)) {
-            final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-            if (readers.hasNext()) {
-                ImageReader reader = readers.next();
-                try {
-                    reader.setInput(in);
-                    return Pair.of(reader.getWidth(0), reader.getHeight(0));
-                } finally {
-                    reader.dispose();
-                }
-            }
-        }
-        return Pair.of(0,0);
-    }
-
     @Transactional
     public void saveFile(String host, String userName, MultipartFile mfile) throws IOException {
         String site = siteService.getSiteForHostname(host);
@@ -68,7 +49,7 @@ public class MediaService {
         String fileName = mfile.getOriginalFilename();
         byte[] fileBytes = mfile.getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
-        Pair<Integer, Integer> imageDimension = getImageDimension(bis);
+        Pair<Integer, Integer> imageDimension = ImageUtil.getImageDimension(bis);
         MediaRecord newRecord = new MediaRecord(fileName, site, userName, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
         mediaRecordRepository.save(newRecord);
         File f = new File(String.join("/", staticFileRoot, site, "media", fileName));

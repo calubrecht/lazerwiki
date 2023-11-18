@@ -81,7 +81,8 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/repository/SiteRepository.class",
 							"us/calubrecht/lazerwiki/repository/UserRepository.class",
 							"us/calubrecht/lazerwiki/service/IMarkupRenderer.class",
-							"us/calubrecht/lazerwiki/service/parser/doku/*")
+							"us/calubrecht/lazerwiki/service/parser/doku/*",
+							"us/calubrecht/lazerwiki/util/ImageUtil.class")
 				}
 			})
 	)
