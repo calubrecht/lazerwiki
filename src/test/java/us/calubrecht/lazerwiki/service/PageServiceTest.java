@@ -183,7 +183,7 @@ public class PageServiceTest {
     }
 
 
-    //@Test
+    @Test
     public void testListPages_wEmptyNamespaces() {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         PageDesc page1 = new PageDescImpl("", "page1", "Page 1", "Bob" );

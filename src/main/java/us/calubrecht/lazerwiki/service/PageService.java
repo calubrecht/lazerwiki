@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,9 +100,20 @@ public class PageService {
     }
 
     List<String> getNamespaces(String rootNS, List<PageDesc> pages) {
-        return pages.stream().map(p -> p.getNamespace()).filter(ns -> ns.startsWith(rootNS) && !ns.equals(rootNS)).
+        return pages.stream().map(p -> p.getNamespace()).distinct().flatMap(ns -> {
+            List<String> parts = List.of(ns.split(":"));
+            List<String> namespaces = new ArrayList<>();
+            if (parts.size() == 0) {
+                return List.of(ns).stream();
+            }
+            for ( int i = 0 ; i <= parts.size(); i++) {
+                String namespace = parts.subList(0, i).stream().collect(Collectors.joining(":"));
+                namespaces.add(namespace);
+            }
+            return namespaces.stream();
+        }).distinct().filter(ns -> ns.startsWith(rootNS) && !ns.equals(rootNS)).
                 filter(ns -> ns.substring(rootNS.length() + 1).indexOf(":") == -1).
-                sorted().distinct().toList();
+                sorted().toList();
     }
     PageNode getPageNode(String rootNS, List<PageDesc> pages) {
         List<String> namespaces = getNamespaces(rootNS, pages);
