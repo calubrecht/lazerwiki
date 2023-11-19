@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import us.calubrecht.lazerwiki.model.PageData;
+import us.calubrecht.lazerwiki.model.PageNode;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.RenderService;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
@@ -39,4 +40,10 @@ public class PageController {
         return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
     }
 
+    @RequestMapping(value = "/listPages")
+    public PageNode listPages(Principal principal, HttpServletRequest request) throws MalformedURLException, PageWriteException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? "Guest" : principal.getName();
+        return pageService.getAllPages(url.getHost());
+    }
 }

@@ -5,9 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import us.calubrecht.lazerwiki.model.Page;
-import us.calubrecht.lazerwiki.model.PageData;
-import us.calubrecht.lazerwiki.model.PageDescriptor;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.repository.IdRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
@@ -16,7 +14,9 @@ import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = PageWriteException.class )
@@ -96,5 +96,33 @@ public class PageService {
     protected long getNewId() {
 
       return idRepository.getNewId();
+    }
+
+    List<String> getNamespaces(String rootNS, List<PageDesc> pages) {
+        return pages.stream().map(p -> p.getNamespace()).filter(ns -> ns.startsWith(rootNS) && !ns.equals(rootNS)).
+                filter(ns -> ns.substring(rootNS.length() + 1).indexOf(":") == -1).
+                sorted().distinct().toList();
+    }
+    PageNode getPageNode(String rootNS, List<PageDesc> pages) {
+        List<String> namespaces = getNamespaces(rootNS, pages);
+        List<PageNode> nodes = new ArrayList();
+        namespaces.forEach(ns ->
+                nodes.add(getPageNode(ns, pages)));
+        nodes.addAll(
+                pages.stream().filter(p -> p.getNamespace().equals(rootNS)).
+                        sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).
+                        map(page -> new PageNode.TerminalNode(page)).
+                        toList());
+        PageNode node = new PageNode(rootNS);
+        node.setChildren(nodes);
+        return node;
+
+    }
+
+    public PageNode getAllPages(String host) {
+        String site = siteService.getSiteForHostname(host);
+        List<PageDesc> pages = pageRepository.getAllValid(site);
+        List<String> ns = getNamespaces("", pages);
+        return getPageNode("", pages);
     }
 }
