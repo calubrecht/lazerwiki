@@ -16,6 +16,7 @@ import us.calubrecht.lazerwiki.util.ImageUtil;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
 
 @Service
@@ -54,13 +55,24 @@ public class MediaService {
         mediaRecordRepository.save(newRecord);
         File f = new File(String.join("/", staticFileRoot, site, "media", fileName));
         logger.info("Writing file " + f.getAbsoluteFile());
-        FileOutputStream fos = new FileOutputStream(f);
-        IOUtils.copy(mfile.getInputStream(), fos);
+        try (FileOutputStream fos = new FileOutputStream(f)) {
+            IOUtils.copy(mfile.getInputStream(), fos);
+        }
     }
 
     public List<MediaRecord> getAllFiles(String host, String userName) {
         String site = siteService.getSiteForHostname(host);
         return mediaRecordRepository.findAllBySiteOrderByFileName(site);
         // If we have ACL, filter by user permissions
+    }
+
+    @Transactional
+    public void deleteFile(String host, String fileName, Principal principal) throws IOException {
+        String site = siteService.getSiteForHostname(host);
+        ensureDir(site);
+        File f = new File(String.join("/", staticFileRoot, site, "media", fileName));
+        logger.info("Deleting file " + f.getAbsoluteFile());
+        mediaRecordRepository.deleteBySiteAndFilename(site, fileName);
+        Files.delete(f.toPath());
     }
 }

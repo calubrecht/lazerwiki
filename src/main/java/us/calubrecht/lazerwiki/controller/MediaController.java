@@ -28,7 +28,7 @@ public class MediaController {
     @Autowired
     MediaService mediaService;
 
-    @RequestMapping("{fileName}")
+    @GetMapping("{fileName}")
     public ResponseEntity<byte[]> getFile(@PathVariable String fileName, Principal principal, HttpServletRequest request) {
         try {
             URL url = new URL(request.getRequestURL().toString());
@@ -58,5 +58,12 @@ public class MediaController {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? null : principal.getName();
         return mediaService.getAllFiles(url.getHost(), userName);
+    }
+
+    @DeleteMapping("{fileName}")
+    public void deleteFile(@PathVariable String fileName, Principal principal, HttpServletRequest request) throws IOException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? null : principal.getName();
+        mediaService.deleteFile(url.getHost(), fileName, principal);
     }
 }
