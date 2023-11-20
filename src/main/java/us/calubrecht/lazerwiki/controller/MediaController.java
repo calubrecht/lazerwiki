@@ -1,10 +1,14 @@
 package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.service.MediaService;

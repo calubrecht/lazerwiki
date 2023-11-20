@@ -26,33 +26,34 @@ public class WebSecurityConfig {
     @Value("${webserver.urlprefix}")
     String urlPrefix;
 
-        @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            RequestMatcher createAdminMatcher = new AntPathRequestMatcher("/specialAdmin/createNewAdmin");
-            http.csrf((csrf) -> csrf
-                    .ignoringRequestMatchers(createAdminMatcher)
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()::handle)
-            );
-            http
-                    .authorizeHttpRequests((authz) -> {
-                        authz.requestMatchers(
-                                        new AntPathRequestMatcher("/api/sessions/login"),
-                                        new AntPathRequestMatcher("/error"),
-                                        new AntPathRequestMatcher("/api/version"),
-                                        new AntPathRequestMatcher("/api/csrf"),
-                                        new AntPathRequestMatcher("/_media/**"),
-                                        new AntPathRequestMatcher("/_resources/**"),
-                                        // Ignore for CORS requests
-                                        new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
-                                        createAdminMatcher).permitAll().
-                                        requestMatchers( new AntPathRequestMatcher("/api/page/*")).permitAll().
-                        // default
-                        anyRequest().authenticated();
-        }
-                    );
-          LazerWikiAuthenticationFilter filter = new LazerWikiAuthenticationFilter("/api/sessions/login", authenticationManager, webserverFrontEnd, urlPrefix);
-          http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
-            return http.build();
-        }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        RequestMatcher createAdminMatcher = new AntPathRequestMatcher("/specialAdmin/createNewAdmin");
+        http.csrf((csrf) -> csrf
+                .ignoringRequestMatchers(createAdminMatcher)
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()::handle)
+        );
+        http
+                .authorizeHttpRequests((authz) -> {
+                            authz.requestMatchers(
+                                            new AntPathRequestMatcher("/api/sessions/login"),
+                                            new AntPathRequestMatcher("/error"),
+                                            new AntPathRequestMatcher("/api/version"),
+                                            new AntPathRequestMatcher("/api/csrf"),
+                                            new AntPathRequestMatcher("/_media/**", HttpMethod.OPTIONS.toString()),
+                                            new AntPathRequestMatcher("/_media/**", HttpMethod.GET.toString()),
+                                            new AntPathRequestMatcher("/_resources/**"),
+                                            // Ignore for CORS requests
+                                            new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
+                                            createAdminMatcher).permitAll().
+                                    requestMatchers(new AntPathRequestMatcher("/api/page/*")).permitAll().
+                                    // default
+                                            anyRequest().authenticated();
+                        }
+                );
+        LazerWikiAuthenticationFilter filter = new LazerWikiAuthenticationFilter("/api/sessions/login", authenticationManager, webserverFrontEnd, urlPrefix);
+        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
 }

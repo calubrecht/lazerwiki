@@ -2,6 +2,8 @@ package us.calubrecht.lazerwiki.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = PageWriteException.class )
 public class PageService {
+    Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
     PageRepository pageRepository;
