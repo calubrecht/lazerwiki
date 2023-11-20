@@ -12,11 +12,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import us.calubrecht.lazerwiki.model.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
+import us.calubrecht.lazerwiki.model.NsNode;
 import us.calubrecht.lazerwiki.service.MediaService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -61,27 +64,28 @@ class MediaControllerTest {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         MockMultipartFile mfile = new MockMultipartFile("file", "someFile.jpg", MediaType.TEXT_PLAIN_VALUE, "Hello, world".getBytes());
 
-        this.mockMvc.perform(multipart("/_media/upload").file(mfile).principal(auth)).andExpect(status().isOk()).andExpect(content().string("Uploaded for Bob"));
+        this.mockMvc.perform(multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(auth)).andExpect(status().isOk()).andExpect(content().string("Upload successful"));
 
-        verify(mediaService).saveFile(eq("localhost"), eq("Bob"), eq(mfile));
+        verify(mediaService).saveFile(eq("localhost"), eq("Bob"), eq(mfile), eq("ns"));
 
         Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
-        Mockito.doThrow(new IOException("")).when(mediaService).saveFile(eq("localhost"), eq("Joe"), eq(mfile));
-        this.mockMvc.perform(multipart("/_media/upload").file(mfile).principal(authJoe)).andExpect(status().isOk()).andExpect(content().string("oops"));
+        Mockito.doThrow(new IOException("")).when(mediaService).saveFile(eq("localhost"), eq("Joe"), eq(mfile), eq("ns"));
+        this.mockMvc.perform(multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(authJoe)).andExpect(status().isOk()).andExpect(content().string("oops"));
     }
 
     @Test
     void listFiles() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        MediaRecord file1 = new MediaRecord("file1.png", "default", "bob", 0, 0, 0);
-        MediaRecord file2 = new MediaRecord("file2.jpg", "default", "bob", 0, 0, 0);
-        when(mediaService.getAllFiles(any(), any())).thenReturn(List.of(file1, file2));
+        MediaRecord file1 = new MediaRecord("file1.png", "default", "","bob", 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("file2.jpg", "default", "", "bob", 0, 0, 0);
+        MediaListResponse resp = new MediaListResponse(Map.of("", List.of(file1, file2)), new NsNode(""));
+        when(mediaService.getAllFiles(any(), any())).thenReturn(resp);
 
         this.mockMvc.perform(get("/_media/list").principal(auth)).andExpect(status().isOk()).andExpect(content().json(
-                " [{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]"));
+                " { \"media\":{\"\":[{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]}, \"namespaces\":{\"namespace\":\"\",\"children\":[]}}"));
 
         this.mockMvc.perform(get("/_media/list")).andExpect(status().isOk()).andExpect(content().json(
-                " [{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]"));
+                " { \"media\":{\"\":[{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]}, \"namespaces\":{\"namespace\":\"\",\"children\":[]}}"));
 
     }
 

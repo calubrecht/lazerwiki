@@ -14,9 +14,10 @@ public class MediaRecord {
 
     }
 
-    public MediaRecord(String fileName, String site, String uploadedBy, long fileSize, int height, int width) {
+    public MediaRecord(String fileName, String site, String namespace, String uploadedBy, long fileSize, int height, int width) {
         this.fileName = fileName;
         this.site = site;
+        this.namespace = namespace;
         this.uploadedBy = uploadedBy;
         this.fileSize = fileSize;
         this.height = height;
@@ -30,6 +31,8 @@ public class MediaRecord {
     private String fileName;
 
     private String site;
+
+    private String namespace;
 
     private String uploadedBy;
 
@@ -95,17 +98,25 @@ public class MediaRecord {
         this.width = width;
     }
 
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MediaRecord that = (MediaRecord) o;
-        return fileSize == that.fileSize && height == that.height && width == that.width && fileName.equals(that.fileName) && site.equals(that.site) && uploadedBy.equals(that.uploadedBy);
+        return fileSize == that.fileSize && height == that.height && width == that.width && Objects.equals(id, that.id) && Objects.equals(fileName, that.fileName) && Objects.equals(site, that.site) && Objects.equals(namespace, that.namespace) && Objects.equals(uploadedBy, that.uploadedBy);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, site, uploadedBy, fileSize, height, width);
+        return Objects.hash(id, fileName, site, namespace, uploadedBy, fileSize, height, width);
     }
 
     @Override
@@ -114,6 +125,7 @@ public class MediaRecord {
                 "id=" + id +
                 ", fileName='" + fileName + '\'' +
                 ", site='" + site + '\'' +
+                ", namespace='" + namespace + '\'' +
                 ", uploadedBy='" + uploadedBy + '\'' +
                 ", fileSize=" + fileSize +
                 ", height=" + height +
