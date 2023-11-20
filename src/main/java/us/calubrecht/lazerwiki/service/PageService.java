@@ -106,7 +106,7 @@ public class PageService {
         return pages.stream().map(p -> p.getNamespace()).distinct().flatMap(ns -> {
             List<String> parts = List.of(ns.split(":"));
             List<String> namespaces = new ArrayList<>();
-            if (parts.size() == 0) {
+            if (parts.size() == 1) {
                 return List.of(ns).stream();
             }
             for ( int i = 0 ; i <= parts.size(); i++) {

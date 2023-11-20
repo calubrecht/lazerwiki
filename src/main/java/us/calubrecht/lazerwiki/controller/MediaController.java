@@ -63,7 +63,7 @@ public class MediaController {
     @DeleteMapping("{fileName}")
     public void deleteFile(@PathVariable String fileName, Principal principal, HttpServletRequest request) throws IOException {
         URL url = new URL(request.getRequestURL().toString());
-        String userName = principal == null ? null : principal.getName();
-        mediaService.deleteFile(url.getHost(), fileName, principal);
+        String userName = principal.getName();
+        mediaService.deleteFile(url.getHost(), fileName, userName);
     }
 }

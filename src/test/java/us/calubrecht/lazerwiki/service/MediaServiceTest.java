@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,5 +92,20 @@ class MediaServiceTest {
         when(mediaRecordRepository.findAllBySiteOrderByFileName("default")).thenReturn(List.of(file1, file2));
 
         List<MediaRecord> files = underTest.getAllFiles("host.com", "user1");
+    }
+
+    @Test
+    void testDeleteFile() throws IOException {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        File f = Paths.get(staticFileRoot, "default", "media", "test.write").toFile();
+        try (FileOutputStream fos = new FileOutputStream(f)) {
+            fos.write(1);
+        }
+        assertTrue(f.exists());
+        underTest.deleteFile("host", "test.write", "bob");
+
+        verify(mediaRecordRepository).deleteBySiteAndFilename("default","test.write");
+        assertFalse(f.exists());
+
     }
 }

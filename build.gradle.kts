@@ -77,9 +77,11 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/WebSecurity*.class",
 							"us/calubrecht/lazerwiki/ServletInitializer.class",
 							"us/calubrecht/lazerwiki/model/*.class",
+							"us/calubrecht/lazerwiki/controller/GlobalControllerAdvice.class",
 							"us/calubrecht/lazerwiki/repository/EntityManagerProxy.class",
 							"us/calubrecht/lazerwiki/repository/SiteRepository.class",
 							"us/calubrecht/lazerwiki/repository/UserRepository.class",
+							"us/calubrecht/lazerwiki/repository/MediaRecordRepository.class",
 							"us/calubrecht/lazerwiki/service/IMarkupRenderer.class",
 							"us/calubrecht/lazerwiki/service/parser/doku/*",
 							"us/calubrecht/lazerwiki/util/ImageUtil.class")

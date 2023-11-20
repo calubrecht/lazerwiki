@@ -84,4 +84,11 @@ class MediaControllerTest {
                 " [{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]"));
 
     }
+
+    @Test
+    void testDeleteFile() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(delete("/_media/delete.file.jpg").principal(auth)).andExpect(status().isOk());
+        verify(mediaService).deleteFile("localhost", "delete.file.jpg", "Bob");
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.LazerWikiApplication;
 import us.calubrecht.lazerwiki.model.Page;
+import us.calubrecht.lazerwiki.model.PageDesc;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,5 +32,11 @@ class PageRepositoryTest {
     void getBySiteAndNamespaceAndPagenameAndDeleted() {
         Page site = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "ns", "page1", false);
         assertNotNull(site);
+    }
+
+    @Test
+    void getAllValid() {
+        List<PageDesc> pages = pageRepository.getAllValid("site1");
+        assertEquals(1, pages.size());
     }
 }

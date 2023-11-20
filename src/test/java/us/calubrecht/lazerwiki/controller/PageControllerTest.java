@@ -14,6 +14,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.RenderService;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -62,5 +63,21 @@ public class PageControllerTest {
                 andExpect(status().isOk());
 
         verify(pageService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), eq("Bob"));
+    }
+
+    @Test
+    public void testListPage() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
+        this.mockMvc.perform(get("/api/page/listPages").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).getAllPages(eq("localhost"));
+
+        this.mockMvc.perform(get("/api/page/listPages")).
+                andExpect(status().isOk());
+
+        verify(pageService, times(2)).getAllPages(eq("localhost"));
     }
 }

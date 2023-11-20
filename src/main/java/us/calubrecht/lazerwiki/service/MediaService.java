@@ -67,7 +67,7 @@ public class MediaService {
     }
 
     @Transactional
-    public void deleteFile(String host, String fileName, Principal principal) throws IOException {
+    public void deleteFile(String host, String fileName, String user) throws IOException {
         String site = siteService.getSiteForHostname(host);
         ensureDir(site);
         File f = new File(String.join("/", staticFileRoot, site, "media", fileName));
