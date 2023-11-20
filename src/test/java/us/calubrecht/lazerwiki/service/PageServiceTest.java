@@ -13,8 +13,8 @@ import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -160,26 +160,26 @@ public class PageServiceTest {
 
         when(pageRepository.getAllValid("site1")).thenReturn(allPages);
 
-        PageNode pageTree = pageService.getAllPages("host1");
+        PageListResponse pageResponse = pageService.getAllPages("host1");
 
-        assertEquals("", pageTree.getNamespace());
-        assertEquals(3, pageTree.getChildren().size());
-        assertEquals("ns1", pageTree.getChildren().get(0).getNamespace());
-        assertEquals("page1", ((PageNode.TerminalNode)pageTree.getChildren().get(1)).getPage().getPagename());
-        assertEquals("", ((PageNode.TerminalNode)pageTree.getChildren().get(1)).getPage().getNamespace());
-        assertEquals("page2", ((PageNode.TerminalNode)pageTree.getChildren().get(2)).getPage().getPagename());
-        assertEquals("", ((PageNode.TerminalNode)pageTree.getChildren().get(2)).getPage().getNamespace());
-
-        PageNode ns1 = pageTree.getChildren().get(0);
-        assertEquals(2, ns1.getChildren().size());
+        assertEquals("", pageResponse.namespaces.getNamespace());
+        assertEquals(1, pageResponse.namespaces.getChildren().size());
+        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getNamespace());
+        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getFullNamespace());
+        NsNode ns1 = pageResponse.namespaces.getChildren().get(0);
+        assertEquals(1, ns1.getChildren().size());
         assertEquals("ns2", ns1.getChildren().get(0).getNamespace());
-        assertEquals("page1", ((PageNode.TerminalNode)ns1.getChildren().get(1)).getPage().getPagename());
-        assertEquals("ns1", ((PageNode.TerminalNode)ns1.getChildren().get(1)).getPage().getNamespace());
+        assertEquals("ns1:ns2", ns1.getChildren().get(0).getFullNamespace());
+        assertEquals(0, ns1.getChildren().get(0).getChildren().size());
 
-        PageNode ns2 = ns1.getChildren().get(0);
-        assertEquals(1, ns2.getChildren().size());
-        assertEquals("page3", ((PageNode.TerminalNode)ns2.getChildren().get(0)).getPage().getPagename());
-        assertEquals("ns1:ns2", ((PageNode.TerminalNode)ns2.getChildren().get(0)).getPage().getNamespace());
+        Map<String, List<PageDesc>> pages = pageResponse.pages;
+
+        assertEquals(2, pages.get("").size());
+        assertEquals("page1", pages.get("").get(0).getPagename());
+        assertEquals(1, pages.get("ns1").size());
+        assertEquals("page1", pages.get("ns1").get(0).getPagename());
+        assertEquals(1, pages.get("ns1:ns2").size());
+        assertEquals("page3", pages.get("ns1:ns2").get(0).getPagename());
     }
 
 
@@ -193,20 +193,24 @@ public class PageServiceTest {
 
         when(pageRepository.getAllValid("site1")).thenReturn(allPages);
 
-        PageNode pageTree = pageService.getAllPages("host1");
-
-        assertEquals("", pageTree.getNamespace());
-        assertEquals(2, pageTree.getChildren().size());
-        assertEquals("ns1", pageTree.getChildren().get(0).getNamespace());
-
-        PageNode ns1 = pageTree.getChildren().get(0);
+        PageListResponse pageResponse = pageService.getAllPages("host1");
+        assertEquals("", pageResponse.namespaces.getNamespace());
+        assertEquals(1, pageResponse.namespaces.getChildren().size());
+        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getNamespace());
+        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getFullNamespace());
+        NsNode ns1 = pageResponse.namespaces.getChildren().get(0);
         assertEquals(1, ns1.getChildren().size());
         assertEquals("ns2", ns1.getChildren().get(0).getNamespace());
+        assertEquals("ns1:ns2", ns1.getChildren().get(0).getFullNamespace());
+        assertEquals(0, ns1.getChildren().get(0).getChildren().size());
 
-        PageNode ns2 = ns1.getChildren().get(0);
-        assertEquals(1, ns2.getChildren().size());
-        assertEquals("page3", ((PageNode.TerminalNode)ns2.getChildren().get(0)).getPage().getPagename());
-        assertEquals("ns1:ns2", ((PageNode.TerminalNode)ns2.getChildren().get(0)).getPage().getNamespace());
+        Map<String, List<PageDesc>> pages = pageResponse.pages;
+
+        assertEquals(1, pages.get("").size());
+        assertEquals("page1", pages.get("").get(0).getPagename());
+        assertEquals(null, pages.get("ns1"));
+        assertEquals(1, pages.get("ns1:ns2").size());
+        assertEquals("page3", pages.get("ns1:ns2").get(0).getPagename());
     }
 
 

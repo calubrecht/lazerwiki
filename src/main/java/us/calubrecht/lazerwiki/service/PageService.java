@@ -1,10 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,26 +115,22 @@ public class PageService {
                 filter(ns -> ns.substring(rootNS.length() + 1).indexOf(":") == -1).
                 sorted().toList();
     }
-    PageNode getPageNode(String rootNS, List<PageDesc> pages) {
+    NsNode getNsNode(String rootNS, List<PageDesc> pages) {
         List<String> namespaces = getNamespaces(rootNS, pages);
-        List<PageNode> nodes = new ArrayList();
+        List<NsNode> nodes = new ArrayList();
         namespaces.forEach(ns ->
-                nodes.add(getPageNode(ns, pages)));
-        nodes.addAll(
-                pages.stream().filter(p -> p.getNamespace().equals(rootNS)).
-                        sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).
-                        map(page -> new PageNode.TerminalNode(page)).
-                        toList());
-        PageNode node = new PageNode(rootNS);
+                nodes.add(getNsNode(ns, pages)));
+        NsNode node = new NsNode(rootNS);
         node.setChildren(nodes);
         return node;
 
     }
 
-    public PageNode getAllPages(String host) {
+    public PageListResponse getAllPages(String host) {
         String site = siteService.getSiteForHostname(host);
         List<PageDesc> pages = pageRepository.getAllValid(site);
         List<String> ns = getNamespaces("", pages);
-        return getPageNode("", pages);
+        NsNode node = getNsNode("", pages);
+        return new PageListResponse(pages.stream().sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).collect(Collectors.groupingBy(PageDesc::getNamespace)), node);
     }
 }
