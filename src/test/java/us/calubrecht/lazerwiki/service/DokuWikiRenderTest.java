@@ -140,6 +140,40 @@ class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderUnderline() {
+        String input1 = "__This__ should be underlined.";
+        assertEquals("<div><span class=\"underline\">This</span> should be underlined.</div>", underTest.render(input1));
+        String input2 = "__This [[underline|under line]]__ should have a link";
+        assertEquals("<div><span class=\"underline\">This <a class=\"wikiLinkMissing\" href=\"/page/underline\">under line</a></span> should have a link</div>", underTest.render(input2));
+
+        String input3 = "Some underlines __aren't matched";
+        assertEquals("<div>Some underlines __aren't matched</div>", underTest.render(input3));
+        String input4 = "Can __underlines\nspan lines?__";
+        assertEquals("<div>Can <span class=\"underline\">underlines\nspan lines?</span></div>", underTest.render(input4));
+        String input5 = "Can **__underline be in__ bold**?";
+        assertEquals("<div>Can <span class=\"bold\"><span class=\"underline\">underline be in</span> bold</span>?</div>", underTest.render(input5));
+        String input6 = "Can __**bold be in** underline__?";
+        assertEquals("<div>Can <span class=\"underline\"><span class=\"bold\">bold be in</span> underline</span>?</div>", underTest.render(input6));
+    }
+
+    @Test
+    public void testRenderMonospace() {
+        String input1 = "''This'' should be monospace.";
+        assertEquals("<div><span class=\"monospace\">This</span> should be monospace.</div>", underTest.render(input1));
+        String input2 = "''This [[monospace|monospace]]'' should have a link";
+        assertEquals("<div><span class=\"monospace\">This <a class=\"wikiLinkMissing\" href=\"/page/monospace\">monospace</a></span> should have a link</div>", underTest.render(input2));
+
+        String input3 = "Some monospace ''aren't matched";
+        assertEquals("<div>Some monospace ''aren't matched</div>", underTest.render(input3));
+        String input4 = "Can ''monospace\nspan lines?''";
+        assertEquals("<div>Can <span class=\"monospace\">monospace\nspan lines?</span></div>", underTest.render(input4));
+        String input5 = "Can **''monospace be in'' bold**?";
+        assertEquals("<div>Can <span class=\"bold\"><span class=\"monospace\">monospace be in</span> bold</span>?</div>", underTest.render(input5));
+        String input6 = "Can ''**bold be in** monospace''?";
+        assertEquals("<div>Can <span class=\"monospace\"><span class=\"bold\">bold be in</span> monospace</span>?</div>", underTest.render(input6));
+    }
+
+    @Test
     public void testRenderImage() {
         String input1 = "{{img.jpg}}";
         assertEquals(

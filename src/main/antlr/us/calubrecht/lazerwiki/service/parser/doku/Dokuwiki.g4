@@ -33,6 +33,8 @@ CHARACTER
 
 BOLD_TOKEN: '**' ;
 ITALIC_TOKEN: '//' ;
+UNDERLINE_TOKEN: '__';
+MONOSPACE_TOKEN: '\'\'';
 
 IMG_START_TOKEN: '{{';
 IMG_END_TOKEN: '}}';
@@ -54,7 +56,7 @@ header_tok
    ;
 
 link_target
-  : (CHARACTER | WS | ITALIC_TOKEN | DASH) *
+  : (CHARACTER | WS | ITALIC_TOKEN | DASH | UNDERLINE_TOKEN) *
   ;
 
 link_display
@@ -77,6 +79,16 @@ italic_span
     ITALIC_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? ITALIC_TOKEN
   ;
 
+underline_span
+  :
+      UNDERLINE_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? UNDERLINE_TOKEN
+  ;
+
+monospace_span
+  :
+      MONOSPACE_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? MONOSPACE_TOKEN
+  ;
+
 all_char
    : CHARACTER | WS  | DASH | STAR | header_tok
    ;
@@ -96,10 +108,19 @@ broken_italic_span
      ITALIC_TOKEN (all_char | link | PIPE )*
    ;
 
+broken_underline_span
+   :
+     UNDERLINE_TOKEN (all_char | link | PIPE )*
+   ;
+
+broken_monospace_span
+   :
+     MONOSPACE_TOKEN (all_char | link | PIPE )*
+   ;
 
 styled_span
   :
-    (bold_span | italic_span | broken_bold_span | broken_italic_span)
+    (bold_span | italic_span | underline_span | monospace_span| broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span)
   ;
 
 olist_item
