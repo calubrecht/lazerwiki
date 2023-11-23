@@ -35,6 +35,12 @@ BOLD_TOKEN: '**' ;
 ITALIC_TOKEN: '//' ;
 UNDERLINE_TOKEN: '__';
 MONOSPACE_TOKEN: '\'\'';
+SUP_START_TOKEN: '<sup>';
+SUP_END_TOKEN: '</sup>';
+SUB_START_TOKEN: '<sub>';
+SUB_END_TOKEN: '</sub>';
+DEL_START_TOKEN: '<del>';
+DEL_END_TOKEN: '</del>';
 
 IMG_START_TOKEN: '{{';
 IMG_END_TOKEN: '}}';
@@ -89,6 +95,21 @@ monospace_span
       MONOSPACE_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? MONOSPACE_TOKEN
   ;
 
+sup_span
+  :
+      SUP_START_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? SUP_END_TOKEN
+  ;
+
+sub_span
+  :
+      SUB_START_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? SUB_END_TOKEN
+  ;
+
+del_span
+  :
+      DEL_START_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? DEL_END_TOKEN
+  ;
+
 all_char
    : CHARACTER | WS  | DASH | STAR | header_tok
    ;
@@ -118,9 +139,24 @@ broken_monospace_span
      MONOSPACE_TOKEN (all_char | link | PIPE )*
    ;
 
+broken_sup
+  :
+   SUP_START_TOKEN | SUP_END_TOKEN
+  ;
+
+broken_sub
+  :
+   SUB_START_TOKEN | SUB_END_TOKEN
+  ;
+
+broken_del
+  :
+   DEL_START_TOKEN | DEL_END_TOKEN
+  ;
+
 styled_span
   :
-    (bold_span | italic_span | underline_span | monospace_span| broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span)
+    (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span| broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span | broken_sup | broken_sub | broken_del )
   ;
 
 olist_item

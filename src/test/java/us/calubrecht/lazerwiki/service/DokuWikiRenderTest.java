@@ -173,6 +173,20 @@ class DokuWikiRendererTest {
         assertEquals("<div>Can <span class=\"monospace\"><span class=\"bold\">bold be in</span> monospace</span>?</div>", underTest.render(input6));
     }
 
+    public void testRenderSuperSubDel() {
+        String input1 = "<sup>This</sup> should be superscript.";
+        assertEquals("<div><sup>This</sup> should be superscript.</div>", underTest.render(input1));
+        String input2 = "<sub>This</sub> should be subscript.";
+        assertEquals("<div><sub>This</sub> should be subscript.</div>", underTest.render(input2));
+        String input3 = "<del>This</del> should be deleted.";
+        assertEquals("<div><del>This</del> should be deleted.</div>", underTest.render(input3));
+
+        String input4 = "Can <sup>monospace\nspan</sup> lines?''";
+        assertEquals("<div>Can <sup>monospace\nspan lines?</sup></div>", underTest.render(input4));
+
+
+    }
+
     @Test
     public void testRenderImage() {
         String input1 = "{{img.jpg}}";
