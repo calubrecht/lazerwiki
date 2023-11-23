@@ -13,7 +13,7 @@ import java.util.List;
 public interface PageRepository extends CrudRepository<Page, PageKey> {
 
     Page findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(String site, String namespace, String pagename, LocalDateTime validts, boolean deleted);
-    List<PageDesc> findAllBySiteAndValidtsAndDeleted(String site, LocalDateTime validts, boolean deleted);
+    List<PageDesc> findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(String site, LocalDateTime validts, boolean deleted);
 
     static final LocalDateTime MAX_DATE = LocalDateTime.of(9999, 12, 31, 0, 0, 0);
     default Page getBySiteAndNamespaceAndPagenameAndDeleted(String site, String namespace, String pagename, boolean deleted)
@@ -23,8 +23,7 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
 
     default List<PageDesc> getAllValid(String site)
     {
-        return findAllBySiteAndValidtsAndDeleted(site, MAX_DATE, false);
+        return findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(site, MAX_DATE, false);
     }
-
 
 }

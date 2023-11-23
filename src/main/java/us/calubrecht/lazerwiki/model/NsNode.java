@@ -9,10 +9,13 @@ public class NsNode {
 
     String fullNamespace;
 
-    public NsNode(String namespace) {
+    boolean writable;
+
+    public NsNode(String namespace, boolean writable) {
         String[] namespaces = namespace.split(":");
         this.namespace = namespaces[namespaces.length-1];
         this.fullNamespace = namespace;
+        this.writable = writable;
     }
 
     public NsNode() {
@@ -32,5 +35,9 @@ public class NsNode {
     }
     public String getFullNamespace() {
         return fullNamespace;
+    }
+
+    public boolean isWritable() {
+        return writable;
     }
 }

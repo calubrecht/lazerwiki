@@ -13,11 +13,14 @@ import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+
 
 @SpringBootTest(classes = {PageService.class})
 @ActiveProfiles("test")
@@ -34,6 +37,9 @@ public class PageServiceTest {
 
     @MockBean
     SiteService siteService;
+
+    @MockBean
+    NamespaceService namespaceService;
 
     @MockBean
     EntityManagerProxy em;
@@ -77,7 +83,10 @@ public class PageServiceTest {
 
     @Test
     public void testGetPageData() {
-        assertEquals(new PageData("This page doesn't exist", "", false), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        assertEquals(new PageData("This page doesn't exist", "", false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
 
         Page p = new Page();
         p.setText("This is raw page text");
@@ -85,7 +94,11 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        assertEquals(new PageData(null, "This is raw page text", true), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
+
+        assertEquals(new PageData( "You are not permissioned to read this page", "",true, false, false), pageService.getPageData("host1", "ns:realPage", "Joe"));
+
+
     }
 
     @Test
@@ -99,6 +112,8 @@ public class PageServiceTest {
     public void testSavePage() throws PageWriteException {
         when(idRepository.getNewId()).thenReturn(55L);
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
         pageService.savePage("host1", "newPage", "Some text", "someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
@@ -114,6 +129,8 @@ public class PageServiceTest {
     public void testSavePage_Existing() throws PageWriteException {
         when(idRepository.getNewId()).thenReturn(55L);
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         Page p = new Page();
         p.setText("This is raw page text");
         p.setId(10L);
@@ -151,16 +168,19 @@ public class PageServiceTest {
     @Test
     public void testListPages() {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
         PageDesc page1 = new PageDescImpl("", "page1", "Page 1", "Bob" );
         PageDesc page2 = new PageDescImpl("", "page2", "Page 1","Francis");
         PageDesc page3 = new PageDescImpl("ns1", "page1", "Page 1","Francis");
         PageDesc page4 = new PageDescImpl("ns1:ns2", "page3", "Page 1","Francis");
         List<PageDesc> allPages = List.of(page1, page2, page3, page4);
+        when(namespaceService.filterReadablePages(any(), eq("site1"), eq("joe"))).thenReturn(allPages);
 
 
         when(pageRepository.getAllValid("site1")).thenReturn(allPages);
 
-        PageListResponse pageResponse = pageService.getAllPages("host1");
+        PageListResponse pageResponse = pageService.getAllPages("host1", "joe");
 
         assertEquals("", pageResponse.namespaces.getNamespace());
         assertEquals(1, pageResponse.namespaces.getChildren().size());
@@ -186,14 +206,17 @@ public class PageServiceTest {
     @Test
     public void testListPages_wEmptyNamespaces() {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
         PageDesc page1 = new PageDescImpl("", "page1", "Page 1", "Bob" );
         PageDesc page2 = new PageDescImpl("ns1:ns2", "page3", "Page 1","Francis");
         List<PageDesc> allPages = List.of(page1, page2);
+        when(namespaceService.filterReadablePages(any(), eq("site1"), eq("joe"))).thenReturn(allPages);
 
 
         when(pageRepository.getAllValid("site1")).thenReturn(allPages);
 
-        PageListResponse pageResponse = pageService.getAllPages("host1");
+        PageListResponse pageResponse = pageService.getAllPages("host1", "joe");
         assertEquals("", pageResponse.namespaces.getNamespace());
         assertEquals(1, pageResponse.namespaces.getChildren().size());
         assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getNamespace());
@@ -245,6 +268,11 @@ public class PageServiceTest {
         @Override
         public String getModifiedBy() {
             return modifiedBy;
+        }
+
+        @Override
+        public LocalDateTime getModified() {
+            return null;
         }
     }
 }

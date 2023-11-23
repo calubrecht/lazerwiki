@@ -73,11 +73,11 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageService).getAllPages(eq("localhost"));
+        verify(pageService).getAllPages(eq("localhost"), eq("Bob"));
 
         this.mockMvc.perform(get("/api/page/listPages")).
                 andExpect(status().isOk());
 
-        verify(pageService, times(2)).getAllPages(eq("localhost"));
+        verify(pageService).getAllPages(eq("localhost"), eq("Guest"));
     }
 }

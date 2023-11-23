@@ -25,6 +25,8 @@ public class Page {
 
     String modifiedBy;
 
+    LocalDateTime modified;
+
     @Column(name = "validTS")
     LocalDateTime validts;
     boolean deleted;
@@ -108,5 +110,13 @@ public class Page {
 
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    public LocalDateTime getModified() {
+        return modified;
+    }
+
+    public void setModified(LocalDateTime modified) {
+        this.modified = modified;
     }
 }

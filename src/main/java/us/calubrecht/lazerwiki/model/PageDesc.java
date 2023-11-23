@@ -16,4 +16,6 @@ public interface PageDesc {
     String getTitle();
 
     String getModifiedBy();
+
+    LocalDateTime getModified();
 }

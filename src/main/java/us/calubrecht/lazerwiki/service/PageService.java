@@ -35,6 +35,9 @@ public class PageService {
     @Autowired
     EntityManagerProxy em;
 
+    @Autowired
+    NamespaceService namespaceService;
+
     public boolean exists(String host, String pageName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
@@ -52,12 +55,17 @@ public class PageService {
     public PageData getPageData(String host, String sPageDescriptor, String userName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        boolean canWrite = namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName);
+        boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
+        if (!canRead) {
+            return new PageData("You are not permissioned to read this page", "", true, false, false);
+        }
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         if (p == null ) {
-            return new PageData("This page doesn't exist", "", false);
+            return new PageData("This page doesn't exist", "", false, canRead, canWrite);
         }
         String source = p.getText();
-        return new PageData(null, source, true);
+        return new PageData(null, source, true, canRead, canWrite);
     }
 
     public PageDescriptor decodeDescriptor(String pageDescriptor) {
@@ -67,13 +75,13 @@ public class PageService {
     }
 
     @Transactional
-    public void savePage(String host, String sPageDescriptor, String text, String user) throws PageWriteException{
-        if (user.equals("Joe")) {
-            throw new PageWriteException("You don't have permission to write this page.");
-        }
+    public void savePage(String host, String sPageDescriptor, String text, String userName) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        if (!namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName)) {
+            throw new PageWriteException("You don't have permission to write this page.");
+        }
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         long id = p == null ? getNewId() : p.getId();
         long revision = p == null ? 1 : p.getRevision() + 1;
@@ -90,7 +98,7 @@ public class PageService {
         newP.setId(id);
         newP.setRevision(revision);
         newP.setValidts(PageRepository.MAX_DATE);
-        newP.setModifiedBy(user);
+        newP.setModifiedBy(userName);
         pageRepository.save(newP);
     }
 
@@ -120,16 +128,15 @@ public class PageService {
         List<NsNode> nodes = new ArrayList();
         namespaces.forEach(ns ->
                 nodes.add(getNsNode(ns, pages)));
-        NsNode node = new NsNode(rootNS);
+        NsNode node = new NsNode(rootNS, false);
         node.setChildren(nodes);
         return node;
 
     }
 
-    public PageListResponse getAllPages(String host) {
+    public PageListResponse getAllPages(String host, String userName) {
         String site = siteService.getSiteForHostname(host);
-        List<PageDesc> pages = pageRepository.getAllValid(site);
-        List<String> ns = getNamespaces("", pages);
+        List<PageDesc> pages = namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
         NsNode node = getNsNode("", pages);
         return new PageListResponse(pages.stream().sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).collect(Collectors.groupingBy(PageDesc::getNamespace)), node);
     }

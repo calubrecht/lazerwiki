@@ -12,7 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.model.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.model.NsNode;
+import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
+import us.calubrecht.lazerwiki.service.exception.MediaReadException;
+import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
 import java.io.*;
@@ -30,6 +33,9 @@ public class MediaService {
 
     @Autowired
     MediaRecordRepository mediaRecordRepository;
+
+    @Autowired
+    NamespaceService namespaceService;
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
@@ -56,9 +62,12 @@ public class MediaService {
 
     }
 
-    public byte[] getBinaryFile(String host, String userName, String fileName) throws IOException {
+    public byte[] getBinaryFile(String host, String userName, String fileName) throws IOException, MediaReadException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
+        if (!namespaceService.canReadNamespace(site, splitFile.getLeft(), userName)) {
+            throw new MediaReadException("Not permissioned to read this file");
+        }
         String nsPath = splitFile.getLeft().replaceAll(":", "/");
         ensureDir(site, nsPath);
         File f = nsPath.isBlank() ?
@@ -69,8 +78,11 @@ public class MediaService {
     }
 
     @Transactional
-    public void saveFile(String host, String userName, MultipartFile mfile, String namespace) throws IOException {
+    public void saveFile(String host, String userName, MultipartFile mfile, String namespace) throws IOException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
+        if (!namespaceService.canWriteNamespace(site, namespace, userName)) {
+            throw new MediaWriteException("Not permissioned to write this file");
+        }
         String nsPath = namespace.replaceAll(":", "/");
         ensureDir(site, nsPath);
         String fileName = mfile.getOriginalFilename();
@@ -104,12 +116,12 @@ public class MediaService {
                 filter(ns -> ns.substring(rootNS.length() + 1).indexOf(":") == -1).
                 sorted().toList();
     }
-    NsNode getNsNode(String rootNS, List<MediaRecord> mediaRecords) {
+    NsNode getNsNode(String site, String rootNS, List<MediaRecord> mediaRecords, String userName) {
         List<String> namespaces = getNamespaces(rootNS, mediaRecords);
         List<NsNode> nodes = new ArrayList();
         namespaces.forEach(ns ->
-                nodes.add(getNsNode(ns, mediaRecords)));
-        NsNode node = new NsNode(rootNS);
+                nodes.add(getNsNode(site, ns, mediaRecords, userName)));
+        NsNode node = new NsNode(rootNS, namespaceService.canWriteNamespace(site, rootNS, userName));
         node.setChildren(nodes);
         return node;
 
@@ -117,8 +129,8 @@ public class MediaService {
 
     public MediaListResponse getAllFiles(String host, String userName) {
         String site = siteService.getSiteForHostname(host);
-        List<MediaRecord> mediaRecords= mediaRecordRepository.findAllBySiteOrderByFileName(site);
-        NsNode namespaces = getNsNode("", mediaRecords);
+        List<MediaRecord> mediaRecords= namespaceService.filterReadableMedia(mediaRecordRepository.findAllBySiteOrderByFileName(site), site, userName);
+        NsNode namespaces = getNsNode(site,"", mediaRecords, userName);
 
 
         return new MediaListResponse(mediaRecords.stream().collect(Collectors.groupingBy(MediaRecord::getNamespace)), namespaces);
@@ -126,10 +138,13 @@ public class MediaService {
     }
 
     @Transactional
-    public void deleteFile(String host, String fileName, String user) throws IOException {
+    public void deleteFile(String host, String fileName, String user) throws IOException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         String nsPath = splitFile.getLeft().replaceAll(":", "/");
+        if (!namespaceService.canWriteNamespace(site, splitFile.getLeft(), user)) {
+            throw new MediaWriteException("Not permissioned to delete this file");
+        }
         ensureDir(site, nsPath);
         File f = nsPath.isBlank() ?
                 new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())):

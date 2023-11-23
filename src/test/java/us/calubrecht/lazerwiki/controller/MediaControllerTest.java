@@ -16,6 +16,8 @@ import us.calubrecht.lazerwiki.model.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.model.NsNode;
 import us.calubrecht.lazerwiki.service.MediaService;
+import us.calubrecht.lazerwiki.service.exception.MediaReadException;
+import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
 import java.io.IOException;
 import java.util.List;
@@ -57,6 +59,13 @@ class MediaControllerTest {
         this.mockMvc.perform(get("/_media/explosive.file").
                         principal(auth)).
                 andExpect(status().isNotFound());
+
+        Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
+        when(mediaService.getBinaryFile(eq("localhost"), eq("Joe"), any())).thenThrow(
+                new MediaReadException(""));
+        this.mockMvc.perform(get("/_media/forbidden.file").
+                        principal(authJoe)).
+                andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -69,8 +78,8 @@ class MediaControllerTest {
         verify(mediaService).saveFile(eq("localhost"), eq("Bob"), eq(mfile), eq("ns"));
 
         Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
-        Mockito.doThrow(new IOException("")).when(mediaService).saveFile(eq("localhost"), eq("Joe"), eq(mfile), eq("ns"));
-        this.mockMvc.perform(multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(authJoe)).andExpect(status().isOk()).andExpect(content().string("oops"));
+        Mockito.doThrow(new MediaWriteException("")).when(mediaService).saveFile(eq("localhost"), eq("Joe"), eq(mfile), eq("ns"));
+        this.mockMvc.perform(multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(authJoe)).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -78,14 +87,15 @@ class MediaControllerTest {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         MediaRecord file1 = new MediaRecord("file1.png", "default", "","bob", 0, 0, 0);
         MediaRecord file2 = new MediaRecord("file2.jpg", "default", "", "bob", 0, 0, 0);
-        MediaListResponse resp = new MediaListResponse(Map.of("", List.of(file1, file2)), new NsNode(""));
+        MediaListResponse resp = new MediaListResponse(Map.of("", List.of(file1, file2)), new NsNode("", true));
         when(mediaService.getAllFiles(any(), any())).thenReturn(resp);
 
         this.mockMvc.perform(get("/_media/list").principal(auth)).andExpect(status().isOk()).andExpect(content().json(
-                " { \"media\":{\"\":[{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]}, \"namespaces\":{\"namespace\":\"\",\"children\":[]}}"));
+                " { \"media\":{\"\":[{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]}, \"namespaces\":{\"namespace\":\"\",\"children\":[], \"writable\":true}}"));
+
 
         this.mockMvc.perform(get("/_media/list")).andExpect(status().isOk()).andExpect(content().json(
-                " { \"media\":{\"\":[{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]}, \"namespaces\":{\"namespace\":\"\",\"children\":[]}}"));
+                " { \"media\":{\"\":[{\"fileName\":\"file1.png\"}, {\"fileName\":\"file2.jpg\"}]}, \"namespaces\":{\"namespace\":\"\",\"children\":[], \"writable\":true}}"));
 
     }
 
@@ -94,5 +104,9 @@ class MediaControllerTest {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         this.mockMvc.perform(delete("/_media/delete.file.jpg").principal(auth)).andExpect(status().isOk());
         verify(mediaService).deleteFile("localhost", "delete.file.jpg", "Bob");
+
+        Mockito.doThrow(new MediaWriteException("")).when(mediaService).deleteFile(eq("localhost"), eq("unauthfile.jpg"), eq("Joe"));
+        Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
+        this.mockMvc.perform(delete("/_media/unauthfile.jpg").principal(authJoe)).andExpect(status().isUnauthorized());
     }
 }

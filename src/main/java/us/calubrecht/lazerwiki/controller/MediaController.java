@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.model.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.service.MediaService;
+import us.calubrecht.lazerwiki.service.exception.MediaReadException;
+import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,18 +41,20 @@ public class MediaController {
             return ResponseEntity.ok().contentType(mediaType).body(mediaService.getBinaryFile(url.getHost(), userName, fileName));
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
+        } catch (MediaReadException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     @PostMapping("upload")
-    public String saveFile(@RequestParam("file") MultipartFile file, @RequestParam("namespace") String namespace, Principal principal, HttpServletRequest request) {
+    public ResponseEntity<String> saveFile(@RequestParam("file") MultipartFile file, @RequestParam("namespace") String namespace, Principal principal, HttpServletRequest request) throws IOException {
         try {
             URL url = new URL(request.getRequestURL().toString());
             String userName = principal.getName();
             mediaService.saveFile(url.getHost(), userName, file, namespace);
-            return "Upload successful";
-        } catch (IOException e) {
-            return "oops";
+            return ResponseEntity.ok("Upload successful");
+        } catch (MediaWriteException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
@@ -62,9 +66,14 @@ public class MediaController {
     }
 
     @DeleteMapping("{fileName}")
-    public void deleteFile(@PathVariable String fileName, Principal principal, HttpServletRequest request) throws IOException {
+    public ResponseEntity<Void> deleteFile(@PathVariable String fileName, Principal principal, HttpServletRequest request) throws IOException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
-        mediaService.deleteFile(url.getHost(), fileName, userName);
+        try {
+            mediaService.deleteFile(url.getHost(), fileName, userName);
+            return ResponseEntity.ok().build();
+        } catch (MediaWriteException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 }

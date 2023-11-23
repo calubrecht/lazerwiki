@@ -5,6 +5,7 @@ import java.util.List;
 
 @Entity(name = "userRecord")
 public class User {
+    public static final String GUEST = "Guest";
 
     public User() {}
     public User(String userName, String passwordHash) {
@@ -21,4 +22,8 @@ public class User {
     @OneToMany(cascade = {CascadeType.ALL})
     @JoinColumn(name = "userName")
     public List<UserRole> roles; // Should roles be site specific?
+
+    public static boolean isGuest(String userName) {
+        return userName == null || userName.equals(GUEST);
+    }
 }
