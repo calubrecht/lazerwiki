@@ -54,7 +54,7 @@ header_tok
    ;
 
 link_target
-  : (CHARACTER | WS | ITALIC_TOKEN)*
+  : (CHARACTER | WS | ITALIC_TOKEN | DASH) *
   ;
 
 link_display

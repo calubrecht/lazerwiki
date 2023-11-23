@@ -38,4 +38,14 @@ public class RenderServiceTest {
         when(pageService.getPageData(any(), eq("ns:nonPage"), any())).thenReturn(noPageData);
         assertEquals(new PageData("Doesn't exist", "This is raw page text", false, true, true), underTest.getRenderedPage("host1", "ns:nonPage", "Bob"));
     }
+
+    @Test
+    public void testRenderError() {
+        PageData pd = new PageData(null, "This is raw page text", true, true, true);
+        when(renderer.render(eq("This is raw page text"))).thenThrow(new NullPointerException());
+        when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
+
+        assertEquals(new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>This is raw page text</code>", "This is raw page text", true, true, true), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+
+    }
 }
