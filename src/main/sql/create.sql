@@ -82,3 +82,29 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=2
 ;
+
+CREATE TABLE `ns_restriction_types` (
+	`type` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`type`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
+CREATE TABLE `namespace` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`namespace` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`restriction_type` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `NS_UNIQUE` (`site`, `namespace`) USING BTREE,
+	INDEX `NS_RESTRICTION_FK` (`restriction_type`) USING BTREE,
+	CONSTRAINT `NS_RESTRICTION_FK` FOREIGN KEY (`restriction_type`) REFERENCES `lazerwiki`.`ns_restriction_types` (`type`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT `NS_SITE_FK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=3
+;
+
+CREATE VIEW knownNamespaces as select distinct site, namespace from `page` union select distinct site, namespace from `mediarecord` union select distinct site, namespace AS `namespace` from `namespace`;
