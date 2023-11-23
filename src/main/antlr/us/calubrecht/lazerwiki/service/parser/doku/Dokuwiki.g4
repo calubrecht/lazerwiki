@@ -163,7 +163,7 @@ inner_text_nowsstart
   ;
 
 header
-  : WS* header_tok inner_text header_tok WS* NEWLINE
+  : WS? header_tok inner_text header_tok WS* NEWLINE
   ;
 
 line_item

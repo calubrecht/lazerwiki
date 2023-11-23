@@ -48,4 +48,13 @@ public class RenderServiceTest {
         assertEquals(new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>This is raw page text</code>", "This is raw page text", true, true, true), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
     }
+
+    @Test
+    public void testRenderCantREad() {
+        PageData pd = new PageData("Can't read this", "Can't read this", true, false, false);
+        when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
+
+        assertEquals(new PageData("Can't read this", "Can't read this", true, false, false), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+
+    }
 }

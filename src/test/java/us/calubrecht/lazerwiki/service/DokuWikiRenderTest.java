@@ -254,6 +254,16 @@ class DokuWikiRendererTest {
     }
 
     @Test
+    public void testHeaderInBox() {
+        String input1 = "  This is a block\n  ==== It has a header in it ====\n";
+        assertEquals(
+                "<pre class=\"code\">This is a block\n==== It has a header in it ====\n</pre>",
+                underTest.render(input1)
+        );
+
+    }
+
+    @Test
     public void testUnusedMethods() {
         TreeRenderer rowRenderer = underTest.renderers.getRenderer(DokuwikiParser.RowContext.class);
         assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class)));
