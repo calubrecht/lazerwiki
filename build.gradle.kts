@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.6.3"
+version = "0.1.6.4"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -31,6 +31,7 @@ dependencies {
 	implementation("org.apache.commons:commons-text:1.10.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
 	runtimeOnly("mysql:mysql-connector-java:8.0.33")
+	runtimeOnly("com.github.usefulness:webp-imageio:0.5.1")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
