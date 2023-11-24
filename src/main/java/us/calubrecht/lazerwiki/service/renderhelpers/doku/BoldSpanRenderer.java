@@ -9,17 +9,13 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import java.util.List;
 
 @Component
-public class BoldSpanRenderer extends TreeRenderer {
+public class BoldSpanRenderer extends AbstractSpanRenderer {
     @Override
     public List<Class> getTargets() {
         return List.of(DokuwikiParser.Bold_spanContext.class);
     }
 
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("<span class=\"bold\">");
-        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
-        sb.append("</span>");
-        return sb;
+    public BoldSpanRenderer() {
+        super("<span class=\"bold\">", "</span>");
     }
 }

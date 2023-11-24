@@ -9,17 +9,13 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import java.util.List;
 
 @Component
-public class ItalicSpanRenderer  extends TreeRenderer {
+public class ItalicSpanRenderer  extends AbstractSpanRenderer {
     @Override
     public List<Class> getTargets() {
         return List.of(DokuwikiParser.Italic_spanContext.class);
     }
 
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("<span class=\"italic\">");
-        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
-        sb.append("</span>");
-        return sb;
+    public ItalicSpanRenderer() {
+        super("<span class=\"italic\">", "</span>");
     }
 }

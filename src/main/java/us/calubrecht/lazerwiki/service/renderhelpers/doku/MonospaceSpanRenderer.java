@@ -9,17 +9,13 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import java.util.List;
 
 @Component
-public class MonospaceSpanRenderer extends TreeRenderer {
+public class MonospaceSpanRenderer extends AbstractSpanRenderer {
     @Override
     public List<Class> getTargets() {
         return List.of(DokuwikiParser.Monospace_spanContext.class);
     }
 
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("<span class=\"monospace\">");
-        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
-        sb.append("</span>");
-        return sb;
+    public MonospaceSpanRenderer() {
+        super("<span class=\"monospace\">", "</span>");
     }
 }

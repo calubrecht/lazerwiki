@@ -9,18 +9,13 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import java.util.List;
 
 @Component
-public class UnderlineSpanRenderer  extends TreeRenderer {
+public class UnderlineSpanRenderer  extends AbstractSpanRenderer {
     @Override
     public List<Class> getTargets() {
         return List.of(DokuwikiParser.Underline_spanContext.class);
     }
 
-    @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("<span class=\"underline\">");
-        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
-        sb.append("</span>");
-        return sb;
+    public UnderlineSpanRenderer() {
+        super("<span class=\"underline\">", "</span>");
     }
 }
