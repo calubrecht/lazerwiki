@@ -27,9 +27,13 @@ PIPE: '|';
 STAR: '*' ;
 DASH: '-' ;
 
-CHARACTER
-    : ~[\r\n]
+WORD
+    : [A-Z0-9a-z]+
     ;
+
+CHARACTER
+   : ~[\r\n]
+   ;
 
 BOLD_TOKEN: '**' ;
 ITALIC_TOKEN: '//' ;
@@ -62,7 +66,7 @@ header_tok
    ;
 
 link_target
-  : (CHARACTER | WS | ITALIC_TOKEN | DASH | UNDERLINE_TOKEN) *
+  : (WORD | CHARACTER | WS | ITALIC_TOKEN | DASH | UNDERLINE_TOKEN) *
   ;
 
 link_display
@@ -111,12 +115,12 @@ del_span
   ;
 
 all_char
-   : CHARACTER | WS  | DASH | STAR | header_tok
+   : WORD | CHARACTER | WS  | DASH | STAR | header_tok
    ;
 
 all_char_nows
    :
-     CHARACTER | DASH | STAR | header_tok
+     WORD | CHARACTER | DASH | STAR | header_tok
    ;
 
 broken_bold_span
