@@ -11,7 +11,7 @@ public class SiteService {
     @Autowired
     SiteRepository siteRepository;
     public String getSiteForHostname(String hostname) {
-        Site s =  siteRepository.findByHostname(hostname);
+        Site s =  siteRepository.findByHostname(hostname.toLowerCase());
         if (s != null) {
             return s.name;
         }

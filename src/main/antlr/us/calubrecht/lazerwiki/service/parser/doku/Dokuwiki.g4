@@ -156,8 +156,13 @@ broken_del
 
 styled_span
   :
-    (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span| broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span | broken_sup | broken_sub | broken_del )
+    (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span| broken_span )
   ;
+
+broken_span
+ :
+ broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span | broken_sup | broken_sub | broken_del
+ ;
 
 olist_item
   :
