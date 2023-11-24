@@ -218,7 +218,7 @@ line_item
 ;
 
 line
-  : (ulist_item | olist_item | image | styled_span | inner_text_nowsstart | styled_span | image | broken_image  ) line_item*
+  : (ulist_item | olist_item | image | styled_span | inner_text_nowsstart | image | broken_image  ) line_item*
   ;
 
 
