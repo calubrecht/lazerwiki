@@ -13,12 +13,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.RenderService;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {PageController.class, VersionController.class})
@@ -80,5 +81,22 @@ public class PageControllerTest {
                 andExpect(status().isOk());
 
         verify(pageService).getAllPages(eq("localhost"), eq("Guest"));
+    }
+
+    @Test
+    public void testListTags() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        when(pageService.getAllTags(any(), any())).thenReturn(List.of("tag1","tag2"));
+        String data = "[\"tag1\", \"tag2\"]";
+        this.mockMvc.perform(get("/api/page/listTags").
+                        principal(auth)).
+                andExpect(status().isOk()).andExpect(content().json(data));
+
+        verify(pageService).getAllTags(eq("localhost"), eq("Bob"));
+
+        this.mockMvc.perform(get("/api/page/listTags")).
+                andExpect(status().isOk()).andExpect(content().json(data));
+
+        verify(pageService).getAllTags(eq("localhost"), eq("Guest"));
     }
 }

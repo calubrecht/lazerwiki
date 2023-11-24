@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.6.6"
+version = "0.1.6.7"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -78,10 +78,12 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/WebSecurity*.class",
 							"us/calubrecht/lazerwiki/ServletInitializer.class",
 							"us/calubrecht/lazerwiki/model/*.class",
+							"us/calubrecht/lazerwiki/requests/*.class",
 							"us/calubrecht/lazerwiki/controller/GlobalControllerAdvice.class",
 							"us/calubrecht/lazerwiki/repository/EntityManagerProxy.class",
 							"us/calubrecht/lazerwiki/repository/SiteRepository.class",
 							"us/calubrecht/lazerwiki/repository/UserRepository.class",
+							"us/calubrecht/lazerwiki/repository/TagRepository.class",
 							"us/calubrecht/lazerwiki/repository/MediaRecordRepository.class",
 							"us/calubrecht/lazerwiki/service/IMarkupRenderer.class",
 							"us/calubrecht/lazerwiki/service/parser/doku/*",

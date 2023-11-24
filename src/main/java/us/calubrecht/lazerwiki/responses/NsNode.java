@@ -18,10 +18,6 @@ public class NsNode {
         this.writable = writable;
     }
 
-    public NsNode() {
-
-    }
-
     public List<NsNode> getChildren() {
         return new ArrayList<NsNode>(children);
     }

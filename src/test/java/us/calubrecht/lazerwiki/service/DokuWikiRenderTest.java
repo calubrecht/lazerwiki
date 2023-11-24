@@ -103,6 +103,12 @@ class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderMalformedURL() {
+        assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://malformed.invalid\">http://malformed.invalid</a></div>", doRender("[[http://bad%link]]"));
+
+    }
+
+    @Test
     public void testRenderSanitizeHtmlInText() {
         assertEquals("<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>", doRender("This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>"));
 
