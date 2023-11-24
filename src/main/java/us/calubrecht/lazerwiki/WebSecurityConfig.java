@@ -44,10 +44,12 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/_media/**", HttpMethod.OPTIONS.toString()),
                                             new AntPathRequestMatcher("/_media/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/_resources/**"),
+                                            new AntPathRequestMatcher("/api/page/get/*"),
+                                            new AntPathRequestMatcher("/api/page/listPages"),
+                                            new AntPathRequestMatcher("/api/page/listTags"),
                                             // Ignore for CORS requests
                                             new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                             createAdminMatcher).permitAll().
-                                    requestMatchers(new AntPathRequestMatcher("/api/page/*")).permitAll().
                                     // default
                                             anyRequest().authenticated();
                         }

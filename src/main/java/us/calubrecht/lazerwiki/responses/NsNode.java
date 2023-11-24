@@ -1,4 +1,4 @@
-package us.calubrecht.lazerwiki.model;
+package us.calubrecht.lazerwiki.responses;
 
 import java.util.ArrayList;
 import java.util.List;

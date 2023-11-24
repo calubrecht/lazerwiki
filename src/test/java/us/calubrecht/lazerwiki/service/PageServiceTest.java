@@ -10,12 +10,17 @@ import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.repository.IdRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
+import us.calubrecht.lazerwiki.repository.TagRepository;
+import us.calubrecht.lazerwiki.responses.NsNode;
+import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -44,6 +49,9 @@ public class PageServiceTest {
     @MockBean
     EntityManagerProxy em;
 
+    @MockBean
+    TagRepository tagRepository;
+
     @Test
     public void testExists() {
         assertFalse(pageService.exists("site1","nonExistentPage"));
@@ -60,12 +68,14 @@ public class PageServiceTest {
 
         Page p = new Page();
         p.setTitle("Titled Page");
+        p.setTags(Collections.emptyList());
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "some:ns", "realPage", false)).
                 thenReturn(p);
         assertEquals("Titled Page", pageService.getTitle("host1", "some:ns:realPage"));
 
         Page p2 = new Page();
+        p2.setTags(Collections.emptyList());
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "some:ns", "nonTitledRealPage", false)).
                 thenReturn(p2);
         assertEquals("Non Titled Real Page", pageService.getTitle("host1", "some:ns:nonTitledRealPage"));
@@ -86,17 +96,18 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
-        assertEquals(new PageData("This page doesn't exist", "", false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
+        assertEquals(new PageData("This page doesn't exist", "", Collections.emptyList(),false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
 
         Page p = new Page();
         p.setText("This is raw page text");
+        p.setTags(Collections.emptyList());
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        assertEquals(new PageData(null, "This is raw page text", true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
 
-        assertEquals(new PageData( "You are not permissioned to read this page", "",true, false, false), pageService.getPageData("host1", "ns:realPage", "Joe"));
+        assertEquals(new PageData( "You are not permissioned to read this page", "", Collections.emptyList(),true, false, false), pageService.getPageData("host1", "ns:realPage", "Joe"));
 
 
     }
@@ -115,10 +126,11 @@ public class PageServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageService.savePage("host1", "newPage", "Some text", "someUser");
+        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(),"someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository).save(pageCaptor.capture());
         Page p = pageCaptor.getValue();
+        p.setTags(Collections.emptyList());
         assertEquals("Some text", p.getText());
         assertEquals(55L, p.getId());
         assertEquals("site1", p.getSite());
@@ -136,10 +148,11 @@ public class PageServiceTest {
         p.setId(10L);
         p.setRevision(2L);
         p.setSite("site1");
+        p.setTags(Collections.emptyList());
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        pageService.savePage("host1", "ns:realPage", "Some text", "someUser");
+        pageService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),"someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
 
@@ -162,7 +175,7 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
         assertThrows(PageWriteException.class, () ->
-                pageService.savePage("host1", "newPage", "Some text", "Joe"));
+                pageService.savePage("host1", "newPage", "Some text", null,"Joe"));
     }
 
     @Test

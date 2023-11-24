@@ -10,6 +10,7 @@ CREATE TABLE `sites` (
 	`name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`hostname` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`name`) USING BTREE,
+
 	UNIQUE INDEX `HostnameIdx` (`hostname`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
@@ -80,7 +81,6 @@ CREATE TABLE `mediaRecord` (
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=2
 ;
 
 CREATE TABLE `ns_restriction_types` (
@@ -104,7 +104,23 @@ CREATE TABLE `namespace` (
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=3
 ;
 
 CREATE VIEW knownNamespaces as select distinct site, namespace from `page` union select distinct site, namespace from `mediarecord` union select distinct site, namespace AS `namespace` from `namespace`;
+
+CREATE TABLE `tag` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`pageId` INT(11) NOT NULL DEFAULT '0',
+	`revision` INT(11) NOT NULL DEFAULT '0',
+	`tag` VARCHAR(50) NOT NULL DEFAULT '0' COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `tag_id` (`tag`) USING BTREE,
+	INDEX `tag_id_revision_FK` (`pageId`, `revision`) USING BTREE,
+	CONSTRAINT `tag_pageid_revision_FK` FOREIGN KEY (`pageId`, `revision`) REFERENCES `lazerwiki`.`page` (`id`, `revision`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
+
+CREATE VIEW activeTags as select distinct `p`.`site` AS `site`,`t`.`tag` AS `tag` from (`tag` `t` join `page` `p` on(`p`.`id` = `t`.`pageId` and `p`.`revision` = `t`.`revision`)) where `p`.`deleted` = 0 and `p`.`validTS` = '9999-12-31 00:00:00';

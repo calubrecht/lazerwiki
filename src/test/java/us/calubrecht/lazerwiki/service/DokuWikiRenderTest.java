@@ -65,6 +65,10 @@ class DokuWikiRendererTest {
         // Link with dash in URL
         assertEquals("<h1>Some text in <a class=\"wikiLinkMissing\" href=\"/page/headerLink\">a header</a></h1>", underTest.render("======Some text in [[ headerLink |a header]]======"));
         assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://domain.example/a-page\">http://domain.example/a-page</a></div>", underTest.render("[[http://domain.example/a-page]]"));
+
+
+        // broken link syntax
+        assertEquals("<div>[[not quite a link]</div>", underTest.render("[[not quite a link]"));
     }
 
     @Test
@@ -73,7 +77,7 @@ class DokuWikiRendererTest {
         assertEquals("<div><a class=\"wikiLinkMissing\" href=\"/page/what_onclick_doEvil\">This link may be evil</a></div>", underTest.render(linkEmbeddingJS));
 
         // External Link
-        assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://malformed.invalid\">http://malformed.invalid</a></div>", underTest.render("[[https://ListGoesWhere\" onclick=\"evil"));
+        assertEquals("<div>[[https://ListGoesWhere\" onclick=\"evil</div>", underTest.render("[[https://ListGoesWhere\" onclick=\"evil"));
 
     }
 

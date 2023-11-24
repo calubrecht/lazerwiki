@@ -4,6 +4,7 @@ package us.calubrecht.lazerwiki.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity(name = "page")
 @IdClass(PageKey.class)
@@ -30,6 +31,13 @@ public class Page {
     @Column(name = "validTS")
     LocalDateTime validts;
     boolean deleted;
+
+    @OneToMany(cascade = {CascadeType.ALL})
+    @JoinColumns({
+      @JoinColumn(name = "pageId", referencedColumnName="id"),
+      @JoinColumn(name = "revision", referencedColumnName="revision")}
+    )
+    public List<PageTag> tags;
 
     public Long getId() {
         return id;
@@ -118,5 +126,13 @@ public class Page {
 
     public void setModified(LocalDateTime modified) {
         this.modified = modified;
+    }
+
+    public List<PageTag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<PageTag> tags) {
+        this.tags = tags;
     }
 }

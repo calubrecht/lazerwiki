@@ -14,6 +14,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.RenderService;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,7 +38,7 @@ public class PageControllerTest {
     @Test
     public void testGetPage() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        this.mockMvc.perform(get("/api/page/testPage").
+        this.mockMvc.perform(get("/api/page/get/testPage").
                         principal(auth)).
                 andExpect(status().isOk());
 
@@ -46,7 +47,7 @@ public class PageControllerTest {
 
     @Test
     public void testGetPageAnon() throws Exception {
-        this.mockMvc.perform(get("/api/page/testPage")).
+        this.mockMvc.perform(get("/api/page/get/testPage")).
                 andExpect(status().isOk());
 
         verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Guest"));
@@ -62,7 +63,7 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), eq("Bob"));
+        verify(pageService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), isNull(), eq("Bob"));
     }
 
     @Test

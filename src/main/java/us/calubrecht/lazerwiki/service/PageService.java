@@ -9,13 +9,14 @@ import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.repository.IdRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
+import us.calubrecht.lazerwiki.repository.TagRepository;
+import us.calubrecht.lazerwiki.responses.NsNode;
+import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +39,9 @@ public class PageService {
     @Autowired
     NamespaceService namespaceService;
 
+    @Autowired
+    TagRepository tagRepository;
+
     public boolean exists(String host, String pageName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
@@ -52,20 +56,22 @@ public class PageService {
         return p == null ? pageDescriptor.renderedName() : (p.getTitle() == null ? pageDescriptor.renderedName() : p.getTitle());
     }
 
+    @Transactional
     public PageData getPageData(String host, String sPageDescriptor, String userName) {
+        logger.info("fetch page: host=" + host + " sPageDescriptor=" + sPageDescriptor + " userName=" + userName);
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
         boolean canWrite = namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName);
         boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
         if (!canRead) {
-            return new PageData("You are not permissioned to read this page", "", true, false, false);
+            return new PageData("You are not permissioned to read this page", "",   Collections.emptyList(),true, false, false);
         }
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         if (p == null ) {
-            return new PageData("This page doesn't exist", "", false, canRead, canWrite);
+            return new PageData("This page doesn't exist", "",   Collections.emptyList(),false, canRead, canWrite);
         }
         String source = p.getText();
-        return new PageData(null, source, true, canRead, canWrite);
+        return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), true, canRead, canWrite);
     }
 
     public PageDescriptor decodeDescriptor(String pageDescriptor) {
@@ -75,7 +81,7 @@ public class PageService {
     }
 
     @Transactional
-    public void savePage(String host, String sPageDescriptor, String text, String userName) throws PageWriteException{
+    public void savePage(String host, String sPageDescriptor, String text, List<String> tags, String userName) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
@@ -99,6 +105,7 @@ public class PageService {
         newP.setRevision(revision);
         newP.setValidts(PageRepository.MAX_DATE);
         newP.setModifiedBy(userName);
+        newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
     }
 
@@ -139,5 +146,10 @@ public class PageService {
         List<PageDesc> pages = namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
         NsNode node = getNsNode("", pages);
         return new PageListResponse(pages.stream().sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).collect(Collectors.groupingBy(PageDesc::getNamespace)), node);
+    }
+
+    public List<String> getAllTags(String host, String userName) {
+        String site = siteService.getSiteForHostname(host);
+        return tagRepository.getAllActiveTags(site);
     }
 }

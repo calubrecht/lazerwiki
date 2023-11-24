@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.model.PageData;
+import us.calubrecht.lazerwiki.responses.PageData;
 
 @Service
 public class RenderService {
@@ -33,7 +33,7 @@ public class RenderService {
         sw.split();
         long queryMillis = sw.getSplitTime();
         try {
-            PageData pd = new PageData(renderer.render(d.source()), d.source(), d.exists(), d.userCanRead(), d.userCanWrite());
+            PageData pd = new PageData(renderer.render(d.source()), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
@@ -46,7 +46,7 @@ public class RenderService {
             String sanitizedSource =  StringEscapeUtils.escapeHtml4(d.source()).replaceAll("&quot;", "\"");
 
             return new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>%s</code>".formatted(sanitizedSource),
-                    d.source(), true, true, true);
+                    d.source(), d.tags(), true, true, true);
 
         }
 

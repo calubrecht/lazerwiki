@@ -1,4 +1,6 @@
-package us.calubrecht.lazerwiki.model;
+package us.calubrecht.lazerwiki.responses;
+
+import us.calubrecht.lazerwiki.model.PageDesc;
 
 import java.util.List;
 import java.util.Map;

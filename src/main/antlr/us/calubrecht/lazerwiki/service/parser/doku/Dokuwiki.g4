@@ -187,15 +187,20 @@ broken_image
    IMG_START_TOKEN | IMG_END_TOKEN
   ;
 
+broken_link
+  :
+   LINK_START | LINK_END
+  ;
+
 
 inner_text
   :
-    (all_char | link | PIPE )+
+    (all_char | link | broken_link | PIPE )+
   ;
 
 inner_text_nowsstart
   :
-    WS? (all_char_nows | link | PIPE )+
+    WS? (all_char_nows | link | broken_link | PIPE )+
   ;
 
 header
