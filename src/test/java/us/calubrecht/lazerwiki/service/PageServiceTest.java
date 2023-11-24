@@ -249,6 +249,13 @@ public class PageServiceTest {
         assertEquals("page3", pages.get("ns1:ns2").get(0).getPagename());
     }
 
+    @Test
+    public void testGetAllTags() {
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(tagRepository.getAllActiveTags("site1")).thenReturn(List.of("tag1", "tag2"));
+        assertEquals(2, pageService.getAllTags("host1", "joe").size());
+    }
+            
 
     static class PageDescImpl implements PageDesc {
         String namespace;
