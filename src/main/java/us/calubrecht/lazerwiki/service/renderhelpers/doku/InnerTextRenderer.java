@@ -4,6 +4,7 @@ package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
@@ -18,13 +19,15 @@ public class InnerTextRenderer extends TreeRenderer {
     protected String sanitize(String input) {
         return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
     }
-    public StringBuffer render(ParseTree tree) {
+
+    @Override
+    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         StringBuffer outBuffer = new StringBuffer();
         StringBuffer currentBuffer = new StringBuffer();
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass());
-            StringBuffer currentRender = renderer.render(child);
+            StringBuffer currentRender = renderer.render(child, renderContext);
             if (renderer.shouldParentSanitize()) {
                 currentBuffer.append(currentRender);
             } else {

@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
@@ -22,17 +23,17 @@ public class RowRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree) {
+    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         throw new RuntimeException("Not Implemented");
     }
 
     @Override
-    public StringBuffer render(List<ParseTree> trees) {
+    public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
         StringBuffer ret = new StringBuffer();
         ret.append("<div>");
         List<ParseTree> children = trees.stream().flatMap(
                 (t) -> flattenChildren(t).stream()).collect(Collectors.toList());
-        ret.append(renderChildren(children));
+        ret.append(renderChildren(children, renderContext));
         // Remove trailing new line
         ret.deleteCharAt(ret.length() -1);
         ret.append("</div>");

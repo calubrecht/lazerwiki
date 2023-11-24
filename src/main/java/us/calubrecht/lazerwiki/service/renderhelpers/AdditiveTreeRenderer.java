@@ -10,7 +10,7 @@ import java.util.List;
  */
 public abstract class AdditiveTreeRenderer extends TreeRenderer {
 
-    public abstract StringBuffer render(List<ParseTree> trees);
+    public abstract StringBuffer render(List<ParseTree> trees, RenderContext renderContext);
 
     @Override
     public boolean isAdditive() {

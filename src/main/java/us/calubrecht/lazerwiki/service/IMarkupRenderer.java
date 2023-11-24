@@ -7,5 +7,5 @@ package us.calubrecht.lazerwiki.service;
  */
 public interface IMarkupRenderer {
 
-    public String render(String markup);
+    public String render(String markup, String site);
 }

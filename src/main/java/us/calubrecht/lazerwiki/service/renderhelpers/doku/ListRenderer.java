@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 import org.antlr.v4.runtime.tree.ParseTree;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
-    public StringBuffer render(List<ParseTree> trees) {
+    public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
         StringBuffer sb = new StringBuffer();
         ListSpec currentSpec = getListSpec(trees.get(0));
         sb.append("<%s>\n".formatted(currentSpec.listType()));
@@ -47,14 +48,14 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
             ParseTree current = trees.get(0);
             ListSpec newSpec = getListSpec(current);
             if (newSpec.equals(currentSpec)) {
-                sb.append(render(current));
+                sb.append(render(current, renderContext));
                 trees.remove(0);
                 continue;
             }
             if (newSpec.depth() == currentSpec.depth()) {
                 sb.append("</%s>\n".formatted(currentSpec.listType()));
                 sb.append("<%s>\n".formatted(newSpec.listType()));
-                sb.append(render(current));
+                sb.append(render(current, renderContext));
                 trees.remove(0);
                 currentSpec = newSpec;
                 continue;
@@ -63,7 +64,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
                 break;
             }
             // Start nested list
-            sb.append(render(trees));
+            sb.append(render(trees, renderContext));
         }
         sb.append("</%s>\n".formatted(currentSpec.listType()));
         return sb;
@@ -71,12 +72,12 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
 
 
     @Override
-    public StringBuffer render(ParseTree tree) {
+    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         StringBuffer sb = new StringBuffer();
         Optional<ParseTree> content = getChildren(tree).stream().filter(t -> t.getClass() == DokuwikiParser.Inner_textContext.class).findFirst();
         content.ifPresent(pt -> {
             TreeRenderer renderer = renderers.getRenderer(pt.getClass());
-            sb.append("<li>" +renderer.render(pt) + "</li>\n"); }
+            sb.append("<li>" +renderer.render(pt, renderContext) + "</li>\n"); }
         );
         return sb;
     }

@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
@@ -41,13 +42,14 @@ public class HeaderRenderer extends TreeRenderer {
                 filter(child -> child.getClass() == DokuwikiParser.Header_tokContext.class).findFirst().get();
     }
 
-    public StringBuffer render(ParseTree tree) {
+    @Override
+    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         DokuwikiParser.HeaderContext context = (DokuwikiParser.HeaderContext)tree;
         int headerSize  = getHeaderTok(tree).getText().length();
         String hTag = "h" + (7 - headerSize);
         StringBuffer outBuffer = new StringBuffer();
         outBuffer.append("<").append(hTag).append(">");
-        outBuffer.append(renderChildren(getChildren(tree)).toString().strip());
+        outBuffer.append(renderChildren(getChildren(tree), renderContext).toString().strip());
         outBuffer.append("</").append(hTag).append(">\n");
         return outBuffer;
 

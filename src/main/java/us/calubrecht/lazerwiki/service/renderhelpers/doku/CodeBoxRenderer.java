@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,12 +20,12 @@ public class CodeBoxRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree) {
+    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         throw new RuntimeException("Not Implemented");
     }
 
     @Override
-    public StringBuffer render(List<ParseTree> trees) {
+    public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
         StringBuffer ret = new StringBuffer();
         ret.append("<pre class=\"code\">");
         trees.forEach(t ->

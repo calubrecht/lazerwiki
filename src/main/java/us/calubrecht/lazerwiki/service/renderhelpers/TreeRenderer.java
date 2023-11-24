@@ -12,7 +12,7 @@ public abstract class TreeRenderer {
 
     public abstract List<Class> getTargets();
 
-    public abstract StringBuffer render(ParseTree tree);
+    public abstract StringBuffer render(ParseTree tree, RenderContext context);
 
     public boolean isAdditive() {
         return false;
@@ -44,7 +44,7 @@ public abstract class TreeRenderer {
         return children;
     }
 
-    protected StringBuffer renderChildren(List<ParseTree> trees) {
+    protected StringBuffer renderChildren(List<ParseTree> trees, RenderContext renderContext) {
         StringBuffer outBuffer = new StringBuffer();
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
@@ -53,7 +53,7 @@ public abstract class TreeRenderer {
             if (lastChildClass != null && lastChildClass != renderer.getAdditiveClass() )
             {
                 AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass);
-                outBuffer.append(aRenderer.render(childrenToMerge));
+                outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
                 lastChildClass = null;
                 childrenToMerge.clear();
             }
@@ -62,11 +62,11 @@ public abstract class TreeRenderer {
                 childrenToMerge.add(child);
                 continue;
             }
-            outBuffer.append(renderer.render(child));
+            outBuffer.append(renderer.render(child, renderContext));
         }
         if (lastChildClass != null) {
             AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer) renderers.getRenderer(lastChildClass);
-            outBuffer.append(aRenderer.render(childrenToMerge));
+            outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
         }
         return outBuffer;
     }
@@ -83,8 +83,9 @@ public abstract class TreeRenderer {
             return null;
         }
 
-        public StringBuffer render(ParseTree tree) {
-            return renderChildren(getChildren(tree));
+        @Override
+        public StringBuffer render(ParseTree tree, RenderContext renderContext) {
+            return renderChildren(getChildren(tree), renderContext);
         }
     }
 }

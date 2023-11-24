@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.PageService;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
@@ -46,9 +47,9 @@ public class LinkRenderer extends TreeRenderer {
         return ret;
     }
 
-    protected String getLinkDisplay(ParseTree tree, String linkTarget) {
+    protected String getLinkDisplay(ParseTree tree, String linkTarget, RenderContext renderContext) {
         if (tree.getChildCount() > 3) {
-            return renderChildren(getChildren(tree, 2, 3)).toString();
+            return renderChildren(getChildren(tree, 2, 3), renderContext).toString();
         }
         if (isInternal(linkTarget)) {
             return pageService.getTitle("default", linkTarget);
@@ -56,9 +57,9 @@ public class LinkRenderer extends TreeRenderer {
         return linkTarget;
     }
 
-    protected String getCssClass(String targetName) {
+    protected String getCssClass(String targetName, String site) {
         if (isInternal(targetName)) {
-            return pageService.exists("default", targetName) ? LINK_CLASS : MISSING_LINK_CLASS;
+            return pageService.exists(site, targetName) ? LINK_CLASS : MISSING_LINK_CLASS;
         }
         return EXTERNAL_LINK_CLASS;
     }
@@ -67,13 +68,14 @@ public class LinkRenderer extends TreeRenderer {
         return !(link.startsWith("https://") || link.startsWith("http://"));
     }
 
-    public StringBuffer render(ParseTree tree) {
+    @Override
+    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
         String linkTarget = getLinkTarget(tree);
         String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
-        String cssClass = getCssClass(linkTarget);
+        String cssClass = getCssClass(linkTarget, renderContext.site());
         return new StringBuffer("<a class=\"%s\" href=\"%s\">%s</a>".
-                formatted(cssClass, linkURL, getLinkDisplay(tree, linkTarget)));
+                formatted(cssClass, linkURL, getLinkDisplay(tree, linkTarget, renderContext)));
     }
 
     @Override
@@ -88,9 +90,9 @@ public class LinkRenderer extends TreeRenderer {
             return List.of(DokuwikiParser.Link_displayContext.class);
         }
 
-        public StringBuffer render(ParseTree tree) {
+        public StringBuffer render(ParseTree tree, RenderContext renderContext) {
             // Strip leading |
-            return renderChildren(getChildren(tree, 1, tree.getChildCount()));
+            return renderChildren(getChildren(tree, 1, tree.getChildCount()), renderContext);
         }
     }
 }

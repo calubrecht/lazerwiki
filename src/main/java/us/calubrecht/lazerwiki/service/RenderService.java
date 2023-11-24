@@ -18,8 +18,12 @@ public class RenderService {
     @Autowired
     PageService pageService;
 
+    @Autowired
+    SiteService siteService;
+
     public PageData getRenderedPage(String host, String sPageDescriptor, String userName) {
         StopWatch sw = StopWatch.createStarted();
+        String site = siteService.getSiteForHostname(host);
         PageData d = pageService.getPageData(host, sPageDescriptor, userName);
         /*
           Could make these renderable templates;
@@ -33,7 +37,7 @@ public class RenderService {
         sw.split();
         long queryMillis = sw.getSplitTime();
         try {
-            PageData pd = new PageData(renderer.render(d.source()), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
+            PageData pd = new PageData(renderer.render(d.source(), site), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
