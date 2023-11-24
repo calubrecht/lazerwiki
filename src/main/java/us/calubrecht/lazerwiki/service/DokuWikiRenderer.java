@@ -24,7 +24,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     RendererRegistrar renderers;
 
     @Override
-    public String render(String markup, String site) {
+    public String render(String markup, String host, String site) {
         DokuwikiLexer lexer = new DokuwikiLexer(CharStreams.fromString(markup + '\n'));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         DokuwikiParser parser = new DokuwikiParser(tokens);
@@ -32,7 +32,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         StringBuffer outBuffer = new StringBuffer();
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
-        RenderContext renderContext = new RenderContext(site);
+        RenderContext renderContext = new RenderContext(host, site);
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass());

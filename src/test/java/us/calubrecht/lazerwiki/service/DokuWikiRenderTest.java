@@ -36,7 +36,7 @@ class DokuWikiRendererTest {
 
 
     String doRender(String source) {
-        return underTest.render(source, "default");
+        return underTest.render(source, "localhost", "default");
     }
 
     @Test
@@ -54,12 +54,12 @@ class DokuWikiRendererTest {
 
     @Test
     void testRenderLink() {
-        when(pageService.exists(eq("default"), eq("exists"))).thenReturn(true);
+        when(pageService.exists(eq("localhost"), eq("exists"))).thenReturn(true);
         assertEquals("<div><a class=\"wikiLinkMissing\" href=\"/page/missing\">This link is missing</a></div>", doRender("[[missing|This link is missing]]"));
         assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", doRender("[[exists|This link exists]]"));
 
-        when(pageService.getTitle(eq("default"), eq("exists"))).thenReturn("This Page Exists");
-        when(pageService.getTitle(eq("default"), eq("someNamespace:missing"))).thenReturn("missing");
+        when(pageService.getTitle(eq("localhost"), eq("exists"))).thenReturn("This Page Exists");
+        when(pageService.getTitle(eq("localhost"), eq("someNamespace:missing"))).thenReturn("missing");
         // Without link description
         assertEquals("<div><a class=\"wikiLinkMissing\" href=\"/page/someNamespace:missing\">missing</a></div>", doRender("[[someNamespace:missing ]]"));
         assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This Page Exists</a></div>", doRender("[[exists]]"));
@@ -89,16 +89,16 @@ class DokuWikiRendererTest {
 
     @Test
     public void testRenderLinkToHome() {
-        when(pageService.getTitle(eq("default"), eq(""))).thenReturn("Home");
-        when(pageService.exists(eq("default"), eq(""))).thenReturn(true);
+        when(pageService.getTitle(eq("localhost"), eq(""))).thenReturn("Home");
+        when(pageService.exists(eq("localhost"), eq(""))).thenReturn(true);
         assertEquals("<div><a class=\"wikiLink\" href=\"/\">Home</a></div>", doRender("[[]]"));
         assertEquals("<div><a class=\"wikiLink\" href=\"/\">Name of Home</a></div>", doRender("[[|Name of Home]]"));
     }
 
     @Test
     public void testRenderLinkOtherSite() {
-        when(pageService.exists(eq("otherSite"), eq("exists"))).thenReturn(true);
-        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.render("[[exists|This link exists]]", "otherSite"));
+        when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.render("[[exists|This link exists]]", "otherHost", "default"));
 
     }
 
@@ -303,8 +303,8 @@ class DokuWikiRendererTest {
     @Test
     public void testUnusedMethods() {
         TreeRenderer rowRenderer = underTest.renderers.getRenderer(DokuwikiParser.RowContext.class);
-        assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("default")));
+        assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("localhost", "default")));
         TreeRenderer codeBoxRenderer = underTest.renderers.getRenderer(DokuwikiParser.Code_boxContext.class);
-        assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("default")));
+        assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("localhost","default")));
     }
 }

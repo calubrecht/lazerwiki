@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.6.7"
+version = "0.1.6.8"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17

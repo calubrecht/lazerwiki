@@ -37,7 +37,7 @@ public class RenderService {
         sw.split();
         long queryMillis = sw.getSplitTime();
         try {
-            PageData pd = new PageData(renderer.render(d.source(), site), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
+            PageData pd = new PageData(renderer.render(d.source(), host, site), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");

@@ -31,7 +31,7 @@ public class RenderServiceTest {
     @Test
     public void testRender() {
         PageData pd = new PageData(null, "This is raw page text",  null,true, true, true);
-        when(renderer.render(eq("This is raw page text"), eq("default"))).thenReturn("This is Rendered Text");
+        when(renderer.render(eq("This is raw page text"), eq("host1"), eq("default"))).thenReturn("This is Rendered Text");
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
@@ -45,7 +45,7 @@ public class RenderServiceTest {
     @Test
     public void testRenderError() {
         PageData pd = new PageData(null, "This is raw page text",  null, true, true, true);
-        when(renderer.render(eq("This is raw page text"), eq("default"))).thenThrow(new NullPointerException());
+        when(renderer.render(eq("This is raw page text"), eq("host1"), eq("default"))).thenThrow(new NullPointerException());
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 

@@ -52,14 +52,14 @@ public class LinkRenderer extends TreeRenderer {
             return renderChildren(getChildren(tree, 2, 3), renderContext).toString();
         }
         if (isInternal(linkTarget)) {
-            return pageService.getTitle("default", linkTarget);
+            return pageService.getTitle(renderContext.host(), linkTarget);
         }
         return linkTarget;
     }
 
-    protected String getCssClass(String targetName, String site) {
+    protected String getCssClass(String targetName, String host) {
         if (isInternal(targetName)) {
-            return pageService.exists(site, targetName) ? LINK_CLASS : MISSING_LINK_CLASS;
+            return pageService.exists(host, targetName) ? LINK_CLASS : MISSING_LINK_CLASS;
         }
         return EXTERNAL_LINK_CLASS;
     }
@@ -73,7 +73,7 @@ public class LinkRenderer extends TreeRenderer {
         DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
         String linkTarget = getLinkTarget(tree);
         String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
-        String cssClass = getCssClass(linkTarget, renderContext.site());
+        String cssClass = getCssClass(linkTarget, renderContext.host());
         return new StringBuffer("<a class=\"%s\" href=\"%s\">%s</a>".
                 formatted(cssClass, linkURL, getLinkDisplay(tree, linkTarget, renderContext)));
     }
