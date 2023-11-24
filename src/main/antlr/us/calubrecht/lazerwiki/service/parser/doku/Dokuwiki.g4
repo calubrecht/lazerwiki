@@ -160,7 +160,7 @@ broken_del
 
 styled_span
   :
-    (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span| broken_span )
+    (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span )
   ;
 
 broken_span
@@ -218,11 +218,11 @@ header
 
 line_item
  :
-   (inner_text | styled_span | image | broken_image )
+   (inner_text | styled_span | broken_span | image | broken_image )
 ;
 
 line
-  : (ulist_item | olist_item | image | styled_span | inner_text_nowsstart | image | broken_image  ) line_item*
+  : (ulist_item | olist_item | image | styled_span | broken_span | inner_text_nowsstart | image | broken_image  ) line_item*
   ;
 
 
