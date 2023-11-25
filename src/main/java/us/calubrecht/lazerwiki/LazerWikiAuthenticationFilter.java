@@ -81,6 +81,7 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
         {
             response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
             response.setHeader("Access-Control-Allow-Credentials", "true");
+            request.getSession(false).setMaxInactiveInterval(90 * 24 * 60 * 60);
             super.onAuthenticationSuccess(request, response, authentication);
 
         }
