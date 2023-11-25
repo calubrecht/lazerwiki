@@ -152,4 +152,12 @@ public class PageService {
         String site = siteService.getSiteForHostname(host);
         return tagRepository.getAllActiveTags(site);
     }
+
+    public List<PageDesc> searchPages(String host, String userName, String searchTerm) {
+        String site = siteService.getSiteForHostname(host);
+        String tagName = searchTerm.split(":")[1];
+        return namespaceService.
+                filterReadablePages(pageRepository.getByTagname(site, tagName), site, userName).stream().
+                sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).collect(Collectors.toList());
+    }
 }

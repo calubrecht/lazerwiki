@@ -255,6 +255,23 @@ public class PageServiceTest {
         when(tagRepository.getAllActiveTags("site1")).thenReturn(List.of("tag1", "tag2"));
         assertEquals(2, pageService.getAllTags("host1", "joe").size());
     }
+
+    @Test
+    public void testSearchTag() {
+        PageDesc page1 = new PageDescImpl("", "page1", "Page 1", "Bob" );
+        PageDesc page2 = new PageDescImpl("ns1:ns2", "page3", "Page 1","Francis");
+        List<PageDesc> pages = List.of(page1, page2);
+        when(pageRepository.getByTagname("site1", "tag1")).thenReturn(pages);
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pages);
+        when(namespaceService.filterReadablePages(any(), eq("site1"), eq("joe"))).thenReturn(List.of(page1));
+
+        List<PageDesc> results = pageService.searchPages("host1", "bob","tag:tag1");
+        assertEquals(2, results.size());
+
+        results = pageService.searchPages("host1", "joe","tag:tag1");
+        assertEquals(1, results.size());
+    }
             
 
     static class PageDescImpl implements PageDesc {

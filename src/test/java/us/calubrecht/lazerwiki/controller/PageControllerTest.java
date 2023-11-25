@@ -99,4 +99,20 @@ public class PageControllerTest {
 
         verify(pageService).getAllTags(eq("localhost"), eq("Guest"));
     }
+
+    @Test
+    public void testSearchPages() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/api/page/searchPages?search=tag:common").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).searchPages(eq("localhost"), eq("Bob"), eq("tag:common"));
+
+        this.mockMvc.perform(get("/api/page/searchPages?search=tag:common")).
+                andExpect(status().isOk());
+
+        verify(pageService).searchPages(eq("localhost"), eq("Guest"), eq("tag:common"));
+
+    }
 }

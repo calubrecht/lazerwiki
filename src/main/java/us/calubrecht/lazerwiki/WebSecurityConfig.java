@@ -47,6 +47,7 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/api/page/get/*"),
                                             new AntPathRequestMatcher("/api/page/listPages"),
                                             new AntPathRequestMatcher("/api/page/listTags"),
+                                            new AntPathRequestMatcher("/api/page/searchPages"),
                                             // Ignore for CORS requests
                                             new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                             createAdminMatcher).permitAll().

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
+import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
@@ -43,10 +44,17 @@ public class PageController {
     }
 
     @RequestMapping(value = "/listPages")
-    public PageListResponse listPages(Principal principal, HttpServletRequest request) throws MalformedURLException, PageWriteException {
+    public PageListResponse listPages(Principal principal, HttpServletRequest request) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? User.GUEST : principal.getName();
         return pageService.getAllPages(url.getHost(), userName);
+    }
+
+    @RequestMapping(value = "/searchPages")
+    public List<PageDesc> searchPages(Principal principal, HttpServletRequest request, @RequestParam("search") String searchTerm) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? User.GUEST : principal.getName();
+        return pageService.searchPages(url.getHost(), userName, searchTerm);
     }
 
     @RequestMapping(value = "/listTags")
