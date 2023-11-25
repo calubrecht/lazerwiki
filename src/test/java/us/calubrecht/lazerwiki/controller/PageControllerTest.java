@@ -64,7 +64,7 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), isNull(), eq("Bob"));
+        verify(renderService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), isNull(), eq("Bob"));
     }
 
     @Test

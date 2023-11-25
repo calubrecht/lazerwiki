@@ -48,7 +48,7 @@ public class ProblemPagesTest {
     @Test
     public void testAboutPage_wasFatal() {
         String s = loadPage("about.page") + '\n';
-        String rendered = underTest.render(s,  "localhost","default");
+        String rendered = underTest.renderToString(s,  "localhost","default");
 
         assertTrue(rendered != null);
 

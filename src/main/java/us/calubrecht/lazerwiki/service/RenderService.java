@@ -6,7 +6,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.service.exception.PageWriteException;
+
+import java.util.List;
 
 @Service
 public class RenderService {
@@ -37,7 +41,7 @@ public class RenderService {
         sw.split();
         long queryMillis = sw.getSplitTime();
         try {
-            PageData pd = new PageData(renderer.render(d.source(), host, site), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
+            PageData pd = new PageData(renderer.renderToString(d.source(), host, site), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
@@ -54,5 +58,11 @@ public class RenderService {
 
         }
 
+    }
+
+    public void savePage(String host, String sPageDescriptor,String text, List<String> tags, String userName) throws PageWriteException {
+        String site = siteService.getSiteForHostname(host);
+        RenderResult res = renderer.renderWithInfo(text, host, site);
+        pageService.savePage(host, sPageDescriptor, text, tags, res.title(), userName);
     }
 }

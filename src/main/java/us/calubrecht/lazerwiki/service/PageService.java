@@ -81,7 +81,7 @@ public class PageService {
     }
 
     @Transactional
-    public void savePage(String host, String sPageDescriptor, String text, List<String> tags, String userName) throws PageWriteException{
+    public void savePage(String host, String sPageDescriptor, String text, List<String> tags, String title, String userName) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
@@ -101,6 +101,7 @@ public class PageService {
         newP.setNamespace(pageDescriptor.namespace());
         newP.setPagename(pageDescriptor.pageName());
         newP.setText(text);
+        newP.setTitle(title);
         newP.setId(id);
         newP.setRevision(revision);
         newP.setValidts(PageRepository.MAX_DATE);

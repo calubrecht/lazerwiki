@@ -126,7 +126,7 @@ public class PageServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(),"someUser");
+        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(), "Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository).save(pageCaptor.capture());
         Page p = pageCaptor.getValue();
@@ -145,6 +145,7 @@ public class PageServiceTest {
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         Page p = new Page();
         p.setText("This is raw page text");
+        p.setTitle("Title");
         p.setId(10L);
         p.setRevision(2L);
         p.setSite("site1");
@@ -152,7 +153,7 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        pageService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),"someUser");
+        pageService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(), "Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
 
@@ -175,7 +176,7 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
         assertThrows(PageWriteException.class, () ->
-                pageService.savePage("host1", "newPage", "Some text", null,"Joe"));
+                pageService.savePage("host1", "newPage", "Some text", null, "Title","Joe"));
     }
 
     @Test

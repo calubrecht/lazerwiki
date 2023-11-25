@@ -39,7 +39,7 @@ public class PageController {
     public PageData savePage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody SavePageRequest body) throws MalformedURLException, PageWriteException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
-        pageService.savePage(url.getHost(), pageDescriptor.orElse(""), body.getText(), body.getTags(), userName);
+        renderService.savePage(url.getHost(), pageDescriptor.orElse(""), body.getText(), body.getTags(), userName);
         return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
     }
 

@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.service;
 
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
@@ -36,7 +35,7 @@ class DokuWikiRendererTest {
 
 
     String doRender(String source) {
-        return underTest.render(source, "localhost", "default");
+        return underTest.renderToString(source, "localhost", "default");
     }
 
     @Test
@@ -98,7 +97,7 @@ class DokuWikiRendererTest {
     @Test
     public void testRenderLinkOtherSite() {
         when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
-        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.render("[[exists|This link exists]]", "otherHost", "default"));
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.renderToString("[[exists|This link exists]]", "otherHost", "default"));
 
     }
 
@@ -306,5 +305,19 @@ class DokuWikiRendererTest {
         assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("localhost", "default")));
         TreeRenderer codeBoxRenderer = underTest.renderers.getRenderer(DokuwikiParser.Code_boxContext.class);
         assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("localhost","default")));
+    }
+
+    @Test
+    public void testRenderTitles() {
+        String input1 = "=== Here's a title===\n";
+        RenderResult result = underTest.renderWithInfo(input1, "host", "site");
+        assertEquals("Here's a title", result.title());
+        String input2 = "==== A title [[WithSomeLink|With Some Link]] ====\n";
+        result = underTest.renderWithInfo(input2, "host", "site");
+        assertEquals("A title With Some Link", result.title());
+
+        String input3 = "Title may not be on first line\n== But you'll find it==\n";
+        result = underTest.renderWithInfo(input3, "host", "site");
+        assertEquals("But you'll find it", result.title());
     }
 }

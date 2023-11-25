@@ -3,13 +3,18 @@ package us.calubrecht.lazerwiki.service;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiLexer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.doku.HeaderRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +28,14 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     @Autowired
     RendererRegistrar renderers;
 
+    String getTitle(String html) {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.body().selectFirst("h1,h2,h3,h4,h5");
+        return el == null ? null : el.wholeText();
+    }
+
     @Override
-    public String render(String markup, String host, String site) {
+    public String  renderToString(String markup, String host, String site) {
         DokuwikiLexer lexer = new DokuwikiLexer(CharStreams.fromString(markup + '\n'));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         DokuwikiParser parser = new DokuwikiParser(tokens);
@@ -51,5 +62,10 @@ public class DokuWikiRenderer implements IMarkupRenderer {
             outBuffer.append(renderer.render(child, renderContext));
         }
         return outBuffer.toString().strip();
+    }
+
+    public RenderResult renderWithInfo(String markup, String host, String site) {
+        String rendered = renderToString(markup, host, site);
+        return new RenderResult(rendered, getTitle(rendered), null);
     }
 }

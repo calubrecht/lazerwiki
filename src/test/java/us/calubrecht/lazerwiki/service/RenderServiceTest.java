@@ -5,11 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.service.exception.PageWriteException;
+
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {RenderService.class})
@@ -31,7 +36,7 @@ public class RenderServiceTest {
     @Test
     public void testRender() {
         PageData pd = new PageData(null, "This is raw page text",  null,true, true, true);
-        when(renderer.render(eq("This is raw page text"), eq("host1"), eq("default"))).thenReturn("This is Rendered Text");
+        when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"))).thenReturn("This is Rendered Text");
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
@@ -45,7 +50,7 @@ public class RenderServiceTest {
     @Test
     public void testRenderError() {
         PageData pd = new PageData(null, "This is raw page text",  null, true, true, true);
-        when(renderer.render(eq("This is raw page text"), eq("host1"), eq("default"))).thenThrow(new NullPointerException());
+        when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"))).thenThrow(new NullPointerException());
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
@@ -60,5 +65,15 @@ public class RenderServiceTest {
 
         assertEquals(new PageData("Can't read this", "Can't read this",   null,true, false, false), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
+    }
+
+    @Test
+    public void testSavePage() throws PageWriteException {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(renderer.renderWithInfo("text", "host", "default")).thenReturn(
+                new RenderResult("rendered", "The Title", null));
+        underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
+
+        verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(), "The Title","user");
     }
 }
