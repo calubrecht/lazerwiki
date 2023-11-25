@@ -230,6 +230,31 @@ class DokuWikiRendererTest {
                 "<div><img src=\"/_media/an-image.jpg\" class=\"media\" loading=\"lazy\"></div>",
                 doRender(input3)
         );
+
+        String inputWithTitle = "{{image.jpg|A title }}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg\" class=\"media\" title=\"A title\" loading=\"lazy\"></div>",
+                doRender(inputWithTitle)
+        );
+
+        String inputWithSize = "{{image.jpg?10}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg?10\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(inputWithSize)
+                );
+        String inputWithSizeAndLinkType = "{{image.jpg?nolink&10}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg?10\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(inputWithSizeAndLinkType)
+        );
+    }
+
+
+    @Test
+    public void testRenderWeirdImage() {
+        String linkEmbeddingJS = "{{ thisLinkHastooMany&&options}}";
+        assertEquals("<div><img src=\"/_media/thisLinkHastooMany&&options\" class=\"mediaright\" loading=\"lazy\"></div>", doRender(linkEmbeddingJS));
+
     }
 
     @Test

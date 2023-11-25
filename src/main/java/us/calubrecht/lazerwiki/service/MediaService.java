@@ -15,6 +15,7 @@ import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
+import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
 import java.io.*;
@@ -36,8 +37,14 @@ public class MediaService {
     @Autowired
     NamespaceService namespaceService;
 
+    @Autowired
+    MediaCacheService mediaCacheService;
+
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
+
+    @Autowired
+    ImageUtil imageUtil;
 
     void ensureDir(String site) throws IOException {
         Files.createDirectories(Paths.get(String.join("/", staticFileRoot, site, "media")));
@@ -61,19 +68,40 @@ public class MediaService {
 
     }
 
-    public byte[] getBinaryFile(String host, String userName, String fileName) throws IOException, MediaReadException {
+    boolean sizeMismatch(MediaRecord record, int width, int height) {
+        if (width != 0 && record.getWidth() != width) {
+            return true;
+        }
+        return height != 0 && record.getHeight() != height;
+    }
+
+
+    public byte[] getBinaryFile(String host, String userName, String fileName, String size) throws IOException, MediaReadException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         if (!namespaceService.canReadNamespace(site, splitFile.getLeft(), userName)) {
             throw new MediaReadException("Not permissioned to read this file");
         }
-        String nsPath = splitFile.getLeft().replaceAll(":", "/");
-        ensureDir(site, nsPath);
-        File f = nsPath.isBlank() ?
-                new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())):
-                new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
-        logger.info("Reading file " + f.getAbsoluteFile());
-        return Files.readAllBytes(f.toPath());
+        IOSupplier<byte[]> byteReader = () -> {
+                String nsPath = splitFile.getLeft().replaceAll(":", "/");
+                ensureDir(site, nsPath);
+                File f = nsPath.isBlank() ?
+                        new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())) :
+                        new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
+                logger.info("Reading file " + f.getAbsoluteFile());
+                return Files.readAllBytes(f.toPath());
+            };
+        if (size != null) {
+            MediaRecord record = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, splitFile.getLeft(), splitFile.getRight());
+            String[] dimensions = size.split("x");
+
+            int width = Integer.parseInt(dimensions[0]);
+            int height = dimensions.length > 1 ? Integer.parseInt(dimensions[1]) : 0;
+            if (sizeMismatch(record, width, height)) {
+                return mediaCacheService.getBinaryFile(site, record, byteReader, width, height);
+            }
+        }
+        return byteReader.get();
     }
 
     @Transactional
@@ -87,7 +115,7 @@ public class MediaService {
         String fileName = mfile.getOriginalFilename();
         byte[] fileBytes = mfile.getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
-        Pair<Integer, Integer> imageDimension = ImageUtil.getImageDimension(bis);
+        Pair<Integer, Integer> imageDimension = imageUtil.getImageDimension(bis);
         MediaRecord newRecord = new MediaRecord(fileName, site, namespace, userName, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
         mediaRecordRepository.save(newRecord);
         File f = nsPath.isBlank() ?
@@ -97,6 +125,7 @@ public class MediaService {
         try (FileOutputStream fos = new FileOutputStream(f)) {
             IOUtils.copy(mfile.getInputStream(), fos);
         }
+        // XXX: Delete scaled images if exist
     }
 
     List<String> getNamespaces(String rootNS, List<MediaRecord> mediaRecords) {
@@ -151,5 +180,6 @@ public class MediaService {
         logger.info("Deleting file " + f.getAbsoluteFile());
         mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, splitFile.getRight(), splitFile.getLeft());
         Files.delete(f.toPath());
+        // XXX: Delete scaled images if exist
     }
 }

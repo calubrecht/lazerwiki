@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.6.12"
+version = "0.1.6.13"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -29,6 +29,7 @@ dependencies {
 	implementation ("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.antlr:antlr4-runtime:4.13.1")
 	implementation("org.apache.commons:commons-text:1.10.0")
+	implementation("commons-io:commons-io:2.15.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.jsoup:jsoup:1.16.2")
 

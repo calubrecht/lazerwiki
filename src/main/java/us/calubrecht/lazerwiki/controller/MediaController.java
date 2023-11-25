@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("_media/")
@@ -26,13 +27,14 @@ public class MediaController {
     MediaService mediaService;
 
     @GetMapping("{fileName}")
-    public ResponseEntity<byte[]> getFile(@PathVariable String fileName, Principal principal, HttpServletRequest request) {
+    public ResponseEntity<byte[]> getFile(@PathVariable String fileName, @RequestParam Map<String,String> requestParams, Principal principal, HttpServletRequest request) {
         try {
             URL url = new URL(request.getRequestURL().toString());
+            String size = requestParams.keySet().stream().findAny().orElse(null);
             String userName = principal == null ? null : principal.getName();
             String mimeType = URLConnection.guessContentTypeFromName(fileName);
             MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
-            return ResponseEntity.ok().contentType(mediaType).body(mediaService.getBinaryFile(url.getHost(), userName, fileName));
+            return ResponseEntity.ok().contentType(mediaType).body(mediaService.getBinaryFile(url.getHost(), userName, fileName, size));
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
         } catch (MediaReadException e) {

@@ -188,7 +188,7 @@ code_box:
 
 
 image
-  : IMG_START_TOKEN inner_text IMG_END_TOKEN
+  : IMG_START_TOKEN inner_text (PIPE inner_text)? IMG_END_TOKEN
   ;
 
 broken_image

@@ -14,6 +14,8 @@ public interface MediaRecordRepository extends CrudRepository<MediaRecord, Long>
 
     List<MediaRecord> findAllBySiteOrderByFileName(String site);
 
+    MediaRecord findBySiteAndNamespaceAndFileName(String site, String namespace, String fileName);
+
     @Modifying
     @Query("DELETE FROM mediaRecord WHERE fileName = :fileName and site= :site and namespace= :namespace")
     void deleteBySiteAndFilenameAndNamespace(@Param("site") String site, @Param("fileName") String fileName, @Param("namespace") String namespace);

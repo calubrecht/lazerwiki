@@ -12,6 +12,8 @@ import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
+import us.calubrecht.lazerwiki.util.IOSupplier;
+import us.calubrecht.lazerwiki.util.ImageUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,19 +23,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {MediaService.class})
+@SpringBootTest(classes = {MediaService.class, ImageUtil.class})
 @ActiveProfiles("test")
 class MediaServiceTest {
 
     @Autowired
     MediaService underTest;
+
+    @MockBean
+    MediaCacheService cacheService;
 
     @MockBean
     SiteService siteService;
@@ -48,20 +53,54 @@ class MediaServiceTest {
     NamespaceService namespaceService;
 
     @Test
-    void getBinaryFile() throws IOException, MediaReadException {
+    void getBinaryFile() throws IOException, MediaReadException, ExecutionException, InterruptedException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
-        byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png");
+        byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", null);
         assertTrue(bytes != null);
         assertEquals(768, bytes.length);
 
-        bytes = underTest.getBinaryFile("localhost", "Bob", "ns:circleWdot.png");
+        bytes = underTest.getBinaryFile("localhost", "Bob", "ns:circleWdot.png", null);
         assertTrue(bytes != null);
         assertEquals(4486, bytes.length);
 
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Joe"))).thenReturn(false);
 
-        assertThrows(MediaReadException.class, () -> underTest.getBinaryFile("localhost", "Joe", "any.file"));
+        assertThrows(MediaReadException.class, () -> underTest.getBinaryFile("localhost", "Joe", "any.file", null));
+        verify(cacheService, never()).getBinaryFile(anyString(), any(MediaRecord.class), any(IOSupplier.class), anyInt(), anyInt());
+    }
+
+    @Test
+    void getBinaryFileWrongSize() throws IOException, MediaReadException, ExecutionException, InterruptedException {
+        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 10, 10);
+        when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "circle.png")).thenReturn(newRecord);
+        byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "10x10");
+        // If size matches record size, don't bother calling cache
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+        // Can supply only a single size;
+        bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "10");
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+        bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "0x10");
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+
+        byte[] scaledBytes = new byte[] {1,2,3,4};
+        when(cacheService.getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(5))).thenReturn(scaledBytes);
+        bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "5x5");
+        assertEquals(scaledBytes.length, bytes.length);
+        assertEquals(scaledBytes[3], bytes[3]);
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(5));
+
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "5x10");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(10));
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "10x5");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(10), eq(5));
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "0x5");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(0), eq(5));
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "5x0");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(0));
+
     }
 
     @Test
@@ -127,7 +166,7 @@ class MediaServiceTest {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canWriteNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
-        byte[] bytesToSave = underTest.getBinaryFile("localhost", "Bob", "circle.png");
+        byte[] bytesToSave = underTest.getBinaryFile("localhost", "Bob", "circle.png", null);
         MockMultipartFile file = new MockMultipartFile("file", "circle2.png", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "circle2.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));

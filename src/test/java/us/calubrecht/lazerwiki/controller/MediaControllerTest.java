@@ -23,8 +23,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -48,24 +47,34 @@ class MediaControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(mediaService).getBinaryFile(eq("localhost"), eq("Bob"), eq("someFile.jpg"));
+        verify(mediaService).getBinaryFile(eq("localhost"), eq("Bob"), eq("someFile.jpg"), isNull());
 
         this.mockMvc.perform(get("/_media/some.unknown_filetype")).
                 andExpect(status().isOk());
-        verify(mediaService).getBinaryFile(eq("localhost"), eq(null), eq("some.unknown_filetype"));
+        verify(mediaService).getBinaryFile(eq("localhost"), eq(null), eq("some.unknown_filetype"), isNull());
 
-        when(mediaService.getBinaryFile(eq("localhost"), eq("Bob"), eq("explosive.file"))).thenThrow(
+        when(mediaService.getBinaryFile(eq("localhost"), eq("Bob"), eq("explosive.file"), isNull())).thenThrow(
                 new IOException(""));
         this.mockMvc.perform(get("/_media/explosive.file").
                         principal(auth)).
                 andExpect(status().isNotFound());
 
         Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
-        when(mediaService.getBinaryFile(eq("localhost"), eq("Joe"), any())).thenThrow(
+        when(mediaService.getBinaryFile(eq("localhost"), eq("Joe"), any(), isNull())).thenThrow(
                 new MediaReadException(""));
         this.mockMvc.perform(get("/_media/forbidden.file").
                         principal(authJoe)).
                 andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getFile_WithSize() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/_media/someFile.jpg?10x10").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(mediaService).getBinaryFile(eq("localhost"), eq("Bob"), eq("someFile.jpg"), eq("10x10"));
     }
 
     @Test
