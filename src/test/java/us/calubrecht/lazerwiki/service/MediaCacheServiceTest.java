@@ -134,4 +134,25 @@ public class MediaCacheServiceTest {
         f = Paths.get(cacheLocation.toString(),"circle.png-5x10").toFile();
         assertEquals("(5,10)", getFileDimensions(f));
     }
+
+    @Test
+    public void testGetBinaryFileWithNS() throws IOException {
+        when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
+            return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
+                    inv.getArgument(1, String.class),
+                    inv.getArgument(2, Integer.class),
+                    inv.getArgument(3, Integer.class));
+        });
+
+        Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
+        Path originalLocation = Paths.get(staticFileRoot, "default", "media", "ns");
+        MediaRecord mediaRecord = new MediaRecord("circleWdot.png", "default",  "ns","Bob", 7, 20, 20);
+        File f = Paths.get(cacheLocation.toString(),"circleWdot.png-10x10").toFile();
+        File origFile = Paths.get(originalLocation.toString(),"circleWdot.png").toFile();
+        Files.deleteIfExists(Path.of(f.getPath()));
+        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 10);
+        assertEquals("(10,10)", getFileDimensions(f));
+        verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
+    }
+
 }

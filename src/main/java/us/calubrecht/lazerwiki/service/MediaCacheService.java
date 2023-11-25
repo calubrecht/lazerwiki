@@ -47,7 +47,8 @@ public class MediaCacheService {
         if (record.getWidth() < width || record.getHeight() < height) {
             return null;
         }
-        File cachedFile = new File(Paths.get(cacheLocation.toString(), record.getFileName() + "-%sx%s".formatted(width, height)).toString());
+        File cachedFile = record.getNamespace().isBlank() ? new File(Paths.get(cacheLocation.toString(), record.getFileName() + "-%sx%s".formatted(width, height)).toString())
+                : new File(Paths.get(cacheLocation.toString(), record.getNamespace(),record.getFileName() + "-%sx%s".formatted(width, height)).toString());
         String nsPath = record.getNamespace().replaceAll(":", "/");
         ensureDir(site, nsPath);
         if (cachedFile.exists()) {

@@ -247,6 +247,12 @@ class DokuWikiRendererTest {
                 "<div><img src=\"/_media/image.jpg?10\" class=\"media\" loading=\"lazy\"></div>",
                 doRender(inputWithSizeAndLinkType)
         );
+
+        String inputWithTypeNoSize = "{{image.jpg?nolink}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(inputWithTypeNoSize)
+        );
     }
 
 
@@ -344,5 +350,9 @@ class DokuWikiRendererTest {
         String input3 = "Title may not be on first line\n== But you'll find it==\n";
         result = underTest.renderWithInfo(input3, "host", "site");
         assertEquals("But you'll find it", result.title());
+
+        String input4 = "This has no title\n";
+        result = underTest.renderWithInfo(input4, "host", "site");
+        assertEquals(null, result.title());
     }
 }
