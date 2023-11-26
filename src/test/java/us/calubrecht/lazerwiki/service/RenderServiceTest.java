@@ -12,8 +12,7 @@ import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +35,7 @@ public class RenderServiceTest {
     @Test
     public void testRender() {
         PageData pd = new PageData(null, "This is raw page text",  null,true, true, true);
-        when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"))).thenReturn("This is Rendered Text");
+        when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenReturn("This is Rendered Text");
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
@@ -50,7 +49,7 @@ public class RenderServiceTest {
     @Test
     public void testRenderError() {
         PageData pd = new PageData(null, "This is raw page text",  null, true, true, true);
-        when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"))).thenThrow(new NullPointerException());
+        when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenThrow(new NullPointerException());
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
@@ -70,7 +69,7 @@ public class RenderServiceTest {
     @Test
     public void testSavePage() throws PageWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(renderer.renderWithInfo("text", "host", "default")).thenReturn(
+        when(renderer.renderWithInfo("text", "host", "default", anyString())).thenReturn(
                 new RenderResult("rendered", "The Title", null));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
 

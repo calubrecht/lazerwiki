@@ -14,6 +14,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -33,9 +34,12 @@ class DokuWikiRendererTest {
     @MockBean
     PageService pageService;
 
+    @MockBean
+    MacroService macroService;
+
 
     String doRender(String source) {
-        return underTest.renderToString(source, "localhost", "default");
+        return underTest.renderToString(source, "localhost", "default", "");
     }
 
     @Test
@@ -97,7 +101,7 @@ class DokuWikiRendererTest {
     @Test
     public void testRenderLinkOtherSite() {
         when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
-        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.renderToString("[[exists|This link exists]]", "otherHost", "default"));
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.renderToString("[[exists|This link exists]]", "otherHost", "default", ""));
 
     }
 
@@ -333,26 +337,36 @@ class DokuWikiRendererTest {
     @Test
     public void testUnusedMethods() {
         TreeRenderer rowRenderer = underTest.renderers.getRenderer(DokuwikiParser.RowContext.class);
-        assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("localhost", "default")));
+        assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("localhost", "default", "")));
         TreeRenderer codeBoxRenderer = underTest.renderers.getRenderer(DokuwikiParser.Code_boxContext.class);
-        assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("localhost","default")));
+        assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("localhost","default", "")));
     }
 
     @Test
     public void testRenderTitles() {
         String input1 = "=== Here's a title===\n";
-        RenderResult result = underTest.renderWithInfo(input1, "host", "site");
+        RenderResult result = underTest.renderWithInfo(input1, "host", "site", "");
         assertEquals("Here's a title", result.title());
         String input2 = "==== A title [[WithSomeLink|With Some Link]] ====\n";
-        result = underTest.renderWithInfo(input2, "host", "site");
+        result = underTest.renderWithInfo(input2, "host", "site", "");
         assertEquals("A title With Some Link", result.title());
 
         String input3 = "Title may not be on first line\n== But you'll find it==\n";
-        result = underTest.renderWithInfo(input3, "host", "site");
+        result = underTest.renderWithInfo(input3, "host", "site", "");
         assertEquals("But you'll find it", result.title());
 
         String input4 = "This has no title\n";
-        result = underTest.renderWithInfo(input4, "host", "site");
+        result = underTest.renderWithInfo(input4, "host", "site", "");
         assertEquals(null, result.title());
+    }
+
+    @Test
+    public void testRenderMacro() {
+        String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
+        when(macroService.renderMacro(eq("macro1: macro"), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
+        String render = underTest.renderToString(inputMacro, "", "", "");
+        assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
+
+
     }
 }

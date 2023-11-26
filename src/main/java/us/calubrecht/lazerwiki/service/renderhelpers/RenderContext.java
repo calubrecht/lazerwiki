@@ -1,4 +1,15 @@
 package us.calubrecht.lazerwiki.service.renderhelpers;
 
-public record RenderContext(String host, String site) {
+import us.calubrecht.lazerwiki.service.IMarkupRenderer;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public record RenderContext(String host, String site, String user, IMarkupRenderer renderer, Map<String, String> renderState) {
+
+    // For tests that don't need renderer in context (not using macros)
+    public RenderContext(String host, String site, String user) {
+        this(host, site, user, null, new HashMap<>());
+    }
+
 }

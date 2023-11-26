@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 /**
  * Interface for a renderer that converts a source in a specific markup language to an HTML snippet for display.
@@ -9,10 +10,12 @@ import us.calubrecht.lazerwiki.model.RenderResult;
  */
 public interface IMarkupRenderer {
 
-    public RenderResult renderWithInfo(String markup, String host, String site);
+    public RenderResult renderWithInfo(String markup, String host, String site, String user);
 
-    public default String  renderToString(String markup, String host, String site) {
-        return renderWithInfo(markup, host, site).renderedText();
+    public  String  renderToString(String markup, RenderContext context);
+
+    public default String  renderToString(String markup, String host, String site, String user) {
+        return renderToString(markup, new RenderContext(host, site, user));
     }
 
 }

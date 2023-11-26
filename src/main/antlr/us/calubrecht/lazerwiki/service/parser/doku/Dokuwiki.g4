@@ -49,6 +49,9 @@ DEL_END_TOKEN: '</del>';
 IMG_START_TOKEN: '{{';
 IMG_END_TOKEN: '}}';
 
+MACRO_START_TOKEN: '~~MACRO~~' ;
+MACRO_END_TOKEN: '~~/MACRO~~' ;
+
 //parser grammar DokuParser;
 
 //options { tokenVocab=DokuLexer; }
@@ -196,6 +199,16 @@ broken_image
    IMG_START_TOKEN | IMG_END_TOKEN
   ;
 
+macro
+  :
+    MACRO_START_TOKEN (line_item )+  MACRO_END_TOKEN
+  ;
+
+broken_macro
+ :
+   MACRO_START_TOKEN | MACRO_END_TOKEN
+ ;
+
 broken_link
   :
    LINK_START | LINK_END
@@ -209,7 +222,7 @@ inner_text
 
 inner_text_nowsstart
   :
-    WS? (all_char_nows | link | broken_link | PIPE )+
+    WS? (all_char_nows | link | broken_link |  PIPE )+
   ;
 
 header
@@ -218,11 +231,11 @@ header
 
 line_item
  :
-   (inner_text | styled_span | broken_span | image | broken_image )
+   (inner_text | styled_span | broken_span | image | broken_image |  macro | broken_macro)
 ;
 
 line
-  : (ulist_item | olist_item | image | styled_span | broken_span | inner_text_nowsstart | image | broken_image  ) line_item*
+  : (ulist_item | olist_item | image | styled_span | broken_span | inner_text_nowsstart | image | broken_image | macro | broken_macro ) line_item*
   ;
 
 

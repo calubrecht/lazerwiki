@@ -41,7 +41,7 @@ public class RenderService {
         sw.split();
         long queryMillis = sw.getSplitTime();
         try {
-            PageData pd = new PageData(renderer.renderToString(d.source(), host, site), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
+            PageData pd = new PageData(renderer.renderToString(d.source(), host, site, userName), d.source(), d.tags(), d.exists(), d.userCanRead(), d.userCanWrite());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
@@ -62,7 +62,7 @@ public class RenderService {
 
     public void savePage(String host, String sPageDescriptor,String text, List<String> tags, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
-        RenderResult res = renderer.renderWithInfo(text, host, site);
+        RenderResult res = renderer.renderWithInfo(text, host, site, userName);
         pageService.savePage(host, sPageDescriptor, text, tags, res.title(), userName);
     }
 }

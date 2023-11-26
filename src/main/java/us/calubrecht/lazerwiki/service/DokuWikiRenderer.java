@@ -17,7 +17,9 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.doku.HeaderRenderer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
@@ -35,7 +37,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     }
 
     @Override
-    public String  renderToString(String markup, String host, String site) {
+    public String  renderToString(String markup, RenderContext context) {
         DokuwikiLexer lexer = new DokuwikiLexer(CharStreams.fromString(markup + '\n'));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         DokuwikiParser parser = new DokuwikiParser(tokens);
@@ -43,7 +45,8 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         StringBuffer outBuffer = new StringBuffer();
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
-        RenderContext renderContext = new RenderContext(host, site);
+        Map<String, String> renderState = context.renderState() != null ? context.renderState() : new HashMap<>();
+        RenderContext renderContext = new RenderContext(context.host(), context.site(), context.user(), this, renderState);
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass());
@@ -64,8 +67,8 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         return outBuffer.toString().strip();
     }
 
-    public RenderResult renderWithInfo(String markup, String host, String site) {
-        String rendered = renderToString(markup, host, site);
+    public RenderResult renderWithInfo(String markup, String host, String site, String user) {
+        String rendered = renderToString(markup, host, site, user);
         return new RenderResult(rendered, getTitle(rendered), null);
     }
 }
