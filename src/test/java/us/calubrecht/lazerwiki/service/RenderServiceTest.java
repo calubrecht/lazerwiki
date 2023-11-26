@@ -69,7 +69,7 @@ public class RenderServiceTest {
     @Test
     public void testSavePage() throws PageWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(renderer.renderWithInfo("text", "host", "default", anyString())).thenReturn(
+        when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
                 new RenderResult("rendered", "The Title", null));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
 

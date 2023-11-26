@@ -27,6 +27,9 @@ public class ProblemPagesTest {
     @MockBean
     PageService pageService;
 
+    @MockBean
+    MacroService macroService;
+
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
     public static class TestConfig {

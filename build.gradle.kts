@@ -64,7 +64,18 @@ tasks.war {
 	}
 	archiveClassifier.set("")
 }
+tasks.register<Jar>("macroApiJar") {
+	manifest {
+		attributes("Implementation-Version" to archiveVersion)
+	}
+	group="build"
+	archiveBaseName="lazerwiki-macro-api"
+	from(sourceSets.main.get().output).include("us/calubrecht/lazerwiki/macro/**")
+}
 
+tasks.build {
+	dependsOn(tasks.getByName("macroApiJar"))
+}
 
 tasks.bootWar {
 	enabled = false
