@@ -346,18 +346,22 @@ class DokuWikiRendererTest {
     public void testRenderTitles() {
         String input1 = "=== Here's a title===\n";
         RenderResult result = underTest.renderWithInfo(input1, "host", "site", "");
-        assertEquals("Here's a title", result.title());
+        assertEquals("Here's a title", result.getTitle());
         String input2 = "==== A title [[WithSomeLink|With Some Link]] ====\n";
         result = underTest.renderWithInfo(input2, "host", "site", "");
-        assertEquals("A title With Some Link", result.title());
+        assertEquals("A title With Some Link", result.getTitle());
 
         String input3 = "Title may not be on first line\n== But you'll find it==\n";
         result = underTest.renderWithInfo(input3, "host", "site", "");
-        assertEquals("But you'll find it", result.title());
+        assertEquals("But you'll find it", result.getTitle());
 
         String input4 = "This has no title\n";
         result = underTest.renderWithInfo(input4, "host", "site", "");
-        assertEquals(null, result.title());
+        assertEquals(null, result.getTitle());
+
+        String input5 = "=== This is the title===\n==== This is just another header ====\n";
+        result = underTest.renderWithInfo(input4, "host", "site", "");
+        assertEquals("This is the title", result.getTitle());
     }
 
     @Test

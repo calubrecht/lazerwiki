@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.annotation.PostConstruct;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,13 +11,11 @@ import org.springframework.data.util.AnnotatedTypeScanner;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
+import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class MacroService {
@@ -89,12 +88,21 @@ public class MacroService {
         }
 
         @Override
-        public String renderPage(String pageDescriptor) {
+        public Pair<String, Map<String, Object>> renderPage(String pageDescriptor) {
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
             if (!page.exists() || !page.userCanRead()) {
-                return "";
+                return Pair.of("rendered", Collections.emptyMap());
             }
-            return renderContext.renderer().renderToString(page.source(),renderContext);
+
+            RenderResult res = renderContext.renderer().renderWithInfo(page.source(),renderContext);
+            return Pair.of(res.renderedText(), res.renderState());
+
+        }
+
+        @Override
+        public List<String> getPagesByNSAndTag(String ns, String tag) {
+            return pageService.searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns)).
+                    stream().map(pd -> pd.getDescriptor()).toList();
         }
     }
 }

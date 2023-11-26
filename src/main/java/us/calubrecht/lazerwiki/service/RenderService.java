@@ -63,6 +63,6 @@ public class RenderService {
     public void savePage(String host, String sPageDescriptor,String text, List<String> tags, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
         RenderResult res = renderer.renderWithInfo(text, host, site, userName);
-        pageService.savePage(host, sPageDescriptor, text, tags, res.title(), userName);
+        pageService.savePage(host, sPageDescriptor, text, tags, res.getTitle(), userName);
     }
 }

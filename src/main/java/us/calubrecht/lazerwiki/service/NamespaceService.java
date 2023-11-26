@@ -67,7 +67,7 @@ public class NamespaceService {
         return !intersection.isEmpty();
     }
 
-    public List<PageDesc> filterReadablePages(List<PageDesc> allValid, String site, String userName) {
+    public List<PageDesc>  filterReadablePages(List<PageDesc> allValid, String site, String userName) {
         Set<String> unreadableNamespaces = allValid.stream().map(p -> p.getNamespace()).distinct().
                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
         return allValid.stream().filter(p -> !unreadableNamespaces.contains(p.getNamespace())).toList();

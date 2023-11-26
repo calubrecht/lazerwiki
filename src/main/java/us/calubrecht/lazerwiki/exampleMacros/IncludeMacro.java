@@ -13,7 +13,7 @@ public class IncludeMacro extends Macro {
 
     @Override
     public String render(MacroContext context, String macroArgs) {
-        String text = context.renderPage(macroArgs.trim());
+        String text = context.renderPage(macroArgs.trim()).getLeft();
         return text != null ? text : "";
     }
 }

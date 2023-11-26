@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -70,7 +71,7 @@ public class RenderServiceTest {
     public void testSavePage() throws PageWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
-                new RenderResult("rendered", "The Title", null));
+                new RenderResult("rendered", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title")));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
 
         verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(), "The Title","user");

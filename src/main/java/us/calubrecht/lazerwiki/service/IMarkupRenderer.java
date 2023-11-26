@@ -10,12 +10,17 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
  */
 public interface IMarkupRenderer {
 
-    public RenderResult renderWithInfo(String markup, String host, String site, String user);
+    public RenderResult renderWithInfo(String markup, RenderContext renderContext);
 
-    public  String  renderToString(String markup, RenderContext context);
+    public  String  renderToString(String markup, RenderContext renderContext);
 
     public default String  renderToString(String markup, String host, String site, String user) {
         return renderToString(markup, new RenderContext(host, site, user));
     }
+
+    public default RenderResult  renderWithInfo(String markup, String host, String site, String user) {
+        return renderWithInfo(markup, new RenderContext(host, site, user));
+    }
+
 
 }

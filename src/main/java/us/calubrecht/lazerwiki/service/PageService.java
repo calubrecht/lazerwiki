@@ -17,6 +17,7 @@ import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -157,8 +158,22 @@ public class PageService {
     public List<PageDesc> searchPages(String host, String userName, String searchTerm) {
         String site = siteService.getSiteForHostname(host);
         String tagName = searchTerm.split(":")[1];
-        return namespaceService.
-                filterReadablePages(pageRepository.getByTagname(site, tagName), site, userName).stream().
-                sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).collect(Collectors.toList());
+        return searchPages(host, userName, Map.of("tag", tagName));
+    }
+
+    public List<PageDesc> searchPages(String host, String userName, Map<String, String> searchTerms) {
+        String site = siteService.getSiteForHostname(host);
+        if (searchTerms.containsKey("tag")) {
+            String tagName = searchTerms.get("tag");
+            List<PageDesc> tagPages = namespaceService.
+                    filterReadablePages(pageRepository.getByTagname(site, tagName), site, userName).stream().
+                    sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).collect(Collectors.toList());
+            if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
+                Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
+                return tagPages.stream().filter(pd -> nsPattern.matcher(pd.getNamespace()).matches()).toList();
+            }
+            return tagPages;
+        }
+        return Collections.emptyList();
     }
 }
