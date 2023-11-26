@@ -67,6 +67,21 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         return outBuffer.toString().strip();
     }
 
+    @Override
+    public String renderToPlainText(String markup, RenderContext renderContext) {
+        DokuwikiLexer lexer = new DokuwikiLexer(CharStreams.fromString(markup + '\n'));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        DokuwikiParser parser = new DokuwikiParser(tokens);
+        ParseTree tree = parser.page();
+        StringBuffer outBuffer = new StringBuffer();
+        for(int i = 0; i < tree.getChildCount(); i++) {
+            ParseTree child = tree.getChild(i);
+            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            outBuffer.append(renderer.renderToPlainText(child, renderContext));
+        }
+        return TreeRenderer.sanitize(outBuffer.toString());
+    }
+
     public RenderResult renderWithInfo(String markup, String host, String site, String user) {
         String rendered = renderToString(markup, host, site, user);
         return new RenderResult(rendered, getTitle(rendered), null);

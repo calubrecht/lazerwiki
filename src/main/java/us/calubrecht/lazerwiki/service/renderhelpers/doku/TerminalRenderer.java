@@ -23,4 +23,9 @@ public class TerminalRenderer extends TreeRenderer {
         TerminalNodeImpl node = (TerminalNodeImpl)tree;
         return node.getSymbol().getType() == Token.EOF ? new StringBuffer() : new StringBuffer(tree.getText());
     }
+
+    @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return render(tree, renderContext);
+    }
 }

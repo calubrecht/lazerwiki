@@ -54,4 +54,9 @@ public class HeaderRenderer extends TreeRenderer {
         return outBuffer;
 
     }
+
+    @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return renderChildrenToPlainText(getChildren(tree), renderContext);
+    }
 }

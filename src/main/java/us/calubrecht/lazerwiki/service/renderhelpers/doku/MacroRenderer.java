@@ -32,4 +32,9 @@ public class MacroRenderer extends TreeRenderer {
         String innerText = matcher.group(1);
         return new StringBuffer(macroService.renderMacro(innerText, context));
     }
+
+    @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return new StringBuffer();
+    }
 }

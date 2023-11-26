@@ -83,6 +83,11 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()), renderContext);
+    }
+
+    @Override
     public boolean isAdditive() {
         return true;
     }
