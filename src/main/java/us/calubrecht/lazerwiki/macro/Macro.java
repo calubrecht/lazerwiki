@@ -9,6 +9,8 @@ public abstract class Macro {
 
     public abstract String getName();
 
+    public abstract String getCSS();
+
     public abstract String render(MacroContext context, String macroArgs);
 
 

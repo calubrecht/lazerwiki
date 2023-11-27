@@ -12,6 +12,11 @@ public class IncludeMacro extends Macro {
     }
 
     @Override
+    public String getCSS() {
+        return "";
+    }
+
+    @Override
     public String render(MacroContext context, String macroArgs) {
         String text = context.renderPage(macroArgs.trim()).getLeft();
         return text != null ? text : "";
