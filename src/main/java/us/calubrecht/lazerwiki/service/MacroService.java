@@ -91,7 +91,7 @@ public class MacroService {
         public Pair<String, Map<String, Object>> renderPage(String pageDescriptor) {
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
             if (!page.exists() || !page.userCanRead()) {
-                return Pair.of("rendered", Collections.emptyMap());
+                return Pair.of("", Collections.emptyMap());
             }
 
             RenderResult res = renderContext.renderer().renderWithInfo(page.source(),renderContext);
