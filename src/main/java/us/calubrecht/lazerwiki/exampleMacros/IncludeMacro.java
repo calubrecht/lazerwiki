@@ -3,17 +3,14 @@ package us.calubrecht.lazerwiki.exampleMacros;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 
+import java.util.Optional;
+
 @CustomMacro
 public class IncludeMacro extends Macro {
 
     @Override
     public String getName() {
         return "include";
-    }
-
-    @Override
-    public String getCSS() {
-        return "";
     }
 
     @Override

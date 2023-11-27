@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import us.calubrecht.lazerwiki.service.MacroCssService;
 import us.calubrecht.lazerwiki.service.ResourceService;
 
 import java.io.IOException;
@@ -29,6 +30,9 @@ class ResourceControllerTest {
 
     @MockBean
     ResourceService resourceService;
+
+    @MockBean
+    MacroCssService cssService;
 
     @Test
     void getFile() throws Exception {

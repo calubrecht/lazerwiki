@@ -4,12 +4,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class Macro {
 
     public abstract String getName();
 
-    public abstract String getCSS();
+    public Optional<String> getCSS() {
+        return Optional.empty();
+    }
 
     public abstract String render(MacroContext context, String macroArgs);
 

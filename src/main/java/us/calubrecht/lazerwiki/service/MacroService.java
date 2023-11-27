@@ -23,6 +23,9 @@ public class MacroService {
     Map<String, Macro> macros = new HashMap<>();
 
     @Autowired
+    MacroCssService macroCssService;
+
+    @Autowired
     PageService pageService;
 
     @Value("#{'${lazerwiki.plugin.scan.packages}'.split(',')}")
@@ -31,6 +34,7 @@ public class MacroService {
     public void registerMacro(Macro macro) {
         logger.info("Registering macro " + macro.getName() + " as " + macro.getClass());
         macros.put(macro.getName(), macro);
+        macro.getCSS().ifPresent(css -> macroCssService.addCss(css));
     }
 
     @PostConstruct
@@ -94,7 +98,12 @@ public class MacroService {
                 return Pair.of("", Collections.emptyMap());
             }
 
-            RenderResult res = renderContext.renderer().renderWithInfo(page.source(),renderContext);
+            RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(),
+                    renderContext.user(),renderContext.renderer(), new HashMap<>());
+            subrenderContext.renderState().putAll(renderContext.renderState());
+            // Allow inner page render to generate its own title
+            subrenderContext.renderState().remove(RenderResult.RENDER_STATE_KEYS.TITLE.name());
+            RenderResult res = renderContext.renderer().renderWithInfo(page.source(),subrenderContext);
             return Pair.of(res.renderedText(), res.renderState());
 
         }

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.8.1"
+version = "0.1.8.2"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -64,6 +64,7 @@ tasks.war {
 	}
 	archiveClassifier.set("")
 }
+
 tasks.register<Jar>("macroApiJar") {
 	manifest {
 		attributes("Implementation-Version" to archiveVersion)
@@ -72,6 +73,22 @@ tasks.register<Jar>("macroApiJar") {
 	archiveBaseName="lazerwiki-macro-api"
 	from(sourceSets.main.get().output).include("us/calubrecht/lazerwiki/macro/**")
 }
+
+tasks.processResources {
+	from ("src/main/java") {
+		include("**/*.css")
+	}
+}
+
+tasks.register<Jar>("localMacroJar") {
+	manifest {
+		attributes("Implementation-Version" to archiveVersion)
+	}
+	group="build"
+	archiveBaseName="localMacros"
+	from(sourceSets.main.get().output).include("localMacros/**")
+}
+
 
 tasks.build {
 	dependsOn(tasks.getByName("macroApiJar"))
@@ -102,7 +119,8 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/repository/MediaRecordRepository.class",
 							"us/calubrecht/lazerwiki/service/IMarkupRenderer.class",
 							"us/calubrecht/lazerwiki/service/parser/doku/*",
-							"us/calubrecht/lazerwiki/util/ImageUtil.class")
+							"us/calubrecht/lazerwiki/util/ImageUtil.class",
+							"localMacros/*")
 				}
 			})
 	)
