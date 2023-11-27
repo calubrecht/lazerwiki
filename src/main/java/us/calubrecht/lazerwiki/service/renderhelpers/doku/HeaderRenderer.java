@@ -50,13 +50,19 @@ public class HeaderRenderer extends TreeRenderer {
         String hTag = "h" + (7 - headerSize);
         StringBuffer outBuffer = new StringBuffer();
         outBuffer.append("<").append(hTag).append(">");
-        String headerText = renderChildren(getChildren(tree), renderContext).toString().strip();
         outBuffer.append(renderChildren(getChildren(tree), renderContext).toString().strip());
         outBuffer.append("</").append(hTag).append(">\n");
         if (!renderContext.renderState().containsKey(RenderResult.RENDER_STATE_KEYS.TITLE.name())) {
-            renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), headerText);
+            renderContext.renderState().put(
+                    RenderResult.RENDER_STATE_KEYS.TITLE.name(),
+                    renderChildrenToPlainText(getChildren(tree), renderContext).toString().strip());
         }
         return outBuffer;
 
+    }
+
+    @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return renderChildrenToPlainText(getChildren(tree), renderContext);
     }
 }

@@ -25,6 +25,11 @@ public class CodeBoxRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return new StringBuffer(renderChildrenToPlainText(getChildren(tree), renderContext).toString().trim());
+    }
+
+    @Override
     public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
         StringBuffer ret = new StringBuffer();
         ret.append("<pre class=\"code\">");

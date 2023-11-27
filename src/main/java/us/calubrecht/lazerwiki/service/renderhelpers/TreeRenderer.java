@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service.renderhelpers;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
+import org.apache.commons.text.StringEscapeUtils;
 import us.calubrecht.lazerwiki.service.RendererRegistrar;
 
 import java.util.ArrayList;
@@ -12,7 +13,9 @@ public abstract class TreeRenderer {
 
     public abstract List<Class> getTargets();
 
-    public abstract StringBuffer render(ParseTree tree, RenderContext context);
+    public abstract StringBuffer render(ParseTree tree, RenderContext renderContext);
+
+    public abstract StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext);
 
     public boolean isAdditive() {
         return false;
@@ -24,6 +27,10 @@ public abstract class TreeRenderer {
 
     public boolean shouldParentSanitize() {
         return true;
+    }
+
+    public static String sanitize(String input) {
+        return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
     }
 
     public void setRenderers(RendererRegistrar renderers) {
@@ -71,6 +78,15 @@ public abstract class TreeRenderer {
         return outBuffer;
     }
 
+    protected StringBuffer renderChildrenToPlainText(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuffer outBuffer = new StringBuffer();
+        for(ParseTree child: trees) {
+            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            outBuffer.append(renderer.renderToPlainText(child, renderContext));
+        }
+        return outBuffer;
+    }
+
     /*
     Unused
     protected boolean isEOL(ParseTree tree) {
@@ -86,6 +102,11 @@ public abstract class TreeRenderer {
         @Override
         public StringBuffer render(ParseTree tree, RenderContext renderContext) {
             return renderChildren(getChildren(tree), renderContext);
+        }
+
+        @Override
+        public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+            return renderChildrenToPlainText(getChildren(tree), renderContext);
         }
     }
 }

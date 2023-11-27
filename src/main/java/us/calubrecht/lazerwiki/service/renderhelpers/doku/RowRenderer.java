@@ -28,6 +28,13 @@ public class RowRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        StringBuffer sb = renderChildrenToPlainText(getChildren(tree), renderContext);
+        sb.append("\n");
+        return sb;
+    }
+
+    @Override
     public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
         StringBuffer ret = new StringBuffer();
         ret.append("<div>");

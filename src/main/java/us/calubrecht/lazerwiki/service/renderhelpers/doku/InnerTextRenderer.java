@@ -16,10 +16,6 @@ public class InnerTextRenderer extends TreeRenderer {
         return List.of(DokuwikiParser.Inner_textContext.class, DokuwikiParser.Inner_text_nowsstartContext.class);
     }
 
-    protected String sanitize(String input) {
-        return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
-    }
-
     @Override
     public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         StringBuffer outBuffer = new StringBuffer();
@@ -39,5 +35,10 @@ public class InnerTextRenderer extends TreeRenderer {
         outBuffer.append(sanitize(currentBuffer.toString()));
         return outBuffer;
 
+    }
+
+    @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext context) {
+        return renderChildrenToPlainText(getChildren(tree), context);
     }
 }

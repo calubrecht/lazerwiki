@@ -79,6 +79,19 @@ public class LinkRenderer extends TreeRenderer {
     }
 
     @Override
+    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
+        String linkTarget = getLinkTarget(tree);
+        if (tree.getChildCount() > 3) {
+            return renderChildrenToPlainText(getChildren(tree, 2, 3), renderContext);
+        }
+        if (isInternal(linkTarget)) {
+            return new StringBuffer(pageService.getTitle(renderContext.host(), linkTarget));
+        }
+        return new StringBuffer(linkTarget);
+    }
+
+    @Override
     public boolean shouldParentSanitize() {
         return false;
     }
@@ -93,6 +106,11 @@ public class LinkRenderer extends TreeRenderer {
         public StringBuffer render(ParseTree tree, RenderContext renderContext) {
             // Strip leading |
             return renderChildren(getChildren(tree, 1, tree.getChildCount()), renderContext);
+        }
+
+        @Override
+        public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+            return renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()), renderContext);
         }
     }
 }

@@ -360,7 +360,7 @@ class DokuWikiRendererTest {
         assertEquals(null, result.getTitle());
 
         String input5 = "=== This is the title===\n==== This is just another header ====\n";
-        result = underTest.renderWithInfo(input4, "host", "site", "");
+        result = underTest.renderWithInfo(input5, "host", "site", "");
         assertEquals("This is the title", result.getTitle());
     }
 
