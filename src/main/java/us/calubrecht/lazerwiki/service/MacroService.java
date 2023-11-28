@@ -113,5 +113,16 @@ public class MacroService {
             return pageService.searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns)).
                     stream().map(pd -> pd.getDescriptor()).toList();
         }
+
+        @Override
+        public Pair<String, Map<String, Object>> renderMarkup(String markup) {
+            RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(),
+                    renderContext.user(),renderContext.renderer(), new HashMap<>());
+            subrenderContext.renderState().putAll(renderContext.renderState());
+            // Allow inner page render to generate its own title
+            subrenderContext.renderState().remove(RenderResult.RENDER_STATE_KEYS.TITLE.name());
+            RenderResult res = renderContext.renderer().renderWithInfo(markup,subrenderContext);
+            return Pair.of(res.renderedText(), res.renderState());
+        }
     }
 }

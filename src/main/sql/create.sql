@@ -91,6 +91,12 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
+INSERT INTO `ns_restriction_types` (`type`) VALUES
+	('OPEN'),
+	('READ_RESTRICTED'),
+	('WRITE_RESTRICTED');
+
+
 CREATE TABLE `namespace` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',

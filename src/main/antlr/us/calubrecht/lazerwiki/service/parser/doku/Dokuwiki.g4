@@ -201,7 +201,7 @@ broken_image
 
 macro
   :
-    MACRO_START_TOKEN (line_item )+  MACRO_END_TOKEN
+    MACRO_START_TOKEN (line_item | NEWLINE)+  MACRO_END_TOKEN
   ;
 
 broken_macro
@@ -231,11 +231,11 @@ header
 
 line_item
  :
-   (inner_text | styled_span | broken_span | image | broken_image |  macro | broken_macro)
+   (inner_text | styled_span | broken_span | image | broken_image )
 ;
 
 line
-  : (ulist_item | olist_item | image | styled_span | broken_span | inner_text_nowsstart | image | broken_image | macro | broken_macro ) line_item*
+  : (ulist_item | olist_item | image | styled_span | broken_span | inner_text_nowsstart | image | broken_image | macro | broken_macro ) (line_item |  macro | broken_macro)*
   ;
 
 

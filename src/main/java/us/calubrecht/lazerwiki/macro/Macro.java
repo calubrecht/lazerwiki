@@ -23,5 +23,7 @@ public abstract class Macro {
         Pair<String, Map<String, Object>> renderPage(String pageDescriptor);
 
         List<String> getPagesByNSAndTag(String ns, String tag);
+
+        Pair<String, Map<String, Object>> renderMarkup(String markup);
     }
 }

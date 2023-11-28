@@ -23,7 +23,7 @@ public class MacroRenderer extends TreeRenderer {
         return List.of(DokuwikiParser.MacroContext.class);
     }
 
-    Pattern macroPattern= Pattern.compile("~~MACRO~~(.*)~~/MACRO~~");
+    Pattern macroPattern= Pattern.compile("~~MACRO~~(.*)~~/MACRO~~", Pattern.DOTALL);
 
     @Override
     public StringBuffer render(ParseTree tree, RenderContext context) {
