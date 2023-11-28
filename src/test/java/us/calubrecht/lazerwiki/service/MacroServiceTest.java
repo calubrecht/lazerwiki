@@ -26,7 +26,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {MacroService.class, DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
+@SpringBootTest(classes = {MacroService.class, DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class},
+        properties = { "lazerwiki.plugin.scan.packages=us.calubrecht.lazerwiki.service" })
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
