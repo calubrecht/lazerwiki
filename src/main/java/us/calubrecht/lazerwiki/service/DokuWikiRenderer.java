@@ -30,11 +30,6 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     @Autowired
     RendererRegistrar renderers;
 
-    String getTitle(String html) {
-        Document doc = Jsoup.parse(html);
-        Element el = doc.body().selectFirst("h1,h2,h3,h4,h5");
-        return el == null ? null : el.wholeText();
-    }
 
     @Override
     public String  renderToString(String markup, RenderContext context) {
@@ -84,6 +79,8 @@ public class DokuWikiRenderer implements IMarkupRenderer {
             TreeRenderer renderer = renderers.getRenderer(child.getClass());
             outBuffer.append(renderer.renderToPlainText(child, renderContext));
         }
+        // Remove trailing new line
+        outBuffer.deleteCharAt(outBuffer.length() -1);
         return TreeRenderer.sanitize(outBuffer.toString());
     }
 

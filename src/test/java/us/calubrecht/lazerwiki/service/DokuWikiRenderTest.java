@@ -43,7 +43,6 @@ class DokuWikiRendererTest {
     }
 
     @Test
-
     void testRenderHeader() {
         String source = "====== Big header ======\n ==== Smaller Header ====";
 
@@ -372,5 +371,15 @@ class DokuWikiRendererTest {
         assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
 
 
+    }
+
+    @Test
+    public void testRenderWithContext() {
+        RenderContext context = new RenderContext("site", "localhost", "user");
+        context.renderState().put("rememberedState", "State");
+        RenderResult res = underTest.renderWithInfo("===Some Header===", context);
+        assertEquals("Some Header", res.renderState().get(RenderResult.RENDER_STATE_KEYS.TITLE.name()));
+        // State sent in to render should remain when returned
+        assertEquals("State", res.renderState().get("rememberedState"));
     }
 }

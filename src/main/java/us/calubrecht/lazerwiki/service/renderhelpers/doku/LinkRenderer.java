@@ -65,7 +65,7 @@ public class LinkRenderer extends TreeRenderer {
     }
 
     protected boolean isInternal(String link) {
-        return !(link.startsWith("https://") || link.startsWith("http://"));
+        return !(link.toLowerCase().startsWith("https://") || link.toLowerCase().startsWith("http://"));
     }
 
     @Override
