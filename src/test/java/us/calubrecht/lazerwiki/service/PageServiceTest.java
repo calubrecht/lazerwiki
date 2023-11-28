@@ -272,6 +272,20 @@ public class PageServiceTest {
 
         results = pageService.searchPages("host1", "joe","tag:tag1");
         assertEquals(1, results.size());
+
+        Map<String, String> searchTerms = Map.of("tag","tag1", "ns", "ns1:ns2");
+        results = pageService.searchPages("host1", "bob",searchTerms);
+        assertEquals(1, results.size());
+    }
+
+    @Test
+    public void testUnsupportedSearch() {
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        Map<String, String> searchTerms = Map.of("fullText","Test");
+        List<PageDesc> results = pageService.searchPages("host1", "bob",searchTerms);
+        assertEquals(0, results.size());
+
+         verify(pageRepository, never()).getByTagname(anyString(), anyString());
     }
             
 

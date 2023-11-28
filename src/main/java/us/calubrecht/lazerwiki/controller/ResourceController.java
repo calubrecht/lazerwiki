@@ -31,9 +31,6 @@ public class ResourceController {
             URL url = new URL(request.getRequestURL().toString());
             String mimeType = URLConnection.guessContentTypeFromName(fileName);
             MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
-            if (fileName.equals("internal/plugin.css")){
-                return ResponseEntity.ok().contentType(mediaType).body(macroCssService.getCss().getBytes());
-            }
             return ResponseEntity.ok().contentType(mediaType).body(resourceService.getBinaryFile(url.getHost(), fileName));
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
@@ -42,16 +39,11 @@ public class ResourceController {
 
     @RequestMapping("internal/{fileName}")
     public ResponseEntity<byte[]> getFileInternal(@PathVariable String fileName, HttpServletRequest request) {
-        try {
-            URL url = new URL(request.getRequestURL().toString());
-            String mimeType = URLConnection.guessContentTypeFromName(fileName);
-            MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
-            if (fileName.equals("plugin.css")){
-                return ResponseEntity.ok().contentType(mediaType).body(macroCssService.getCss().getBytes());
-            }
-            return ResponseEntity.notFound().build();
-        } catch (IOException e) {
-            return ResponseEntity.notFound().build();
+        String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
+        if (fileName.equals("plugin.css")) {
+            return ResponseEntity.ok().contentType(mediaType).body(macroCssService.getCss().getBytes());
         }
+        return ResponseEntity.notFound().build();
     }
 }

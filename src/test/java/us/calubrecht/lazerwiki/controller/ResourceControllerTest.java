@@ -51,4 +51,13 @@ class ResourceControllerTest {
                 andExpect(status().isNotFound());
     }
 
+    @Test
+    void getFileInternal() throws Exception {
+        this.mockMvc.perform(get("/_resources/internal/plugin.css")).
+                andExpect(status().isOk());
+
+        this.mockMvc.perform(get("/_resources/internal/anything.else")).
+                andExpect(status().isNotFound());
+    }
+
 }

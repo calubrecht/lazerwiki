@@ -40,7 +40,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         StringBuffer outBuffer = new StringBuffer();
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
-        Map<String, Object> renderState = context.renderState() != null ? context.renderState() : new HashMap<>();
+        Map<String, Object> renderState = context.renderState();
         RenderContext renderContext = new RenderContext(context.host(), context.site(), context.user(), this, renderState);
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
