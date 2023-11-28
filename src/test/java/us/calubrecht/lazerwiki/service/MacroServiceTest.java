@@ -1,6 +1,9 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,6 +22,7 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest(classes = {MacroService.class, MacroServiceTest.BrokenMacro.class, MacroServiceTest.GoodMacro.class, DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class MacroServiceTest {
 
     @Autowired
@@ -34,12 +38,14 @@ class MacroServiceTest {
     DokuWikiRenderer renderer;
 
     @Test
+    @Order(1)
     void registerMacros() {
         // Macro was registerd and set CSS aat startup
         verify(macroCssService).addCss("div {}");
     }
 
     @Test
+    @Order(2)
     void renderMacro() {
         RenderContext context = new RenderContext("localhost", "default", "user");
         assertEquals("Good Macro", underTest.renderMacro("Good", context));

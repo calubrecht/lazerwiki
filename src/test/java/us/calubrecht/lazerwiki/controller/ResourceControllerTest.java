@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {ResourceController.class, VersionController.class})
@@ -53,8 +54,9 @@ class ResourceControllerTest {
 
     @Test
     void getFileInternal() throws Exception {
+        when(cssService.getCss()).thenReturn("someCss");
         this.mockMvc.perform(get("/_resources/internal/plugin.css")).
-                andExpect(status().isOk());
+                andExpect(status().isOk()).andExpect(content().string("someCss"));
 
         this.mockMvc.perform(get("/_resources/internal/anything.else")).
                 andExpect(status().isNotFound());
