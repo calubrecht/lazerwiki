@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -84,7 +85,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
 
     @Override
     public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        return renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()), renderContext);
+        return renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()).stream().filter(t -> ! (t instanceof TerminalNodeImpl)).collect(Collectors.toList()), renderContext);
     }
 
     @Override

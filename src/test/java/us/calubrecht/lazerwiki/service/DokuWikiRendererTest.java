@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
-class DokuWikiRendererTest {
+public class DokuWikiRendererTest {
 
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")

@@ -48,4 +48,10 @@ public class DokuWikiRendererPlaintextTest {
         assertEquals("This Page has an alternate display", doRender("[[ exists|This Page has an alternate display]]"));
         assertEquals("httP://externalLink.com", doRender("[[httP://externalLink.com ]]"));
     }
+
+    @Test
+    void testRenderList() {
+        assertEquals("Item 1\nItem2", doRender("  *Item 1\n  *Item2"));
+
+    }
 }
