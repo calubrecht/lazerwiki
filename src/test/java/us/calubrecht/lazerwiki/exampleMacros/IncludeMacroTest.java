@@ -40,6 +40,10 @@ class IncludeMacroTest {
         PageData page = new PageData(null, "This Page", null, true, true, true);
         when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
         assertEquals("<div>This Page</div>", macroService.renderMacro("include:includedPage", renderContext));
+
+        PageData notpage = new PageData(null, "", null, false, true, true);
+        when(pageService.getPageData(anyString(), eq("nothingPage"), anyString())).thenReturn(notpage);
+        assertEquals("", macroService.renderMacro("include:nothingPage", renderContext));
     }
 
 }
