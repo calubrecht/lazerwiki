@@ -34,7 +34,7 @@ dependencies {
 	implementation("org.jsoup:jsoup:1.16.2")
 
 
-	runtimeOnly("mysql:mysql-connector-java:8.0.33")
+	providedRuntime("mysql:mysql-connector-java:8.0.33")
 	runtimeOnly("com.github.usefulness:webp-imageio:0.5.1")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
