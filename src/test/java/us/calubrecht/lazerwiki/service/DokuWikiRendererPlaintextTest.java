@@ -54,4 +54,35 @@ public class DokuWikiRendererPlaintextTest {
         assertEquals("Item 1\nItem2", doRender("  *Item 1\n  *Item2"));
 
     }
+
+    @Test
+    void testRenderHeader() {
+        assertEquals("The Header", doRender("===The Header==="));
+
+        assertEquals("The Header with a link", doRender("===The Header with a [[goHere|link]]==="));
+
+    }
+
+    @Test
+    void testRenderImg() {
+        assertEquals("thisImage.jpg", doRender("{{thisImage.jpg}}"));
+
+        assertEquals("Image with a title", doRender("{{thisImage.jpg|Image with a title}}"));
+
+    }
+
+    @Test
+    void testRenderCodeBox() {
+        assertEquals("This is in the code block", doRender("  This is in the code block"));
+    }
+
+    @Test
+    void testRenderMacro() {
+        assertEquals("", doRender("~~MACRO~~This could be any macro~~/MACRO~~"));
+    }
+
+    @Test
+    void testRenderSpans() {
+        assertEquals("Bold, italic, none of it is rendered", doRender("**Bold, //italic//**, none of it is rendered"));
+    }
 }

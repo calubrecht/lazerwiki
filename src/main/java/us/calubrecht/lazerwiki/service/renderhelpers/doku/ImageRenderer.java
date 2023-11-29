@@ -35,7 +35,10 @@ public class ImageRenderer  extends TreeRenderer {
     public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
         String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext).toString();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
-        return new StringBuffer(innards.getOrDefault(INNARD_TOKEN.TITLE, innards.getOrDefault(INNARD_TOKEN.FILE_NAME, "")));
+        if (innards.get(INNARD_TOKEN.TITLE) != null) {
+            return new StringBuffer(innards.get(INNARD_TOKEN.TITLE));
+        }
+        return new StringBuffer(innards.get(INNARD_TOKEN.FILE_NAME));
     }
 
     Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w.:\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");

@@ -63,6 +63,6 @@ public class HeaderRenderer extends TreeRenderer {
 
     @Override
     public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        return renderChildrenToPlainText(getChildren(tree), renderContext);
+        return renderChildrenToPlainText(getChildren(tree), renderContext).append("\n");
     }
 }

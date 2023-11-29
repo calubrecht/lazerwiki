@@ -24,9 +24,7 @@ public abstract class AbstractSpanRenderer extends TreeRenderer {
     @Override
     public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
         StringBuffer sb = new StringBuffer();
-        sb.append(startTag);
         sb.append(renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
-        sb.append(endTag);
         return sb;
     }
 

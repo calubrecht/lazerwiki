@@ -15,6 +15,9 @@ public class WrapMacro extends Macro {
     public String render(Macro.MacroContext context, String macroArgs) {
         String[] toks = macroArgs.split(":");
         String innerText = context.renderMarkup(toks[1]).getLeft();
-        return "<div class=\"%s\">%s</div>\n".formatted(toks[0],innerText);
+        // Strip the div that comes from the renderer.
+        innerText = innerText.
+                substring(5, innerText.length() -6);
+        return "<div class=\"%s\">%s</div>".formatted(toks[0],innerText);
     }
 }
