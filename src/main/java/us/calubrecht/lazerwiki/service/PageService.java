@@ -69,7 +69,8 @@ public class PageService {
         }
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
         if (p == null ) {
-            return new PageData("This page doesn't exist", "",   Collections.emptyList(),false, canRead, canWrite);
+            // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
+            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(),false, canRead, canWrite);
         }
         String source = p.getText();
         return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), true, canRead, canWrite);

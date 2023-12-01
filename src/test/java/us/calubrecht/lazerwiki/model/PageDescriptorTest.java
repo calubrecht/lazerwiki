@@ -25,5 +25,8 @@ public class PageDescriptorTest {
 
         PageDescriptor homepage = new PageDescriptor("", "");
         assertEquals("Home", homepage.renderedName());
+
+        PageDescriptor pageWithNums = new PageDescriptor("", "newPage234a");
+        assertEquals("New Page 234 A", pageWithNums.renderedName());
     }
 }

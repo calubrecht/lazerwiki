@@ -14,7 +14,7 @@ public record PageDescriptor(String namespace, String pageName) {
         return this.namespace + ":" + this.pageName;
     }
 
-    static Pattern WORD_FINDER = Pattern.compile("(([A-Z]?[a-z]+)|([A-Z]))");
+    static Pattern WORD_FINDER = Pattern.compile("([A-Z]?[a-z]+)|[A-Z]|[0-9]+");
 
     public String renderedName() {
         if (pageName.isEmpty()) {
