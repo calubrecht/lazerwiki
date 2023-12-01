@@ -49,7 +49,11 @@ public class LinkRenderer extends TreeRenderer {
 
     protected String getLinkDisplay(ParseTree tree, String linkTarget, RenderContext renderContext) {
         if (tree.getChildCount() > 3) {
-            return renderChildren(getChildren(tree, 2, 3), renderContext).toString();
+            String linkText =  renderChildren(getChildren(tree, 2, 3), renderContext).toString();
+            if (!linkText.isBlank()) {
+                return linkText;
+            }
+            // Fall through
         }
         if (isInternal(linkTarget)) {
             return pageService.getTitle(renderContext.host(), linkTarget);
@@ -83,7 +87,11 @@ public class LinkRenderer extends TreeRenderer {
         DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
         String linkTarget = getLinkTarget(tree);
         if (tree.getChildCount() > 3) {
-            return renderChildrenToPlainText(getChildren(tree, 2, 3), renderContext);
+            StringBuffer linkText = renderChildrenToPlainText(getChildren(tree, 2, 3), renderContext);
+            if (!linkText.toString().isBlank()) {
+                return linkText;
+            }
+            // Fall through
         }
         if (isInternal(linkTarget)) {
             return new StringBuffer(pageService.getTitle(renderContext.host(), linkTarget));

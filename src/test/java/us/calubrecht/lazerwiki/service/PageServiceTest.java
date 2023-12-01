@@ -96,7 +96,7 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
-        assertEquals(new PageData("This page doesn't exist", "", Collections.emptyList(),false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
+        assertEquals(new PageData("This page doesn't exist", "======Non Existant Page======", Collections.emptyList(),false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
 
         Page p = new Page();
         p.setText("This is raw page text");

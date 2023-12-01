@@ -74,6 +74,8 @@ public class DokuWikiRendererTest {
         assertEquals("<h1>Some text in <a class=\"wikiLinkMissing\" href=\"/page/headerLink\">a header</a></h1>", doRender("======Some text in [[ headerLink |a header]]======"));
         assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://domain.example/a-page\">http://domain.example/a-page</a></div>", doRender("[[http://domain.example/a-page]]"));
 
+        // Link with blank link text (use title instead)
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This Page Exists</a></div>", doRender("[[exists|]]"));
 
         // broken link syntax
         assertEquals("<div>[[not quite a link]</div>", doRender("[[not quite a link]"));
