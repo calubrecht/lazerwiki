@@ -104,6 +104,15 @@ class MediaServiceTest {
     }
 
     @Test
+    void getBinaryFileNoRecord() throws IOException, MediaReadException, ExecutionException, InterruptedException {
+        when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle2.png", "10x10");
+        // No MediaRecord, can't try to resize, don't look in cache.
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+    }
+
+    @Test
     void saveFile() throws IOException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canWriteNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);

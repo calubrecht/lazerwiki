@@ -93,6 +93,9 @@ public class MediaService {
             };
         if (size != null) {
             MediaRecord record = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, splitFile.getLeft(), splitFile.getRight());
+            if (record == null) {
+                return byteReader.get();
+            }
             String[] dimensions = size.split("x");
 
             int width = Integer.parseInt(dimensions[0]);
