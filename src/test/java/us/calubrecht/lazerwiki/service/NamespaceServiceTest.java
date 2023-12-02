@@ -64,6 +64,42 @@ public class NamespaceServiceTest {
         assertTrue(underTest.canReadNamespace("site1", "closed", "readable"));
         assertFalse(underTest.canReadNamespace("site1", "closed", "other"));
     }
+
+    @Test
+    public void permissionsAreInherited() {
+        User user = new User();
+        user.roles = List.of(new UserRole(user, "ROLE_USER"));
+        when(userService.getUser("user")).thenReturn(user);
+
+        Namespace ns1 = new Namespace();
+        ns1.restriction_type = Namespace.RESTRICTION_TYPE.OPEN;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(ns1);
+        assertTrue(underTest.canReadNamespace("site1", "ns1:subns", "user"));
+
+        Namespace ns_closed = new Namespace();
+        ns_closed.namespace="closed";
+        ns_closed.restriction_type = Namespace.RESTRICTION_TYPE.READ_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(ns_closed);
+        assertFalse(underTest.canReadNamespace("site1", "closed:subns", "user"));
+
+        User readableUser = new User();
+        readableUser.roles = List.of(new UserRole(readableUser, "ROLE_READ:site1:closed"));
+        when(userService.getUser("readable")).thenReturn(readableUser);
+        assertTrue(underTest.canReadNamespace("site1", "closed:subns", "readable"));
+
+        Namespace ns_writeClosed = new Namespace();
+        ns_writeClosed.namespace="writeClosed";
+        ns_writeClosed.restriction_type = Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "writeClosed")).thenReturn(ns_writeClosed);
+        assertFalse(underTest.canWriteNamespace("site1", "writeClosed:subns", "user"));
+
+        User writeableUser = new User();
+        writeableUser.roles = List.of(new UserRole(writeableUser, "ROLE_READ:site1:writeClosed"));
+        when(userService.getUser("writeable")).thenReturn(writeableUser);
+        assertTrue(underTest.canWriteNamespace("site1", "ns_writeClosed:subns", "writeable"));
+    }
+
+
     @Test
     public void testCanWriteNamespace() {
         assertTrue(underTest.canWriteNamespace("site1", "ns_unknown", "bob"));

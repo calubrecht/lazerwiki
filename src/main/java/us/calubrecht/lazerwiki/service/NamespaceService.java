@@ -21,10 +21,19 @@ public class NamespaceService {
     @Autowired
     UserService userService;
 
+    String parentNamespace(String namespace) {
+        if (!namespace.contains(":"))
+        {
+            return null;
+        }
+        return namespace.substring(0, namespace.lastIndexOf(":"));
+    }
+
     public boolean canReadNamespace(String site, String namespace, String userName) {
         Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
         if (nsObj == null ) {
-            return true;
+            String parentNS = parentNamespace(namespace);
+            return parentNS == null ? true : canReadNamespace(site, parentNS, userName);
         }
 
         Set<Namespace.RESTRICTION_TYPE> readable = Set.of(Namespace.RESTRICTION_TYPE.OPEN, Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED);
@@ -51,7 +60,8 @@ public class NamespaceService {
         }
         Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
         if (nsObj == null ) {
-            return true;
+            String parentNS = parentNamespace(namespace);
+            return parentNS == null ? true : canWriteNamespace(site, parentNS, userName);
         }
 
         if (nsObj.restriction_type == Namespace.RESTRICTION_TYPE.OPEN) {
