@@ -10,6 +10,9 @@ import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -63,6 +66,7 @@ public class RenderService {
     public void savePage(String host, String sPageDescriptor,String text, List<String> tags, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
         RenderResult res = renderer.renderWithInfo(text, host, site, userName);
-        pageService.savePage(host, sPageDescriptor, text, tags, res.getTitle(), userName);
+        Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
+        pageService.savePage(host, sPageDescriptor, text, tags, links, res.getTitle(), userName);
     }
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public record RenderResult (String renderedText, Map<String, Object> renderState) {
 
-    public enum RENDER_STATE_KEYS {TITLE};
+    public enum RENDER_STATE_KEYS {TITLE, LINKS};
 
     public String getTitle() {
         Object title = renderState().get(RENDER_STATE_KEYS.TITLE.name());

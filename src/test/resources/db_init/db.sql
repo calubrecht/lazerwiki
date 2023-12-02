@@ -59,4 +59,22 @@ insert into userRecord (userName, passwordHash) VALUES ('Bob', '');
 insert into userRole (userName, role) VALUES ('Bob', 'Admin');
 insert into userRole (userName, role) VALUES ('Bob', 'User');
 
---select u1_0.userName,u1_0.passwordHash from user_record u1_0 where u1_0.userName='Bob';
+CREATE TABLE `links` (
+	`id` NUMBER(11) NOT NULL AUTO_INCREMENT,
+	`site` VARCHAR(50) NOT NULL ,
+	`sourcePageNS` VARCHAR(50) NOT NULL,
+	`sourcePageName` VARCHAR(200) NOT NULL,
+    `targetPageNS` VARCHAR(50) NOT NULL,
+    `targetPageName` VARCHAR(200) NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX (`site`, `sourcePageNS`, `sourcePageName`) ,
+	INDEX (`site`, `targetPageNS`, `targetPageName`),
+	CONSTRAINT `linkSiteFK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+;
+
+insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('default', '', '', '', 'page1');
+insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('default', '', '', '', 'page2');
+insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('site1', '', '', '', 'page3');
+insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('default', '', 'page1', '', 'page2');
+insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('default', '', 'page1', 'ns', 'nsPage');

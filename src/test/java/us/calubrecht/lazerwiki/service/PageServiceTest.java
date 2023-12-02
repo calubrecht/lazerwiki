@@ -7,10 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.*;
-import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
-import us.calubrecht.lazerwiki.repository.IdRepository;
-import us.calubrecht.lazerwiki.repository.PageRepository;
-import us.calubrecht.lazerwiki.repository.TagRepository;
+import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
@@ -45,6 +42,10 @@ public class PageServiceTest {
 
     @MockBean
     NamespaceService namespaceService;
+
+    @MockBean
+    LinkService linkService;
+
 
     @MockBean
     EntityManagerProxy em;
@@ -126,7 +127,7 @@ public class PageServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(), "Title","someUser");
+        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository).save(pageCaptor.capture());
         Page p = pageCaptor.getValue();
@@ -153,7 +154,7 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        pageService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(), "Title","someUser");
+        pageService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
 
@@ -176,8 +177,21 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
         assertThrows(PageWriteException.class, () ->
-                pageService.savePage("host1", "newPage", "Some text", null, "Title","Joe"));
+                pageService.savePage("host1", "newPage", "Some text", null,  Collections.emptyList(),"Title","Joe"));
     }
+
+    @Test
+    public void testSavePageWithLinks() throws PageWriteException {
+        when(idRepository.getNewId()).thenReturn(55L);
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+
+        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  List.of("page1", "page2"),"Title","someUser");
+
+        verify(linkService).setLinksFromPage("site1", "", "newPage",  List.of("page1", "page2"));
+    }
+
 
     @Test
     public void testListPages() {

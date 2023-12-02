@@ -13,6 +13,8 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -103,7 +105,13 @@ public class DokuWikiRendererTest {
     public void testRenderLinkOtherSite() {
         when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
         assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.renderToString("[[exists|This link exists]]", "otherHost", "default", ""));
+    }
 
+    @Test
+    public void testRenderLinkRecordsLinks() {
+        RenderResult result = underTest.renderWithInfo("[[oneLink]]\n[[oneLinkWithText|The text]] [[http://external.link]] \n[[ns:ThirdLink]]", "host", "site","user");
+        Set<String>  links = (Set<String>)result.renderState().get(RenderResult.RENDER_STATE_KEYS.LINKS.name());
+        assertEquals(Set.of("oneLink", "oneLinkWithText", "ns:ThirdLink"), links);
     }
 
     @Test

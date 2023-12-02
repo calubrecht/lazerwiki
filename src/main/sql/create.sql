@@ -130,3 +130,20 @@ ENGINE=InnoDB
 
 
 CREATE VIEW activeTags as select distinct `p`.`site` AS `site`,`t`.`tag` AS `tag` from (`tag` `t` join `page` `p` on(`p`.`id` = `t`.`pageId` and `p`.`revision` = `t`.`revision`)) where `p`.`deleted` = 0 and `p`.`validTS` = '9999-12-31 00:00:00';
+
+
+CREATE TABLE `links` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`sourcePageNS` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`sourcePageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	`targetPageNS` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`targetPageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `linkSourceKey` (`site`, `sourcePageNS`, `sourcePageName`) USING BTREE,
+	INDEX `linkTargetKey` (`site`, `targetPageNS`, `targetPageName`) USING BTREE,
+	CONSTRAINT `linksSiteFK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;

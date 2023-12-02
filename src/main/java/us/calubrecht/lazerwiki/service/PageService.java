@@ -41,6 +41,9 @@ public class PageService {
     NamespaceService namespaceService;
 
     @Autowired
+    LinkService linkService;
+
+    @Autowired
     TagRepository tagRepository;
 
     public boolean exists(String host, String pageName) {
@@ -83,7 +86,7 @@ public class PageService {
     }
 
     @Transactional
-    public void savePage(String host, String sPageDescriptor, String text, List<String> tags, String title, String userName) throws PageWriteException{
+    public void savePage(String host, String sPageDescriptor, String text, Collection<String> tags, Collection<String> links, String title, String userName) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
@@ -110,6 +113,7 @@ public class PageService {
         newP.setModifiedBy(userName);
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
+        linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
     }
 
     protected long getNewId() {

@@ -12,7 +12,11 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
 @Component
 public class LinkRenderer extends TreeRenderer {
@@ -77,6 +81,9 @@ public class LinkRenderer extends TreeRenderer {
         DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
         String linkTarget = getLinkTarget(tree);
         String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
+        if (isInternal(linkTarget)) {
+            ((Set<String>)renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(linkTarget);
+        }
         String cssClass = getCssClass(linkTarget, renderContext.host());
         return new StringBuffer("<a class=\"%s\" href=\"%s\">%s</a>".
                 formatted(cssClass, linkURL, getLinkDisplay(tree, linkTarget, renderContext)));

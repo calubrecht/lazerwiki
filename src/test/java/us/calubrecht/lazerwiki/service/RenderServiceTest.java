@@ -9,8 +9,7 @@ import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -74,6 +73,19 @@ public class RenderServiceTest {
                 new RenderResult("rendered", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title")));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
 
-        verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(), "The Title","user");
+        verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(),  Collections.emptySet(),"The Title","user");
+    }
+
+
+
+    @Test
+    public void testSavePageWithLinks() throws PageWriteException {
+        List<String> links = List.of("page1", "page2");
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
+                new RenderResult("rendered", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title", RenderResult.RENDER_STATE_KEYS.LINKS.name(), links)));
+        underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
+        verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(),  links,"The Title","user");
+
     }
 }
