@@ -45,6 +45,9 @@ class MacroServiceTest {
     @Autowired
     DokuWikiRenderer renderer;
 
+    @MockBean
+    LinkService linkService;
+
     @Test
     @Order(1)
     void registerMacros() {

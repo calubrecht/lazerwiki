@@ -228,6 +228,9 @@ public class PageServiceTest {
         assertEquals("page1", pages.get("ns1").get(0).getPagename());
         assertEquals(1, pages.get("ns1:ns2").size());
         assertEquals("page3", pages.get("ns1:ns2").get(0).getPagename());
+
+        List<String> pageList = pageService.getAllPagesFlat("host1", "joe");
+        assertEquals(List.of("page1","page2", "ns1:page1", "ns1:ns2:page3"), pageList);
     }
 
 

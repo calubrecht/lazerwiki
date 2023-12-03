@@ -23,6 +23,9 @@ public abstract class Macro {
         Pair<String, Map<String, Object>> renderPage(String pageDescriptor);
 
         List<String> getPagesByNSAndTag(String ns, String tag);
+        List<String> getAllPages();
+
+        List<String> getLinksOnPage(String page);
 
         Pair<String, Map<String, Object>> renderMarkup(String markup);
     }

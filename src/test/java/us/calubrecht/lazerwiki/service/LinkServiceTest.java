@@ -42,4 +42,13 @@ class LinkServiceTest {
         List<Link> links = List.of(new Link("default", "ns", "pageName", "", "page1"), new Link("default", "ns", "pageName", "ns", "page2"));
         verify(linkRepository).saveAll(eq(links));
     }
+
+    @Test
+    void getLinksOnPage() {
+        List<Link> links = List.of(new Link("default", "", "pageName", "", "page1"), new Link("default", "", "pageName", "ns:ns:inner", "page5"));
+        when(linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName(any(), any(), any())).thenReturn(links);
+        assertEquals(List.of("page1", "ns:ns:inner:page5"), underTest.getLinksOnPage("default","pageName"));
+
+
+    }
 }

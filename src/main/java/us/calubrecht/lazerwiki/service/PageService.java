@@ -155,6 +155,12 @@ public class PageService {
         return new PageListResponse(pages.stream().sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).collect(Collectors.groupingBy(PageDesc::getNamespace)), node);
     }
 
+    public List<String> getAllPagesFlat(String host, String userName) {
+        String site = siteService.getSiteForHostname(host);
+        List<PageDesc> pages = namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
+        return pages.stream().map(pd -> pd.getDescriptor()).toList();
+    }
+
     public List<String> getAllTags(String host, String userName) {
         String site = siteService.getSiteForHostname(host);
         return tagRepository.getAllActiveTags(site);

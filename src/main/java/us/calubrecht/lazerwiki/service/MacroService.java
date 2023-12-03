@@ -16,6 +16,7 @@ import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MacroService {
@@ -27,6 +28,9 @@ public class MacroService {
 
     @Autowired
     PageService pageService;
+
+    @Autowired
+    LinkService linkService;
 
     @Value("#{'${lazerwiki.plugin.scan.packages}'.split(',')}")
     private List<String> macroPackageds;
@@ -112,6 +116,16 @@ public class MacroService {
         public List<String> getPagesByNSAndTag(String ns, String tag) {
             return pageService.searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns)).
                     stream().map(pd -> pd.getDescriptor()).toList();
+        }
+
+        @Override
+        public List<String> getAllPages() {
+            return pageService.getAllPagesFlat(renderContext.host(), renderContext.user());
+        }
+
+        @Override
+        public List<String> getLinksOnPage(String page) {
+            return linkService.getLinksOnPage(renderContext.site(), page);
         }
 
         @Override

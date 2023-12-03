@@ -31,4 +31,10 @@ public class LinkService {
         }).collect(Collectors.toList());
         linkRepository.saveAll(links);
     }
+
+    public List<String> getLinksOnPage(String site, String page) {
+        PageDescriptor pd = decodeDescriptor(page);
+        return linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName(site, pd.namespace(), pd.pageName()).
+                stream().map(l -> l.getTargetPageNS().isBlank() ? l.getTargetPageName() : l.getTargetPageNS() +":" + l.getTargetPageName()).collect(Collectors.toList());
+    }
 }
