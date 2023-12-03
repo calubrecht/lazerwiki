@@ -33,9 +33,9 @@ public class AdminService {
         List<PageDesc> pages = pageRepository.getAllValid(site);
         pages.forEach(pd -> {
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.getNamespace(), pd.getPagename(), false);
-            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, "");
+            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, UserService.SYS_USER);
             Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
-            logger.info("Setting " + links.size() + " links for " + pd);
+            logger.info("Setting " + links.size() + " links for " + pd.getNamespace() + ":" + pd.getPagename());
             linkService.setLinksFromPage(site, pd.getNamespace(), pd.getPagename(), links);
         });
     }

@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    public static final String SYS_USER="<SYS_USER>";
+
     @Autowired
     UserRepository userRepository;
 
@@ -32,6 +34,12 @@ public class UserService {
 
     @Transactional
     public User getUser(String userName) {
+        if (userName.equals(SYS_USER)) {
+            User u = new User();
+            u.userName = SYS_USER;
+            u.roles = List.of(new UserRole(u, "ROLE_ADMIN"));
+            return u;
+        }
         User u = userRepository.findById(userName).orElse(null);
         if (u != null) {
             u.roles.size();

@@ -67,6 +67,11 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testGetSysUser() {
+        assertEquals("ROLE_ADMIN", userService.getUser(UserService.SYS_USER).roles.get(0).role);
+    }
+
+    @Test
     public void testVerifyPassword() {
         when(userService.passwordUtil.matches(eq("ThisPass"), eq("cleverHash"))).thenReturn(true);
 
