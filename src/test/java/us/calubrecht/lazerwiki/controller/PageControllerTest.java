@@ -17,8 +17,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,5 +113,15 @@ public class PageControllerTest {
 
         verify(pageService).searchPages(eq("localhost"), eq("Guest"), eq("tag:common"));
 
+    }
+
+    @Test
+    public void testDeletePage() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(delete("/api/page/testPage").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).deletePage(eq("localhost"), eq("testPage"), eq("Bob"));
     }
 }

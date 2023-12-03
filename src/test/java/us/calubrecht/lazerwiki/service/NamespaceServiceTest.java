@@ -137,22 +137,6 @@ public class NamespaceServiceTest {
         assertTrue(underTest.canWriteNamespace("site1", "closed", "readable"));
         assertFalse(underTest.canWriteNamespace("site1", "closed", "other"));
     }
-
-    /**
-     *   public List<PageDesc> filterReadablePages(List<PageDesc> allValid, String site, String userName) {
-     *         Set<String> unreadableNamespaces = allValid.stream().map(p -> p.getNamespace()).distinct().
-     *                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
-     *         return allValid.stream().filter(p -> !unreadableNamespaces.contains(p.getNamespace())).toList();
-     *     }
-     *
-     *     public List<MediaRecord> filterReadableMedia(List<MediaRecord> allValid, String site, String userName) {
-     *         List vv2 = allValid;
-     *         Set<String> unreadableNamespaces = allValid.stream().map(m -> m.getNamespace()).distinct().
-     *                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
-     *         return allValid.stream().filter(m -> !unreadableNamespaces.contains(m.getNamespace())).toList();
-     *     }
-     */
-
     @Test
     public void test_filterReadablePages() {
         Namespace ns1 = new Namespace();
@@ -205,5 +189,44 @@ public class NamespaceServiceTest {
                 allMedia, "site1", null);
         assertEquals(1, filtered.size());
         assertEquals("file1", filtered.get(0).getFileName());
+    }
+
+    @Test
+    public void testCanUploadInNamespace() {
+        assertFalse(underTest.canUploadInNamespace("site1", "ns_unknown", "Guest"));
+        Namespace ns_closed = new Namespace();
+        ns_closed.namespace="closed";
+        ns_closed.restriction_type = Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(ns_closed);
+        User uploadUser = new User();
+        uploadUser.roles = List.of(new UserRole(uploadUser, "ROLE_UPLOAD:site1"));
+        when(userService.getUser("uploadUser")).thenReturn(uploadUser);
+        User normUser = new User();
+        normUser.roles = List.of(new UserRole(normUser, "ROLE_USER"));
+        when(userService.getUser("normUser")).thenReturn(normUser);
+
+        assertTrue(underTest.canUploadInNamespace("site1", "ns_open", "uploadUser"));
+        assertFalse(underTest.canUploadInNamespace("site1", "closed", "uploadUser"));
+        assertFalse(underTest.canUploadInNamespace("site1", "ns_open", "normUser"));
+    }
+
+    @Test
+    public void testCanDeleteInNamespace() {
+        assertFalse(underTest.canDeleteInNamespace("site1", "ns_unknown", "Guest"));
+        Namespace ns_closed = new Namespace();
+        ns_closed.namespace="closed";
+        ns_closed.restriction_type = Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(ns_closed);
+        User uploadUser = new User();
+        uploadUser.roles = List.of(new UserRole(uploadUser, "ROLE_DELETE:site1"));
+        when(userService.getUser("uploadUser")).thenReturn(uploadUser);
+        User normUser = new User();
+        normUser.roles = List.of(new UserRole(normUser, "ROLE_USER"));
+        when(userService.getUser("normUser")).thenReturn(normUser);
+
+
+        assertTrue(underTest.canDeleteInNamespace("site1", "ns_open", "uploadUser"));
+        assertFalse(underTest.canDeleteInNamespace("site1", "closed", "uploadUser"));
+        assertFalse(underTest.canDeleteInNamespace("site1", "ns_open", "normUser"));
     }
 }

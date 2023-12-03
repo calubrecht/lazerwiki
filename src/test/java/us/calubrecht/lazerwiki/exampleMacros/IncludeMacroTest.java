@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
@@ -40,11 +41,11 @@ class IncludeMacroTest {
     @Test
     public void testIncludeMacro() {
         RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
-        PageData page = new PageData(null, "This Page", null, null,true, true, true);
+        PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
         when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
         assertEquals("<div>This Page</div>", macroService.renderMacro("include:includedPage", renderContext));
 
-        PageData notpage = new PageData(null, "", null, null,false, true, true);
+        PageData notpage = new PageData(null, "", null, null,new PageFlags(false, false, true, true, false));
         when(pageService.getPageData(anyString(), eq("nothingPage"), anyString())).thenReturn(notpage);
         assertEquals("", macroService.renderMacro("include:nothingPage", renderContext));
     }

@@ -98,7 +98,7 @@ public class MacroService {
         @Override
         public Pair<String, Map<String, Object>> renderPage(String pageDescriptor) {
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
-            if (!page.exists() || !page.userCanRead()) {
+            if (!page.flags().exists() || !page.flags().userCanRead()) {
                 return Pair.of("", Collections.emptyMap());
             }
 

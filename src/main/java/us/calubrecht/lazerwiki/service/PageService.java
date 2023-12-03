@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.repository.TagRepository;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
@@ -67,17 +68,21 @@ public class PageService {
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
         boolean canWrite = namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName);
         boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
+        boolean canDelete = namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) && !pageDescriptor.isHome();
         if (!canRead) {
-            return new PageData("You are not permissioned to read this page", "",   Collections.emptyList(),Collections.emptyList(),true, false, false);
+            return new PageData("You are not permissioned to read this page", "",   Collections.emptyList(),Collections.emptyList(), PageData.EMPTY_FLAGS);
         }
-        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
         if (p == null ) {
             // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
-            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(), backlinks,false, canRead, canWrite);
+            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(), backlinks, new PageFlags(false, false, true, canWrite, false));
+        }
+        if (p.isDeleted()) {
+            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(), backlinks, new PageFlags(false, true, true, canWrite, false));
         }
         String source = p.getText();
-        return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), backlinks, true, canRead, canWrite);
+        return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), backlinks, new PageFlags(true, false, true, canWrite, canDelete));
     }
 
     public PageDescriptor decodeDescriptor(String pageDescriptor) {
@@ -94,7 +99,7 @@ public class PageService {
         if (!namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName)) {
             throw new PageWriteException("You don't have permission to write this page.");
         }
-        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         long id = p == null ? getNewId() : p.getId();
         long revision = p == null ? 1 : p.getRevision() + 1;
         if (p != null ) {
@@ -187,5 +192,37 @@ public class PageService {
             return tagPages;
         }
         return Collections.emptyList();
+    }
+
+    @Transactional
+    public void deletePage(String host, String sPageDescriptor, String userName) throws PageWriteException {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        if (!namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) || sPageDescriptor.equals("")) {
+            throw new PageWriteException("You don't have permission to delete this page.");
+        }
+
+        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        if (p == null) {
+            return;
+        }
+        long revision =  p.getRevision() + 1;
+        p.setValidts(LocalDateTime.now());
+        pageRepository.save(p);
+        em.flush(); // Flush update to DB so we can do insert afterward
+        Page newP = new Page();
+        newP.setSite(site);
+        newP.setNamespace(pageDescriptor.namespace());
+        newP.setPagename(pageDescriptor.pageName());
+        newP.setText("");
+        newP.setTitle("");
+        newP.setId(p.getId());
+        newP.setRevision(revision);
+        newP.setValidts(PageRepository.MAX_DATE);
+        newP.setModifiedBy(userName);
+        newP.setTags(Collections.emptyList());
+        newP.setDeleted(true);
+        pageRepository.save(newP);
+        linkService.deleteLinks(site, sPageDescriptor);
     }
 }

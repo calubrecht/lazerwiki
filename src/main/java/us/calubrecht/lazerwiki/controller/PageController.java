@@ -43,6 +43,13 @@ public class PageController {
         return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
     }
 
+    @DeleteMapping("{pageDescriptor}")
+    public void deletePage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request) throws MalformedURLException, PageWriteException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal.getName();
+        pageService.deletePage(url.getHost(), pageDescriptor, userName);
+    }
+
     @RequestMapping(value = "/listPages")
     public PageListResponse listPages(Principal principal, HttpServletRequest request) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());

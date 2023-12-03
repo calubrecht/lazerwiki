@@ -29,8 +29,20 @@ class PageRepositoryTest {
     }
 
     @Test
+    void findBySiteAndNamespaceAndPagenameAndValidts() {
+        Page site = pageRepository.findBySiteAndNamespaceAndPagenameAndValidts("site1", "ns", "deletedPage", MAX_DATE);
+        assertNotNull(site);
+    }
+
+    @Test
     void getBySiteAndNamespaceAndPagenameAndDeleted() {
         Page site = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "ns", "page1", false);
+        assertNotNull(site);
+    }
+
+    @Test
+    void getBySiteAndNamespaceAndPagenameAndValidts() {
+        Page site = pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "deletedPage");
         assertNotNull(site);
     }
 

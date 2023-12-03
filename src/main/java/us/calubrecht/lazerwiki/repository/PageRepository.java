@@ -15,6 +15,7 @@ import java.util.List;
 public interface PageRepository extends CrudRepository<Page, PageKey> {
 
     Page findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(String site, String namespace, String pagename, LocalDateTime validts, boolean deleted);
+    Page findBySiteAndNamespaceAndPagenameAndValidts(String site, String namespace, String pagename, LocalDateTime validts);
     List<PageDesc> findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(String site, LocalDateTime validts, boolean deleted);
 
     @Query(value="SELECT namespace, pagename, title, modifiedBy, modified FROM page p inner join tag t on p.id= t.pageId and p.revision = t.revision  where p.site = :site and t.tag=:tagName and deleted=0 and validTS='9999-12-31 00:00:00'",
@@ -25,6 +26,11 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
     default Page getBySiteAndNamespaceAndPagenameAndDeleted(String site, String namespace, String pagename, boolean deleted)
     {
         return findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(site, namespace, pagename, MAX_DATE, deleted);
+    }
+
+    default Page getBySiteAndNamespaceAndPagename(String site, String namespace, String pagename)
+    {
+        return findBySiteAndNamespaceAndPagenameAndValidts(site, namespace, pagename, MAX_DATE);
     }
 
     default List<PageDesc> getAllValid(String site)

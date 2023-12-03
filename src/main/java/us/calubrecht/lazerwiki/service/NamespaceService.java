@@ -77,6 +77,32 @@ public class NamespaceService {
         return !intersection.isEmpty();
     }
 
+    public boolean canDeleteInNamespace(String site, String namespace, String userName) {
+        if (User.isGuest(userName)) {
+            return false;
+        }
+        User user = userService.getUser(userName);
+        List<String> roles = user.roles.stream().map(role -> role.role).collect(Collectors.toList());
+        List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_DELETE:" + site);
+        List<String> intersection = new ArrayList<>(roles);
+        intersection.retainAll(necessaryRoles);
+
+        return !intersection.isEmpty() && canWriteNamespace(site, namespace, userName);
+    }
+
+    public boolean canUploadInNamespace(String site, String namespace, String userName) {
+        if (User.isGuest(userName)) {
+            return false;
+        }
+        User user = userService.getUser(userName);
+        List<String> roles = user.roles.stream().map(role -> role.role).collect(Collectors.toList());
+        List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_UPLOAD:" + site);
+        List<String> intersection = new ArrayList<>(roles);
+        intersection.retainAll(necessaryRoles);
+
+        return !intersection.isEmpty() && canWriteNamespace(site, namespace, userName);
+    }
+
     public List<PageDesc>  filterReadablePages(List<PageDesc> allValid, String site, String userName) {
         Set<String> unreadableNamespaces = allValid.stream().map(p -> p.getNamespace()).distinct().
                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());

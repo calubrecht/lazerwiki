@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.util.*;
@@ -34,35 +35,35 @@ public class RenderServiceTest {
 
     @Test
     public void testRender() {
-        PageData pd = new PageData(null, "This is raw page text",  null,null,true, true, true);
+        PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
         when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenReturn("This is Rendered Text");
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
-        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,true, true, true), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
-        PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,false, true, true);
+        PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false));
         when(pageService.getPageData(any(), eq("ns:nonPage"), any())).thenReturn(noPageData);
-        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null,false, true, true), underTest.getRenderedPage("host1", "ns:nonPage", "Bob"));
+        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null, new PageFlags(false, false, true, true, false)), underTest.getRenderedPage("host1", "ns:nonPage", "Bob"));
     }
 
     @Test
     public void testRenderError() {
-        PageData pd = new PageData(null, "This is raw page text",  null, null,true, true, true);
+        PageData pd = new PageData(null, "This is raw page text",  null, null, PageData.ALL_RIGHTS);
         when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenThrow(new NullPointerException());
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
-        assertEquals(new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>This is raw page text</code>", "This is raw page text",   null,null,true, true, true), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>This is raw page text</code>", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
     }
 
     @Test
     public void testRenderCantREad() {
-        PageData pd = new PageData("Can't read this", "Can't read this",   null,null,true, false, false);
+        PageData pd = new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false));
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
 
-        assertEquals(new PageData("Can't read this", "Can't read this",   null,null,true, false, false), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false)), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
     }
 

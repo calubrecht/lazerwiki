@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
@@ -97,18 +98,20 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
-        assertEquals(new PageData("This page doesn't exist", "======Non Existant Page======", Collections.emptyList(),Collections.emptyList(),false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
+        when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        assertEquals(new PageData("This page doesn't exist", "======Non Existant Page======", Collections.emptyList(),Collections.emptyList(), new PageFlags(false, false, true, true, false)),
+                pageService.getPageData("localhost", "nonExistantPage", "Bob"));
 
         Page p = new Page();
         p.setText("This is raw page text");
         p.setTags(Collections.emptyList());
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
-        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
 
-        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), Collections.emptyList(),true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), Collections.emptyList(), PageData.ALL_RIGHTS), pageService.getPageData("host1", "ns:realPage", "Bob"));
 
-        assertEquals(new PageData( "You are not permissioned to read this page", "", Collections.emptyList(), Collections.emptyList(),true, false, false), pageService.getPageData("host1", "ns:realPage", "Joe"));
+        assertEquals(new PageData( "You are not permissioned to read this page", "", Collections.emptyList(), Collections.emptyList(), PageData.EMPTY_FLAGS), pageService.getPageData("host1", "ns:realPage", "Joe"));
 
 
     }
@@ -123,11 +126,48 @@ public class PageServiceTest {
         p.setText("This is raw page text");
         p.setTags(Collections.emptyList());
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
-        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
         when(linkService.getBacklinks("site1", "ns:realPage")).thenReturn(List.of("page1", "page2"));
 
-        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), List.of("page1", "page2"),true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), List.of("page1", "page2"), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "ns:realPage", "Bob"));
+    }
+
+    @Test
+    public void testGetPageDataDeleted() {
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+
+        Page p = new Page();
+        p.setDeleted(true);
+        p.setTags(Collections.emptyList());
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "deletedPage")).
+                thenReturn(p);
+
+        assertEquals(new PageData("This page doesn't exist", "======Deleted Page======", Collections.emptyList(), Collections.emptyList(), new PageFlags(false, true, true, true, false)), pageService.getPageData("host1", "deletedPage", "Bob"));
+
+
+    }
+    @Test
+    public void testGetPageDataHome() {
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+
+        Page p = new Page();
+        p.setText("Hi");
+        p.setTags(Collections.emptyList());
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "")).
+                thenReturn(p);
+
+        assertEquals(new PageData(null, "Hi", Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "", "Bob"));
+
+
     }
 
     @Test
@@ -168,7 +208,7 @@ public class PageServiceTest {
         p.setRevision(2L);
         p.setSite("site1");
         p.setTags(Collections.emptyList());
-        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
 
         pageService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
@@ -320,6 +360,43 @@ public class PageServiceTest {
         assertEquals(0, results.size());
 
          verify(pageRepository, never()).getByTagname(anyString(), anyString());
+    }
+
+    @Test
+    public void testDeletePage() throws PageWriteException {
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("default");
+        when(namespaceService.canDeleteInNamespace(eq("default"), eq(""), eq("bob"))).thenReturn(true);
+        Page p = new Page();
+        p.setId(1000L);
+        p.setPagename("testPage");
+        p.setNamespace("");
+        p.setDeleted(false);
+        p.setRevision(10L);
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(eq("default"), eq(""), eq("testPage"), eq(false))).thenReturn(p);
+
+        assertThrows(PageWriteException.class, ()-> pageService.deletePage("localhost", "testPage", "frank"));
+
+        assertThrows(PageWriteException.class, ()-> pageService.deletePage("localhost", "", "bob"));
+
+        verify(linkService, never()).deleteLinks(anyString(), anyString());
+
+        pageService.deletePage("localhost", "unknownPage", "bob");
+        verify(linkService, never()).deleteLinks(anyString(), anyString());
+
+        pageService.deletePage("localhost", "testPage", "bob");
+        verify(linkService).deleteLinks(eq("default"), eq("testPage"));
+        ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
+        verify(pageRepository, times(2)).save(captor.capture());
+
+        assertEquals(2, captor.getAllValues().size());
+        Page invalidatedPage = captor.getAllValues().get(0);
+        assertEquals(1000L, invalidatedPage.getId());
+        assertEquals(10L, invalidatedPage.getRevision());
+        Page newPage = captor.getAllValues().get(1);
+        assertEquals("", newPage.getText());
+        assertEquals(1000L, newPage.getId());
+        assertEquals(11L, newPage.getRevision());
+        assertTrue(newPage.isDeleted());
     }
             
 

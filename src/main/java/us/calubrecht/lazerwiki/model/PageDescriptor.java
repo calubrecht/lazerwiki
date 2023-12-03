@@ -27,4 +27,8 @@ public record PageDescriptor(String namespace, String pageName) {
         }
         return words.stream().flatMap(a -> Arrays.stream(a.split("_")).map(w -> ("" +w.charAt(0)).toUpperCase() + w.substring(1))).collect(Collectors.joining(" "));
     }
+
+    public boolean isHome() {
+        return (pageName + namespace).isEmpty();
+    }
 }

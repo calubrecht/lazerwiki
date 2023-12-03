@@ -56,4 +56,10 @@ class LinkServiceTest {
         when(linkRepository.findAllBySiteAndTargetPageNSAndTargetPageName(any(), any(), any())).thenReturn(links);
         assertEquals(List.of("page1", "ns:ns:inner:page5"), underTest.getBacklinks("default","pageName"));
     }
+
+    @Test
+    void deleteLinks() {
+        underTest.deleteLinks("site1", "ns:page1");
+        verify(linkRepository).deleteBySiteAndSourcePageNSAndSourcePageName("site1", "ns", "page1");
+    }
 }

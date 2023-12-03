@@ -118,7 +118,7 @@ class MediaServiceTest {
     @Test
     void saveFile() throws IOException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(namespaceService.canWriteNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
         MockMultipartFile file = new MockMultipartFile("file", "small.bin", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "small.bin").toFile();
@@ -144,7 +144,7 @@ class MediaServiceTest {
     @Test
     void saveFile_wNS() throws IOException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(namespaceService.canWriteNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
         MockMultipartFile file = new MockMultipartFile("file", "other.bin", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "ns1", "other.bin").toFile();
@@ -176,7 +176,7 @@ class MediaServiceTest {
     @Test
     void saveFile_real() throws IOException, MediaReadException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(namespaceService.canWriteNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         byte[] bytesToSave = underTest.getBinaryFile("localhost", "Bob", "circle.png", null);
         MockMultipartFile file = new MockMultipartFile("file", "circle2.png", null, bytesToSave);
@@ -235,7 +235,7 @@ class MediaServiceTest {
     @Test
     void testDeleteFile() throws IOException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(namespaceService.canWriteNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
         File f = Paths.get(staticFileRoot, "default", "media", "test.write").toFile();
         try (FileOutputStream fos = new FileOutputStream(f)) {
             fos.write(1);
@@ -256,7 +256,7 @@ class MediaServiceTest {
         assertFalse(f.exists());
 
 
-        when(namespaceService.canWriteNamespace(eq("default"), any(), eq("joe"))).thenReturn(false);
+        when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("joe"))).thenReturn(false);
         assertThrows(MediaWriteException.class, () ->  underTest.deleteFile("host", "test.write", "joe"));
 
     }

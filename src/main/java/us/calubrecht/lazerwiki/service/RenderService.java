@@ -35,16 +35,16 @@ public class RenderService {
         /*
           Could make these renderable templates;
          */
-        if (!d.exists()) {
+        if (!d.flags().exists()) {
             return d;
         }
-        if (!d.userCanRead()) {
+        if (!d.flags().userCanRead()) {
             return d;
         }
         sw.split();
         long queryMillis = sw.getSplitTime();
         try {
-            PageData pd = new PageData(renderer.renderToString(d.source(), host, site, userName), d.source(), d.tags(), d.backlinks(), d.exists(), d.userCanRead(), d.userCanWrite());
+            PageData pd = new PageData(renderer.renderToString(d.source(), host, site, userName), d.source(), d.tags(), d.backlinks(), d.flags());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
@@ -57,7 +57,7 @@ public class RenderService {
             String sanitizedSource =  StringEscapeUtils.escapeHtml4(d.source()).replaceAll("&quot;", "\"");
 
             return new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>%s</code>".formatted(sanitizedSource),
-                    d.source(), d.tags(), d.backlinks(),true, true, true);
+                    d.source(), d.tags(), d.backlinks(),d.flags());
 
         }
 

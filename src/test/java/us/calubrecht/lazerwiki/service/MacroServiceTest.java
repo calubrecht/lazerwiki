@@ -13,6 +13,7 @@ import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.HashMap;
@@ -89,18 +90,17 @@ class MacroServiceTest {
     void testMacroContextImplRenderPage() {
         RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
-        PageData page = new PageData(null, "**Hi**", null, null,true, true, true);
+        PageData page = new PageData(null, "**Hi**", null, null, PageData.ALL_RIGHTS);
         when(pageService.getPageData(anyString(), eq("existsPage"), anyString())).thenReturn(page);
         assertEquals("<div><span class=\"bold\">Hi</span></div>", macroContext.renderPage("existsPage").getLeft());
 
-        PageData notExists = new PageData("What is this?", null, null, null,false, true, true);
+        PageData notExists = new PageData("What is this?", null, null, null, new PageFlags(false, false, true, true, false));
         when(pageService.getPageData(anyString(), eq("notExists"), anyString())).thenReturn(notExists);
         assertEquals("", macroContext.renderPage("notExists").getLeft());
 
-        PageData cantRead = new PageData("Not for you", null, null, null, true, false, false);
+        PageData cantRead = new PageData("Not for you", null, null, null, new PageFlags(true, false, false, false, false));
         when(pageService.getPageData(anyString(), eq("cantRead"), anyString())).thenReturn(cantRead);
         assertEquals("", macroContext.renderPage("cantRead").getLeft());
-
     }
 
     @Test

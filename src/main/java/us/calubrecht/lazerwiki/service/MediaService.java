@@ -110,7 +110,7 @@ public class MediaService {
     @Transactional
     public void saveFile(String host, String userName, MultipartFile mfile, String namespace) throws IOException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
-        if (!namespaceService.canWriteNamespace(site, namespace, userName)) {
+        if (!namespaceService.canUploadInNamespace(site, namespace, userName)) {
             throw new MediaWriteException("Not permissioned to write this file");
         }
         String nsPath = namespace.replaceAll(":", "/");
@@ -152,7 +152,7 @@ public class MediaService {
         List<NsNode> nodes = new ArrayList();
         namespaces.forEach(ns ->
                 nodes.add(getNsNode(site, ns, mediaRecords, userName)));
-        NsNode node = new NsNode(rootNS, namespaceService.canWriteNamespace(site, rootNS, userName));
+        NsNode node = new NsNode(rootNS, namespaceService.canUploadInNamespace(site, rootNS, userName));
         node.setChildren(nodes);
         return node;
 
@@ -173,7 +173,7 @@ public class MediaService {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         String nsPath = splitFile.getLeft().replaceAll(":", "/");
-        if (!namespaceService.canWriteNamespace(site, splitFile.getLeft(), user)) {
+        if (!namespaceService.canDeleteInNamespace(site, splitFile.getLeft(), user)) {
             throw new MediaWriteException("Not permissioned to delete this file");
         }
         ensureDir(site, nsPath);

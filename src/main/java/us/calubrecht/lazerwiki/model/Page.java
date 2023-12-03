@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.model;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ public class Page {
 
     String modifiedBy;
 
+    @CreationTimestamp
     LocalDateTime modified;
 
     @Column(name = "validTS")

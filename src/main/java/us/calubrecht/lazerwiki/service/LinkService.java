@@ -41,4 +41,10 @@ public class LinkService {
         return linkRepository.findAllBySiteAndTargetPageNSAndTargetPageName(site, pd.namespace(), pd.pageName()).
                 stream().map(l -> l.getSourcePageNS().isBlank() ? l.getSourcePageName() : l.getSourcePageNS() +":" + l.getSourcePageName()).collect(Collectors.toList());
     }
+
+    public void deleteLinks(String site, String page) {
+        PageDescriptor pd = decodeDescriptor(page);
+        linkRepository.deleteBySiteAndSourcePageNSAndSourcePageName(site, pd.namespace(), pd.pageName());
+
+    }
 }
