@@ -316,6 +316,11 @@ public class PageServiceTest {
             this.modifiedBy = modifiedBy;
         }
 
+        PageDescImpl(String namespace, String pageName) {
+            this.namespace = namespace;
+            this.pageName = pageName;
+        }
+
         @Override
         public String getNamespace() {
             return namespace;
