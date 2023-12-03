@@ -14,8 +14,21 @@ public class LinkCheckMacro extends Macro{
             table.linksTable, table.linksTable td, table.linksTable th {
               border: 1px solid;
             }
+            table.linksTable {
+              border-collapse:collapse;
+              empty-cells:show;
+              border-spacing:0;
+            }
              table.linksTable th {
-             background:grey;
+             background: lightgrey;
+             padding: 0 .5em 0 .5em;
+             }
+             table.linksTable td {
+             padding: 0 .5em 0 .5em;
+             }
+
+            table.linksTable tr:hover {
+             background: #ffe0a0;
              }
             """;
 
