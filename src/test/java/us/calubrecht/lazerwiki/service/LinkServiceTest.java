@@ -48,7 +48,12 @@ class LinkServiceTest {
         List<Link> links = List.of(new Link("default", "", "pageName", "", "page1"), new Link("default", "", "pageName", "ns:ns:inner", "page5"));
         when(linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName(any(), any(), any())).thenReturn(links);
         assertEquals(List.of("page1", "ns:ns:inner:page5"), underTest.getLinksOnPage("default","pageName"));
+    }
 
-
+    @Test
+    void getBacklinks() {
+        List<Link> links = List.of(new Link("default", "", "page1", "", "pageName"), new Link("default", "ns:ns:inner", "page5", "ns:ns:inner", "pageName"));
+        when(linkRepository.findAllBySiteAndTargetPageNSAndTargetPageName(any(), any(), any())).thenReturn(links);
+        assertEquals(List.of("page1", "ns:ns:inner:page5"), underTest.getBacklinks("default","pageName"));
     }
 }

@@ -68,15 +68,16 @@ public class PageService {
         boolean canWrite = namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName);
         boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
         if (!canRead) {
-            return new PageData("You are not permissioned to read this page", "",   Collections.emptyList(),true, false, false);
+            return new PageData("You are not permissioned to read this page", "",   Collections.emptyList(),Collections.emptyList(),true, false, false);
         }
         Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
+        List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
         if (p == null ) {
             // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
-            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(),false, canRead, canWrite);
+            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(), backlinks,false, canRead, canWrite);
         }
         String source = p.getText();
-        return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), true, canRead, canWrite);
+        return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), backlinks, true, canRead, canWrite);
     }
 
     public PageDescriptor decodeDescriptor(String pageDescriptor) {

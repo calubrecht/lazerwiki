@@ -97,7 +97,7 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
-        assertEquals(new PageData("This page doesn't exist", "======Non Existant Page======", Collections.emptyList(),false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
+        assertEquals(new PageData("This page doesn't exist", "======Non Existant Page======", Collections.emptyList(),Collections.emptyList(),false, true, true), pageService.getPageData("localhost", "nonExistantPage", "Bob"));
 
         Page p = new Page();
         p.setText("This is raw page text");
@@ -106,11 +106,28 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
                 thenReturn(p);
 
-        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), Collections.emptyList(),true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
 
-        assertEquals(new PageData( "You are not permissioned to read this page", "", Collections.emptyList(),true, false, false), pageService.getPageData("host1", "ns:realPage", "Joe"));
+        assertEquals(new PageData( "You are not permissioned to read this page", "", Collections.emptyList(), Collections.emptyList(),true, false, false), pageService.getPageData("host1", "ns:realPage", "Joe"));
 
 
+    }
+
+    @Test
+    public void testGetPageDataWithBacklinks() {
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+
+        Page p = new Page();
+        p.setText("This is raw page text");
+        p.setTags(Collections.emptyList());
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1","ns", "realPage", false)).
+                thenReturn(p);
+        when(linkService.getBacklinks("site1", "ns:realPage")).thenReturn(List.of("page1", "page2"));
+
+        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), List.of("page1", "page2"),true, true, true), pageService.getPageData("host1", "ns:realPage", "Bob"));
     }
 
     @Test

@@ -89,15 +89,15 @@ class MacroServiceTest {
     void testMacroContextImplRenderPage() {
         RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
-        PageData page = new PageData(null, "**Hi**", null, true, true, true);
+        PageData page = new PageData(null, "**Hi**", null, null,true, true, true);
         when(pageService.getPageData(anyString(), eq("existsPage"), anyString())).thenReturn(page);
         assertEquals("<div><span class=\"bold\">Hi</span></div>", macroContext.renderPage("existsPage").getLeft());
 
-        PageData notExists = new PageData("What is this?", null, null, false, true, true);
+        PageData notExists = new PageData("What is this?", null, null, null,false, true, true);
         when(pageService.getPageData(anyString(), eq("notExists"), anyString())).thenReturn(notExists);
         assertEquals("", macroContext.renderPage("notExists").getLeft());
 
-        PageData cantRead = new PageData("Not for you", null, null, true, false, false);
+        PageData cantRead = new PageData("Not for you", null, null, null, true, false, false);
         when(pageService.getPageData(anyString(), eq("cantRead"), anyString())).thenReturn(cantRead);
         assertEquals("", macroContext.renderPage("cantRead").getLeft());
 

@@ -1,12 +1,10 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.transaction.Transactional;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.LinkRepository;
-import us.calubrecht.lazerwiki.repository.PageRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,5 +34,11 @@ public class LinkService {
         PageDescriptor pd = decodeDescriptor(page);
         return linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName(site, pd.namespace(), pd.pageName()).
                 stream().map(l -> l.getTargetPageNS().isBlank() ? l.getTargetPageName() : l.getTargetPageNS() +":" + l.getTargetPageName()).collect(Collectors.toList());
+    }
+
+    public List<String> getBacklinks(String site, String page) {
+        PageDescriptor pd = decodeDescriptor(page);
+        return linkRepository.findAllBySiteAndTargetPageNSAndTargetPageName(site, pd.namespace(), pd.pageName()).
+                stream().map(l -> l.getSourcePageNS().isBlank() ? l.getSourcePageName() : l.getSourcePageNS() +":" + l.getSourcePageName()).collect(Collectors.toList());
     }
 }

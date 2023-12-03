@@ -40,11 +40,11 @@ class IncludeMacroTest {
     @Test
     public void testIncludeMacro() {
         RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
-        PageData page = new PageData(null, "This Page", null, true, true, true);
+        PageData page = new PageData(null, "This Page", null, null,true, true, true);
         when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
         assertEquals("<div>This Page</div>", macroService.renderMacro("include:includedPage", renderContext));
 
-        PageData notpage = new PageData(null, "", null, false, true, true);
+        PageData notpage = new PageData(null, "", null, null,false, true, true);
         when(pageService.getPageData(anyString(), eq("nothingPage"), anyString())).thenReturn(notpage);
         assertEquals("", macroService.renderMacro("include:nothingPage", renderContext));
     }
