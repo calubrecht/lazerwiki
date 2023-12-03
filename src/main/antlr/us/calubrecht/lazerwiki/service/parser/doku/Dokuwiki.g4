@@ -235,7 +235,7 @@ line_item
 ;
 
 line
-  : (ulist_item | olist_item | image | styled_span | broken_span | inner_text_nowsstart | image | broken_image | macro | broken_macro ) (line_item |  macro | broken_macro)*
+  : (ulist_item | olist_item | image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | image | broken_image | macro | broken_macro ) (line_item |  macro | broken_macro)*
   ;
 
 

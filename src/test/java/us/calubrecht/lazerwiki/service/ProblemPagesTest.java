@@ -14,9 +14,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, ProblemPagesTest.TestConfig.class})
+@SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, ProblemPagesTest.TestConfig.class, MacroService.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 public class ProblemPagesTest {
@@ -28,7 +29,10 @@ public class ProblemPagesTest {
     PageService pageService;
 
     @MockBean
-    MacroService macroService;
+    MacroCssService macroCssService;
+
+    @MockBean
+    LinkService linkService;
 
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
@@ -51,6 +55,15 @@ public class ProblemPagesTest {
     @Test
     public void testAboutPage_wasFatal() {
         String s = loadPage("about.page") + '\n';
+        String rendered = underTest.renderToString(s,  "localhost","default", "");
+
+        assertTrue(rendered != null);
+
+    }
+
+    @Test
+    public void testWrapMacro_wasFatal() {
+        String s = loadPage("wrapMacro.page") + '\n';
         String rendered = underTest.renderToString(s,  "localhost","default", "");
 
         assertTrue(rendered != null);

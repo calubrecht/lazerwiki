@@ -1,0 +1,4 @@
+~~MACRO~~wrap:clear:~~/MACRO~~
+~~MACRO~~wrap:secret:
+ __//**Secret **//__
+~~/MACRO~~
