@@ -110,6 +110,9 @@ class MediaServiceTest {
         assertThrows(IOException.class, () -> underTest.getBinaryFile("localhost", "Bob", "nothere.png", "10x10"));
         // No MediaRecord, can't try to resize, don't look in cache.
         verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "10x10");
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
     }
 
     @Test
