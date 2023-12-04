@@ -229,4 +229,12 @@ public class NamespaceServiceTest {
         assertFalse(underTest.canDeleteInNamespace("site1", "closed", "uploadUser"));
         assertFalse(underTest.canDeleteInNamespace("site1", "ns_open", "normUser"));
     }
+
+    @Test
+    public void testParentNamespace() {
+        assertEquals(null, underTest.parentNamespace(""));
+        assertEquals("", underTest.parentNamespace("ns"));
+        assertEquals("ns", underTest.parentNamespace("ns:n2"));
+        assertEquals("ns:n2", underTest.parentNamespace("ns:n2:n5"));
+    }
 }

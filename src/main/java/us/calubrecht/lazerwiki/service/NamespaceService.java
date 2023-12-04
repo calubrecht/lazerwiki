@@ -21,10 +21,10 @@ public class NamespaceService {
     @Autowired
     UserService userService;
 
-    String parentNamespace(String namespace) {
+    public String parentNamespace(String namespace) {
         if (!namespace.contains(":"))
         {
-            return null;
+            return namespace.isBlank() ? null : "";
         }
         return namespace.substring(0, namespace.lastIndexOf(":"));
     }

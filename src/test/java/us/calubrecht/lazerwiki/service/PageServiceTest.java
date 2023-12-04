@@ -398,6 +398,20 @@ public class PageServiceTest {
         assertEquals(11L, newPage.getRevision());
         assertTrue(newPage.isDeleted());
     }
+
+    @Test
+    public void testGetTemplate() {
+        Page ns1Template = new Page();
+        ns1Template.setText("== Page: %NAME%==\nIn %NAMESPACE%");
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site", "ns1", "_template", false)).thenReturn(ns1Template);
+        when(namespaceService.parentNamespace("ns1:ns2")).thenReturn("ns1");
+        when(namespaceService.parentNamespace("ns1")).thenReturn("");
+        when(namespaceService.parentNamespace("ns3")).thenReturn("");
+        assertEquals("== Page: Page 1==\nIn ns1", pageService.getTemplate("site", new PageDescriptor("ns1", "page1")));
+        assertEquals("== Page: Page 2==\nIn ns1:ns2", pageService.getTemplate("site", new PageDescriptor("ns1:ns2", "page2")));
+        assertEquals("======Page 3======", pageService.getTemplate("site", new PageDescriptor("ns3", "page3")));
+        assertEquals("======Page 4======", pageService.getTemplate("site", new PageDescriptor("", "page4")));
+    }
             
 
     static class PageDescImpl implements PageDesc {

@@ -45,7 +45,7 @@ public class TableRenderer extends FlatteningRenderer {
                 } else {
                     nextOpenTag = "th";
                 }
-            } else if (tree.getText().equals("\n") && closingData) {
+            } else if (tree.getText().equals("\n") ) {
                 currRow.add(currTableData);
                 currRow = new ArrayList<>();
                 rows.add(currRow);

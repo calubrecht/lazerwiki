@@ -76,10 +76,10 @@ public class PageService {
         List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
         if (p == null ) {
             // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
-            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(), backlinks, new PageFlags(false, false, true, canWrite, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),   Collections.emptyList(), backlinks, new PageFlags(false, false, true, canWrite, false));
         }
         if (p.isDeleted()) {
-            return new PageData("This page doesn't exist", "======" + pageDescriptor.renderedName() + "======",   Collections.emptyList(), backlinks, new PageFlags(false, true, true, canWrite, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),   Collections.emptyList(), backlinks, new PageFlags(false, true, true, canWrite, false));
         }
         String source = p.getText();
         return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), backlinks, new PageFlags(true, false, true, canWrite, canDelete));
@@ -224,5 +224,26 @@ public class PageService {
         newP.setDeleted(true);
         pageRepository.save(newP);
         linkService.deleteLinks(site, sPageDescriptor);
+    }
+
+    String getTemplate(String site, PageDescriptor pageDescriptor) {
+        String ns = pageDescriptor.namespace();
+        Page template = null;
+        while ( ns != null) {
+            template = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, ns, "_template", false);
+            if (template != null) {
+                break;
+            }
+            ns = namespaceService.parentNamespace(ns);
+        }
+        if (template == null) {
+            return "======" + pageDescriptor.renderedName() + "======";
+        }
+        Map<String, String> replacements = Map.of("%NAME%", pageDescriptor.renderedName(), "%NAMESPACE%", pageDescriptor.namespace(), "%RAWNAME%", pageDescriptor.pageName());
+        String text = template.getText();
+        for (Map.Entry<String, String> entry : replacements.entrySet() ) {
+           text = text.replace(entry.getKey(), entry.getValue());
+        }
+        return text;
     }
 }
