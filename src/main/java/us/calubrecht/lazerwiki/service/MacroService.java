@@ -99,7 +99,7 @@ public class MacroService {
         public Pair<String, Map<String, Object>> renderPage(String pageDescriptor) {
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
             if (!page.flags().exists() || !page.flags().userCanRead()) {
-                return Pair.of("", Collections.emptyMap());
+                return Pair.of("", new HashMap<String,Object>(page.flags().toMap()));
             }
 
             RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(),
@@ -108,7 +108,9 @@ public class MacroService {
             // Allow inner page render to generate its own title
             subrenderContext.renderState().remove(RenderResult.RENDER_STATE_KEYS.TITLE.name());
             RenderResult res = renderContext.renderer().renderWithInfo(page.source(),subrenderContext);
-            return Pair.of(res.renderedText(), res.renderState());
+            Map<String, Object> renderState = new HashMap<>(res.renderState());
+            renderState.putAll(page.flags().toMap());
+            return Pair.of(res.renderedText(), renderState);
 
         }
 

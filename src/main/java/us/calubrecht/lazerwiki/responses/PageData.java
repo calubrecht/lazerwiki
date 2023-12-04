@@ -1,9 +1,14 @@
 package us.calubrecht.lazerwiki.responses;
 
 import java.util.List;
+import java.util.Map;
 
 public record PageData(String rendered, String source, List<String> tags, List<String> backlinks, PageFlags flags) {
     public record PageFlags(boolean exists, boolean wasDeleted, boolean userCanRead, boolean userCanWrite, boolean userCanDelete) {
+
+        public Map<String, Boolean> toMap() {
+            return Map.of("exists", exists, "wasDeleted", wasDeleted, "userCanRead", userCanRead, "userCanWrite", userCanWrite, "userCanDelete", userCanDelete);
+        }
 
     }
 
