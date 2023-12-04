@@ -9,6 +9,7 @@ CREATE TABLE `page_ids` (
 CREATE TABLE `sites` (
 	`name` VARCHAR(50) NOT NULL,
 	`hostname` VARCHAR(200) NOT NULL,
+	`siteName` VARCHAR(200) NULL DEFAULT NULL,
 	PRIMARY KEY (`name`),
 	UNIQUE (`hostname`)
 );

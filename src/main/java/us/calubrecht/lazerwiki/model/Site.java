@@ -10,4 +10,6 @@ public class Site {
     public String name;
 
     public String hostname;
+
+    public String siteName;
 }
