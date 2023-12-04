@@ -1,7 +1,6 @@
 package us.calubrecht.lazerwiki.service.renderhelpers;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.text.StringEscapeUtils;
 import us.calubrecht.lazerwiki.service.RendererRegistrar;
 
@@ -28,6 +27,8 @@ public abstract class TreeRenderer {
     public boolean shouldParentSanitize() {
         return true;
     }
+
+    public TreeRenderer getSpecificRenderer(ParseTree tree) { return this;}
 
     public static String sanitize(String input) {
         return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
@@ -56,10 +57,10 @@ public abstract class TreeRenderer {
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
         for(ParseTree child: trees) {
-            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
             if (lastChildClass != null && lastChildClass != renderer.getAdditiveClass() )
             {
-                AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass);
+                AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass, childrenToMerge.get(0));
                 outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
                 lastChildClass = null;
                 childrenToMerge.clear();
@@ -72,7 +73,7 @@ public abstract class TreeRenderer {
             outBuffer.append(renderer.render(child, renderContext));
         }
         if (lastChildClass != null) {
-            AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer) renderers.getRenderer(lastChildClass);
+            AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer) renderers.getRenderer(lastChildClass, childrenToMerge.get(0));
             outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
         }
         return outBuffer;
@@ -81,7 +82,7 @@ public abstract class TreeRenderer {
     protected StringBuffer renderChildrenToPlainText(List<ParseTree> trees, RenderContext renderContext) {
         StringBuffer outBuffer = new StringBuffer();
         for(ParseTree child: trees) {
-            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
             outBuffer.append(renderer.renderToPlainText(child, renderContext));
         }
         return outBuffer;

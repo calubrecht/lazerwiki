@@ -87,4 +87,17 @@ public class DokuWikiRendererPlaintextTest {
     void testRenderSpans() {
         assertEquals("Bold, italic, none of it is rendered", doRender("**Bold, //italic//**, none of it is rendered"));
     }
+
+    @Test
+    public void testRenderLinebreak() {
+        String input = "This is a line \\\\ with a linebreak";
+        assertEquals("This is a line\nwith a linebreak", doRender(input));
+    }
+
+    @Test
+    public void testRenderTable() {
+        String inputSimpleTable = "| First | Line |\n|Second | Line|";
+        assertEquals("| First | Line |\n" +
+                "|Second | Line|", doRender(inputSimpleTable));
+    }
 }

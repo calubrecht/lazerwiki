@@ -44,10 +44,10 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         RenderContext renderContext = new RenderContext(context.host(), context.site(), context.user(), this, renderState);
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
-            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
             if (lastChildClass != null && lastChildClass != renderer.getAdditiveClass() )
             {
-                AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass);
+                AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass, childrenToMerge.get(0));
                 outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
                 lastChildClass = null;
                 childrenToMerge.clear();
@@ -76,7 +76,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         StringBuffer outBuffer = new StringBuffer();
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
-            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
             outBuffer.append(renderer.renderToPlainText(child, renderContext));
         }
         // Remove trailing new line

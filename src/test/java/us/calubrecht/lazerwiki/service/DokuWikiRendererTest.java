@@ -130,7 +130,7 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testCanGetDefaultRendererForUnknownClass() {
-        assertEquals(null, underTest.renderers.getRenderer(Integer.class).getTargets());
+        assertEquals(null, underTest.renderers.getRenderer(Integer.class, null).getTargets());
     }
 
     @Test
@@ -352,9 +352,9 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testUnusedMethods() {
-        TreeRenderer rowRenderer = underTest.renderers.getRenderer(DokuwikiParser.RowContext.class);
+        TreeRenderer rowRenderer = underTest.renderers.getRenderer(DokuwikiParser.RowContext.class, null);
         assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("localhost", "default", "")));
-        TreeRenderer codeBoxRenderer = underTest.renderers.getRenderer(DokuwikiParser.Code_boxContext.class);
+        TreeRenderer codeBoxRenderer = underTest.renderers.getRenderer(DokuwikiParser.Code_boxContext.class, null);
         assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("localhost","default", "")));
     }
 
@@ -386,8 +386,17 @@ public class DokuWikiRendererTest {
         when(macroService.renderMacro(eq("macro1: macro"), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
         String render = underTest.renderToString(inputMacro, "", "", "");
         assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
+    }
 
+    @Test
+    public void testRenderLinebreak() {
+        String input = "This is a line \\\\ with a linebreak";
+        assertEquals("<div>This is a line<br>with a linebreak</div>", doRender(input));
+        String inputBreakSymbolInHeader = "====This is \\\\ a header====";
+        assertEquals("<h3>This is<br>a header</h3>", doRender(inputBreakSymbolInHeader));
 
+        String inputRequireWS = "This is a line\\\\with a linebreak but no spaces";
+        assertEquals("<div>This is a line\\\\with a linebreak but no spaces</div>", doRender(inputRequireWS));
     }
 
     @Test
@@ -398,5 +407,19 @@ public class DokuWikiRendererTest {
         assertEquals("Some Header", res.renderState().get(RenderResult.RENDER_STATE_KEYS.TITLE.name()));
         // State sent in to render should remain when returned
         assertEquals("State", res.renderState().get("rememberedState"));
+    }
+
+    @Test
+    public void testRenderTable() {
+        String inputSimpleTable = "| First | Line |\n|Second | Line|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td> First </td><td> Line </td></tr>\n<tr><td>Second </td><td> Line</td></tr>\n</tbody></table>", doRender(inputSimpleTable));
+        String tableWithHeader = "^ Header ^ Line ^\n|Second | Line|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><th> Header </th><th> Line </th></tr>\n<tr><td>Second </td><td> Line</td></tr>\n</tbody></table>", doRender(tableWithHeader));
+        String tableWithMixedHeader = "^ Header | Line |\n|Second | Line|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><th> Header </th><td> Line </td></tr>\n<tr><td>Second </td><td> Line</td></tr>\n</tbody></table>", doRender(tableWithMixedHeader));
+        String tableWithColSpan = "^ Header | Line |\n|Second ||";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><th> Header </th><td> Line </td></tr>\n<tr><td colspan=\"2\">Second </td></tr>\n</tbody></table>", doRender(tableWithColSpan));
+        String tableWithImg = "|{{img.jpg}} \\\\ Some text after|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"><br>Some text after</td></tr>\n</tbody></table>", doRender(tableWithImg));
     }
 }

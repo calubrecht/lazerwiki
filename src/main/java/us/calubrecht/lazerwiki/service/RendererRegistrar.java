@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.annotation.PostConstruct;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
@@ -31,11 +32,13 @@ public class RendererRegistrar {
 
     }
 
-    public TreeRenderer getRenderer(Class forClass) {
-        return renderersForClass.getOrDefault(forClass, TreeRenderer.DEFAULT);
+    public TreeRenderer getRenderer(Class forClass, ParseTree tree) {
+        TreeRenderer renderer = renderersForClass.getOrDefault(forClass, TreeRenderer.DEFAULT);
+        return renderer.getSpecificRenderer(tree);
     }
 
-    public TreeRenderer getRenderer(String additiveClass) {
-        return renderersForAdditiveClass.getOrDefault(additiveClass, TreeRenderer.DEFAULT);
+    public TreeRenderer getRenderer(String additiveClass, ParseTree tree) {
+        TreeRenderer renderer = renderersForAdditiveClass.getOrDefault(additiveClass, TreeRenderer.DEFAULT);
+        return renderer.getSpecificRenderer(tree);
     }
 }

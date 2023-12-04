@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -10,12 +11,16 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
-public class RowRenderer extends AdditiveTreeRenderer {
+public class RowRenderer extends FlatteningRenderer {
 
     Set<Class> treesToFlatten = Set.of(DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class);
+
+    @Autowired
+    TableRenderer tableRenderer;
 
     @Override
     public List<Class> getTargets() {
@@ -23,8 +28,8 @@ public class RowRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        throw new RuntimeException("Not Implemented");
+    Set<Class> getTreesToFlatten() {
+        return treesToFlatten;
     }
 
     @Override
@@ -38,7 +43,7 @@ public class RowRenderer extends AdditiveTreeRenderer {
         StringBuffer ret = new StringBuffer();
         ret.append("<div>");
         List<ParseTree> children = trees.stream().flatMap(
-                (t) -> flattenChildren(t).stream()).collect(Collectors.toList());
+                (t) -> flattenChildren(t, false).stream()).collect(Collectors.toList());
         ret.append(renderChildren(children, renderContext));
         // Remove trailing new line
         ret.deleteCharAt(ret.length() -1);
@@ -51,29 +56,17 @@ public class RowRenderer extends AdditiveTreeRenderer {
         return "Row";
     }
 
-    List<ParseTree> flattenChildren(ParseTree tree) {
-        List<ParseTree> trees = new ArrayList<>();
-        TreeRenderer lastRenderer = null;
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            ParseTree t = tree.getChild(i);
-            if (treesToFlatten.contains(t.getClass())){
-                for (int j = 0; j < t.getChildCount(); j++) {
-                    ParseTree child = t.getChild(j);
-                    trees.add(child);
-                    lastRenderer = renderers.getRenderer(child.getClass());
-                }
-            }
-            else {
-                if (lastRenderer.isAdditive()) {
-                    // Additive renders are always alone in the row, so the following is alwayas an EOL
-                    //if (isEOL(t)) {
-                      continue;
-                    //}
-                }
-                trees.add(t);
-                lastRenderer = renderers.getRenderer(t.getClass());
-            }
+    static final Pattern tablePattern = Pattern.compile("[|^].*[|^]");
+    @Override
+    public TreeRenderer getSpecificRenderer(ParseTree tree) {
+        if (tree == null)  {
+            return this;
         }
-        return trees;
+        // Get text and strip trailing newline
+        String text = tree.getText().substring(0, tree.getText().length()-1);
+        if (tablePattern.matcher(text).matches()){
+            return tableRenderer;
+        }
+        return this;
     }
 }

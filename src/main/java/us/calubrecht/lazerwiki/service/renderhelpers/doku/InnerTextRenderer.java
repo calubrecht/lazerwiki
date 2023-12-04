@@ -22,7 +22,7 @@ public class InnerTextRenderer extends TreeRenderer {
         StringBuffer currentBuffer = new StringBuffer();
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
-            TreeRenderer renderer = renderers.getRenderer(child.getClass());
+            TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
             StringBuffer currentRender = renderer.render(child, renderContext);
             if (renderer.shouldParentSanitize()) {
                 currentBuffer.append(currentRender);

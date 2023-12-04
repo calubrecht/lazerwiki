@@ -31,7 +31,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
             ParseTree child = tree.getChild(i);
             String token = child.getText();
             if (tokenMapping.get(token) != null) {
-                ListRenderer renderer = (ListRenderer)renderers.getRenderer(tokenMapping.get(token));
+                ListRenderer renderer = (ListRenderer)renderers.getRenderer(tokenMapping.get(token), child);
                 spec = new ListSpec(renderer.listTag, count);
                 break;
             }
@@ -77,7 +77,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
         StringBuffer sb = new StringBuffer();
         Optional<ParseTree> content = getChildren(tree).stream().filter(t -> t.getClass() == DokuwikiParser.Inner_textContext.class).findFirst();
         content.ifPresent(pt -> {
-            TreeRenderer renderer = renderers.getRenderer(pt.getClass());
+            TreeRenderer renderer = renderers.getRenderer(pt.getClass(), pt);
             sb.append("<li>" +renderer.render(pt, renderContext) + "</li>\n"); }
         );
         return sb;

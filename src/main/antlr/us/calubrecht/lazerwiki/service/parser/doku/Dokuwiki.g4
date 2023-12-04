@@ -45,6 +45,7 @@ SUB_START_TOKEN: '<sub>';
 SUB_END_TOKEN: '</sub>';
 DEL_START_TOKEN: '<del>';
 DEL_END_TOKEN: '</del>';
+FORCE_LINKBREAK: ' \\\\ ';
 
 IMG_START_TOKEN: '{{';
 IMG_END_TOKEN: '}}';
@@ -220,22 +221,33 @@ inner_text
     (all_char | link | broken_link | PIPE )+
   ;
 
+inner_text_ext
+  :
+    (all_char | link | broken_link | PIPE | line_break )+
+  ;
+
 inner_text_nowsstart
   :
     WS? (all_char_nows | link | broken_link |  PIPE )+
   ;
 
 header
-  : WS? header_tok inner_text header_tok WS* NEWLINE
+  : WS? header_tok inner_text_ext header_tok WS* NEWLINE
   ;
+
+line_break
+  : FORCE_LINKBREAK
+  ;
+
+
 
 line_item
  :
-   (inner_text | styled_span | broken_span | image | broken_image )
+   (inner_text | styled_span | broken_span | image | broken_image | line_break )
 ;
 
 line
-  : (ulist_item | olist_item | image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | image | broken_image | macro | broken_macro ) (line_item |  macro | broken_macro)*
+  : (ulist_item | olist_item | image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | image | broken_image | macro | broken_macro | line_break ) (line_item |  macro | broken_macro)*
   ;
 
 
