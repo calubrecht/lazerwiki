@@ -39,4 +39,17 @@ class WrapMacroTest {
         RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
         assertEquals("<div class=\"special\">This is some special text</div>", macroService.renderMacro("wrap:special:This is some special text", renderContext));
     }
+
+    @Test
+    void renderMultiline() {
+        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        assertEquals("<div class=\"special\"><div>This is some special text</div>\n<div>OnMultiple lines</div></div>", macroService.renderMacro("wrap:special:This is some special text\n\nOnMultiple lines", renderContext));
+    }
+
+    @Test
+    void renderSimple() {
+        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag", renderContext));
+        assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag:", renderContext));
+    }
 }
