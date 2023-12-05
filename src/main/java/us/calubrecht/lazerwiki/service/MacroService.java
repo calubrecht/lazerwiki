@@ -16,7 +16,6 @@ import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class MacroService {
@@ -33,7 +32,7 @@ public class MacroService {
     LinkService linkService;
 
     @Value("#{'${lazerwiki.plugin.scan.packages}'.split(',')}")
-    private List<String> macroPackageds;
+    private List<String> macroPackages;
 
     public void registerMacro(Macro macro) {
         logger.info("Registering macro " + macro.getName() + " as " + macro.getClass());
@@ -44,7 +43,7 @@ public class MacroService {
     @PostConstruct
     public void registerMacros() {
         AnnotatedTypeScanner scanner= new AnnotatedTypeScanner(CustomMacro.class);
-        Set<Class<?>> macroClasses = scanner.findTypes(macroPackageds);
+        Set<Class<?>> macroClasses = scanner.findTypes(macroPackages);
         macroClasses.forEach((cl) -> {
             try {
                 Macro macro = (Macro)cl.getDeclaredConstructor().newInstance();
