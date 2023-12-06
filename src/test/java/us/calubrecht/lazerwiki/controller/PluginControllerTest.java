@@ -7,10 +7,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PluginService;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -28,7 +27,7 @@ class PluginControllerTest {
 
     @Test
     void getPluginJS() throws Exception {
-        when(pluginService.getEditToolbarDefs()).thenReturn("ToolbarDefs");
+        when(pluginService.getEditToolbarDefs(anyString())).thenReturn("ToolbarDefs");
         this.mockMvc.perform(get("/_resources/js/pluginJS.js")).
                 andExpect(status().isOk()).andExpect(content().string("ToolbarDefs"));
 

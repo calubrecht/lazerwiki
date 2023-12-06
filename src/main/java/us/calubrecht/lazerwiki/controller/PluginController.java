@@ -23,10 +23,11 @@ public class PluginController {
     PluginService pluginService;
 
     @GetMapping("_resources/js/pluginJS.js")
-    public ResponseEntity<byte[]> getPluginJS() {
+    public ResponseEntity<byte[]> getPluginJS(HttpServletRequest request ) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
         String mimeType = URLConnection.guessContentTypeFromName("pluginJS.js");
         MediaType mediaType = MediaType.parseMediaType(mimeType);
-        return ResponseEntity.ok().contentType(mediaType).body(pluginService.getEditToolbarDefs().getBytes());
+        return ResponseEntity.ok().contentType(mediaType).body(pluginService.getEditToolbarDefs(url.getHost()).getBytes());
 
     }
 }

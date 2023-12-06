@@ -10,6 +10,7 @@ CREATE TABLE `sites` (
 	`name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`hostname` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
 	`siteName` VARCHAR(200) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`settings` JSON NOT NULL DEFAULT '{}' COLLATE 'utf8mb4_bin',
 	PRIMARY KEY (`name`) USING BTREE,
 
 	UNIQUE INDEX `HostnameIdx` (`hostname`) USING BTREE

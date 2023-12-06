@@ -8,6 +8,8 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -51,5 +53,39 @@ public class SiteServiceTest {
         assertEquals("The Test Wiki", underTest.getSiteNameForHostname("site1.org"));
         assertEquals("Lazerwiki", underTest.getSiteNameForHostname("othersite.org"));
         assertEquals("Lazerwiki", underTest.getSiteNameForHostname("missingSite.org"));
+    }
+
+    /**
+     *
+     *   public Object getSettingForHostname(String hostname, String setting) {
+     *         Site s =  siteRepository.findByHostname(hostname.toLowerCase());
+     *         if (s == null || !s.settings.containsValue(setting)) {
+     *             s = siteRepository.findByHostname("*");
+     *         }
+     *         if (s == null ) {
+     *
+     *             return null;
+     *         }
+     *         return s.settings.get(setting);
+     *     }
+     */
+    @Test
+    public void test_getSettingForHostname() {
+        Site noSettingSite = new Site();
+        noSettingSite.settings = Map.of();
+        Site defSite = new Site();
+        defSite.settings = Map.of("setting1", "value");
+        Site settingSite = new Site();
+        settingSite.settings = Map.of("setting1", "othervalue");
+        when(repository.findByHostname("site1")).thenReturn(noSettingSite);
+        when(repository.findByHostname("site2")).thenReturn(settingSite);
+        when(repository.findByHostname("*")).thenReturn(defSite);
+
+        assertEquals("value", underTest.getSettingForHostname("site1", "setting1"));
+        assertEquals("othervalue", underTest.getSettingForHostname("site2", "setting1"));
+    }
+    @Test
+    public void test_getSettingForHostnameNoSettings() {
+        assertEquals(null, underTest.getSettingForHostname("site1", "setting1"));
     }
 }

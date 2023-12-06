@@ -32,4 +32,15 @@ public class SiteService {
         }
         return s.siteName;
     }
+
+    public Object getSettingForHostname(String hostname, String setting) {
+        Site s =  siteRepository.findByHostname(hostname.toLowerCase());
+        if (s == null || !s.settings.containsKey(setting)) {
+            s = siteRepository.findByHostname("*");
+        }
+        if (s == null ) {
+            return null;
+        }
+        return s.settings.get(setting);
+    }
 }
