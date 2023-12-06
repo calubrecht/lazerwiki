@@ -8,7 +8,6 @@ public record EditToolbarDef(String name, String icon, String script) {
             icon = "toolbarBtn.png";
         }
         return """
-                {name:"%s", icon:"%s", script:%s}
-                """.formatted(name(), icon(), script());
+                {name:"%s", icon:"%s", script:%s}""".formatted(name(), icon, script());
     }
 }
