@@ -71,7 +71,7 @@ tasks.register<Jar>("macroApiJar") {
 	}
 	group="build"
 	archiveBaseName="lazerwiki-macro-api"
-	from(sourceSets.main.get().output).include("us/calubrecht/lazerwiki/macro/**")
+	from(sourceSets.main.get().output).include("us/calubrecht/lazerwiki/macro/**","us/calubrecht/lazerwiki/plugin/**")
 }
 
 tasks.processResources {
