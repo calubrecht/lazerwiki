@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.8.23"
+version = "0.1.8.24"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -120,6 +120,7 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/service/IMarkupRenderer.class",
 							"us/calubrecht/lazerwiki/service/parser/doku/*",
 							"us/calubrecht/lazerwiki/util/ImageUtil.class",
+							"us/calubrecht/lazerwiki/examplePlugins/ClearFloats.class",
 							"localMacros/*")
 				}
 			})

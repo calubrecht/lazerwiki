@@ -89,4 +89,18 @@ public class RenderServiceTest {
         verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(),  links,"The Title","user");
 
     }
+
+    @Test
+    public void testPreviewPage() {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(renderer.renderToString("goodSource", "localhost", "default", "Bob")).thenReturn("This rendered");
+        assertEquals("This rendered", underTest.previewPage("localhost", "thisPage", "goodSource", "Bob").rendered());
+
+        when(renderer.renderToString("brokenSource", "localhost", "default", "Bob")).thenThrow(new RuntimeException("This is broken"));
+        assertEquals("<h1>Error</h1>\n" +
+                "<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n" +
+                "<code>brokenSource</code>", underTest.previewPage("localhost", "thisPage", "brokenSource", "Bob").rendered());
+
+
+    }
 }

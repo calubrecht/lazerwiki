@@ -70,4 +70,11 @@ public class PageController {
         String userName = principal == null ? User.GUEST : principal.getName();
         return pageService.getAllTags(url.getHost(), userName);
     }
+
+    @PostMapping(value = {"/previewPage/{pageDescriptor}", "/previewPage/"})
+    public PageData previewPage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody SavePageRequest body) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal.getName();
+        return renderService.previewPage(url.getHost(), pageDescriptor.orElse(""), body.getText(), userName);
+    }
 }

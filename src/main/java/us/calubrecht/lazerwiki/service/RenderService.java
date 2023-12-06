@@ -69,4 +69,27 @@ public class RenderService {
         Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
         pageService.savePage(host, sPageDescriptor, text, tags, links, res.getTitle(), userName);
     }
+
+    public PageData previewPage(String host, String sPageDescriptor, String text, String userName) {
+        StopWatch sw = StopWatch.createStarted();
+        String site = siteService.getSiteForHostname(host);
+        try {
+            PageData pd = new PageData(renderer.renderToString(text, host, site, userName), text, null, null, null);
+            sw.stop();
+            long totalMillis = sw.getTime();
+            logger.info("Render preview for " + sPageDescriptor + " took " + totalMillis + "ms");
+            return pd;
+        }
+        catch (Exception e) {
+            sw.stop();
+            long totalMillis = sw.getTime();
+            logger.error("Render preview failed! host= " + host + " sPageDescriptor= " + sPageDescriptor + " user=" + userName + ".", e);
+            String sanitizedSource =  StringEscapeUtils.escapeHtml4(text).replaceAll("&quot;", "\"");
+
+            return new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>%s</code>".formatted(sanitizedSource),
+                    text, null, null, null);
+
+        }
+
+    }
 }

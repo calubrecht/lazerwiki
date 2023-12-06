@@ -124,4 +124,38 @@ public class PageControllerTest {
 
         verify(pageService).deletePage(eq("localhost"), eq("testPage"), eq("Bob"));
     }
+
+    @Test
+    public void testPreviewPage() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
+        this.mockMvc.perform(post("/api/page/previewPage/thisPage").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+
+        verify(renderService).previewPage(eq("localhost"), eq("thisPage"), eq("This is some text"), eq("Bob"));
+        this.mockMvc.perform(post("/api/page/previewPage/").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+
+        verify(renderService).previewPage(eq("localhost"), eq(""), eq("This is some text"), eq("Bob"));
+    }
+
+    /*
+    @Test
+    public void testGetPageRevisions() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
+        this.mockMvc.perform(get("/api/page/pageRevisions/thisPage").principal(auth)).
+                andExpect(status().isOk());
+
+
+        verify(pageService).pageRevisions(eq("localhost"), eq("thisPage"), eq("Bob"));
+    }*/
 }
