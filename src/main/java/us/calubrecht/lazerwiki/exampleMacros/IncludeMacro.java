@@ -46,6 +46,6 @@ public class IncludeMacro extends Macro {
         if (p.getRight().get("userCanWrite").toString().equals("true")) {
             return p.getLeft() + "<a href=\"/page/%s#Edit\" className=\"includePageLink\">Edit %s</a>".formatted(includePath,includePath);
         }
-        return p.getLeft();
+        return "<div class=\"include\">%s</div>".formatted(p.getLeft());
     }
 }

@@ -61,6 +61,10 @@ public class PageService {
         return p == null ? pageDescriptor.renderedName() : (p.getTitle() == null ? pageDescriptor.renderedName() : p.getTitle());
     }
 
+    public String getTitle(PageDescriptor pd, Page p) {
+        return p == null ? pd.renderedName() : (p.getTitle() == null ? pd.renderedName() : p.getTitle());
+    }
+
     @Transactional
     public PageData getPageData(String host, String sPageDescriptor, String userName) {
         logger.info("fetch page: host=" + host + " sPageDescriptor=" + sPageDescriptor + " userName=" + userName);
@@ -70,20 +74,20 @@ public class PageService {
         boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
         boolean canDelete = namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) && !pageDescriptor.isHome();
         if (!canRead) {
-            return new PageData("You are not permissioned to read this page", "",   Collections.emptyList(),Collections.emptyList(), PageData.EMPTY_FLAGS);
+            return new PageData("You are not permissioned to read this page", "", getTitle(host, sPageDescriptor),  Collections.emptyList(),Collections.emptyList(), PageData.EMPTY_FLAGS);
         }
         Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
 
         if (p == null ) {
             // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),   Collections.emptyList(), backlinks, new PageFlags(false, false, true, canWrite, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), backlinks, new PageFlags(false, false, true, canWrite, false));
         }
         if (p.isDeleted()) {
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),   Collections.emptyList(), backlinks, new PageFlags(false, true, true, canWrite, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), backlinks, new PageFlags(false, true, true, canWrite, false));
         }
         String source = p.getText();
-        return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), backlinks, new PageFlags(true, false, true, canWrite, canDelete));
+        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), backlinks, new PageFlags(true, false, true, canWrite, canDelete));
     }
 
     public PageCache getCachedPage(String host, String sPageDescriptor) {
