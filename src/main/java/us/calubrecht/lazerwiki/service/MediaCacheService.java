@@ -45,7 +45,7 @@ public class MediaCacheService {
         Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
         // refuse to scale up
         if (record.getWidth() < width || record.getHeight() < height) {
-            return null;
+            return fileLoad.get();
         }
         File cachedFile = record.getNamespace().isBlank() ? new File(Paths.get(cacheLocation.toString(), record.getFileName() + "-%sx%s".formatted(width, height)).toString())
                 : new File(Paths.get(cacheLocation.toString(), record.getNamespace(),record.getFileName() + "-%sx%s".formatted(width, height)).toString());

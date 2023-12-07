@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
+import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
 import java.io.*;
@@ -78,13 +79,12 @@ public class MediaCacheServiceTest {
     @Test
     public void testGetBinaryFileDontUpscale() throws IOException {
         MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 20, 20);
+        IOSupplier supplier = () -> new byte[] {1,2,3,4};
 
-        assertEquals(null, underTest.getBinaryFile("default", mediaRecord, null,20, 25));
-        // Should have used cache, did not need to call scale again.
+        assertEquals(4, underTest.getBinaryFile("default", mediaRecord, supplier ,20, 25)[3]);
         verify(mockImageUtil, never()).scaleImage(any(), any(), anyInt(), anyInt());
 
-        assertEquals(null, underTest.getBinaryFile("default", mediaRecord, null,25, 0));
-        // Should have used cache, did not need to call scale again.
+        assertEquals(4, underTest.getBinaryFile("default", mediaRecord, supplier,25, 0)[3]);
         verify(mockImageUtil, never()).scaleImage(any(), any(), anyInt(), anyInt());
 
     }
