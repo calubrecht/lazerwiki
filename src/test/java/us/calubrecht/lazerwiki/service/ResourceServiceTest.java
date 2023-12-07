@@ -34,5 +34,8 @@ class ResourceServiceTest {
         bytes = underTest.getBinaryFile("localhost", "site.css");
         assertTrue(bytes != null);
         assertEquals("/* Site specific css to override defaults */", new String(bytes).trim());
+
+        // Missing File
+        assertThrows(IOException.class, () -> underTest.getBinaryFile("localhost", "what.css"));
     }
 }

@@ -31,6 +31,9 @@ public class ResourceService {
         if (!f.exists()) {
             logger.info("Reading file from resources " + String.join("/", "static", fileName));
             InputStream s = getClass().getClassLoader().getResourceAsStream(String.join("/", "static", fileName));
+            if (s == null ) {
+                throw new IOException("Error reading " + fileName);
+            }
             return s.readAllBytes();
         }
         logger.info("Reading file " + f.getAbsoluteFile());
