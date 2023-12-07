@@ -36,7 +36,7 @@ public class RenderServiceTest {
     @Test
     public void testRender() {
         PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
-        when(renderer.renderToString(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenReturn("This is Rendered Text");
+        when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
@@ -71,7 +71,7 @@ public class RenderServiceTest {
     public void testSavePage() throws PageWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
-                new RenderResult("rendered", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title")));
+                new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title")));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
 
         verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(),  Collections.emptySet(),"The Title","user");
@@ -84,7 +84,7 @@ public class RenderServiceTest {
         List<String> links = List.of("page1", "page2");
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
-                new RenderResult("rendered", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title", RenderResult.RENDER_STATE_KEYS.LINKS.name(), links)));
+                new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title", RenderResult.RENDER_STATE_KEYS.LINKS.name(), links)));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
         verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(),  links,"The Title","user");
 

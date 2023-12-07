@@ -109,6 +109,7 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testRenderLinkRecordsLinks() {
+        when(pageService.getTitle(any(), any())).thenReturn("");
         RenderResult result = underTest.renderWithInfo("[[oneLink]]\n[[oneLinkWithText|The text]] [[http://external.link]] \n[[ns:ThirdLink]]", "host", "site","user");
         Set<String>  links = (Set<String>)result.renderState().get(RenderResult.RENDER_STATE_KEYS.LINKS.name());
         assertEquals(Set.of("oneLink", "oneLinkWithText", "ns:ThirdLink"), links);

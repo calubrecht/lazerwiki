@@ -56,6 +56,7 @@ public class LinkCheckMacro extends Macro{
         Set<String> orphanedPages = new HashSet<>(allPages);
         orphanedPages.removeAll(linkedTo);
         orphanedPages.remove("");
+        context.setPageDontCache();
         return """
                 <h2>Broken Links</h2>
                 <table class="brokenLinks linksTable">

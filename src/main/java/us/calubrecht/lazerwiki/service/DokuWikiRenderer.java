@@ -33,10 +33,17 @@ public class DokuWikiRenderer implements IMarkupRenderer {
 
     @Override
     public String  renderToString(String markup, RenderContext context) {
+        return renderToString(parseMarkup(markup), context);
+    }
+
+    ParseTree parseMarkup(String markup) {
         DokuwikiLexer lexer = new DokuwikiLexer(CharStreams.fromString(markup + '\n'));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         DokuwikiParser parser = new DokuwikiParser(tokens);
-        ParseTree tree = parser.page();
+        return parser.page();
+    }
+
+    String renderToString(ParseTree tree, RenderContext context) {
         StringBuffer outBuffer = new StringBuffer();
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
@@ -62,17 +69,20 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         return outBuffer.toString().strip();
     }
 
+    @Override
     public RenderResult renderWithInfo(String markup, RenderContext renderContext) {
-        String rendered = renderToString(markup, renderContext);
-        return new RenderResult(rendered, renderContext.renderState());
+        ParseTree tree = parseMarkup(markup);
+        String rendered = renderToString(tree, renderContext);
+        String plainText = renderToPlainText(tree, renderContext);
+        return new RenderResult(rendered, plainText, renderContext.renderState());
     }
 
     @Override
     public String renderToPlainText(String markup, RenderContext renderContext) {
-        DokuwikiLexer lexer = new DokuwikiLexer(CharStreams.fromString(markup + '\n'));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        DokuwikiParser parser = new DokuwikiParser(tokens);
-        ParseTree tree = parser.page();
+        return renderToPlainText(parseMarkup(markup), renderContext);
+    }
+
+    public String renderToPlainText(ParseTree tree, RenderContext renderContext) {
         StringBuffer outBuffer = new StringBuffer();
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);

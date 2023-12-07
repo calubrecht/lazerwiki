@@ -61,7 +61,7 @@ class AdminServiceTest {
                 links.add("page3");
                 links.add("ns:page4");
             }
-            return new RenderResult(text, Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links));
+            return new RenderResult(text, "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links));
         });
 
         underTest.regenLinks("default");

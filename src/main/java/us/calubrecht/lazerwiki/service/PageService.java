@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.*;
-import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
-import us.calubrecht.lazerwiki.repository.IdRepository;
-import us.calubrecht.lazerwiki.repository.PageRepository;
-import us.calubrecht.lazerwiki.repository.TagRepository;
+import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
@@ -47,6 +44,9 @@ public class PageService {
     @Autowired
     TagRepository tagRepository;
 
+    @Autowired
+    PageCacheRepository pageCacheRepository;
+
     public boolean exists(String host, String pageName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
@@ -74,6 +74,7 @@ public class PageService {
         }
         Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
+
         if (p == null ) {
             // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
             return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),   Collections.emptyList(), backlinks, new PageFlags(false, false, true, canWrite, false));
@@ -85,7 +86,28 @@ public class PageService {
         return new PageData(null, source, p.getTags().stream().map(PageTag::getTag).toList(), backlinks, new PageFlags(true, false, true, canWrite, canDelete));
     }
 
-    public PageDescriptor decodeDescriptor(String pageDescriptor) {
+    public PageCache getCachedPage(String host, String sPageDescriptor) {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        PageCache.PageCacheKey key = new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+        return pageCacheRepository.findById(key).orElse(null);
+    }
+
+    @Transactional
+    public void saveCache(String host, String sPageDescriptor, RenderResult rendered) {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        PageCache newCache = new PageCache();
+        newCache.site = site;
+        newCache.namespace = pageDescriptor.namespace();
+        newCache.pageName = pageDescriptor.pageName();
+        newCache.renderedCache = rendered.renderedText();
+        newCache.plaintextCache = rendered.plainText();
+        newCache.useCache = !(Boolean)rendered.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
+        pageCacheRepository.save(newCache);
+    }
+
+    public static PageDescriptor decodeDescriptor(String pageDescriptor) {
         List<String> tokens = new ArrayList<>(Arrays.asList(pageDescriptor.split(":")));
         String pageName = tokens.remove(tokens.size() -1);
         return new PageDescriptor(String.join(":", tokens), pageName);
@@ -224,6 +246,8 @@ public class PageService {
         newP.setDeleted(true);
         pageRepository.save(newP);
         linkService.deleteLinks(site, sPageDescriptor);
+        PageCache.PageCacheKey key = new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+        pageCacheRepository.deleteById(key);
     }
 
     String getTemplate(String site, PageDescriptor pageDescriptor) {

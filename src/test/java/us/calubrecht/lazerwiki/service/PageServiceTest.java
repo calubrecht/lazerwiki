@@ -47,6 +47,9 @@ public class PageServiceTest {
     @MockBean
     LinkService linkService;
 
+    @MockBean
+    PageCacheRepository pageCacheRepository;
+
 
     @MockBean
     EntityManagerProxy em;

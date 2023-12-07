@@ -21,6 +21,7 @@ public abstract class Macro {
         String sanitize(String input);
 
         Pair<String, Map<String, Object>> renderPage(String pageDescriptor);
+        Pair<String, Map<String, Object>> getCachedRender(String pageDescriptor);
 
         List<String> getPagesByNSAndTag(String ns, String tag);
         List<String> getAllPages();
@@ -28,5 +29,7 @@ public abstract class Macro {
         List<String> getLinksOnPage(String page);
 
         Pair<String, Map<String, Object>> renderMarkup(String markup);
+
+        void setPageDontCache();
     }
 }

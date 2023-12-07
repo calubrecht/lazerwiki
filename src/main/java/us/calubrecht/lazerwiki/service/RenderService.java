@@ -6,14 +6,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import us.calubrecht.lazerwiki.model.PageCache;
+import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class RenderService {
@@ -33,7 +33,7 @@ public class RenderService {
         String site = siteService.getSiteForHostname(host);
         PageData d = pageService.getPageData(host, sPageDescriptor, userName);
         /*
-          Could make these renderable templates;
+          XXX:Could make these renderable templates;
          */
         if (!d.flags().exists()) {
             return d;
@@ -43,16 +43,24 @@ public class RenderService {
         }
         sw.split();
         long queryMillis = sw.getSplitTime();
-        try {
-            PageData pd = new PageData(renderer.renderToString(d.source(), host, site, userName), d.source(), d.tags(), d.backlinks(), d.flags());
+        PageCache cachedPage = pageService.getCachedPage(host, sPageDescriptor);
+        if (cachedPage != null && cachedPage.useCache) {
+            PageData pd = new PageData(cachedPage.renderedCache, d.source(), d.tags(), d.backlinks(), d.flags());
             sw.stop();
             long totalMillis = sw.getTime();
+            logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,QueryCache)");
+            return pd;
+        }
+        try {
+            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, userName);
+            PageData pd = new PageData(rendered.renderedText(), d.source(), d.tags(), d.backlinks(), d.flags());
+            sw.stop();
+            long totalMillis = sw.getTime();
+            pageService.saveCache(host, sPageDescriptor, rendered);
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
             return pd;
         }
         catch (Exception e) {
-            sw.stop();
-            long totalMillis = sw.getTime();
             logger.error("Render failed! host= " + host + " sPageDescriptor= " + sPageDescriptor + " user=" + userName + ".", e);
             String sanitizedSource =  StringEscapeUtils.escapeHtml4(d.source()).replaceAll("&quot;", "\"");
 
@@ -68,6 +76,7 @@ public class RenderService {
         RenderResult res = renderer.renderWithInfo(text, host, site, userName);
         Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
         pageService.savePage(host, sPageDescriptor, text, tags, links, res.getTitle(), userName);
+        pageService.saveCache(host, sPageDescriptor, res);
     }
 
     public PageData previewPage(String host, String sPageDescriptor, String text, String userName) {

@@ -6,6 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -54,5 +56,7 @@ public class LinkCheckMacroTest {
 
         //Orphan pages section. Split on 1 td will give 3 parts so 1 orphaned pages(page3) + 1 header
         assertEquals(3, split[1].split("<tr>").length);
+
+        assertTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
     }
 }

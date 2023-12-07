@@ -149,3 +149,20 @@ CREATE TABLE `links` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
+
+CREATE TABLE `pageCache` (
+	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`namespace` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`pageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	`renderedCache` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`plaintextCache` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`useCache` BIT(1) NOT NULL DEFAULT b'1',
+	PRIMARY KEY (`site`, `namespace`, `pageName`) USING BTREE,
+	FULLTEXT INDEX `PageCachePlaintextSearch` (`plaintextCache`),
+	CONSTRAINT `FK_pageCacheSite` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT `FK_pageCache_page` FOREIGN KEY (`site`, `namespace`, `pageName`) REFERENCES `lazerwiki`.`page` (`site`, `namespace`, `pagename`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
