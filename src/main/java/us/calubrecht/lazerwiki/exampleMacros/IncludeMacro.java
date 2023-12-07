@@ -44,7 +44,7 @@ public class IncludeMacro extends Macro {
         Pair<String, Map<String, Object>> p = context.renderPage(includePath);
         context.setPageDontCache();
         if (p.getRight().get("userCanWrite").toString().equals("true")) {
-            return p.getLeft() + "<a href=\"/page/%s#Edit\" className=\"includePageLink\">Edit %s</a>".formatted(includePath,includePath);
+            return "<div class=\"include\">%s<a href=\"/page/%s#Edit\" className=\"includePageLink\">Edit %s</a></div>".formatted(p.getLeft(), includePath,includePath);
         }
         return "<div class=\"include\">%s</div>".formatted(p.getLeft());
     }

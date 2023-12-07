@@ -102,7 +102,7 @@ public class PageServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
-        assertEquals(new PageData("This page doesn't exist", "======Non Existant Page======", Collections.emptyList(),Collections.emptyList(), new PageFlags(false, false, true, true, false)),
+        assertEquals(new PageData("This page doesn't exist", "======Non Existant Page======", "Non Existant Page", Collections.emptyList(),Collections.emptyList(), new PageFlags(false, false, true, true, false)),
                 pageService.getPageData("localhost", "nonExistantPage", "Bob"));
 
         Page p = new Page();
@@ -112,9 +112,9 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
 
-        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), Collections.emptyList(), PageData.ALL_RIGHTS), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", "Real Page", Collections.emptyList(), Collections.emptyList(), PageData.ALL_RIGHTS), pageService.getPageData("host1", "ns:realPage", "Bob"));
 
-        assertEquals(new PageData( "You are not permissioned to read this page", "", Collections.emptyList(), Collections.emptyList(), PageData.EMPTY_FLAGS), pageService.getPageData("host1", "ns:realPage", "Joe"));
+        assertEquals(new PageData( "You are not permissioned to read this page", "", "Real Page", Collections.emptyList(), Collections.emptyList(), PageData.EMPTY_FLAGS), pageService.getPageData("host1", "ns:realPage", "Joe"));
 
 
     }
@@ -133,7 +133,7 @@ public class PageServiceTest {
                 thenReturn(p);
         when(linkService.getBacklinks("site1", "ns:realPage")).thenReturn(List.of("page1", "page2"));
 
-        assertEquals(new PageData(null, "This is raw page text", Collections.emptyList(), List.of("page1", "page2"), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData(null, "This is raw page text", "Real Page", Collections.emptyList(), List.of("page1", "page2"), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "ns:realPage", "Bob"));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "deletedPage")).
                 thenReturn(p);
 
-        assertEquals(new PageData("This page doesn't exist", "======Deleted Page======", Collections.emptyList(), Collections.emptyList(), new PageFlags(false, true, true, true, false)), pageService.getPageData("host1", "deletedPage", "Bob"));
+        assertEquals(new PageData("This page doesn't exist", "======Deleted Page======", "Deleted Page", Collections.emptyList(), Collections.emptyList(), new PageFlags(false, true, true, true, false)), pageService.getPageData("host1", "deletedPage", "Bob"));
 
 
     }
@@ -168,7 +168,7 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "")).
                 thenReturn(p);
 
-        assertEquals(new PageData(null, "Hi", Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "", "Bob"));
+        assertEquals(new PageData(null, "Hi", "Home", Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "", "Bob"));
 
 
     }

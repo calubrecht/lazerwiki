@@ -16,8 +16,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
@@ -109,7 +108,7 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testRenderLinkRecordsLinks() {
-        when(pageService.getTitle(any(), any())).thenReturn("");
+        when(pageService.getTitle(anyString(), anyString())).thenReturn("");
         RenderResult result = underTest.renderWithInfo("[[oneLink]]\n[[oneLinkWithText|The text]] [[http://external.link]] \n[[ns:ThirdLink]]", "host", "site","user");
         Set<String>  links = (Set<String>)result.renderState().get(RenderResult.RENDER_STATE_KEYS.LINKS.name());
         assertEquals(Set.of("oneLink", "oneLinkWithText", "ns:ThirdLink"), links);
