@@ -35,4 +35,15 @@ public class AdminController {
         adminService.regenLinks(site);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("regenCacheTable/{site}")
+    public ResponseEntity<Void> regenCacheTable(@PathVariable("site") String site, Principal principal) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + site)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        adminService.regenCache(site);
+        return ResponseEntity.ok().build();
+    }
 }

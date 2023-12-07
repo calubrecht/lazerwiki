@@ -7,4 +7,5 @@ import us.calubrecht.lazerwiki.model.PageCache;
 @Repository
 public interface PageCacheRepository extends CrudRepository<PageCache, PageCache.PageCacheKey> {
 
+    public void deleteBySite(String site);
 }
