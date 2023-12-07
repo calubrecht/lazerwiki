@@ -1,8 +1,10 @@
 plugins {
 	java
+	`java-library`
 	antlr
 	war
 	jacoco
+	`maven-publish`
 	id("org.springframework.boot") version "3.1.4"
 	id("io.spring.dependency-management") version "1.1.3"
 }
@@ -131,4 +133,25 @@ tasks.jacocoTestReport {
 			})
 	)
 	dependsOn(tasks.test) // tests are required to run before generating the report
+}
+
+
+configure<PublishingExtension> {
+	publications {
+		create<MavenPublication>("mavenJava") {
+			from(components.getByName("java"))
+			pom {
+
+				name.set("LazerWiki Plugin api")
+				description.set("A library to enable extension of the Lazerwiki project")
+				developers {
+					developer {
+						id.set("calubrecht")
+						name.set("Chad Lubrecht")
+						email.set("chad.lubrecht@gmail.com")
+					}
+				}
+			}
+		}
+	}
 }
