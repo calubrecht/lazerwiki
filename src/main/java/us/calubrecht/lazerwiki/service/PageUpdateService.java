@@ -75,6 +75,7 @@ public class PageUpdateService {
         pageRepository.save(newP);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
         if (p == null) {
+            em.flush(); // Flush so regen can work?
             regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
         }
     }
@@ -117,6 +118,7 @@ public class PageUpdateService {
         linkService.deleteLinks(site, sPageDescriptor);
         PageCache.PageCacheKey key = new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         pageCacheRepository.deleteById(key);
+        em.flush(); // Flush so regen can work?
         regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
     }
 }
