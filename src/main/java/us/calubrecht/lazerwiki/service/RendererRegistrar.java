@@ -17,12 +17,12 @@ public class RendererRegistrar {
     Map<Class, TreeRenderer> renderersForClass;
     Map<String, TreeRenderer> renderersForAdditiveClass;
 
-    TreeRenderer DEFAULT_RENDERER = new TreeRenderer.DefaultRenderer();
+    final TreeRenderer DEFAULT_RENDERER = new TreeRenderer.DefaultRenderer();
 
     @PostConstruct
     public void linkBeans() {
         renderersForClass = new ConcurrentHashMap<>();
-        renderersForAdditiveClass = new ConcurrentHashMap();
+        renderersForAdditiveClass = new ConcurrentHashMap<>();
         for (TreeRenderer renderer : renderers) {
             renderer.getTargets().forEach(cl -> renderersForClass.put(cl, renderer));
             if (renderer.isAdditive()) {

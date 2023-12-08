@@ -29,6 +29,7 @@ public class AdminService {
     @Autowired
     PageCacheRepository pageCacheRepository;
 
+    @SuppressWarnings("unchecked")
     @Transactional
     public void regenLinks(String site) {
         logger.info("Regening link table for " +site);

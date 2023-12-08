@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class LazerWikiAuthenticationManager implements AuthenticationManager {
-    Log logger = LogFactory.getLog(getClass());
+    final Log logger = LogFactory.getLog(getClass());
 
     @Autowired
     UserService userService;

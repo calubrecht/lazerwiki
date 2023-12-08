@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Component
 public class RowRenderer extends FlatteningRenderer {
 
-    final Set<Class> treesToFlatten = Set.of(DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class);
+    final Set<Class<? extends ParseTree>> treesToFlatten = Set.of(DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class);
 
     @Autowired
     TableRenderer tableRenderer;
@@ -32,8 +32,7 @@ public class RowRenderer extends FlatteningRenderer {
 
     @Override
     public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = renderChildrenToPlainText(getChildren(tree), renderContext);
-        return sb;
+        return renderChildrenToPlainText(getChildren(tree), renderContext);
     }
 
     @Override

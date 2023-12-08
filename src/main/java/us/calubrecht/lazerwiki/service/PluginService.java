@@ -23,7 +23,7 @@ public class PluginService {
     @Autowired
     SiteService siteService;
 
-    List<Plugin> plugins = new ArrayList<>();
+    final List<Plugin> plugins = new ArrayList<>();
 
 
     public void registerPlugin(Plugin plugin) {
@@ -46,6 +46,7 @@ public class PluginService {
         });
     }
 
+    @SuppressWarnings("unchecked")
     public String getEditToolbarDefs(String host) {
         List<String> blackListedPlugins = Optional.ofNullable(
                 (List<String>) siteService.getSettingForHostname(host, "pluginBlacklist")).orElse(Collections.emptyList());

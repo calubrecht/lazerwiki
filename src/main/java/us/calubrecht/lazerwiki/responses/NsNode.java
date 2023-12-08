@@ -9,7 +9,7 @@ public class NsNode {
 
     final String fullNamespace;
 
-    boolean writable;
+    final boolean writable;
 
     public NsNode(String namespace, boolean writable) {
         String[] namespaces = namespace.split(":");

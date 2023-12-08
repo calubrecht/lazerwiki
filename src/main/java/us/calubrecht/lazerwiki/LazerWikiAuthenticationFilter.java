@@ -59,10 +59,7 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
         String username = map.get("username").toString();
         String password = map.get("password").toString();
 
-        // TODO Auto-generated method stub
-        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
-                username, password);
-        return authRequest;
+        return new UsernamePasswordAuthenticationToken(username, password);
     }
 
     private static class ForwardSuccessHandler extends SimpleUrlAuthenticationSuccessHandler

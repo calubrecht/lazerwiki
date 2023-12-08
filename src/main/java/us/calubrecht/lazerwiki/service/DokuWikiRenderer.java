@@ -3,9 +3,6 @@ package us.calubrecht.lazerwiki.service;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.RenderResult;
@@ -14,10 +11,8 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
-import us.calubrecht.lazerwiki.service.renderhelpers.doku.HeaderRenderer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +39,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     }
 
     String renderToString(ParseTree tree, RenderContext context) {
-        StringBuffer outBuffer = new StringBuffer();
+        StringBuilder outBuffer = new StringBuilder();
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
         Map<String, Object> renderState = context.renderState();
@@ -52,7 +47,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
-            if (lastChildClass != null && lastChildClass != renderer.getAdditiveClass() )
+            if (lastChildClass != null && !lastChildClass.equals(renderer.getAdditiveClass()))
             {
                 AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass, childrenToMerge.get(0));
                 outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
@@ -83,7 +78,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     }
 
     public String renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        StringBuffer outBuffer = new StringBuffer();
+        StringBuilder outBuffer = new StringBuilder();
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);

@@ -20,8 +20,7 @@ public class SessionsController {
     @GetMapping("username")
     public UserDTO username(Principal principal, HttpServletRequest request) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
-        UserDTO user = new UserDTO(principal.getName(), url.getHost(), null);
-        return user;
+        return new UserDTO(principal.getName(), url.getHost(), null);
     }
 
     @PostMapping("logout")

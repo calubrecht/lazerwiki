@@ -26,7 +26,7 @@ class PasswordUtilTest {
     }
 
     @Test
-    void testMain() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    void testMain() {
         PasswordUtil.main(new String[]{"somePassword"});
         String firstHash = outContent.toString().trim();
         outContent.reset();

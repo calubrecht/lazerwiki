@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public abstract class ListRenderer extends AdditiveTreeRenderer {
     private final String listTag;
 
-    Map<String, Class<? extends ParseTree>> tokenMapping = Map.of(
+    final Map<String, Class<? extends ParseTree>> tokenMapping = Map.of(
             "-", DokuwikiParser.Olist_itemContext.class, "*", DokuwikiParser.Ulist_itemContext.class);
 
     public ListRenderer(String listTag) {

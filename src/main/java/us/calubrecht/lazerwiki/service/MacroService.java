@@ -23,7 +23,7 @@ import java.util.*;
 @Service
 public class MacroService {
     final Logger logger = LogManager.getLogger(getClass());
-    Map<String, Macro> macros = new HashMap<>();
+    final Map<String, Macro> macros = new HashMap<>();
 
     @Autowired
     MacroCssService macroCssService;
@@ -135,6 +135,7 @@ public class MacroService {
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             if (pageCache != null) { // In this case, ignore useCache flag
                 Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
+                renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
                 return Pair.of(pageCache.renderedCache, renderState);
             }
             return doRender(page);

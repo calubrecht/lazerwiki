@@ -40,7 +40,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testCreateUser() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public void testCreateUser() {
         when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
         userService.addUser("Bob", "password",  List.of(LazerWikiAuthenticationManager.USER));
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);

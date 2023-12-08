@@ -149,7 +149,7 @@ public class MediaService {
     }
     NsNode getNsNode(String site, String rootNS, List<MediaRecord> mediaRecords, String userName) {
         List<String> namespaces = getNamespaces(rootNS, mediaRecords);
-        List<NsNode> nodes = new ArrayList();
+        List<NsNode> nodes = new ArrayList<>();
         namespaces.forEach(ns ->
                 nodes.add(getNsNode(site, ns, mediaRecords, userName)));
         NsNode node = new NsNode(rootNS, namespaceService.canUploadInNamespace(site, rootNS, userName));

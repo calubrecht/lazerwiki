@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 @SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
@@ -130,7 +131,7 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testCanGetDefaultRendererForUnknownClass() {
-        assertEquals(null, underTest.renderers.getRenderer(Integer.class, null).getTargets());
+        assertNull(underTest.renderers.getRenderer(Integer.class, null).getTargets());
     }
 
     @Test
@@ -312,15 +313,32 @@ public class DokuWikiRendererTest {
     public void testRenderNestedLists() {
         String input1 = " - Simple List\n  -Deeper List\n   * DeepestList\n";
         assertEquals(
-                "<div><ol>\n<li>Simple List</li>\n<ol>\n<li>Deeper List</li>\n<ul>\n<li>DeepestList</li>\n</ul>\n</ol>" +
-                        "\n</ol></div>",
+                """
+                        <div><ol>
+                        <li>Simple List</li>
+                        <ol>
+                        <li>Deeper List</li>
+                        <ul>
+                        <li>DeepestList</li>
+                        </ul>
+                        </ol>
+                        </ol></div>""",
                 doRender(input1)
         );
 
         String input2 = " - Simple List\n *List Changes Type\n   * DeepestList\n * and backout\n";
         assertEquals(
-                "<div><ol>\n<li>Simple List</li>\n</ol>\n<ul>\n<li>List Changes Type</li>\n<ul>\n<li>DeepestList</li>\n" +
-                        "</ul>\n<li>and backout</li>\n</ul></div>",
+                """
+                        <div><ol>
+                        <li>Simple List</li>
+                        </ol>
+                        <ul>
+                        <li>List Changes Type</li>
+                        <ul>
+                        <li>DeepestList</li>
+                        </ul>
+                        <li>and backout</li>
+                        </ul></div>""",
                 doRender(input2)
         );
     }
@@ -373,7 +391,7 @@ public class DokuWikiRendererTest {
 
         String input4 = "This has no title\n";
         result = underTest.renderWithInfo(input4, "host", "site", "");
-        assertEquals(null, result.getTitle());
+        assertNull(result.getTitle());
 
         String input5 = "=== This is the title===\n==== This is just another header ====\n";
         result = underTest.renderWithInfo(input5, "host", "site", "");

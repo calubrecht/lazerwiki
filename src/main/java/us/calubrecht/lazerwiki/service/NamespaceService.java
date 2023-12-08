@@ -33,7 +33,7 @@ public class NamespaceService {
         Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
         if (nsObj == null ) {
             String parentNS = parentNamespace(namespace);
-            return parentNS == null ? true : canReadNamespace(site, parentNS, userName);
+            return parentNS == null || canReadNamespace(site, parentNS, userName);
         }
 
         Set<Namespace.RESTRICTION_TYPE> readable = Set.of(Namespace.RESTRICTION_TYPE.OPEN, Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED);
@@ -46,7 +46,7 @@ public class NamespaceService {
         }
 
         User user = userService.getUser(userName);
-        List<String> roles = user.roles.stream().map(role -> role.role).collect(Collectors.toList());
+        List<String> roles = user.roles.stream().map(role -> role.role).toList();
         List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_WRITE:" + site + ":" + namespace, "ROLE_READ:" + site + ":" + namespace);
         List<String> intersection = new ArrayList<>(roles);
         intersection.retainAll(necessaryRoles);
@@ -61,7 +61,7 @@ public class NamespaceService {
         Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
         if (nsObj == null ) {
             String parentNS = parentNamespace(namespace);
-            return parentNS == null ? true : canWriteNamespace(site, parentNS, userName);
+            return parentNS == null || canWriteNamespace(site, parentNS, userName);
         }
 
         if (nsObj.restriction_type == Namespace.RESTRICTION_TYPE.OPEN) {
@@ -69,7 +69,7 @@ public class NamespaceService {
         }
 
         User user = userService.getUser(userName);
-        List<String> roles = user.roles.stream().map(role -> role.role).collect(Collectors.toList());
+        List<String> roles = user.roles.stream().map(role -> role.role).toList();
         List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_WRITE:" + site + ":" + namespace);
         List<String> intersection = new ArrayList<>(roles);
         intersection.retainAll(necessaryRoles);
@@ -82,7 +82,7 @@ public class NamespaceService {
             return false;
         }
         User user = userService.getUser(userName);
-        List<String> roles = user.roles.stream().map(role -> role.role).collect(Collectors.toList());
+        List<String> roles = user.roles.stream().map(role -> role.role).toList();
         List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_DELETE:" + site);
         List<String> intersection = new ArrayList<>(roles);
         intersection.retainAll(necessaryRoles);
@@ -95,7 +95,7 @@ public class NamespaceService {
             return false;
         }
         User user = userService.getUser(userName);
-        List<String> roles = user.roles.stream().map(role -> role.role).collect(Collectors.toList());
+        List<String> roles = user.roles.stream().map(role -> role.role).toList();
         List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_UPLOAD:" + site);
         List<String> intersection = new ArrayList<>(roles);
         intersection.retainAll(necessaryRoles);
@@ -104,14 +104,13 @@ public class NamespaceService {
     }
 
     public List<PageDesc>  filterReadablePages(List<PageDesc> allValid, String site, String userName) {
-        Set<String> unreadableNamespaces = allValid.stream().map(p -> p.getNamespace()).distinct().
+        Set<String> unreadableNamespaces = allValid.stream().map(PageDesc::getNamespace).distinct().
                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
         return allValid.stream().filter(p -> !unreadableNamespaces.contains(p.getNamespace())).toList();
     }
 
     public List<MediaRecord> filterReadableMedia(List<MediaRecord> allValid, String site, String userName) {
-        List vv2 = allValid;
-        Set<String> unreadableNamespaces = allValid.stream().map(m -> m.getNamespace()).distinct().
+        var unreadableNamespaces = allValid.stream().map(MediaRecord::getNamespace).distinct().
                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
         return allValid.stream().filter(m -> !unreadableNamespaces.contains(m.getNamespace())).toList();
     }

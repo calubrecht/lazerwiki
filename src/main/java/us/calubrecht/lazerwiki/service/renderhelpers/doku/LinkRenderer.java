@@ -76,6 +76,7 @@ public class LinkRenderer extends TreeRenderer {
         return !(link.toLowerCase().startsWith("https://") || link.toLowerCase().startsWith("http://"));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public StringBuffer render(ParseTree tree, RenderContext renderContext) {
         DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;

@@ -41,7 +41,7 @@ public class AdminUserController {
     UserService userService;
 
     @PostMapping("createNewAdmin")
-    public ResponseEntity<String> createNewAdmin(HttpServletRequest request, @RequestBody Map<String, String> body) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public ResponseEntity<String> createNewAdmin(HttpServletRequest request, @RequestBody Map<String, String> body) {
         String realIPHeader = request.getHeader("X-Real-IP");
         if (realIPHeader != null) {
             // This request has been forwarded from a proxy. Deny.

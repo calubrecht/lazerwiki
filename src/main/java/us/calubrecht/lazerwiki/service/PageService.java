@@ -154,24 +154,24 @@ public class PageService {
     }
 
     List<String> getNamespaces(String rootNS, List<PageDesc> pages) {
-        return pages.stream().map(p -> p.getNamespace()).distinct().flatMap(ns -> {
+        return pages.stream().map(PageDesc::getNamespace).distinct().flatMap(ns -> {
             List<String> parts = List.of(ns.split(":"));
             List<String> namespaces = new ArrayList<>();
             if (parts.size() == 1) {
                 return List.of(ns).stream();
             }
             for ( int i = 0 ; i <= parts.size(); i++) {
-                String namespace = parts.subList(0, i).stream().collect(Collectors.joining(":"));
+                String namespace = String.join(":", parts.subList(0, i));
                 namespaces.add(namespace);
             }
             return namespaces.stream();
         }).distinct().filter(ns -> ns.startsWith(rootNS) && !ns.equals(rootNS)).
-                filter(ns -> ns.substring(rootNS.length() + 1).indexOf(":") == -1).
+                filter(ns -> !ns.substring(rootNS.length() + 1).contains(":")).
                 sorted().toList();
     }
     NsNode getNsNode(String rootNS, List<PageDesc> pages) {
         List<String> namespaces = getNamespaces(rootNS, pages);
-        List<NsNode> nodes = new ArrayList();
+        List<NsNode> nodes = new ArrayList<>();
         namespaces.forEach(ns ->
                 nodes.add(getNsNode(ns, pages)));
         NsNode node = new NsNode(rootNS, false);
@@ -190,7 +190,7 @@ public class PageService {
     public List<String> getAllPagesFlat(String host, String userName) {
         String site = siteService.getSiteForHostname(host);
         List<PageDesc> pages = namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
-        return pages.stream().map(pd -> pd.getDescriptor()).toList();
+        return pages.stream().map(PageDesc::getDescriptor).toList();
     }
 
     public List<String> getAllTags(String host, String userName) {
@@ -199,7 +199,6 @@ public class PageService {
     }
 
     public List<PageDesc> searchPages(String host, String userName, String searchTerm) {
-        String site = siteService.getSiteForHostname(host);
         String tagName = searchTerm.split(":")[1];
         return searchPages(host, userName, Map.of("tag", tagName));
     }
