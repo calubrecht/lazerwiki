@@ -85,17 +85,17 @@ link:
 
 bold_span
   :
-    BOLD_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? BOLD_TOKEN
+    BOLD_TOKEN (all_char | link | PIPE | NEWLINE | no_bold_span)+? BOLD_TOKEN
   ;
 
 italic_span
   :
-    ITALIC_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? ITALIC_TOKEN
+    ITALIC_TOKEN (all_char | link | PIPE | NEWLINE | no_italic_span)+? ITALIC_TOKEN
   ;
 
 underline_span
   :
-      UNDERLINE_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? UNDERLINE_TOKEN
+      UNDERLINE_TOKEN (all_char | link | PIPE | NEWLINE | no_underline_span)+? UNDERLINE_TOKEN
   ;
 
 monospace_span
@@ -166,6 +166,22 @@ styled_span
   :
     (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span )
   ;
+
+// Can create "no_x_span" for other styled_spans, but not that worried about them, less used.
+no_bold_span
+:
+( italic_span | underline_span | monospace_span| sup_span| sub_span| del_span )
+;
+
+no_italic_span
+  :
+    (bold_span  | underline_span | monospace_span| sup_span| sub_span| del_span )
+  ;
+
+no_underline_span
+   :
+      (bold_span | italic_span  | monospace_span| sup_span| sub_span| del_span )
+   ;
 
 broken_span
  :
