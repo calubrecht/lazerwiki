@@ -78,33 +78,31 @@ public class LinkRenderer extends TreeRenderer {
 
     @SuppressWarnings("unchecked")
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         String linkTarget = getLinkTarget(tree);
         String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
         if (isInternal(linkTarget)) {
             ((Set<String>)renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(linkTarget);
         }
         String cssClass = getCssClass(linkTarget, renderContext.host());
-        return new StringBuffer("<a class=\"%s\" href=\"%s\">%s</a>".
+        return new StringBuilder("<a class=\"%s\" href=\"%s\">%s</a>".
                 formatted(cssClass, linkURL, getLinkDisplay(tree, linkTarget, renderContext)));
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        DokuwikiParser.LinkContext context = (DokuwikiParser.LinkContext)tree;
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         String linkTarget = getLinkTarget(tree);
         if (tree.getChildCount() > 3) {
-            StringBuffer linkText = renderChildrenToPlainText(getChildren(tree, 2, 3), renderContext);
+            StringBuilder linkText = renderChildrenToPlainText(getChildren(tree, 2, 3), renderContext);
             if (!linkText.toString().isBlank()) {
                 return linkText;
             }
             // Fall through
         }
         if (isInternal(linkTarget)) {
-            return new StringBuffer(pageService.getTitle(renderContext.host(), linkTarget));
+            return new StringBuilder(pageService.getTitle(renderContext.host(), linkTarget));
         }
-        return new StringBuffer(linkTarget);
+        return new StringBuilder(linkTarget);
     }
 
     @Override
@@ -119,13 +117,13 @@ public class LinkRenderer extends TreeRenderer {
             return List.of(DokuwikiParser.Link_displayContext.class);
         }
 
-        public StringBuffer render(ParseTree tree, RenderContext renderContext) {
+        public StringBuilder render(ParseTree tree, RenderContext renderContext) {
             // Strip leading |
             return renderChildren(getChildren(tree, 1, tree.getChildCount()), renderContext);
         }
 
         @Override
-        public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
             return renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()), renderContext);
         }
     }

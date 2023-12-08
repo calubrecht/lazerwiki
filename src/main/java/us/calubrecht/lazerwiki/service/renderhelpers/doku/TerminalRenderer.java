@@ -18,13 +18,13 @@ public class TerminalRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         TerminalNodeImpl node = (TerminalNodeImpl)tree;
-        return node.getSymbol().getType() == Token.EOF ? new StringBuffer() : new StringBuffer(tree.getText());
+        return node.getSymbol().getType() == Token.EOF ? new StringBuilder() : new StringBuilder(tree.getText());
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         return render(tree, renderContext);
     }
 }

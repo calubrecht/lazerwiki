@@ -9,8 +9,6 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class MacroRenderer extends TreeRenderer {
@@ -24,14 +22,14 @@ public class MacroRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext context) {
+    public StringBuilder render(ParseTree tree, RenderContext context) {
         String treeText = tree.getText();
         String innerText = treeText.substring("~~MACRO~~".length(), treeText.length() - "~~/MACRO~~".length());
-        return new StringBuffer(macroService.renderMacro(innerText, context));
+        return new StringBuilder(macroService.renderMacro(innerText, context));
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        return new StringBuffer();
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return new StringBuilder();
     }
 }

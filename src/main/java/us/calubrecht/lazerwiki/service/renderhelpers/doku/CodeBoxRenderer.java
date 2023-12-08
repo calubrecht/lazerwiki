@@ -19,18 +19,18 @@ public class CodeBoxRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         throw new RuntimeException("Not Implemented");
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        return new StringBuffer(renderChildrenToPlainText(getChildren(tree), renderContext).toString().trim()).append('\n');
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return new StringBuilder(renderChildrenToPlainText(getChildren(tree), renderContext).toString().trim()).append('\n');
     }
 
     @Override
-    public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
-        StringBuffer ret = new StringBuffer();
+    public StringBuilder render(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuilder ret = new StringBuilder();
         ret.append("<pre class=\"code\">");
         trees.forEach(t ->
         {

@@ -9,7 +9,6 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,19 +24,19 @@ public class ImageRenderer  extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext).toString();
         return parseInner(inner);
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext).toString();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
         if (innards.get(INNARD_TOKEN.TITLE) != null) {
-            return new StringBuffer(innards.get(INNARD_TOKEN.TITLE));
+            return new StringBuilder(innards.get(INNARD_TOKEN.TITLE));
         }
-        return new StringBuffer(innards.get(INNARD_TOKEN.FILE_NAME));
+        return new StringBuilder(innards.get(INNARD_TOKEN.FILE_NAME));
     }
 
     final Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w.:\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");
@@ -61,10 +60,8 @@ public class ImageRenderer  extends TreeRenderer {
 
     }
 
-    protected StringBuffer renderChildren(List<ParseTree> trees, RenderContext renderContext) {
-        StringBuffer outBuffer = new StringBuffer();
-        List<ParseTree> childrenToMerge = new ArrayList<>();
-        String lastChildClass = null;
+    protected StringBuilder renderChildren(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuilder outBuffer = new StringBuilder();
         for(ParseTree child: trees) {
             outBuffer.append(child.getText());
         }
@@ -85,8 +82,8 @@ public class ImageRenderer  extends TreeRenderer {
         return "";
     }
 
-    StringBuffer parseInner(String inner) {
-        StringBuffer sb = new StringBuffer();
+    StringBuilder parseInner(String inner) {
+        StringBuilder sb = new StringBuilder();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
         String className = "media";
         String imageTok = innards.get(INNARD_TOKEN.FILE_TOK);
@@ -100,9 +97,9 @@ public class ImageRenderer  extends TreeRenderer {
             className = "medialeft";
         }
         sb.append("<img src=\"/_media/");
-        sb.append(innards.get(INNARD_TOKEN.FILE_NAME).trim() + getSizeTok(innards.get(INNARD_TOKEN.OPTIONS)));
+        sb.append(innards.get(INNARD_TOKEN.FILE_NAME).trim()).append(getSizeTok(innards.get(INNARD_TOKEN.OPTIONS)));
         String titleText = Strings.isBlank(innards.get(INNARD_TOKEN.TITLE)) ? "" : " title=\"" + innards.get(INNARD_TOKEN.TITLE).trim() + "\"";
-        sb.append("\" class=\"" + className + "\"" + titleText + " loading=\"lazy\">");
+        sb.append("\" class=\"").append(className).append("\"").append(titleText).append(" loading=\"lazy\">");
         return sb;
     }
 }

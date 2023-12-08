@@ -13,8 +13,8 @@ public abstract class AbstractSpanRenderer extends TreeRenderer {
         this.endTag = endTag;
     }
 
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
+        StringBuilder sb = new StringBuilder();
         sb.append(startTag);
         sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
         sb.append(endTag);
@@ -22,8 +22,8 @@ public abstract class AbstractSpanRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        StringBuilder sb = new StringBuilder();
         sb.append(renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
         return sb;
     }

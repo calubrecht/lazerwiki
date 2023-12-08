@@ -7,7 +7,6 @@ import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,8 +40,8 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
-    public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
+    public StringBuilder render(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuilder sb = new StringBuilder();
         ListSpec currentSpec = getListSpec(trees.get(0));
         sb.append("<%s>\n".formatted(currentSpec.listType()));
         while (!trees.isEmpty()) {
@@ -73,8 +72,8 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
 
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
+        StringBuilder sb = new StringBuilder();
         Optional<ParseTree> content = getChildren(tree).stream().filter(t -> t.getClass() == DokuwikiParser.Inner_textContext.class).findFirst();
         content.ifPresent(pt -> {
             TreeRenderer renderer = renderers.getRenderer(pt.getClass(), pt);
@@ -84,7 +83,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         return renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()).stream().filter(t -> ! (t instanceof TerminalNodeImpl)).collect(Collectors.toList()), renderContext);
     }
 

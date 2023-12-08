@@ -10,10 +10,10 @@ import java.util.List;
  */
 public abstract class AdditiveTreeRenderer extends TreeRenderer {
 
-    public abstract StringBuffer render(List<ParseTree> trees, RenderContext renderContext);
+    public abstract StringBuilder render(List<ParseTree> trees, RenderContext renderContext);
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         throw new RuntimeException("Not Implemented");
     }
 

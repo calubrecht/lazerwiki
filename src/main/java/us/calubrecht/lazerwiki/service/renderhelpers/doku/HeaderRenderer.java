@@ -39,16 +39,15 @@ public class HeaderRenderer extends TreeRenderer {
 
     ParseTree getHeaderTok(ParseTree header) {
         return IntStream.range(0, header.getChildCount()).
-                mapToObj(idx -> header.getChild(idx)).
+                mapToObj(header::getChild).
                 filter(child -> child.getClass() == DokuwikiParser.Header_tokContext.class).findFirst().get();
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        DokuwikiParser.HeaderContext context = (DokuwikiParser.HeaderContext)tree;
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         int headerSize  = getHeaderTok(tree).getText().length();
         String hTag = "h" + (7 - headerSize);
-        StringBuffer outBuffer = new StringBuffer();
+        StringBuilder outBuffer = new StringBuilder();
         outBuffer.append("<").append(hTag).append(">");
         outBuffer.append(renderChildren(getChildren(tree), renderContext).toString().strip());
         outBuffer.append("</").append(hTag).append(">\n");
@@ -62,7 +61,7 @@ public class HeaderRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         return renderChildrenToPlainText(getChildren(tree), renderContext).append("\n");
     }
 }

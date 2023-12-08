@@ -12,9 +12,9 @@ public abstract class TreeRenderer {
 
     public abstract List<Class<? extends ParseTree>> getTargets();
 
-    public abstract StringBuffer render(ParseTree tree, RenderContext renderContext);
+    public abstract StringBuilder render(ParseTree tree, RenderContext renderContext);
 
-    public abstract StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext);
+    public abstract StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext);
 
     public boolean isAdditive() {
         return false;
@@ -50,8 +50,8 @@ public abstract class TreeRenderer {
         return children;
     }
 
-    protected StringBuffer renderChildren(List<ParseTree> trees, RenderContext renderContext) {
-        StringBuffer outBuffer = new StringBuffer();
+    protected StringBuilder renderChildren(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuilder outBuffer = new StringBuilder();
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
         for(ParseTree child: trees) {
@@ -77,8 +77,8 @@ public abstract class TreeRenderer {
         return outBuffer;
     }
 
-    protected StringBuffer renderChildrenToPlainText(List<ParseTree> trees, RenderContext renderContext) {
-        StringBuffer outBuffer = new StringBuffer();
+    protected StringBuilder renderChildrenToPlainText(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuilder outBuffer = new StringBuilder();
         for(ParseTree child: trees) {
             TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
             outBuffer.append(renderer.renderToPlainText(child, renderContext));
@@ -99,12 +99,12 @@ public abstract class TreeRenderer {
         }
 
         @Override
-        public StringBuffer render(ParseTree tree, RenderContext renderContext) {
+        public StringBuilder render(ParseTree tree, RenderContext renderContext) {
             return renderChildren(getChildren(tree), renderContext);
         }
 
         @Override
-        public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
             return renderChildrenToPlainText(getChildren(tree), renderContext);
         }
     }

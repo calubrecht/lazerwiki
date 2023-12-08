@@ -17,8 +17,8 @@ public class TableRenderer extends FlatteningRenderer {
     static final Set<String> DATA_TAGS = Set.of("|", "^");
 
     @Override
-    public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
-        StringBuffer sb = new StringBuffer();
+    public StringBuilder render(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuilder sb = new StringBuilder();
         sb.append("<table class=\"lazerTable\"><tbody>");
         List<ParseTree> children = trees.stream().flatMap(
                 (t) -> flattenChildren(t, true).stream()).toList();
@@ -84,7 +84,7 @@ public class TableRenderer extends FlatteningRenderer {
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         return renderChildrenToPlainText(getChildren(tree), renderContext);
     }
 

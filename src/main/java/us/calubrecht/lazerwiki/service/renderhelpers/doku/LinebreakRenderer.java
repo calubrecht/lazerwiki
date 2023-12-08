@@ -17,12 +17,12 @@ public class LinebreakRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        return new StringBuffer("<br>");
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
+        return new StringBuilder("<br>");
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        return new StringBuffer("\n");
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        return new StringBuilder("\n");
     }
 }

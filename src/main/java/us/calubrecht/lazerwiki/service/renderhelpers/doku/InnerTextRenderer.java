@@ -16,13 +16,13 @@ public class InnerTextRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer render(ParseTree tree, RenderContext renderContext) {
-        StringBuffer outBuffer = new StringBuffer();
-        StringBuffer currentBuffer = new StringBuffer();
+    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
+        StringBuilder outBuffer = new StringBuilder();
+        StringBuilder currentBuffer = new StringBuilder();
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
-            StringBuffer currentRender = renderer.render(child, renderContext);
+            StringBuilder currentRender = renderer.render(child, renderContext);
             if (renderer.shouldParentSanitize()) {
                 currentBuffer.append(currentRender);
             } else {
@@ -37,7 +37,7 @@ public class InnerTextRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext context) {
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext context) {
         return renderChildrenToPlainText(getChildren(tree), context);
     }
 }

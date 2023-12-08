@@ -31,13 +31,13 @@ public class RowRenderer extends FlatteningRenderer {
     }
 
     @Override
-    public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         return renderChildrenToPlainText(getChildren(tree), renderContext);
     }
 
     @Override
-    public StringBuffer render(List<ParseTree> trees, RenderContext renderContext) {
-        StringBuffer ret = new StringBuffer();
+    public StringBuilder render(List<ParseTree> trees, RenderContext renderContext) {
+        StringBuilder ret = new StringBuilder();
         ret.append("<div>");
         List<ParseTree> children = trees.stream().flatMap(
                 (t) -> flattenChildren(t, false).stream()).collect(Collectors.toList());
