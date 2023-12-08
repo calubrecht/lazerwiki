@@ -21,12 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
-@SpringBootTest(classes = {AdminService.class})
+@SpringBootTest(classes = {RegenCacheService.class})
 @ActiveProfiles("test")
-class AdminServiceTest {
+class RegenCacheServiceTest {
 
     @Autowired
-    AdminService underTest;
+    RegenCacheService underTest;
 
     @MockBean
     PageRepository pageRepository;
@@ -102,5 +102,35 @@ class AdminServiceTest {
         verify(pageCacheRepository,times(2)).save(argument.capture());
         assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
         assertEquals("text2 rendered", argument.getAllValues().get(1).renderedCache);
+    }
+
+    @Test
+    void regenCachesForBacklinks() {
+        List<PageDesc> pds = List.of(new PageServiceTest.PageDescImpl("", "page1"), new PageServiceTest.PageDescImpl("ns", "page2"));
+        when(pageRepository.getAllValid("default")).thenReturn(pds);
+        Page page1 = new Page();
+        page1.setPagename("page1");
+        page1.setText("text1");
+        Page page2 = new Page();
+        page2.setPagename("page2");
+        page2.setText("text2");
+
+        when(linkService.getBacklinks(any(), any())).thenReturn(List.of("page1", "page2"));
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page2"), eq(false))).thenReturn(page2);
+        when(renderer.renderWithInfo(any(), any(), any(), any())).thenAnswer(inv -> {
+            List<String> links = new ArrayList<>();
+            String text = inv.getArgument(0, String.class);
+            return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links));
+        });
+
+        underTest.regenCachesForBacklinks("default", "linkedPage");
+
+        ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
+        verify(pageCacheRepository, never()).deleteBySite("default");
+        verify(pageCacheRepository,times(2)).save(argument.capture());
+        assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
+        assertEquals("text2 rendered", argument.getAllValues().get(1).renderedCache);
+
     }
 }

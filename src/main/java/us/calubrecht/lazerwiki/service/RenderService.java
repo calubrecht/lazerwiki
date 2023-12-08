@@ -24,6 +24,9 @@ public class RenderService {
     PageService pageService;
 
     @Autowired
+    PageUpdateService pageUpdateService;
+
+    @Autowired
     SiteService siteService;
 
     public PageData getRenderedPage(String host, String sPageDescriptor, String userName) {
@@ -74,7 +77,7 @@ public class RenderService {
         String site = siteService.getSiteForHostname(host);
         RenderResult res = renderer.renderWithInfo(text, host, site, userName);
         Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
-        pageService.savePage(host, sPageDescriptor, text, tags, links, res.getTitle(), userName);
+        pageUpdateService.savePage(host, sPageDescriptor, text, tags, links, res.getTitle(), userName);
         pageService.saveCache(host, sPageDescriptor, res);
     }
 

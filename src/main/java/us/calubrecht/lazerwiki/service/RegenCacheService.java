@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class AdminService {
+public class RegenCacheService {
     final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
@@ -59,6 +59,25 @@ public class AdminService {
             newCache.plaintextCache = res.plainText();
             newCache.useCache = !(Boolean)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
             logger.info("Caching rendered page for " + pd.getNamespace() + ":" + pd.getPagename() + " useCache=" + newCache.useCache);
+            pageCacheRepository.save(newCache);
+        });
+    }
+
+    public void regenCachesForBacklinks(String site, String linkedPage) {
+        logger.info("Regening cache for links to " +site + "-" + linkedPage);
+        List<String> backlinks = linkService.getBacklinks(site, linkedPage);
+        backlinks.forEach(link -> {
+            PageDescriptor pd = PageService.decodeDescriptor(link);
+            Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
+            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, UserService.SYS_USER);
+            PageCache newCache = new PageCache();
+            newCache.site = site;
+            newCache.namespace = pd.namespace();
+            newCache.pageName = pd.pageName();
+            newCache.renderedCache = res.renderedText();
+            newCache.plaintextCache = res.plainText();
+            newCache.useCache = !(Boolean)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
+            logger.info("Caching rendered page for " + pd.namespace() + ":" + pd.pageName() + " useCache=" + newCache.useCache);
             pageCacheRepository.save(newCache);
         });
     }

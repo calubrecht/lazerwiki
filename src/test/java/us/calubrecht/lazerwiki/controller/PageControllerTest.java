@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.PageService;
+import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
 
 import java.util.List;
@@ -31,6 +32,9 @@ public class PageControllerTest {
 
     @MockBean
     PageService pageService;
+
+    @MockBean
+    PageUpdateService pageUpdateService;
 
     @MockBean
     RenderService renderService;
@@ -122,7 +126,7 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageService).deletePage(eq("localhost"), eq("testPage"), eq("Bob"));
+        verify(pageUpdateService).deletePage(eq("localhost"), eq("testPage"), eq("Bob"));
     }
 
     @Test

@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.requests.SavePageRequest;
 import us.calubrecht.lazerwiki.service.PageService;
+import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
@@ -24,6 +25,9 @@ import java.util.Optional;
 public class PageController {
     @Autowired
     PageService pageService;
+
+    @Autowired
+    PageUpdateService pageUpdateService;
 
     @Autowired
     RenderService renderService;
@@ -47,7 +51,7 @@ public class PageController {
     public void deletePage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request) throws MalformedURLException, PageWriteException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
-        pageService.deletePage(url.getHost(), pageDescriptor, userName);
+        pageUpdateService.deletePage(url.getHost(), pageDescriptor, userName);
     }
 
     @RequestMapping(value = "/listPages")

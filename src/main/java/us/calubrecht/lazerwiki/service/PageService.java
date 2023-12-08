@@ -13,10 +13,10 @@ import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional(rollbackFor = PageWriteException.class )
@@ -26,14 +26,9 @@ public class PageService {
     @Autowired
     PageRepository pageRepository;
 
-    @Autowired
-    IdRepository idRepository;
 
     @Autowired
     SiteService siteService;
-
-    @Autowired
-    EntityManagerProxy em;
 
     @Autowired
     NamespaceService namespaceService;
@@ -117,48 +112,12 @@ public class PageService {
         return new PageDescriptor(String.join(":", tokens), pageName);
     }
 
-    @Transactional
-    public void savePage(String host, String sPageDescriptor, String text, Collection<String> tags, Collection<String> links, String title, String userName) throws PageWriteException{
-        String site = siteService.getSiteForHostname(host);
-        // get Existing
-        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
-        if (!namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName)) {
-            throw new PageWriteException("You don't have permission to write this page.");
-        }
-        Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
-        long id = p == null ? getNewId() : p.getId();
-        long revision = p == null ? 1 : p.getRevision() + 1;
-        if (p != null ) {
-            p.setValidts(LocalDateTime.now());
-            pageRepository.save(p);
-            em.flush(); // Flush update to DB so we can do insert afterward
-        }
-        Page newP = new Page();
-        newP.setSite(site);
-        newP.setNamespace(pageDescriptor.namespace());
-        newP.setPagename(pageDescriptor.pageName());
-        newP.setText(text);
-        newP.setTitle(title);
-        newP.setId(id);
-        newP.setRevision(revision);
-        newP.setValidts(PageRepository.MAX_DATE);
-        newP.setModifiedBy(userName);
-        newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
-        pageRepository.save(newP);
-        linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
-    }
-
-    protected long getNewId() {
-
-      return idRepository.getNewId();
-    }
-
     List<String> getNamespaces(String rootNS, List<PageDesc> pages) {
         return pages.stream().map(PageDesc::getNamespace).distinct().flatMap(ns -> {
             List<String> parts = List.of(ns.split(":"));
             List<String> namespaces = new ArrayList<>();
             if (parts.size() == 1) {
-                return List.of(ns).stream();
+                return Stream.of(ns);
             }
             for ( int i = 0 ; i <= parts.size(); i++) {
                 String namespace = String.join(":", parts.subList(0, i));
@@ -217,40 +176,6 @@ public class PageService {
             return tagPages;
         }
         return Collections.emptyList();
-    }
-
-    @Transactional
-    public void deletePage(String host, String sPageDescriptor, String userName) throws PageWriteException {
-        String site = siteService.getSiteForHostname(host);
-        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
-        if (!namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) || sPageDescriptor.equals("")) {
-            throw new PageWriteException("You don't have permission to delete this page.");
-        }
-
-        Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pageDescriptor.namespace(), pageDescriptor.pageName(), false);
-        if (p == null) {
-            return;
-        }
-        long revision =  p.getRevision() + 1;
-        p.setValidts(LocalDateTime.now());
-        pageRepository.save(p);
-        em.flush(); // Flush update to DB so we can do insert afterward
-        Page newP = new Page();
-        newP.setSite(site);
-        newP.setNamespace(pageDescriptor.namespace());
-        newP.setPagename(pageDescriptor.pageName());
-        newP.setText("");
-        newP.setTitle("");
-        newP.setId(p.getId());
-        newP.setRevision(revision);
-        newP.setValidts(PageRepository.MAX_DATE);
-        newP.setModifiedBy(userName);
-        newP.setTags(Collections.emptyList());
-        newP.setDeleted(true);
-        pageRepository.save(newP);
-        linkService.deleteLinks(site, sPageDescriptor);
-        PageCache.PageCacheKey key = new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
-        pageCacheRepository.deleteById(key);
     }
 
     String getTemplate(String site, PageDescriptor pageDescriptor) {

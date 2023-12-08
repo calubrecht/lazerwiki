@@ -32,7 +32,7 @@ public class WebSecurityConfig {
         http.csrf((csrf) -> csrf
                 .ignoringRequestMatchers(createAdminMatcher)
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler())
+                .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()::handle)
         );
         http
                 .authorizeHttpRequests((authz) -> {

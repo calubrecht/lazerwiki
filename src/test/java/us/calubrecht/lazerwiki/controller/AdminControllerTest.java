@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserRole;
-import us.calubrecht.lazerwiki.service.AdminService;
+import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.util.List;
@@ -30,7 +30,7 @@ class AdminControllerTest {
     UserService userService;
 
     @MockBean
-    AdminService adminService;
+    RegenCacheService regenCacheService;
 
     @Test
     void regenLinkTable() throws Exception {
@@ -48,9 +48,9 @@ class AdminControllerTest {
                 andExpect(status().isOk());
         this.mockMvc.perform(post("/api/admin/regenLinkTable/default").principal(new UsernamePasswordAuthenticationToken("celia", ""))).
                 andExpect(status().isOk());
-        verify(adminService, times(2)).regenLinks("default");
+        verify(regenCacheService, times(2)).regenLinks("default");
         this.mockMvc.perform(post("/api/admin/regenLinkTable/default").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
                 andExpect(status().isUnauthorized());
-        verify(adminService, times(2)).regenLinks("default");
+        verify(regenCacheService, times(2)).regenLinks("default");
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import us.calubrecht.lazerwiki.model.User;
-import us.calubrecht.lazerwiki.service.AdminService;
+import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.security.Principal;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     @Autowired
-    AdminService adminService;
+    RegenCacheService regenCacheService;
 
     @Autowired
     UserService userService;
@@ -32,7 +32,7 @@ public class AdminController {
         if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + site)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        adminService.regenLinks(site);
+        regenCacheService.regenLinks(site);
         return ResponseEntity.ok().build();
     }
 
@@ -43,7 +43,7 @@ public class AdminController {
         if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + site)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        adminService.regenCache(site);
+        regenCacheService.regenCache(site);
         return ResponseEntity.ok().build();
     }
 }

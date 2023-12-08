@@ -28,6 +28,9 @@ public class RenderServiceTest {
     PageService pageService;
 
     @MockBean
+    PageUpdateService pageUpdateService;
+
+    @MockBean
     IMarkupRenderer renderer;
 
     @MockBean
@@ -74,7 +77,7 @@ public class RenderServiceTest {
                 new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title")));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
 
-        verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(),  Collections.emptySet(),"The Title","user");
+        verify(pageUpdateService).savePage("host", "pageName", "text",  Collections.emptyList(),  Collections.emptySet(),"The Title","user");
     }
 
 
@@ -86,7 +89,7 @@ public class RenderServiceTest {
         when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
                 new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title", RenderResult.RENDER_STATE_KEYS.LINKS.name(), links)));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
-        verify(pageService).savePage("host", "pageName", "text",  Collections.emptyList(),  links,"The Title","user");
+        verify(pageUpdateService).savePage("host", "pageName", "text",  Collections.emptyList(),  links,"The Title","user");
 
     }
 

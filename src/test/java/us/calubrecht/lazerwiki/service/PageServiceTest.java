@@ -52,9 +52,6 @@ public class PageServiceTest {
 
 
     @MockBean
-    EntityManagerProxy em;
-
-    @MockBean
     TagRepository tagRepository;
 
     @Test
@@ -181,79 +178,6 @@ public class PageServiceTest {
     }
 
     @Test
-    public void testSavePage() throws PageWriteException {
-        when(idRepository.getNewId()).thenReturn(55L);
-        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
-        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
-        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
-
-        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
-        ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
-        verify(pageRepository).save(pageCaptor.capture());
-        Page p = pageCaptor.getValue();
-        p.setTags(Collections.emptyList());
-        assertEquals("Some text", p.getText());
-        assertEquals(55L, p.getId());
-        assertEquals("site1", p.getSite());
-        assertEquals("someUser", p.getModifiedBy());
-    }
-
-    @Test
-    public void testSavePage_Existing() throws PageWriteException {
-        when(idRepository.getNewId()).thenReturn(55L);
-        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
-        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
-        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
-        Page p = new Page();
-        p.setText("This is raw page text");
-        p.setTitle("Title");
-        p.setId(10L);
-        p.setRevision(2L);
-        p.setSite("site1");
-        p.setTags(Collections.emptyList());
-        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
-                thenReturn(p);
-
-        pageService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
-        ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
-        verify(pageRepository, times(2)).save(pageCaptor.capture());
-
-        assertEquals(2, pageCaptor.getAllValues().size());
-        Page invalidatedPage = pageCaptor.getAllValues().get(0);
-        assertEquals("This is raw page text", invalidatedPage.getText());
-        assertEquals(10L, invalidatedPage.getId());
-        assertEquals(2L, invalidatedPage.getRevision());
-        assertEquals("site1", invalidatedPage.getSite());
-        Page newPage = pageCaptor.getAllValues().get(1);
-        assertEquals("Some text", newPage.getText());
-        assertEquals(10L, newPage.getId());
-        assertEquals(3L, newPage.getRevision());
-        assertEquals("site1", newPage.getSite());
-    }
-
-    @Test
-    public void testSavePage_unauthorized()  {
-        when(idRepository.getNewId()).thenReturn(55L);
-        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
-
-        assertThrows(PageWriteException.class, () ->
-                pageService.savePage("host1", "newPage", "Some text", null,  Collections.emptyList(),"Title","Joe"));
-    }
-
-    @Test
-    public void testSavePageWithLinks() throws PageWriteException {
-        when(idRepository.getNewId()).thenReturn(55L);
-        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
-        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
-        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
-
-        pageService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  List.of("page1", "page2"),"Title","someUser");
-
-        verify(linkService).setLinksFromPage("site1", "", "newPage",  List.of("page1", "page2"));
-    }
-
-
-    @Test
     public void testListPages() {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
@@ -363,43 +287,6 @@ public class PageServiceTest {
         assertEquals(0, results.size());
 
          verify(pageRepository, never()).getByTagname(anyString(), anyString());
-    }
-
-    @Test
-    public void testDeletePage() throws PageWriteException {
-        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("default");
-        when(namespaceService.canDeleteInNamespace(eq("default"), eq(""), eq("bob"))).thenReturn(true);
-        Page p = new Page();
-        p.setId(1000L);
-        p.setPagename("testPage");
-        p.setNamespace("");
-        p.setDeleted(false);
-        p.setRevision(10L);
-        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(eq("default"), eq(""), eq("testPage"), eq(false))).thenReturn(p);
-
-        assertThrows(PageWriteException.class, ()-> pageService.deletePage("localhost", "testPage", "frank"));
-
-        assertThrows(PageWriteException.class, ()-> pageService.deletePage("localhost", "", "bob"));
-
-        verify(linkService, never()).deleteLinks(anyString(), anyString());
-
-        pageService.deletePage("localhost", "unknownPage", "bob");
-        verify(linkService, never()).deleteLinks(anyString(), anyString());
-
-        pageService.deletePage("localhost", "testPage", "bob");
-        verify(linkService).deleteLinks(eq("default"), eq("testPage"));
-        ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
-        verify(pageRepository, times(2)).save(captor.capture());
-
-        assertEquals(2, captor.getAllValues().size());
-        Page invalidatedPage = captor.getAllValues().get(0);
-        assertEquals(1000L, invalidatedPage.getId());
-        assertEquals(10L, invalidatedPage.getRevision());
-        Page newPage = captor.getAllValues().get(1);
-        assertEquals("", newPage.getText());
-        assertEquals(1000L, newPage.getId());
-        assertEquals(11L, newPage.getRevision());
-        assertTrue(newPage.isDeleted());
     }
 
     @Test
