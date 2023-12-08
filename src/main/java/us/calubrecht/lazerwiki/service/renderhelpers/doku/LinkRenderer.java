@@ -67,7 +67,10 @@ public class LinkRenderer extends TreeRenderer {
 
     protected String getCssClass(String targetName, String host) {
         if (isInternal(targetName)) {
-            return pageService.exists(host, targetName) ? LINK_CLASS : MISSING_LINK_CLASS;
+            boolean exists =  pageService.exists(host, targetName);
+            logger.info("Does %s->%s exist? %s".formatted(host, targetName, exists));
+            return exists? LINK_CLASS : MISSING_LINK_CLASS;
+
         }
         return EXTERNAL_LINK_CLASS;
     }
