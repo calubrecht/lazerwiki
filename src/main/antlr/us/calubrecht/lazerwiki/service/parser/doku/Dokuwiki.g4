@@ -174,12 +174,12 @@ broken_span
 
 olist_item
   :
-    WS+ DASH WS* inner_text
+    WS+ DASH WS* (inner_text | styled_span)+
   ;
 
 ulist_item
   :
-    WS+ STAR WS* inner_text
+    WS+ STAR WS* (inner_text | styled_span)+
   ;
 
 row:
@@ -247,7 +247,7 @@ line_item
 ;
 
 line
-  : (ulist_item | olist_item | image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | image | broken_image | macro | broken_macro | line_break ) (line_item |  macro | broken_macro)*
+  : (ulist_item | olist_item) | ((image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | image | broken_image | macro | broken_macro | line_break ) (line_item |  macro | broken_macro)*)
   ;
 
 
