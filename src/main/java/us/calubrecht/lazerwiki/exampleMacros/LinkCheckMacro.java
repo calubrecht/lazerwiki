@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @CustomMacro
 public class LinkCheckMacro extends Macro{
 
-    String css = """
+    final String css = """
             table.linksTable, table.linksTable td, table.linksTable th {
               border: 1px solid;
             }

@@ -67,7 +67,7 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
 
     private static class ForwardSuccessHandler extends SimpleUrlAuthenticationSuccessHandler
     {
-        String url;
+        final String url;
 
         public ForwardSuccessHandler(String defaultHost, String url)
         {
@@ -86,24 +86,15 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
 
         }
 
-        private String stripTrailingSlash(String url)
-        {
-            if (url.endsWith("/"))
-            {
-                return url.substring(0, url.length() -1);
-            }
-            return url;
-        }
-
         protected String determineTargetUrl(HttpServletRequest request,
                                             HttpServletResponse response)
         {
             String oReferer = (String)request.getHeader("Referer");
 
             try {
-                URL referredUrl = new URL(oReferer);
                 if (oReferer != null)
                 {
+                    URL referredUrl = new URL(oReferer);
                     return (new URL(referredUrl.getProtocol(), referredUrl.getHost(), referredUrl.getPort(), url)).toString();
                 }
             } catch (MalformedURLException e) {
@@ -116,7 +107,7 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
 
     public static class MyMatcher implements RequestMatcher
     {
-        private RequestMatcher delegate_;
+        private final RequestMatcher delegate_;
         public MyMatcher(String defaultFilterProcessesUrl)
         {
             delegate_= new AndRequestMatcher(

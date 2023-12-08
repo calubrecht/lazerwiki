@@ -24,13 +24,13 @@ public class GlobalControllerAdvice {
             }
 
         }
-        String maxSize = Long.toString(maxBytes) +  " bytes";
+        String maxSize = maxBytes +  " bytes";
         if (maxBytes >= 1024) {
             double maxKB = maxBytes/1024.0;
-            maxSize = Double.toString(maxKB) + " KB";
+            maxSize = maxKB + " KB";
             if (maxKB >= 1024) {
                 double maxMB = maxKB/1024;
-                maxSize = Double.toString(maxMB) + " MB";
+                maxSize = maxMB + " MB";
             }
         }
 

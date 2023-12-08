@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class PluginService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
     @Value("#{'${lazerwiki.plugin.scan.packages}'.split(',')}")
     private List<String> pluginPackages;
 

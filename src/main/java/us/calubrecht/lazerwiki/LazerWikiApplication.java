@@ -16,7 +16,7 @@ import us.calubrecht.lazerwiki.controller.VersionController;
 
 @SpringBootApplication
 public class LazerWikiApplication  extends SpringBootServletInitializer {
-	Logger logger = LoggerFactory.getLogger(getClass());
+	final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public static void main(String[] args) {
 		SpringApplication.run(LazerWikiApplication.class, args);

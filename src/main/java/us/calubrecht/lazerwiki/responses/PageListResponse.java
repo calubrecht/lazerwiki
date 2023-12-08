@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 public class PageListResponse {
-    public Map<String, List<PageDesc>> pages;
+    final public Map<String, List<PageDesc>> pages;
 
-    public NsNode namespaces;
+    final public NsNode namespaces;
 
     public PageListResponse(Map<String, List<PageDesc>> pages, NsNode namespaces) {
         this.pages = pages;

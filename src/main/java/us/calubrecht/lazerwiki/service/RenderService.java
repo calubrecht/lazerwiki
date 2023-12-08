@@ -7,9 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.PageCache;
-import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.model.RenderResult;
-import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
@@ -17,7 +15,7 @@ import java.util.*;
 
 @Service
 public class RenderService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
     IMarkupRenderer renderer;
@@ -71,6 +69,7 @@ public class RenderService {
 
     }
 
+    @SuppressWarnings("unchecked")
     public void savePage(String host, String sPageDescriptor,String text, List<String> tags, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
         RenderResult res = renderer.renderWithInfo(text, host, site, userName);
@@ -91,7 +90,6 @@ public class RenderService {
         }
         catch (Exception e) {
             sw.stop();
-            long totalMillis = sw.getTime();
             logger.error("Render preview failed! host= " + host + " sPageDescriptor= " + sPageDescriptor + " user=" + userName + ".", e);
             String sanitizedSource =  StringEscapeUtils.escapeHtml4(text).replaceAll("&quot;", "\"");
 

@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
-import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
@@ -19,9 +18,9 @@ import java.util.regex.Pattern;
 
 @Component
 public class ImageRenderer  extends TreeRenderer {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
     @Override
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return List.of(DokuwikiParser.ImageContext.class);
     }
 
@@ -41,9 +40,9 @@ public class ImageRenderer  extends TreeRenderer {
         return new StringBuffer(innards.get(INNARD_TOKEN.FILE_NAME));
     }
 
-    Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w.:\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");
+    final Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w.:\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");
 
-    enum INNARD_TOKEN {FILE_NAME, FILE_TOK, OPTIONS, TITLE};
+    enum INNARD_TOKEN {FILE_NAME, FILE_TOK, OPTIONS, TITLE}
 
     Map<INNARD_TOKEN, String> splitInnards(String inner) {
         Map<INNARD_TOKEN, String> ret = new HashMap<>();
@@ -77,7 +76,7 @@ public class ImageRenderer  extends TreeRenderer {
         if (options == null) {
             return "";
         }
-        String toks[] = options.split("&");
+        String[] toks = options.split("&");
         for (String tok : toks) {
             if (SIZE_PATTERN.matcher(tok).matches()) {
                 return "?" + tok;

@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class ListRenderer extends AdditiveTreeRenderer {
-    private String listTag;
+    private final String listTag;
 
     Map<String, Class<? extends ParseTree>> tokenMapping = Map.of(
             "-", DokuwikiParser.Olist_itemContext.class, "*", DokuwikiParser.Ulist_itemContext.class);
@@ -78,7 +78,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
         Optional<ParseTree> content = getChildren(tree).stream().filter(t -> t.getClass() == DokuwikiParser.Inner_textContext.class).findFirst();
         content.ifPresent(pt -> {
             TreeRenderer renderer = renderers.getRenderer(pt.getClass(), pt);
-            sb.append("<li>" +renderer.render(pt, renderContext) + "</li>\n"); }
+            sb.append("<li>").append(renderer.render(pt, renderContext)).append("</li>\n"); }
         );
         return sb;
     }

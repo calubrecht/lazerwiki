@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 @Component
 public class HeaderRenderer extends TreeRenderer {
     @Override
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return List.of(DokuwikiParser.HeaderContext.class);
     }
 

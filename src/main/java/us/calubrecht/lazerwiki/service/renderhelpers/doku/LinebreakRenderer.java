@@ -12,7 +12,7 @@ import java.util.List;
 public class LinebreakRenderer extends TreeRenderer {
 
     @Override
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return List.of(DokuwikiParser.Line_breakContext.class);
     }
 

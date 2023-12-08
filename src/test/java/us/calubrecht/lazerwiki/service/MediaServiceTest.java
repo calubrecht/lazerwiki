@@ -53,15 +53,15 @@ class MediaServiceTest {
     NamespaceService namespaceService;
 
     @Test
-    void getBinaryFile() throws IOException, MediaReadException, ExecutionException, InterruptedException {
+    void getBinaryFile() throws IOException, MediaReadException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", null);
-        assertTrue(bytes != null);
+        assertNotNull(bytes);
         assertEquals(768, bytes.length);
 
         bytes = underTest.getBinaryFile("localhost", "Bob", "ns:circleWdot.png", null);
-        assertTrue(bytes != null);
+        assertNotNull(bytes);
         assertEquals(4486, bytes.length);
 
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Joe"))).thenReturn(false);
@@ -71,7 +71,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void getBinaryFileWrongSize() throws IOException, MediaReadException, ExecutionException, InterruptedException {
+    void getBinaryFileWrongSize() throws IOException, MediaReadException {
         MediaRecord newRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 10, 10);
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
@@ -104,7 +104,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void getBinaryFileNoRecord() throws IOException, MediaReadException, ExecutionException, InterruptedException {
+    void getBinaryFileNoRecord() throws IOException, MediaReadException {
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         assertThrows(IOException.class, () -> underTest.getBinaryFile("localhost", "Bob", "nothere.png", "10x10"));
@@ -214,7 +214,7 @@ class MediaServiceTest {
         MediaListResponse files = underTest.getAllFiles("host.com", "user1");
         assertEquals(2, files.namespaces.getChildren().size());
         assertEquals("", files.namespaces.getNamespace());
-        assertEquals(null, files.media.get(""));
+        assertNull(files.media.get(""));
         assertEquals(0, files.namespaces.getChildren().get(0).getChildren().size());
         assertEquals("ns1", files.namespaces.getChildren().get(0).getNamespace());
         assertEquals(1, files.namespaces.getChildren().get(1).getChildren().size());
@@ -227,7 +227,7 @@ class MediaServiceTest {
         files = underTest.getAllFiles("host.com", "user2");
         assertEquals(1, files.namespaces.getChildren().size());
         assertEquals("", files.namespaces.getNamespace());
-        assertEquals(null, files.media.get(""));
+        assertNull(files.media.get(""));
         assertEquals(0, files.namespaces.getChildren().get(0).getChildren().size());
         assertEquals("ns1", files.namespaces.getChildren().get(0).getNamespace());
     }

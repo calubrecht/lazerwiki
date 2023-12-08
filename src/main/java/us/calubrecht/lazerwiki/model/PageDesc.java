@@ -18,10 +18,11 @@ public interface PageDesc {
 
     String getModifiedBy();
 
+    @SuppressWarnings("SameReturnValue")
     LocalDateTime getModified();
 
     @JsonIgnore
-    default public String getDescriptor() {
+    default String getDescriptor() {
         return getNamespace().isBlank() ? getPagename() : getNamespace() + ":" + getPagename();
     }
 }

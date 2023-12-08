@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ImageRendererTest {
 
-    ImageRenderer renderer = new ImageRenderer();
+    final ImageRenderer renderer = new ImageRenderer();
 
     @Test
     void parseInnerAlignment() {

@@ -17,7 +17,7 @@ public abstract class Macro {
     public abstract String render(MacroContext context, String macroArgs);
 
 
-    public static interface MacroContext {
+    public interface MacroContext {
         String sanitize(String input);
 
         Pair<String, Map<String, Object>> renderPage(String pageDescriptor);

@@ -5,9 +5,9 @@ import java.util.List;
 
 public class NsNode {
     List<NsNode> children = new ArrayList<>();
-    String namespace;
+    final String namespace;
 
-    String fullNamespace;
+    final String fullNamespace;
 
     boolean writable;
 

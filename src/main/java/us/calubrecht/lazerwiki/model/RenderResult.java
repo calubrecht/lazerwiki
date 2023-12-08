@@ -7,7 +7,7 @@ import java.util.Map;
 
 public record RenderResult (String renderedText, String plainText, Map<String, Object> renderState) {
 
-    public enum RENDER_STATE_KEYS {TITLE, LINKS, DONT_CACHE};
+    public enum RENDER_STATE_KEYS {TITLE, LINKS, DONT_CACHE}
 
     public String getTitle() {
         Object title = renderState().get(RENDER_STATE_KEYS.TITLE.name());

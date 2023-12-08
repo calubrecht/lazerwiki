@@ -5,8 +5,8 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 public abstract class AbstractSpanRenderer extends TreeRenderer {
-    String startTag;
-    String endTag;
+    final String startTag;
+    final String endTag;
 
     public AbstractSpanRenderer(String startTag, String endTag) {
         this.startTag = startTag;

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MediaService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
     @Autowired
     SiteService siteService;
 

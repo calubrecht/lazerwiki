@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MacroCssService {
 
-    StringBuilder macroCss = new StringBuilder();
+    final StringBuilder macroCss = new StringBuilder();
     String constructedCss = null;
 
     public void addCss(String css) {

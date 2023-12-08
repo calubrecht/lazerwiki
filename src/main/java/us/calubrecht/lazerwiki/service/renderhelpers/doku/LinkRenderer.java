@@ -20,7 +20,7 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS
 
 @Component
 public class LinkRenderer extends TreeRenderer {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
     static final String MISSING_LINK_CLASS ="wikiLinkMissing";
     static final String LINK_CLASS ="wikiLink";
     static final String EXTERNAL_LINK_CLASS ="wikiLinkExternal";
@@ -29,7 +29,7 @@ public class LinkRenderer extends TreeRenderer {
     private PageService pageService;
 
     @Override
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return List.of(DokuwikiParser.LinkContext.class);
     }
 
@@ -114,7 +114,7 @@ public class LinkRenderer extends TreeRenderer {
     @Component
     public static class LinkDisplayRenderer extends TreeRenderer {
         @Override
-        public List<Class> getTargets() {
+        public List<Class<? extends ParseTree>> getTargets() {
             return List.of(DokuwikiParser.Link_displayContext.class);
         }
 

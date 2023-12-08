@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MacroCssServiceTest {
 
-    MacroCssService service= new MacroCssService();
+    final MacroCssService service= new MacroCssService();
 
     @Test
     void getCss() {

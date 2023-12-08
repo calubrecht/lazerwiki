@@ -35,7 +35,7 @@ public class MediaCacheServiceTest {
     @MockBean
     ImageUtil mockImageUtil;
 
-    ImageUtil realImageUtil = new ImageUtil();
+    final ImageUtil realImageUtil = new ImageUtil();
 
     String getFileDimensions(File f) throws IOException {
         FileInputStream fis = new FileInputStream(f);

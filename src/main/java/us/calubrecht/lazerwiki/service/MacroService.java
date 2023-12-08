@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 import us.calubrecht.lazerwiki.model.PageCache;
+import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.RenderResult;
-import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
@@ -22,7 +22,7 @@ import java.util.*;
 
 @Service
 public class MacroService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
     Map<String, Macro> macros = new HashMap<>();
 
     @Autowired
@@ -105,8 +105,7 @@ public class MacroService {
             }
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             if (pageCache != null && pageCache.useCache) {
-                Map<String, Object> renderState = new HashMap<>();
-                renderState.putAll(page.flags().toMap());
+                Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                 return Pair.of(pageCache.renderedCache, renderState);
             }
 
@@ -135,8 +134,7 @@ public class MacroService {
             }
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             if (pageCache != null) { // In this case, ignore useCache flag
-                Map<String, Object> renderState = new HashMap<>();
-                renderState.putAll(page.flags().toMap());
+                Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                 return Pair.of(pageCache.renderedCache, renderState);
             }
             return doRender(page);
@@ -146,7 +144,7 @@ public class MacroService {
         @Override
         public List<String> getPagesByNSAndTag(String ns, String tag) {
             return pageService.searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns)).
-                    stream().map(pd -> pd.getDescriptor()).toList();
+                    stream().map(PageDesc::getDescriptor).toList();
         }
 
         @Override

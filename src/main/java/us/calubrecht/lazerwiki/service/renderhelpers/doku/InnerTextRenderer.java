@@ -2,7 +2,6 @@
 package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Component
 public class InnerTextRenderer extends TreeRenderer {
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return List.of(DokuwikiParser.Inner_textContext.class, DokuwikiParser.Inner_text_nowsstartContext.class);
     }
 

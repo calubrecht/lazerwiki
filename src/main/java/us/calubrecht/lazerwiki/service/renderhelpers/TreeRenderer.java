@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class TreeRenderer {
     protected RendererRegistrar renderers;
 
-    public abstract List<Class> getTargets();
+    public abstract List<Class<? extends ParseTree>> getTargets();
 
     public abstract StringBuffer render(ParseTree tree, RenderContext renderContext);
 
@@ -38,8 +38,6 @@ public abstract class TreeRenderer {
         this.renderers = renderers;
     }
 
-    public static TreeRenderer DEFAULT = new DefaultRenderer();
-
     protected List<ParseTree> getChildren(ParseTree tree) {
         return getChildren(tree, 0, tree.getChildCount());
     }
@@ -58,7 +56,7 @@ public abstract class TreeRenderer {
         String lastChildClass = null;
         for(ParseTree child: trees) {
             TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
-            if (lastChildClass != null && lastChildClass != renderer.getAdditiveClass() )
+            if (lastChildClass != null && !lastChildClass.equals(renderer.getAdditiveClass()) )
             {
                 AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass, childrenToMerge.get(0));
                 outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
@@ -96,7 +94,7 @@ public abstract class TreeRenderer {
 
     public static class DefaultRenderer extends TreeRenderer {
         @Override
-        public List<Class> getTargets() {
+        public List<Class<? extends ParseTree>> getTargets() {
             return null;
         }
 

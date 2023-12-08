@@ -3,19 +3,16 @@ package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
-import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
-import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class TableRenderer extends FlatteningRenderer {
-    Set<Class> treesToFlatten = Set.of(DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class, DokuwikiParser.Inner_textContext.class);
+    final Set<Class<? extends ParseTree>> treesToFlatten = Set.of(DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class, DokuwikiParser.Inner_textContext.class);
 
     static final Set<String> DATA_TAGS = Set.of("|", "^");
 
@@ -24,12 +21,11 @@ public class TableRenderer extends FlatteningRenderer {
         StringBuffer sb = new StringBuffer();
         sb.append("<table class=\"lazerTable\"><tbody>");
         List<ParseTree> children = trees.stream().flatMap(
-                (t) -> flattenChildren(t, true).stream()).collect(Collectors.toList());
+                (t) -> flattenChildren(t, true).stream()).toList();
         String nextOpenTag = null;
-        boolean inRow = false;
         TableData currTableData= null;
         boolean closingData = false;
-        List<List<TableData>> rows = new ArrayList();
+        List<List<TableData>> rows = new ArrayList<>();
         List<TableData> currRow = new ArrayList<>();
         rows.add(currRow);
         for (ParseTree tree : children) {
@@ -78,19 +74,18 @@ public class TableRenderer extends FlatteningRenderer {
     }
 
     @Override
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return Collections.emptyList();
     }
 
     @Override
-    Set<Class> getTreesToFlatten() {
+    Set<Class<? extends ParseTree>> getTreesToFlatten() {
         return treesToFlatten;
     }
 
     @Override
     public StringBuffer renderToPlainText(ParseTree tree, RenderContext renderContext) {
-        StringBuffer sb = renderChildrenToPlainText(getChildren(tree), renderContext);
-        return sb;
+        return renderChildrenToPlainText(getChildren(tree), renderContext);
     }
 
     @Override
@@ -100,9 +95,9 @@ public class TableRenderer extends FlatteningRenderer {
 
     class TableData {
         int colspan = 1;
-        String tagType;
-        List<ParseTree> internal = new ArrayList<>();
-        RenderContext renderContext;
+        final String tagType;
+        final List<ParseTree> internal = new ArrayList<>();
+        final RenderContext renderContext;
 
 
 

@@ -7,15 +7,14 @@ import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class CodeBoxRenderer extends AdditiveTreeRenderer {
 
-    int indentSpaces = 2;
+    final int indentSpaces = 2;
 
     @Override
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return List.of(DokuwikiParser.Code_boxContext.class);
     }
 
@@ -36,7 +35,7 @@ public class CodeBoxRenderer extends AdditiveTreeRenderer {
         trees.forEach(t ->
         {
             ret.append(t.getText().substring(indentSpaces));
-        ;});
+        });
         ret.append("</pre>");
         return ret;
     }

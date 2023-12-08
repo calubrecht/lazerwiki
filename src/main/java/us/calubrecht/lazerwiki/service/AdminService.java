@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 public class AdminService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
     LinkService linkService;

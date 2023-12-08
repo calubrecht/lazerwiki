@@ -9,7 +9,7 @@ public class PasswordUtil {
     final long iterationCount = 600000;
     final String versionMark = ":v1:";
 
-    PasswordEncoder encoder = new BCryptPasswordEncoder();
+    final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public String hashPassword(String password) {
         return versionMark + encoder.encode(password);
@@ -21,7 +21,7 @@ public class PasswordUtil {
 
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static void main(String[] args)  {
         PasswordUtil util = new PasswordUtil();
         if (args.length == 1) {
             // Hash a password

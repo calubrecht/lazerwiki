@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class MediaCacheService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;

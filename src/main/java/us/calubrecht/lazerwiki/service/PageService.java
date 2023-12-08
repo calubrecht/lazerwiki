@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = PageWriteException.class )
 public class PageService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
     PageRepository pageRepository;

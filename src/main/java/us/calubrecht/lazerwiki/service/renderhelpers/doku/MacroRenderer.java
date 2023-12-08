@@ -19,17 +19,14 @@ public class MacroRenderer extends TreeRenderer {
     MacroService macroService;
 
     @Override
-    public List<Class> getTargets() {
+    public List<Class<? extends ParseTree>> getTargets() {
         return List.of(DokuwikiParser.MacroContext.class);
     }
 
-    Pattern macroPattern= Pattern.compile("~~MACRO~~(.*)~~/MACRO~~", Pattern.DOTALL);
-
     @Override
     public StringBuffer render(ParseTree tree, RenderContext context) {
-        Matcher matcher = macroPattern.matcher(tree.getText());
-        matcher.matches();
-        String innerText = matcher.group(1);
+        String treeText = tree.getText();
+        String innerText = treeText.substring("~~MACRO~~".length(), treeText.length() - "~~/MACRO~~".length());
         return new StringBuffer(macroService.renderMacro(innerText, context));
     }
 

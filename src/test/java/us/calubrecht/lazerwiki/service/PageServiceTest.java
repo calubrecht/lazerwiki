@@ -175,9 +175,9 @@ public class PageServiceTest {
 
     @Test
     public void testDecodeDescriptor() {
-        assertEquals(new PageDescriptor("", "noNS"), pageService.decodeDescriptor("noNS"));
-        assertEquals(new PageDescriptor("ns", "withNS"), pageService.decodeDescriptor("ns:withNS"));
-        assertEquals("ns:withNS", pageService.decodeDescriptor("ns:withNS").toString());
+        assertEquals(new PageDescriptor("", "noNS"), PageService.decodeDescriptor("noNS"));
+        assertEquals(new PageDescriptor("ns", "withNS"), PageService.decodeDescriptor("ns:withNS"));
+        assertEquals("ns:withNS", PageService.decodeDescriptor("ns:withNS").toString());
     }
 
     @Test
@@ -322,7 +322,7 @@ public class PageServiceTest {
 
         assertEquals(1, pages.get("").size());
         assertEquals("page1", pages.get("").get(0).getPagename());
-        assertEquals(null, pages.get("ns1"));
+        assertNull(pages.get("ns1"));
         assertEquals(1, pages.get("ns1:ns2").size());
         assertEquals("page3", pages.get("ns1:ns2").get(0).getPagename());
     }
@@ -418,8 +418,8 @@ public class PageServiceTest {
             
 
     static class PageDescImpl implements PageDesc {
-        String namespace;
-        String pageName;
+        final String namespace;
+        final String pageName;
         String title;
         String modifiedBy;
 

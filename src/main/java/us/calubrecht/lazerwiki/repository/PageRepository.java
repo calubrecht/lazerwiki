@@ -22,7 +22,7 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
             nativeQuery = true)
     List<PageDesc> getByTagname(@Param("site") String site, @Param("tagName") String tagName);
 
-    static final LocalDateTime MAX_DATE = LocalDateTime.of(9999, 12, 31, 0, 0, 0);
+    LocalDateTime MAX_DATE = LocalDateTime.of(9999, 12, 31, 0, 0, 0);
     default Page getBySiteAndNamespaceAndPagenameAndDeleted(String site, String namespace, String pagename, boolean deleted)
     {
         return findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(site, namespace, pagename, MAX_DATE, deleted);

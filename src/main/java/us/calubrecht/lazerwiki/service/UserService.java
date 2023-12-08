@@ -25,7 +25,7 @@ public class UserService {
     PasswordUtil passwordUtil = new PasswordUtil();
 
     @Transactional
-    public void addUser(String userName, String password, List<GrantedAuthority> roles) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public void addUser(String userName, String password, List<GrantedAuthority> roles) {
 
         User newUser = new User(userName, passwordUtil.hashPassword(password));
         newUser.roles = roles.stream().map(role -> new UserRole(newUser, role.getAuthority())).collect(Collectors.toList());

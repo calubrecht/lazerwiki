@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 
 @Service
 public class ResourceService {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
 
@@ -30,11 +30,12 @@ public class ResourceService {
         File f = new File(String.join("/", staticFileRoot, site, "resources", fileName));
         if (!f.exists()) {
             logger.info("Reading file from resources " + String.join("/", "static", fileName));
-            InputStream s = getClass().getClassLoader().getResourceAsStream(String.join("/", "static", fileName));
-            if (s == null ) {
-                throw new IOException("Error reading " + fileName);
+            try (InputStream s = getClass().getClassLoader().getResourceAsStream(String.join("/", "static", fileName))) {
+                if (s == null) {
+                    throw new IOException("Error reading " + fileName);
+                }
+                return s.readAllBytes();
             }
-            return s.readAllBytes();
         }
         logger.info("Reading file " + f.getAbsoluteFile());
         return Files.readAllBytes(f.toPath());

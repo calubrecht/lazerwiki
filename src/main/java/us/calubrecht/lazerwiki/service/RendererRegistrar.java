@@ -17,6 +17,8 @@ public class RendererRegistrar {
     Map<Class, TreeRenderer> renderersForClass;
     Map<String, TreeRenderer> renderersForAdditiveClass;
 
+    TreeRenderer DEFAULT_RENDERER = new TreeRenderer.DefaultRenderer();
+
     @PostConstruct
     public void linkBeans() {
         renderersForClass = new ConcurrentHashMap<>();
@@ -28,17 +30,17 @@ public class RendererRegistrar {
             }
             renderer.setRenderers(this);
         }
-        TreeRenderer.DEFAULT.setRenderers(this);
+        DEFAULT_RENDERER.setRenderers(this);
 
     }
 
     public TreeRenderer getRenderer(Class forClass, ParseTree tree) {
-        TreeRenderer renderer = renderersForClass.getOrDefault(forClass, TreeRenderer.DEFAULT);
+        TreeRenderer renderer = renderersForClass.getOrDefault(forClass, DEFAULT_RENDERER);
         return renderer.getSpecificRenderer(tree);
     }
 
     public TreeRenderer getRenderer(String additiveClass, ParseTree tree) {
-        TreeRenderer renderer = renderersForAdditiveClass.getOrDefault(additiveClass, TreeRenderer.DEFAULT);
+        TreeRenderer renderer = renderersForAdditiveClass.getOrDefault(additiveClass, DEFAULT_RENDERER);
         return renderer.getSpecificRenderer(tree);
     }
 }

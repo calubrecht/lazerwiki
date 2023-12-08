@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.controller;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +36,7 @@ import java.util.Map;
         value = "admin.user.creation.enabled",
         havingValue = "true")
 public class AdminUserController {
-    Logger logger = LogManager.getLogger(getClass());
+    final Logger logger = LogManager.getLogger(getClass());
     @Autowired
     UserService userService;
 

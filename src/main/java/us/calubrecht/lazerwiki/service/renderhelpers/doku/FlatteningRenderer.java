@@ -1,7 +1,6 @@
 package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
@@ -11,7 +10,7 @@ import java.util.Set;
 
 public abstract class FlatteningRenderer extends AdditiveTreeRenderer {
 
-    abstract Set<Class> getTreesToFlatten();
+    abstract Set<Class<? extends ParseTree>> getTreesToFlatten();
 
     List<ParseTree> flattenChildren(ParseTree tree, boolean recursive) {
         List<ParseTree> trees = new ArrayList<>();
