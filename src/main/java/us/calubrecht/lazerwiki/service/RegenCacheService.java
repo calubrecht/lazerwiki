@@ -29,6 +29,10 @@ public class RegenCacheService {
     @Autowired
     PageCacheRepository pageCacheRepository;
 
+    @Autowired
+    SiteService siteService;
+
+
     @SuppressWarnings("unchecked")
     @Transactional
     public void regenLinks(String site) {
@@ -45,12 +49,13 @@ public class RegenCacheService {
 
     @Transactional
     public void regenCache(String site) {
-        logger.info("Regening cache table for " +site);
+        String host = siteService.getHostForSitename(site);
+        logger.info("Regening cache table for " +site + " " + host);
         pageCacheRepository.deleteBySite(site);
         List<PageDesc> pages = pageRepository.getAllValid(site);
         pages.forEach(pd -> {
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.getNamespace(), pd.getPagename(), false);
-            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, UserService.SYS_USER);
+            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, UserService.SYS_USER);
             PageCache newCache = new PageCache();
             newCache.site = site;
             newCache.namespace = pd.getNamespace();
@@ -64,12 +69,13 @@ public class RegenCacheService {
     }
 
     public void regenCachesForBacklinks(String site, String linkedPage) {
+        String host = siteService.getHostForSitename(site);
         logger.info("Regening cache for links to " +site + "-" + linkedPage);
         List<String> backlinks = linkService.getBacklinks(site, linkedPage);
         backlinks.forEach(link -> {
             PageDescriptor pd = PageService.decodeDescriptor(link);
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
-            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, UserService.SYS_USER);
+            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, UserService.SYS_USER);
             PageCache newCache = new PageCache();
             newCache.site = site;
             newCache.namespace = pd.namespace();

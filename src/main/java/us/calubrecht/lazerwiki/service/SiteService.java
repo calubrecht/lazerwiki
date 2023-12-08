@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
+import java.util.Optional;
+
 @Service
 public class SiteService {
 
@@ -42,5 +44,10 @@ public class SiteService {
             return null;
         }
         return s.settings.get(setting);
+    }
+
+    public String getHostForSitename(String site) {
+        Optional<Site> s =  siteRepository.findById(site);
+        return s.map(ss -> ss.hostname).orElse("*");
     }
 }

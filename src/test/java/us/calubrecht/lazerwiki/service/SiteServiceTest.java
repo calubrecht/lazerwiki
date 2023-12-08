@@ -9,6 +9,7 @@ import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -87,5 +88,13 @@ public class SiteServiceTest {
     @Test
     public void test_getSettingForHostnameNoSettings() {
         assertEquals(null, underTest.getSettingForHostname("site1", "setting1"));
+    }
+
+    @Test
+    void getHostForSitename() {
+        Site blue = new Site();
+        blue.hostname = "water.com";
+        when(repository.findById("blue")).thenReturn(Optional.of(blue));
+        assertEquals("water.com", underTest.getHostForSitename("blue"));
     }
 }

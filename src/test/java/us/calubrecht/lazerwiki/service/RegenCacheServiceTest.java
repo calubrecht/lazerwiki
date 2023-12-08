@@ -40,6 +40,9 @@ class RegenCacheServiceTest {
     @MockBean
     PageCacheRepository pageCacheRepository;
 
+    @MockBean
+    SiteService siteService;
+
 
     @Test
     void regenLinks() {

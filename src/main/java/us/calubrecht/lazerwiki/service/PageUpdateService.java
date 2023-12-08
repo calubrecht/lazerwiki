@@ -74,7 +74,7 @@ public class PageUpdateService {
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
-        if (p == null) {
+        if (p == null  || p.isDeleted()) {
             em.flush(); // Flush so regen can work?
             regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
         }
