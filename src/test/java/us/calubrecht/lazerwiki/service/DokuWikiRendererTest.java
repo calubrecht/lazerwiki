@@ -298,6 +298,16 @@ public class DokuWikiRendererTest {
                 "<div>Something</div>\n<div><ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\nThen * non-matching</div>",
                 doRender(input2)
         );
+
+        // List item with bold
+        String inputBold = """
+                 * **item1**
+                 * **item2** - is mixed
+                """;
+        assertEquals(
+                "<div><ul>\n<li><span class=\"bold\">item1</span></li>\n<li><span class=\"bold\">item2</span> - is mixed</li>\n</ul></div>",
+                doRender(inputBold)
+        );
     }
 
     @Test

@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class ListRenderer extends AdditiveTreeRenderer {
@@ -70,15 +71,17 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
         return sb;
     }
 
+    Set<Class<? extends ParseTree>> innerTreesToRender = Set.of(DokuwikiParser.Inner_textContext.class, DokuwikiParser.Styled_spanContext.class);
 
     @Override
     public StringBuilder render(ParseTree tree, RenderContext renderContext) {
-        StringBuilder sb = new StringBuilder();
-        Optional<ParseTree> content = getChildren(tree).stream().filter(t -> t.getClass() == DokuwikiParser.Inner_textContext.class).findFirst();
-        content.ifPresent(pt -> {
+        StringBuilder sb = new StringBuilder("<li>");
+        List<ParseTree> content = getChildren(tree).stream().filter(t -> innerTreesToRender.contains(t.getClass())).toList();
+        content.forEach(pt -> {
             TreeRenderer renderer = renderers.getRenderer(pt.getClass(), pt);
-            sb.append("<li>").append(renderer.render(pt, renderContext)).append("</li>\n"); }
+            sb.append(renderer.render(pt, renderContext)); }
         );
+        sb.append("</li>\n");
         return sb;
     }
 
