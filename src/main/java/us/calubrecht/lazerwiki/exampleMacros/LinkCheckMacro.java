@@ -68,7 +68,7 @@ public class LinkCheckMacro extends Macro{
             nsFilter = (page) -> nsMatches(page, nsWhitelist);
         }
 
-        Map<String, String> caseInsensitiveMapping = context.getAllPages().stream().filter(nsFilter).collect(Collectors.toMap(String::toLowerCase, Function.identity()));
+        Map<String, String> caseInsensitiveMapping = context.getAllPages().stream().filter(nsFilter).filter(p -> !p.endsWith(":_template") && !p.equals("_template")).collect(Collectors.toMap(String::toLowerCase, Function.identity()));
         Map<String, String> brokenLinksMapping = new HashMap<>();
         Set<String> allPages = caseInsensitiveMapping.keySet();
         Set<String> linkedTo = new HashSet<>();
