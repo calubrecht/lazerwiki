@@ -26,6 +26,17 @@ public class PageCache {
         public String namespace;
         public String pageName;
 
+        public PageCacheKey() {
+
+        }
+
+        public PageCacheKey(String site, String namespace, String pageName) {
+            this.site = site;
+            this.namespace = namespace;
+            this.pageName = pageName;
+        }
+
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -39,14 +50,13 @@ public class PageCache {
             return Objects.hash(site, namespace, pageName);
         }
 
-        public PageCacheKey() {
-
-        }
-
-        public PageCacheKey(String site, String namespace, String pageName) {
-            this.site = site;
-            this.namespace = namespace;
-            this.pageName = pageName;
+        @Override
+        public String toString() {
+            return "PageCacheKey{" +
+                    "site='" + site + '\'' +
+                    ", namespace='" + namespace + '\'' +
+                    ", pageName='" + pageName + '\'' +
+                    '}';
         }
     }
 }
