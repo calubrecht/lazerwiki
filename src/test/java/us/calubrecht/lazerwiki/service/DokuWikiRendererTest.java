@@ -449,5 +449,8 @@ public class DokuWikiRendererTest {
         assertEquals("<table class=\"lazerTable\"><tbody><tr><th> Header </th><td> Line </td></tr>\n<tr><td colspan=\"2\">Second </td></tr>\n</tbody></table>", doRender(tableWithColSpan));
         String tableWithImg = "|{{img.jpg}} \\\\ Some text after|";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"><br>Some text after</td></tr>\n</tbody></table>", doRender(tableWithImg));
+        String tableWithLink = "| [[LinkToSomePage]] \\\\ Some text after|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td> <a class=\"wikiLinkMissing\" href=\"/page/LinkToSomePage\">null</a><br>Some text after</td></tr>\n" +
+                "</tbody></table>", doRender(tableWithLink));
     }
 }

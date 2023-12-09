@@ -23,7 +23,7 @@ public abstract class FlatteningRenderer extends AdditiveTreeRenderer {
             if (getTreesToFlatten().contains(t.getClass())) {
                 for (int j = 0; j < t.getChildCount(); j++) {
                     ParseTree child = t.getChild(j);
-                    if (recursive) {
+                    if (recursive && getTreesToFlatten().contains(child.getClass())) {
                         trees.addAll(flattenChildren(child, true));
                     }
                     else {
