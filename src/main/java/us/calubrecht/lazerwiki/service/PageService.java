@@ -96,10 +96,11 @@ public class PageService {
     public void saveCache(String host, String sPageDescriptor, RenderResult rendered) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         PageCache newCache = new PageCache();
         newCache.site = site;
-        newCache.namespace = pageDescriptor.namespace();
-        newCache.pageName = pageDescriptor.pageName();
+        newCache.namespace = p.getNamespace();
+        newCache.pageName = p.getPagename();
         newCache.renderedCache = rendered.renderedText();
         newCache.plaintextCache = rendered.plainText();
         newCache.useCache = !(Boolean)rendered.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
