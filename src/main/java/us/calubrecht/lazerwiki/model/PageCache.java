@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 
+import java.util.Objects;
+
 @Entity(name = "pageCache")
 @IdClass(PageCache.PageCacheKey.class)
 public class PageCache {
@@ -23,6 +25,19 @@ public class PageCache {
         public String site;
         public String namespace;
         public String pageName;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PageCacheKey that = (PageCacheKey) o;
+            return site.equals(that.site) && namespace.equals(that.namespace) && pageName.equals(that.pageName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(site, namespace, pageName);
+        }
 
         public PageCacheKey() {
 
