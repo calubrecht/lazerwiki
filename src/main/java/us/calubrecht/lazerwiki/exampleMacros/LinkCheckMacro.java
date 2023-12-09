@@ -1,12 +1,13 @@
 package us.calubrecht.lazerwiki.exampleMacros;
 
-import org.apache.commons.lang3.tuple.Pair;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CustomMacro
 public class LinkCheckMacro extends Macro{
@@ -42,10 +43,32 @@ public class LinkCheckMacro extends Macro{
         return Optional.of(css);
     }
 
+    String getNS(String page) {
+        int colIdx = page.lastIndexOf(":");
+        return colIdx == -1 ? "" : page.substring(0, colIdx+1).toLowerCase();
+    }
+
+    boolean nsMatches(String page, Set<String> namespaces) {
+        String pageNS = getNS(page);
+        return namespaces.stream().filter(ns -> pageNS.startsWith(ns)).findAny().isPresent();
+    }
+
     @Override
     public String render(Macro.MacroContext context, String macroArgs) {
+        Map<String, String> argsMap = toArgsMap(macroArgs);
+        Predicate<String> nsFilter = (ns) -> true;
+        if (argsMap.containsKey("filterNS")) {
+            Set<String> nsBlacklist = Stream.of(argsMap.get("filterNS").split(",")).map(String::toLowerCase).
+                    map(ns -> ns.endsWith(":") ? ns : ns + ":").collect(Collectors.toSet());
+            nsFilter = (page) -> !nsMatches(page, nsBlacklist);
+        }
+        else if (argsMap.containsKey("ns")) {
+            Set<String> nsWhitelist = Stream.of(argsMap.get("ns").split(",")).map(String::toLowerCase).
+                    map(ns -> ns.endsWith(":") ? ns : ns + ":").collect(Collectors.toSet());
+            nsFilter = (page) -> nsMatches(page, nsWhitelist);
+        }
 
-        Map<String, String> caseInsensitiveMapping = context.getAllPages().stream().collect(Collectors.toMap(String::toLowerCase, Function.identity()));
+        Map<String, String> caseInsensitiveMapping = context.getAllPages().stream().filter(nsFilter).collect(Collectors.toMap(String::toLowerCase, Function.identity()));
         Map<String, String> brokenLinksMapping = new HashMap<>();
         Set<String> allPages = caseInsensitiveMapping.keySet();
         Set<String> linkedTo = new HashSet<>();
