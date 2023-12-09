@@ -5,6 +5,7 @@ import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @CustomMacro
@@ -43,16 +44,23 @@ public class LinkCheckMacro extends Macro{
 
     @Override
     public String render(Macro.MacroContext context, String macroArgs) {
-        Set<String> allPages = new HashSet<>(context.getAllPages());
+
+        Map<String, String> caseInsensitiveMapping = context.getAllPages().stream().collect(Collectors.toMap(String::toLowerCase, Function.identity()));
+        Map<String, String> brokenLinksMapping = new HashMap<>();
+        Set<String> allPages = caseInsensitiveMapping.keySet();
         Set<String> linkedTo = new HashSet<>();
         Map<String, List<String>> brokenLinks = new HashMap<>();
-        for (String page : allPages) {
+        allPages.stream().sorted().forEach(page -> {
             List<String> links = context.getLinksOnPage(page);
-            linkedTo.addAll(links.stream().filter(l -> allPages.contains(l)).collect(Collectors.toList()));
-            links.stream().filter(l -> !allPages.contains(l)).forEach(l -> {
-                brokenLinks.computeIfAbsent(l, (k)-> new ArrayList<>()).add(page);
+            linkedTo.addAll(links.stream().map(String::toLowerCase).filter(l -> allPages.contains(l)).collect(Collectors.toList()));
+            links.stream().filter(l -> !allPages.contains(l.toLowerCase())).forEach(l -> {
+                brokenLinks.computeIfAbsent(l.toLowerCase(), (k)-> new ArrayList<>()).add(page);
+                // Record case of first existence of link
+                if (!brokenLinksMapping.containsKey(l.toLowerCase())) {
+                    brokenLinksMapping.put(l.toLowerCase(), l);
+                }
             });
-        }
+        });
         Set<String> orphanedPages = new HashSet<>(allPages);
         orphanedPages.removeAll(linkedTo);
         orphanedPages.remove("");
@@ -70,17 +78,17 @@ public class LinkCheckMacro extends Macro{
                   <tr><th>Pages Name</th></tr>
                   %s
                   </tbody></table>
-                """.formatted(renderBrokenLinks(brokenLinks), renderOrphanedPages(orphanedPages));
+                """.formatted(renderBrokenLinks(brokenLinks, caseInsensitiveMapping, brokenLinksMapping), renderOrphanedPages(orphanedPages, caseInsensitiveMapping));
     }
 
-    String renderBrokenLinks(Map<String, List<String>> brokenLinks) {
+    String renderBrokenLinks(Map<String, List<String>> brokenLinks, Map<String, String> caseInsensitiveMapping, Map<String, String> brokenLinksMapping) {
         return brokenLinks.entrySet().stream().map(
-                entry ->"<tr><td>%s</td><td>%s</td><td>%s</td></tr>".formatted(entry.getValue().size(), renderLink(entry.getKey()), renderLinkList(entry.getValue()))).collect(Collectors.joining("\n"));
+                entry ->"<tr><td>%s</td><td>%s</td><td>%s</td></tr>".formatted(entry.getValue().size(), renderLink(brokenLinksMapping.get(entry.getKey())), renderLinkList(entry.getValue(), caseInsensitiveMapping))).collect(Collectors.joining("\n"));
     }
 
-    String renderOrphanedPages( Set<String> orphanedPages) {
+    String renderOrphanedPages( Set<String> orphanedPages, Map<String, String> caseInsensitiveMapping) {
         return orphanedPages.stream().map(
-                page ->"<tr><td>%s</td></tr>".formatted(renderLink(page))).collect(Collectors.joining("\n"));
+                page ->"<tr><td>%s</td></tr>".formatted(renderLink(caseInsensitiveMapping.get(page)))).collect(Collectors.joining("\n"));
     }
 
     String renderLink(String page) {
@@ -90,7 +98,7 @@ public class LinkCheckMacro extends Macro{
         return "<a href=\"/page/" + page + "\">"+ page + "</a>";
     }
 
-    String renderLinkList(List<String> pages) {
-        return "[%s]".formatted(pages.stream().map(p -> renderLink(p)).collect(Collectors.joining(",")));
+    String renderLinkList(List<String> pages, Map<String, String> caseInsensitiveMapping) {
+        return "[%s]".formatted(pages.stream().map(p -> renderLink(caseInsensitiveMapping.get(p))).collect(Collectors.joining(",")));
     }
 }
