@@ -104,6 +104,7 @@ class RegenCacheServiceTest {
         verify(pageCacheRepository).deleteBySite("default");
         verify(pageCacheRepository,times(2)).save(argument.capture());
         assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
+        assertEquals(true, argument.getAllValues().get(0).useCache);
         assertEquals("text2 rendered", argument.getAllValues().get(1).renderedCache);
     }
 
@@ -133,7 +134,58 @@ class RegenCacheServiceTest {
         verify(pageCacheRepository, never()).deleteBySite("default");
         verify(pageCacheRepository,times(2)).save(argument.capture());
         assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
+        assertEquals(true, argument.getAllValues().get(0).useCache);
         assertEquals("text2 rendered", argument.getAllValues().get(1).renderedCache);
+
+    }
+
+    @Test
+    public void testRegenCacheForBacklinksWithNoCache() {
+        List<PageDesc> pds = List.of(new PageServiceTest.PageDescImpl("", "page1"), new PageServiceTest.PageDescImpl("ns", "page2"));
+        when(pageRepository.getAllValid("default")).thenReturn(pds);
+        Page page1 = new Page();
+        page1.setPagename("page1");
+        page1.setText("text1");
+
+        when(linkService.getBacklinks(any(), any())).thenReturn(List.of("page1"));
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
+        when(renderer.renderWithInfo(any(), any(), any(), any())).thenAnswer(inv -> {
+            List<String> links = new ArrayList<>();
+            String text = inv.getArgument(0, String.class);
+            return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links, RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), true));
+        });
+
+        underTest.regenCachesForBacklinks("default", "linkedPage");
+
+        ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
+        verify(pageCacheRepository, never()).deleteBySite("default");
+        verify(pageCacheRepository,times(1)).save(argument.capture());
+        assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
+        assertEquals(false, argument.getAllValues().get(0).useCache);
+    }
+
+    @Test
+    public void regenCacheWithNoCache() {
+        List<PageDesc> pds = List.of(new PageServiceTest.PageDescImpl("", "page1"));
+        when(pageRepository.getAllValid("default")).thenReturn(pds);
+        Page page1 = new Page();
+        page1.setPagename("page1");
+        page1.setText("text1");
+
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
+        when(renderer.renderWithInfo(any(), any(), any(), any())).thenAnswer(inv -> {
+            List<String> links = new ArrayList<>();
+            String text = inv.getArgument(0, String.class);
+            return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links, RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), true));
+        });
+
+        underTest.regenCache("default");
+
+        ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
+        verify(pageCacheRepository).deleteBySite("default");
+        verify(pageCacheRepository,times(1)).save(argument.capture());
+        assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
+        assertEquals(false, argument.getAllValues().get(0).useCache);
 
     }
 }

@@ -106,6 +106,7 @@ public class MacroService {
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             if (pageCache != null && pageCache.useCache) {
                 Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
+                renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
                 return Pair.of(pageCache.renderedCache, renderState);
             }
 

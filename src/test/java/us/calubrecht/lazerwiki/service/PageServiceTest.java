@@ -16,9 +16,7 @@ import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Collections;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -91,6 +89,14 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site2", "", "", false)).
                 thenReturn(p);
         assertEquals("Titled Page", pageService.getTitle("host2", ""));
+
+        PageDescriptor pd = new PageDescriptor("ns", "page_name");
+        assertEquals("Page Name", pageService.getTitle(pd, null));
+        Page pageNoTitle = new Page();
+        assertEquals("Page Name", pageService.getTitle(pd, pageNoTitle));
+        Page pageWithTitle = new Page();
+        pageWithTitle.setTitle("Other Name");
+        assertEquals("Other Name", pageService.getTitle(pd, pageWithTitle));
     }
 
     @Test
@@ -302,7 +308,49 @@ public class PageServiceTest {
         assertEquals("======Page 3======", pageService.getTemplate("site", new PageDescriptor("ns3", "page3")));
         assertEquals("======Page 4======", pageService.getTemplate("site", new PageDescriptor("", "page4")));
     }
-            
+
+    @Test
+    public void testGetCachedPage() {
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        PageCache cached = new PageCache();
+        cached.renderedCache = "Rendered";
+        PageCache.PageCacheKey key = new PageCache.PageCacheKey("default", "ns", "cached");
+        when(pageCacheRepository.findById(key)).thenReturn(Optional.of(cached));
+        PageCache ret = pageService.getCachedPage("localhost", "ns:cached");
+        assertEquals("Rendered", ret.renderedCache);
+    }
+    @Test
+    public void testSavePage() {
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        RenderResult rendered = new RenderResult("rendered", "notRendered", Map.of("DONT_CACHE", true));
+        Page p = new Page();
+        p.setPagename("TOCACHE");
+        p.setNamespace("ns");
+        when(pageRepository.getBySiteAndNamespaceAndPagename("default", "ns", "toCache")).thenReturn(p);
+        pageService.saveCache("localhost", "ns:toCache", rendered);
+        PageCache cached = new PageCache();
+        cached.site = "default";
+        cached.namespace = "ns";
+        cached.pageName= "TOCACHE"; // Use name with case as set in the database
+        cached.renderedCache = "rendered";
+        cached.plaintextCache = "notRendered";
+        cached.useCache = false;
+
+        verify(pageCacheRepository).save(cached);
+
+        // Save and Cache
+        RenderResult rendered2 = new RenderResult("rendered", "notRendered", new HashMap<>());
+        when(pageRepository.getBySiteAndNamespaceAndPagename("default", "ns", "toCache")).thenReturn(p);
+        pageService.saveCache("localhost", "ns:toCache", rendered2);
+        PageCache cached2 = new PageCache();
+        cached2.site = "default";
+        cached2.namespace = "ns";
+        cached2.pageName= "TOCACHE"; // Use name with case as set in the database
+        cached2.renderedCache = "rendered";
+        cached2.plaintextCache = "notRendered";
+        cached2.useCache = true;
+        verify(pageCacheRepository).save(cached2);
+    }
 
     static class PageDescImpl implements PageDesc {
         final String namespace;

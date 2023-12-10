@@ -63,9 +63,9 @@ public class PageUpdateServiceTest {
         pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository).save(pageCaptor.capture());
+        // new Page, should regen cache
         verify(regenCacheService).regenCachesForBacklinks("site1", "newPage");
         Page p = pageCaptor.getValue();
-        p.setTags(Collections.emptyList());
         assertEquals("Some text", p.getText());
         assertEquals(55L, p.getId());
         assertEquals("site1", p.getSite());
@@ -104,6 +104,34 @@ public class PageUpdateServiceTest {
         assertEquals(10L, newPage.getId());
         assertEquals(3L, newPage.getRevision());
         assertEquals("site1", newPage.getSite());
+    }
+
+    @Test
+    public void testSavePageDeleted() throws PageWriteException {
+        when(idRepository.getNewId()).thenReturn(55L);
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        Page p = new Page();
+        p.setText("This is raw page text");
+        p.setTitle("Title");
+        p.setId(10L);
+        p.setRevision(2L);
+        p.setSite("site1");
+        p.setTags(Collections.emptyList());
+        p.setDeleted(true);
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "deletedPage")).
+                thenReturn(p);
+
+        pageUpdateService.savePage("host1", "deletedPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
+        ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
+        verify(pageRepository, times(2)).save(pageCaptor.capture());
+        verify(regenCacheService).regenCachesForBacklinks("site1", "deletedPage");
+        Page pSaved = pageCaptor.getAllValues().get(1);  // Second saved page is restore page.
+        assertEquals("Some text", pSaved.getText());
+        assertEquals(10L, pSaved.getId());  // Id from deleted page is reused
+        assertEquals("site1", pSaved.getSite());
+        assertEquals("someUser", pSaved.getModifiedBy());
     }
 
     @Test

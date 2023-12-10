@@ -74,7 +74,7 @@ public class LinkCheckMacro extends Macro{
         Set<String> linkedTo = new HashSet<>();
         Map<String, List<String>> brokenLinks = new HashMap<>();
         allPages.stream().sorted().forEach(page -> {
-            List<String> links = context.getLinksOnPage(page);
+            List<String> links = context.getLinksOnPage(caseInsensitiveMapping.get(page));
             linkedTo.addAll(links.stream().map(String::toLowerCase).filter(l -> allPages.contains(l)).collect(Collectors.toList()));
             links.stream().filter(l -> !allPages.contains(l.toLowerCase())).forEach(l -> {
                 brokenLinks.computeIfAbsent(l.toLowerCase(), (k)-> new ArrayList<>()).add(page);

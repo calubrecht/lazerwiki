@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
@@ -103,6 +104,29 @@ public class RenderServiceTest {
         assertEquals("<h1>Error</h1>\n" +
                 "<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n" +
                 "<code>brokenSource</code>", underTest.previewPage("localhost", "thisPage", "brokenSource", "Bob").rendered());
+
+
+    }
+
+    @Test
+    public void testGetRendererdPAge_Cached() {
+        PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
+        when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
+        when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
+        when(pageService.getPageData(any(), eq("ns:realPage2"), any())).thenReturn(pd);
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        PageCache cached = new PageCache();
+        cached.useCache = true;
+        cached.renderedCache = "This is from rendered Cache";
+        when(pageService.getCachedPage("host1", "ns:realPage")).thenReturn(cached);
+
+        assertEquals(new PageData("This is from rendered Cache", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        PageCache ignoreCache = new PageCache();
+        ignoreCache.useCache = false;
+        ignoreCache.renderedCache = "This is from rendered Cache";
+        when(pageService.getCachedPage("host1", "ns:realPage2")).thenReturn(ignoreCache);
+
+        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage2", "Bob"));
 
 
     }

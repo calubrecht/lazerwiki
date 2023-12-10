@@ -11,7 +11,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
+import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDesc;
+import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -22,8 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -101,6 +102,22 @@ class MacroServiceTest {
         PageData cantRead = new PageData("Not for you", null, null, null, new PageFlags(true, false, false, false, false));
         when(pageService.getPageData(anyString(), eq("cantRead"), anyString())).thenReturn(cantRead);
         assertEquals("", macroContext.renderPage("cantRead").getLeft());
+
+        // Cahced Page
+        PageCache cached = new PageCache();
+        cached.useCache = true;
+        cached.renderedCache = "This is from Cache";
+        when(pageService.getCachedPage("localhost", "cachedPage")).thenReturn(cached);
+        PageData renderedPage = new PageData(null, "Rendered now", null, null, PageData.ALL_RIGHTS);
+        when(pageService.getPageData(anyString(), eq("cachedPage"), anyString())).thenReturn(renderedPage);
+        assertEquals("This is from Cache", macroContext.renderPage("cachedPage").getLeft());
+
+        PageCache ignoredCache = new PageCache();
+        ignoredCache.useCache = false;
+        ignoredCache.renderedCache = "This is from Cache";
+        when(pageService.getCachedPage("localhost", "ignoredCache")).thenReturn(ignoredCache);
+        when(pageService.getPageData(anyString(), eq("ignoredCache"), anyString())).thenReturn(renderedPage);
+        assertEquals("<div>Rendered now</div>", macroContext.renderPage("ignoredCache").getLeft());
     }
 
     @Test
@@ -108,8 +125,46 @@ class MacroServiceTest {
     void testRenderPageBroken() {
         RenderContext context = new RenderContext("localhost", "default", "user");
         assertThrows(RuntimeException.class, ()-> underTest.renderMacro("Broken", context));
-
     }
+
+    @Test
+    @Order(6)
+    void testMacroContextGetCachedRender() {
+        //(boolean exists, boolean wasDeleted, boolean userCanRead, boolean userCanWrite, boolean userCanDelete) {
+        PageData none = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true));
+        PageData forbidden = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true));
+        when(pageService.getPageData(any(), eq("noPage"), any())).thenReturn(none);
+        when(pageService.getPageData(any(), eq("forbiddenPage"), any())).thenReturn(forbidden);
+        RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
+        assertEquals("", macroContext.getCachedRender("noPage").getLeft());
+        assertEquals("", macroContext.getCachedRender("forbiddenPage").getLeft());
+        PageData ok = new PageData("", "OK page", null, null, new PageData.PageFlags(true, false, true, true, true));
+        when(pageService.getPageData(any(), eq("cachedPage"), any())).thenReturn(ok);
+        PageCache cached = new PageCache();
+        cached.useCache = true;
+        cached.renderedCache = "From cache";
+        when(pageService.getCachedPage("localhost", "cachedPage")).thenReturn(cached);
+        assertEquals("From cache", macroContext.getCachedRender("cachedPage").getLeft());
+        when(pageService.getPageData(any(), eq("ignorableCache"), any())).thenReturn(ok);
+        PageCache ignorableCache = new PageCache();
+        ignorableCache.useCache = false;
+        ignorableCache.renderedCache = "From cache but transient";
+        when(pageService.getCachedPage("localhost", "ignorableCache")).thenReturn(ignorableCache);
+        assertEquals("From cache but transient", macroContext.getCachedRender("ignorableCache").getLeft());
+        when(pageService.getPageData(any(), eq("nonCached"), any())).thenReturn(ok);
+        assertEquals("<div>OK page</div>", macroContext.getCachedRender("nonCached").getLeft());
+    }
+    //setPageDontCache
+    @Test
+    @Order(7)
+    void testSetPageDontCache() {
+        RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
+        macroContext.setPageDontCache();
+        assertEquals(true, context.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
+    }
+
 
     @CustomMacro
     public static class BrokenMacro extends Macro {

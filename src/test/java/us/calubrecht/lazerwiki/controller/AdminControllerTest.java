@@ -53,4 +53,26 @@ class AdminControllerTest {
                 andExpect(status().isUnauthorized());
         verify(regenCacheService, times(2)).regenLinks("default");
     }
+
+    @Test
+    void regenCacheTable() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        User siteAdmin = new User();
+        siteAdmin.roles = List.of(new UserRole(siteAdmin, "ROLE_ADMIN:default"));
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(regularUser, "ROLE_USER"));
+        when(userService.getUser("bob")).thenReturn(adminUser);
+        when(userService.getUser("celia")).thenReturn(siteAdmin);
+        when(userService.getUser("frank")).thenReturn(regularUser);
+
+        this.mockMvc.perform(post("/api/admin/regenCacheTable/default").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
+                andExpect(status().isOk());
+        this.mockMvc.perform(post("/api/admin/regenCacheTable/default").principal(new UsernamePasswordAuthenticationToken("celia", ""))).
+                andExpect(status().isOk());
+        verify(regenCacheService, times(2)).regenCache("default");
+        this.mockMvc.perform(post("/api/admin/regenCacheTable/default").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
+                andExpect(status().isUnauthorized());
+        verify(regenCacheService, times(2)).regenCache("default");
+    }
 }

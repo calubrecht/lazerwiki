@@ -274,6 +274,12 @@ public class DokuWikiRendererTest {
                 "<div><img src=\"/_media/image.jpg\" class=\"media\" loading=\"lazy\"></div>",
                 doRender(inputWithTypeNoSize)
         );
+
+        String inputWithTypeFullLink = "{{image.jpg?fullLink}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg\" class=\"media fullLink\" loading=\"lazy\"></div>",
+                doRender(inputWithTypeFullLink)
+        );
     }
 
 

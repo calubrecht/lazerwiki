@@ -21,6 +21,19 @@ public class PageCache {
     public String plaintextCache;
     public boolean useCache;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PageCache pageCache = (PageCache) o;
+        return useCache == pageCache.useCache && Objects.equals(site, pageCache.site) && Objects.equals(namespace, pageCache.namespace) && Objects.equals(pageName, pageCache.pageName) && Objects.equals(renderedCache, pageCache.renderedCache) && Objects.equals(plaintextCache, pageCache.plaintextCache);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(site, namespace, pageName, renderedCache, plaintextCache, useCache);
+    }
+
     public static class PageCacheKey {
         public String site;
         public String namespace;

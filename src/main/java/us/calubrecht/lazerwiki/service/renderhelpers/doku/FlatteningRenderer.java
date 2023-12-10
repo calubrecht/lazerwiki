@@ -15,9 +15,6 @@ public abstract class FlatteningRenderer extends AdditiveTreeRenderer {
     List<ParseTree> flattenChildren(ParseTree tree, boolean recursive) {
         List<ParseTree> trees = new ArrayList<>();
         TreeRenderer lastRenderer = null;
-        if (tree.getChildCount() == 0) {
-            return List.of(tree);
-        }
         for (int i = 0; i < tree.getChildCount(); i++) {
             ParseTree t = tree.getChild(i);
             if (getTreesToFlatten().contains(t.getClass())) {
