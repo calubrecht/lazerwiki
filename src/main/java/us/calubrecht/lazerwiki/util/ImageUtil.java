@@ -64,7 +64,7 @@ public class ImageUtil {
                         oldImage = oldImage.getSubimage(0, 0, cropToWidth, cropToHeight);
                     }
                     Image resultingImage = oldImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-                    BufferedImage outputImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                    BufferedImage outputImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                     outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
                     ByteArrayOutputStream baos=new ByteArrayOutputStream();
                     ImageIO.write(outputImage, formatName, baos );

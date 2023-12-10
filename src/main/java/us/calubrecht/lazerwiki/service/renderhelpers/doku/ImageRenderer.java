@@ -82,6 +82,19 @@ public class ImageRenderer  extends TreeRenderer {
         return "";
     }
 
+    boolean getIsLink(String options) {
+        if (options == null) {
+            return false;
+        }
+        String[] toks = options.split("&");
+        for (String tok : toks) {
+            if (tok.equals("fullLink")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     StringBuilder parseInner(String inner) {
         StringBuilder sb = new StringBuilder();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
@@ -95,6 +108,9 @@ public class ImageRenderer  extends TreeRenderer {
         }
         else if (imageTok.endsWith(" ")) {
             className = "medialeft";
+        }
+        if (getIsLink(innards.get(INNARD_TOKEN.OPTIONS))) {
+            className += " fullLink";
         }
         sb.append("<img src=\"/_media/");
         sb.append(innards.get(INNARD_TOKEN.FILE_NAME).trim()).append(getSizeTok(innards.get(INNARD_TOKEN.OPTIONS)));

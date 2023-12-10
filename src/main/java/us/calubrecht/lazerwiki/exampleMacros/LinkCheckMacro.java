@@ -56,11 +56,11 @@ public class LinkCheckMacro extends Macro{
     @Override
     public String render(Macro.MacroContext context, String macroArgs) {
         Map<String, String> argsMap = toArgsMap(macroArgs);
-        Predicate<String> nsFilter = (ns) -> true;
+        Predicate<String> nsFilter = (page) -> !nsMatches(page, Set.of("_meta"));
         if (argsMap.containsKey("filterNS")) {
             Set<String> nsBlacklist = Stream.of(argsMap.get("filterNS").split(",")).map(String::toLowerCase).
                     map(ns -> ns.endsWith(":") ? ns : ns + ":").collect(Collectors.toSet());
-            nsFilter = (page) -> !nsMatches(page, nsBlacklist);
+            nsFilter = (page) -> !nsMatches(page, nsBlacklist) && !nsMatches(page, Set.of("_meta"));
         }
         else if (argsMap.containsKey("ns")) {
             Set<String> nsWhitelist = Stream.of(argsMap.get("ns").split(",")).map(String::toLowerCase).
