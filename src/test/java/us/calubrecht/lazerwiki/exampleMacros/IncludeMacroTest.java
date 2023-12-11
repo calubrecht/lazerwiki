@@ -13,6 +13,7 @@ import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,6 +57,10 @@ class IncludeMacroTest {
         when(pageService.getPageData(anyString(), eq("nothingPage"), anyString())).thenReturn(notpage);
         assertEquals("<div class=\"include\"></div>", macroService.renderMacro("include:nothingPage", renderContext));
         assertTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
+
+        RenderContext plaintextContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>(Map.of("plainText", true)));
+        assertEquals("", macroService.renderMacro("include:includedPage", plaintextContext));
+
     }
 
 }

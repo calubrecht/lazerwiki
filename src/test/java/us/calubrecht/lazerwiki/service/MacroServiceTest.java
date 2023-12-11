@@ -12,7 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 import us.calubrecht.lazerwiki.model.PageCache;
-import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
@@ -80,11 +79,14 @@ class MacroServiceTest {
         assertEquals("&lt;div&gt;hi&lt;/div&gt;", macroContext.sanitize("<div>hi</div>"));
 
 
-        List<SearchResult> pages = List.of(new SearchResult("ns", "bigPage","Big Page",""));
+        List<SearchResult> pages = List.of(
+                new SearchResult("ns", "bigPage","Big Page",""),
+                new SearchResult("", "otherPage","Other Page",""));
         when(pageService.searchPages(anyString(), anyString(), eq(Map.of("tag","aTag", "ns", "bigNS")))).thenReturn(Map.of("tag", pages));
         List<String> results = macroContext.getPagesByNSAndTag("bigNS", "aTag");
-        assertEquals(1, results.size());
+        assertEquals(2, results.size());
         assertEquals("ns:bigPage", results.get(0));
+        assertEquals("otherPage", results.get(1));
     }
 
     @Test
