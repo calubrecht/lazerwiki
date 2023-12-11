@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
+import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.util.*;
@@ -56,7 +58,7 @@ public class PageService {
         return p == null ? pageDescriptor.renderedName() : (p.getTitle() == null ? pageDescriptor.renderedName() : p.getTitle());
     }
 
-    public String getTitle(PageDescriptor pd, Page p) {
+    public static String getTitle(PageDescriptor pd, Page p) {
         return p == null ? pd.renderedName() : (p.getTitle() == null ? pd.renderedName() : p.getTitle());
     }
 
@@ -158,25 +160,57 @@ public class PageService {
         return tagRepository.getAllActiveTags(site);
     }
 
-    public List<PageDesc> searchPages(String host, String userName, String searchTerm) {
-        String tagName = searchTerm.split(":")[1];
-        return searchPages(host, userName, Map.of("tag", tagName));
+    public Map<String, List<SearchResult>> searchPages(String host, String userName, String searchTerm) {
+        String[] searchValues = searchTerm.split(":");
+        return searchPages(host, userName, Map.of(searchValues[0], searchValues[1]));
     }
 
-    public List<PageDesc> searchPages(String host, String userName, Map<String, String> searchTerms) {
+    public Map<String, List<SearchResult>>  searchPages(String host, String userName, Map<String, String> searchTerms) {
         String site = siteService.getSiteForHostname(host);
         if (searchTerms.containsKey("tag")) {
             String tagName = searchTerms.get("tag");
-            List<PageDesc> tagPages = namespaceService.
+            List<SearchResult> tagPages = namespaceService.
                     filterReadablePages(pageRepository.getByTagname(site, tagName), site, userName).stream().
-                    sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).collect(Collectors.toList());
+                    sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
+                    map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
                 Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
-                return tagPages.stream().filter(pd -> nsPattern.matcher(pd.getNamespace()).matches()).toList();
+                return Map.of("tag", tagPages.stream().filter(pd -> nsPattern.matcher(pd.namespace()).matches()).toList());
             }
-            return tagPages;
+            return Map.of("tag", tagPages);
         }
-        return Collections.emptyList();
+        else if (searchTerms.containsKey("text")) {
+            String searchTerm = searchTerms.get("text");
+            List<SearchResult> titlePages = namespaceService.
+                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(site, searchTerm)), site, userName).stream().
+                    sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
+                    map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
+            List<SearchResult> textPages = namespaceService.
+                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(site, searchTerm)), site, userName).stream().
+                    sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
+                    map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchTerm))).collect(Collectors.toList());
+            if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
+                Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
+                titlePages = titlePages.stream().filter(pd -> nsPattern.matcher(pd.namespace()).matches()).toList();
+                textPages = textPages.stream().filter(pd -> nsPattern.matcher(pd.namespace()).matches()).toList();
+            }
+            return Map.of("title", titlePages, "text", textPages);
+        }
+        return Collections.emptyMap();
+    }
+
+    SearchResult searchResultFromPlaintext(PageCache pc, List<String> searchTerms) {
+        Optional<String> searchLine = Stream.of(pc.plaintextCache.split("\\\n")).
+                filter(line -> {
+                    // Can do something smarter? make prefer if text is a word of its own?
+                    for (String term: searchTerms) {
+                        if (line.contains(term)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }).map(line -> StringEscapeUtils.escapeHtml4(line).replaceAll("&quot;", "\"")).findFirst();
+        return new SearchResult(pc.getNamespace(), pc.getPagename(), pc.getTitle(), searchLine.orElse(null));
     }
 
     String getTemplate(String site, PageDescriptor pageDescriptor) {

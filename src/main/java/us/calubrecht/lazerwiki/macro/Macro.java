@@ -46,5 +46,7 @@ public abstract class Macro {
         Pair<String, Map<String, Object>> renderMarkup(String markup);
 
         void setPageDontCache();
+
+        boolean isPlaintextRender();
     }
 }

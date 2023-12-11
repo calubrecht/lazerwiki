@@ -40,6 +40,9 @@ public class IncludeMacro extends Macro {
 
     @Override
     public String render(MacroContext context, String macroArgs) {
+        if (context.isPlaintextRender()) {
+            return "";
+        }
         String includePath = macroArgs.trim();
         Pair<String, Map<String, Object>> p = context.renderPage(includePath);
         context.setPageDontCache();

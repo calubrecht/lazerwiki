@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 import us.calubrecht.lazerwiki.model.PageCache;
-import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
@@ -146,7 +146,8 @@ public class MacroService {
         @Override
         public List<String> getPagesByNSAndTag(String ns, String tag) {
             return pageService.searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns)).
-                    stream().map(PageDesc::getDescriptor).toList();
+                    get("tag").
+                    stream().map(SearchResult::getDescriptor).toList();
         }
 
         @Override
@@ -173,6 +174,11 @@ public class MacroService {
         @Override
         public void setPageDontCache() {
             renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), true);
+        }
+
+        @Override
+        public boolean isPlaintextRender() {
+            return Boolean.TRUE.equals(renderContext.renderState().get("plainText"));
         }
     }
 }

@@ -16,6 +16,7 @@ import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
+import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.HashMap;
@@ -79,8 +80,8 @@ class MacroServiceTest {
         assertEquals("&lt;div&gt;hi&lt;/div&gt;", macroContext.sanitize("<div>hi</div>"));
 
 
-        List<PageDesc> pages = List.of(new PageServiceTest.PageDescImpl("ns", "bigPage","Big Page",""));
-        when(pageService.searchPages(anyString(), anyString(), eq(Map.of("tag","aTag", "ns", "bigNS")))).thenReturn(pages);
+        List<SearchResult> pages = List.of(new SearchResult("ns", "bigPage","Big Page",""));
+        when(pageService.searchPages(anyString(), anyString(), eq(Map.of("tag","aTag", "ns", "bigNS")))).thenReturn(Map.of("tag", pages));
         List<String> results = macroContext.getPagesByNSAndTag("bigNS", "aTag");
         assertEquals(1, results.size());
         assertEquals("ns:bigPage", results.get(0));

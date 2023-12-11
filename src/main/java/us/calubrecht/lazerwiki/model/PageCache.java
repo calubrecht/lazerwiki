@@ -1,14 +1,30 @@
 package us.calubrecht.lazerwiki.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "pageCache")
 @IdClass(PageCache.PageCacheKey.class)
-public class PageCache {
+public class PageCache implements PageDesc {
+
+    public PageCache() {
+
+    }
+
+    public PageCache(String site, String namespace, String pageName, String title, String renderedCache, String plaintextCache,  boolean useCache) {
+        this.site = site;
+        this.namespace = namespace;
+        this.pageName = pageName;
+        this.renderedCache = renderedCache;
+        this.plaintextCache = plaintextCache;
+        this.title = title;
+        this.useCache = useCache;
+    }
 
     @Id
     public String site;
@@ -19,6 +35,8 @@ public class PageCache {
 
     public String renderedCache;
     public String plaintextCache;
+
+    public String title;
     public boolean useCache;
 
     @Override
@@ -26,12 +44,71 @@ public class PageCache {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PageCache pageCache = (PageCache) o;
-        return useCache == pageCache.useCache && Objects.equals(site, pageCache.site) && Objects.equals(namespace, pageCache.namespace) && Objects.equals(pageName, pageCache.pageName) && Objects.equals(renderedCache, pageCache.renderedCache) && Objects.equals(plaintextCache, pageCache.plaintextCache);
+        return useCache == pageCache.useCache && Objects.equals(site, pageCache.site) && Objects.equals(namespace, pageCache.namespace) && Objects.equals(pageName, pageCache.pageName) && Objects.equals(renderedCache, pageCache.renderedCache) && Objects.equals(plaintextCache, pageCache.plaintextCache) && Objects.equals(title, pageCache.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(site, namespace, pageName, renderedCache, plaintextCache, useCache);
+        return Objects.hash(site, namespace, pageName, renderedCache, plaintextCache, useCache, title);
+    }
+
+    @JsonIgnore
+    public PageDesc toDesc() {
+        return new PageDesc() {
+
+            @Override
+            public String getNamespace() {
+                return namespace;
+            }
+
+            @Override
+            public String getPagename() {
+                return pageName;
+            }
+
+            @Override
+            public String getTitle() {
+                return title;
+            }
+
+            @Override
+            public String getModifiedBy() {
+                return null;
+            }
+
+            @Override
+            public LocalDateTime getModified() {
+                return null;
+            }
+        };
+    }
+
+    @Override
+    public String getNamespace() {
+        return namespace;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getPagename() {
+        return pageName;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getModifiedBy() {
+        return null;
+    }
+
+    @Override
+    @JsonIgnore
+    public LocalDateTime getModified() {
+        return null;
     }
 
     public static class PageCacheKey {

@@ -13,6 +13,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +75,8 @@ public class DokuWikiRenderer implements IMarkupRenderer {
 
     @Override
     public String renderToPlainText(String markup, RenderContext renderContext) {
+        RenderContext plainTextContext = new RenderContext(renderContext.host(), renderContext.site(), renderContext.user(), renderContext.renderer(), new HashMap<>(renderContext.renderState()));
+        plainTextContext.renderState().put("plainText", true);
         return renderToPlainText(parseMarkup(markup), renderContext);
     }
 

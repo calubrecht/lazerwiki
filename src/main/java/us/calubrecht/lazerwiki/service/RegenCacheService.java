@@ -62,6 +62,7 @@ public class RegenCacheService {
             newCache.pageName = pd.getPagename();
             newCache.renderedCache = res.renderedText();
             newCache.plaintextCache = res.plainText();
+            newCache.title = PageService.getTitle(new PageDescriptor(pd.getNamespace(), pd.getPagename()), p);
             newCache.useCache = !(Boolean)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
             logger.info("Caching rendered page for " + pd.getNamespace() + ":" + pd.getPagename() + " useCache=" + newCache.useCache);
             pageCacheRepository.save(newCache);
@@ -82,6 +83,7 @@ public class RegenCacheService {
             newCache.pageName = pd.pageName();
             newCache.renderedCache = res.renderedText();
             newCache.plaintextCache = res.plainText();
+            newCache.title = PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
             newCache.useCache = !(Boolean)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
             logger.info("Caching rendered page for " + pd.namespace() + ":" + pd.pageName() + " useCache=" + newCache.useCache);
             pageCacheRepository.save(newCache);

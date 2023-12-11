@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
+import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
@@ -274,22 +275,46 @@ public class PageServiceTest {
         when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pages);
         when(namespaceService.filterReadablePages(any(), eq("site1"), eq("joe"))).thenReturn(List.of(page1));
 
-        List<PageDesc> results = pageService.searchPages("host1", "bob","tag:tag1");
+        List<SearchResult> results = pageService.searchPages("host1", "bob","tag:tag1").get("tag");
         assertEquals(2, results.size());
 
-        results = pageService.searchPages("host1", "joe","tag:tag1");
+        results = pageService.searchPages("host1", "joe","tag:tag1").get("tag");
         assertEquals(1, results.size());
 
         Map<String, String> searchTerms = Map.of("tag","tag1", "ns", "ns1:ns2");
-        results = pageService.searchPages("host1", "bob",searchTerms);
+        results = pageService.searchPages("host1", "bob",searchTerms).get("tag");
         assertEquals(1, results.size());
+    }
+
+    @Test
+    public void testSearchText() {
+        PageCache page1 = new PageCache("site1", "", "page1", "Page 1", "", "This is a page\nWith some bananas\nAnd a cow", false);
+        PageCache page2 = new PageCache("site1", "ns", "page2", "Page2", "", "All your bananas\nbelong to me\nThe banana thief", false);
+        List<PageCache> pages = List.of(page1, page2);
+        List<PageDesc> pagesDesc = List.of(page1, page2);
+        when(pageCacheRepository.searchByTitle(eq("site1"), eq("banana"))).thenReturn(List.of(page1, page2));
+        when(pageCacheRepository.searchByText(eq("site1"), eq("banana"))).thenReturn(List.of(page1, page2));
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pagesDesc);
+
+        Map<String, List<SearchResult>> results = pageService.searchPages("host1", "bob","text:banana");
+        assertEquals(2, results.get("title").size());
+        assertEquals(2, results.get("text").size());
+
+        assertEquals("With some bananas", results.get("text").get(0).resultLine());
+        assertEquals("All your bananas", results.get("text").get(1).resultLine());
+
+        results = pageService.searchPages("host1", "bob",Map.of("text","banana", "ns", "ns"));
+        assertEquals(1, results.get("title").size());
+        assertEquals(1, results.get("text").size());
+
     }
 
     @Test
     public void testUnsupportedSearch() {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         Map<String, String> searchTerms = Map.of("fullText","Test");
-        List<PageDesc> results = pageService.searchPages("host1", "bob",searchTerms);
+        Map<String, List<SearchResult>> results = pageService.searchPages("host1", "bob",searchTerms);
         assertEquals(0, results.size());
 
          verify(pageRepository, never()).getByTagname(anyString(), anyString());
