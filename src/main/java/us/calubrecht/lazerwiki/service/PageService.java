@@ -181,6 +181,7 @@ public class PageService {
         }
         else if (searchTerms.containsKey("text")) {
             String searchTerm = searchTerms.get("text");
+            String searchLower = searchTerm.toLowerCase();
             List<SearchResult> titlePages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(site, searchTerm)), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
@@ -188,7 +189,7 @@ public class PageService {
             List<SearchResult> textPages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(site, searchTerm)), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
-                    map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchTerm))).collect(Collectors.toList());
+                    map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchLower))).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
                 Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
                 titlePages = titlePages.stream().filter(pd -> nsPattern.matcher(pd.namespace()).matches()).toList();
@@ -203,8 +204,9 @@ public class PageService {
         Optional<String> searchLine = Stream.of(pc.plaintextCache.split("\\\n")).
                 filter(line -> {
                     // Can do something smarter? make prefer if text is a word of its own?
+                    String lowerLine = line.toLowerCase();
                     for (String term: searchTerms) {
-                        if (line.contains(term)) {
+                        if (lowerLine.contains(term)) {
                             return true;
                         }
                     }
