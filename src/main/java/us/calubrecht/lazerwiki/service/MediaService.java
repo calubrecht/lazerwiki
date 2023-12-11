@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.responses.NsNode;
@@ -116,10 +117,19 @@ public class MediaService {
         String nsPath = namespace.replaceAll(":", "/");
         ensureDir(site, nsPath);
         String fileName = mfile.getOriginalFilename();
+        MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, namespace, fileName);
+        Long id = null;
+        if (oldRecord != null){
+            if (!namespaceService.canDeleteInNamespace(site, namespace, userName)) {
+                throw new MediaWriteException("Not permissioned to overwrite existing file");
+            }
+            id = oldRecord.getId();
+        }
         byte[] fileBytes = mfile.getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
         Pair<Integer, Integer> imageDimension = imageUtil.getImageDimension(bis);
         MediaRecord newRecord = new MediaRecord(fileName, site, namespace, userName, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
+        newRecord.setId(id);
         mediaRecordRepository.save(newRecord);
         File f = nsPath.isBlank() ?
                 new File(String.join("/", staticFileRoot, site, "media", fileName)):

@@ -189,6 +189,30 @@ class MediaServiceTest {
     }
 
     @Test
+    void saveFile_Existing() throws IOException, MediaWriteException {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Frank"))).thenReturn(true);
+        byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
+        MockMultipartFile file = new MockMultipartFile("file", "small.bin", null, bytesToSave);
+        File f = Paths.get(staticFileRoot, "default", "media", "small.bin").toFile();
+        Files.deleteIfExists(Path.of(f.getPath()));
+        MediaRecord existingRecord = new MediaRecord("small.bin", "default",  "","Bob", 7, 0, 0);
+        existingRecord.setId(10L);
+        when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "small.bin")).thenReturn(existingRecord);
+        // Frank cannot delete, so cannot overwrite.
+        assertThrows(MediaWriteException.class, () ->underTest.saveFile("localhost", "Frank", file, ""));
+
+        underTest.saveFile("localhost", "Bob", file, "");
+
+        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "","Bob", 7, 0, 0);
+        newRecord.setId(10L);
+        verify(mediaRecordRepository).save(eq(newRecord));
+    }
+
+
+    @Test
     void testListFiles() {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canReadNamespace(any(), any(), eq("user1"))).thenReturn(true);
