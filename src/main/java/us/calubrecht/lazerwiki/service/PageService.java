@@ -189,7 +189,7 @@ public class PageService {
             List<SearchResult> textPages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(site, searchTerm)), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
-                    map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchLower))).collect(Collectors.toList());
+                    map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchLower.split(" ")))).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
                 Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
                 titlePages = titlePages.stream().filter(pd -> nsPattern.matcher(pd.namespace()).matches()).toList();
