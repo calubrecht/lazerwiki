@@ -91,7 +91,7 @@ public class DokuWikiRendererPlaintextTest {
     @Test
     public void testRenderLinebreak() {
         String input = "This is a line \\\\ with a linebreak";
-        assertEquals("This is a line\nwith a linebreak", doRender(input));
+        assertEquals("This is a line\n with a linebreak", doRender(input));
     }
 
     @Test

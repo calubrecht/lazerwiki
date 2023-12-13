@@ -45,7 +45,7 @@ SUB_START_TOKEN: '<sub>';
 SUB_END_TOKEN: '</sub>';
 DEL_START_TOKEN: '<del>';
 DEL_END_TOKEN: '</del>';
-FORCE_LINKBREAK: ' \\\\ ';
+FORCE_LINEBREAK: ' \\\\';
 
 IMG_START_TOKEN: '{{';
 IMG_END_TOKEN: '}}';
@@ -252,7 +252,7 @@ header
   ;
 
 line_break
-  : FORCE_LINKBREAK
+  : FORCE_LINEBREAK
   ;
 
 
