@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.9.1"
+version = "0.1.9.2"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -37,10 +37,10 @@ dependencies {
 	providedRuntime("mysql:mysql-connector-java:8.0.33")
 	implementation("com.github.usefulness:webp-imageio:0.5.1")
 	// Gradle will pull in an older version of this if not explicit.
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10")
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10")
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10")
-	implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10")
+	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10")
+	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10")
+	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
