@@ -58,6 +58,16 @@ public class PageControllerTest {
     }
 
     @Test
+    public void testGetPageHistory() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/api/page/history/testPage").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).getPageHistory(eq("localhost"), eq("testPage"), eq("Bob"));
+    }
+
+    @Test
     public void testSavePage() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";

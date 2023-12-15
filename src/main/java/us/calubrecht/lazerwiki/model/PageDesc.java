@@ -14,6 +14,8 @@ public interface PageDesc {
 
     String getPagename();
 
+    Long getRevision();
+
     String getTitle();
 
     String getModifiedBy();

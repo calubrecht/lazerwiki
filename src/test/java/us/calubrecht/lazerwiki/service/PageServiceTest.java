@@ -1,5 +1,8 @@
 package us.calubrecht.lazerwiki.service;
 
+import com.github.difflib.text.DiffRow;
+import com.github.difflib.text.DiffRowGenerator;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.responses.SearchResult;
+import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
@@ -377,11 +381,27 @@ public class PageServiceTest {
         verify(pageCacheRepository).save(cached2);
     }
 
+    @Test
+    void testGetPageHistory() throws PageReadException {
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        PageDesc v1 = new PageDescImpl("ns", "page1", 1L);
+        PageDesc v2 = new PageDescImpl("ns", "page1", 1L);
+        PageDesc v3 = new PageDescImpl("ns", "page1", 3L);
+        when(pageRepository.findAllBySiteAndNamespaceAndPagenameOrderByRevision("default", "ns", "page1")).thenReturn(List.of(v1, v2, v3));
+        when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+
+        assertEquals(3, pageService.getPageHistory("localhost", "ns:page1", "Bob").size());
+        assertThrows(PageReadException.class, () -> pageService.getPageHistory("localhost", "ns:page1", "Frank"));
+
+    }
+
     static class PageDescImpl implements PageDesc {
         final String namespace;
         final String pageName;
         String title;
         String modifiedBy;
+
+        Long revision;
 
         PageDescImpl(String namespace, String pageName, String title, String modifiedBy) {
             this.namespace = namespace;
@@ -393,6 +413,11 @@ public class PageServiceTest {
         PageDescImpl(String namespace, String pageName) {
             this.namespace = namespace;
             this.pageName = pageName;
+        }
+        PageDescImpl(String namespace, String pageName, Long revision) {
+            this.namespace = namespace;
+            this.pageName = pageName;
+            this.revision = revision;
         }
 
         @Override
@@ -419,5 +444,33 @@ public class PageServiceTest {
         public LocalDateTime getModified() {
             return null;
         }
+
+        @Override
+        public Long getRevision() {return revision;}
     }
+
+
+    @Test
+    public void testDiff() {
+        List<String> specificDiffs = new ArrayList();
+        DiffRowGenerator generator = DiffRowGenerator.create()
+                .showInlineDiffs(true)
+                .inlineDiffByWord(true)
+                .mergeOriginalRevised(true)
+                //.oldTag(f -> f ? "<span class=\"diffRemoved\">" : "</span>")
+                //.newTag(f -> f ? "<span class=\"diffAdded\">" : "</span>")
+                //.oldTag(f-> "~~")
+                //.oldTag(f-> "*")
+                .build();
+        List<DiffRow> rows = generator.generateDiffRows(
+                Arrays.asList("Blue moon","This is a test senctence.", "This is the second line.", "And here is the finish."),
+                Arrays.asList("Nothing like anohter line", "Blue moon", "This is a test for diffutils.", "This is the second line."));
+
+        System.out.println("|original|new|");
+        System.out.println("|--------|---|");
+        for (DiffRow row : rows) {
+            System.out.println("|" + row.getOldLine() + "|" + row.getNewLine() + "|");
+        }
+    }
+
 }

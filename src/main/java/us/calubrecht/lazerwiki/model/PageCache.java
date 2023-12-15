@@ -80,6 +80,9 @@ public class PageCache implements PageDesc {
             public LocalDateTime getModified() {
                 return null;
             }
+
+            @Override
+            public Long getRevision() { return null;}
         };
     }
 
@@ -110,6 +113,8 @@ public class PageCache implements PageDesc {
     public LocalDateTime getModified() {
         return null;
     }
+
+    public Long getRevision() { return null;}
 
     public static class PageCacheKey {
         public String site;

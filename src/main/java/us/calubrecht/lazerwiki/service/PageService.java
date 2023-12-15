@@ -1,5 +1,8 @@
 package us.calubrecht.lazerwiki.service;
 
+import com.github.difflib.text.DiffRow;
+import com.github.difflib.text.DiffRowGenerator;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +16,7 @@ import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.responses.SearchResult;
+import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.util.*;
@@ -234,5 +238,53 @@ public class PageService {
            text = text.replace(entry.getKey(), entry.getValue());
         }
         return text;
+    }
+
+    public List<PageDesc> getPageHistory(String host, String sPageDescriptor, String userName) throws PageReadException {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
+        if (!canRead) {
+            throw new PageReadException("You are not permissioned to read this namespace");
+        }
+        return pageRepository.findAllBySiteAndNamespaceAndPagenameOrderByRevision(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+    }
+
+    public List<Pair<Integer, String>>  getPageDiff(String host, String sPageDescriptor, Long rev1, Long rev2, String userName) throws PageReadException {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
+        if (!canRead) {
+            throw new PageReadException("You are not permissioned to read this namespace");
+        }
+        Page latest = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+        Long id = latest.getId();
+        PageKey key1 = new PageKey(id, rev1);
+        PageKey key2 = new PageKey(id, rev2);
+        Page p1 = pageRepository.findById(key1).orElse(null);
+        Page p2 = pageRepository.findById(key2).orElse(null);
+        if (p1 == null ) {
+            throw new PageReadException("Cannot read " + sPageDescriptor + " rev " + rev1);
+        }
+        if (p2 == null ) {
+            throw new PageReadException("Cannot read " + sPageDescriptor + " rev " + rev2);
+        }
+
+        List<String> v1 = List.of(p1.getText().split("\n"));
+        List<String> v2 = List.of(p2.getText().split("\n"));
+        DiffRowGenerator generator = DiffRowGenerator.create()
+                .showInlineDiffs(true)
+                .inlineDiffByWord(true)
+                .mergeOriginalRevised(true)
+                .build();
+        List<DiffRow> rows = generator.generateDiffRows(v1, v2);
+        List<Pair<Integer, String>> result = new ArrayList<>();
+        int rowNum = 1;
+        for (DiffRow row : rows) {
+            Integer lineNum = row.getTag() ==DiffRow.Tag.INSERT ? -1 : rowNum++;
+            result.add(Pair.of(lineNum, row.getOldLine()));
+        }
+       // List<String> res= rows.stream().map(dr -> dr.getOldLine()).toList();
+        return result;
     }
 }

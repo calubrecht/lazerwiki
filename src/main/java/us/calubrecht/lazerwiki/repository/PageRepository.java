@@ -17,6 +17,7 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
     Page findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(String site, String namespace, String pagename, LocalDateTime validts, boolean deleted);
     Page findBySiteAndNamespaceAndPagenameAndValidts(String site, String namespace, String pagename, LocalDateTime validts);
     List<PageDesc> findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(String site, LocalDateTime validts, boolean deleted);
+    List<PageDesc> findAllBySiteAndNamespaceAndPagenameOrderByRevision(String site, String namespace, String pagename);
 
     @Query(value="SELECT namespace, pagename, title, modifiedBy, modified FROM page p inner join tag t on p.id= t.pageId and p.revision = t.revision  where p.site = :site and t.tag=:tagName and deleted=0 and validTS='9999-12-31 00:00:00'",
             nativeQuery = true)

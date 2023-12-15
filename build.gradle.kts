@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.9.2"
+version = "0.1.9.3"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -32,6 +32,7 @@ dependencies {
 	implementation("commons-io:commons-io:2.15.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.jsoup:jsoup:1.16.2")
+	implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 
 
 	providedRuntime("mysql:mysql-connector-java:8.0.33")

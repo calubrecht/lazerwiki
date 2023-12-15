@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.controller;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
+import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.net.MalformedURLException;
@@ -41,6 +43,19 @@ public class PageController {
         return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
     }
 
+    @RequestMapping(value = {"/history/{pageDescriptor}", "/history/"})
+    public List<PageDesc> getPageHistory(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException, PageReadException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? "Guest" : principal.getName();
+        return pageService.getPageHistory(url.getHost(), pageDescriptor.orElse(""), userName);
+    }
+
+    @RequestMapping(value = {"/diff/{pageDescriptor}/{rev1}/{rev2}", "/history/{rev1}/{rev2}"})
+    public List<Pair<Integer,String>> getPageHistory(@PathVariable Optional<String> pageDescriptor, @PathVariable Long rev1, @PathVariable Long rev2, Principal principal, HttpServletRequest request ) throws MalformedURLException, PageReadException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? "Guest" : principal.getName();
+        return pageService.getPageDiff(url.getHost(), pageDescriptor.orElse(""), rev1, rev2, userName);
+    }
     @PostMapping(value = { "/savePage", "{pageDescriptor}/savePage"})
     public PageData savePage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody SavePageRequest body) throws MalformedURLException, PageWriteException {
         URL url = new URL(request.getRequestURL().toString());

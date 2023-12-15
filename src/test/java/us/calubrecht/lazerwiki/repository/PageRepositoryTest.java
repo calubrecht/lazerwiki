@@ -51,4 +51,11 @@ class PageRepositoryTest {
         List<PageDesc> pages = pageRepository.getAllValid("site1");
         assertEquals(1, pages.size());
     }
+
+    @Test
+    void findAllBySiteAndNamespaceAndPagenameOrderByRevision() {
+        List<PageDesc> pageDescs = pageRepository.findAllBySiteAndNamespaceAndPagenameOrderByRevision("site1", "ns", "page1");
+        assertEquals(2, pageDescs.size());
+
+    }
 }
