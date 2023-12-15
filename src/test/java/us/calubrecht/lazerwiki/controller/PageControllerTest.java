@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
+import us.calubrecht.lazerwiki.service.exception.PageReadException;
 
 import java.util.List;
 
@@ -65,6 +66,34 @@ public class PageControllerTest {
                 andExpect(status().isOk());
 
         verify(pageService).getPageHistory(eq("localhost"), eq("testPage"), eq("Bob"));
+
+
+        when(pageService.getPageHistory(eq("localhost"), eq("testPage"), eq("Jack"))).
+                thenThrow(new PageReadException(""));
+        Authentication auth2 = new UsernamePasswordAuthenticationToken("Jack", "password1");
+        this.mockMvc.perform(get("/api/page/history/testPage").
+                        principal(auth2)).
+                andExpect(status().isUnauthorized());
+
+    }
+
+    @Test
+    public void testGetPageDiff() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/api/page/diff/testPage/1/2").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).getPageDiff(eq("localhost"), eq("testPage"), eq(1L), eq(2L), eq("Bob"));
+
+
+        when(pageService.getPageDiff(eq("localhost"), eq("testPage"), eq(1L), eq(2L), eq("Jack"))).
+                thenThrow(new PageReadException(""));
+        Authentication auth2 = new UsernamePasswordAuthenticationToken("Jack", "password1");
+        this.mockMvc.perform(get("/api/page/diff/testPage/1/2").
+                        principal(auth2)).
+                andExpect(status().isUnauthorized());
+
     }
 
     @Test
@@ -160,16 +189,4 @@ public class PageControllerTest {
 
         verify(renderService).previewPage(eq("localhost"), eq(""), eq("This is some text"), eq("Bob"));
     }
-
-    /*
-    @Test
-    public void testGetPageRevisions() throws Exception {
-        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
-        this.mockMvc.perform(get("/api/page/pageRevisions/thisPage").principal(auth)).
-                andExpect(status().isOk());
-
-
-        verify(pageService).pageRevisions(eq("localhost"), eq("thisPage"), eq("Bob"));
-    }*/
 }

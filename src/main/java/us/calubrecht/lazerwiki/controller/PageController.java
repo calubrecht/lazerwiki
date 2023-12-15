@@ -2,6 +2,8 @@ package us.calubrecht.lazerwiki.controller;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,18 +46,27 @@ public class PageController {
     }
 
     @RequestMapping(value = {"/history/{pageDescriptor}", "/history/"})
-    public List<PageDesc> getPageHistory(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException, PageReadException {
+    public ResponseEntity<List<PageDesc>> getPageHistory(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? "Guest" : principal.getName();
-        return pageService.getPageHistory(url.getHost(), pageDescriptor.orElse(""), userName);
+        try {
+            return ResponseEntity.ok(pageService.getPageHistory(url.getHost(), pageDescriptor.orElse(""), userName));
+        } catch (PageReadException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @RequestMapping(value = {"/diff/{pageDescriptor}/{rev1}/{rev2}", "/history/{rev1}/{rev2}"})
-    public List<Pair<Integer,String>> getPageHistory(@PathVariable Optional<String> pageDescriptor, @PathVariable Long rev1, @PathVariable Long rev2, Principal principal, HttpServletRequest request ) throws MalformedURLException, PageReadException {
+    public ResponseEntity<List<Pair<Integer,String>>> getPageHistory(@PathVariable Optional<String> pageDescriptor, @PathVariable Long rev1, @PathVariable Long rev2, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? "Guest" : principal.getName();
-        return pageService.getPageDiff(url.getHost(), pageDescriptor.orElse(""), rev1, rev2, userName);
+        try {
+            return ResponseEntity.ok(pageService.getPageDiff(url.getHost(), pageDescriptor.orElse(""), rev1, rev2, userName));
+        } catch (PageReadException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
+
     @PostMapping(value = { "/savePage", "{pageDescriptor}/savePage"})
     public PageData savePage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody SavePageRequest body) throws MalformedURLException, PageWriteException {
         URL url = new URL(request.getRequestURL().toString());
