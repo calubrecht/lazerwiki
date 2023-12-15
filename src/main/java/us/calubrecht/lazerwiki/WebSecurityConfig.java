@@ -45,6 +45,7 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/_media/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/_resources/**"),
                                             new AntPathRequestMatcher("/api/page/get/*", HttpMethod.GET.toString()),
+                                            new AntPathRequestMatcher("/api/page/getHistorical/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/page/history/*", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/page/diff/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/page/listPages", HttpMethod.GET.toString()),

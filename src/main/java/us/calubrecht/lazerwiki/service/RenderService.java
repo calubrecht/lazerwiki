@@ -73,6 +73,29 @@ public class RenderService {
 
     }
 
+    public PageData getHistoricalRenderedPage(String host, String sPageDescriptor, long revision, String userName) {
+        String site = siteService.getSiteForHostname(host);
+        PageData d = pageService.getHistoricalPageData(host, sPageDescriptor, revision, userName);
+        if (!d.flags().exists()) {
+            return d;
+        }
+        if (!d.flags().userCanRead()) {
+            return d;
+        }
+        try {
+            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, userName);
+            PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags());
+            return pd;
+        }
+        catch (Exception e) {
+            logger.error("Render failed! host= " + host + " sPageDescriptor= " + sPageDescriptor + " user=" + userName + ".", e);
+            String sanitizedSource =  StringEscapeUtils.escapeHtml4(d.source()).replaceAll("&quot;", "\"");
+
+            return new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>%s</code>".formatted(sanitizedSource),
+                    d.source(), d.tags(), d.backlinks(),d.flags());
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public void savePage(String host, String sPageDescriptor,String text, List<String> tags, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);

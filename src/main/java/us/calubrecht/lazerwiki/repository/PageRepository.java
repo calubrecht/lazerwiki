@@ -16,6 +16,8 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
 
     Page findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(String site, String namespace, String pagename, LocalDateTime validts, boolean deleted);
     Page findBySiteAndNamespaceAndPagenameAndValidts(String site, String namespace, String pagename, LocalDateTime validts);
+
+    Page findBySiteAndNamespaceAndPagenameAndRevision(String site, String namespace, String pagename, long revision);
     List<PageDesc> findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(String site, LocalDateTime validts, boolean deleted);
     List<PageDesc> findAllBySiteAndNamespaceAndPagenameOrderByRevision(String site, String namespace, String pagename);
 

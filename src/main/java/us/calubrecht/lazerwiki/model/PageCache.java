@@ -82,6 +82,11 @@ public class PageCache implements PageDesc {
             }
 
             @Override
+            public boolean isDeleted() {
+                return false;
+            }
+
+            @Override
             public Long getRevision() { return null;}
         };
     }
@@ -114,6 +119,14 @@ public class PageCache implements PageDesc {
         return null;
     }
 
+    @Override
+    @JsonIgnore
+    public boolean isDeleted() {
+        return false;
+    }
+
+    @Override
+    @JsonIgnore
     public Long getRevision() { return null;}
 
     public static class PageCacheKey {

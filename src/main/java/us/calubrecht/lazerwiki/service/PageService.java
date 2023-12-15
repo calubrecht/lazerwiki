@@ -2,7 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
-import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.data.util.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,6 +90,29 @@ public class PageService {
         String source = p.getText();
         return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), backlinks, new PageFlags(true, false, true, canWrite, canDelete));
     }
+
+    @Transactional
+    public PageData getHistoricalPageData(String host, String sPageDescriptor, long revision, String userName) {
+        logger.info("fetch page: host=" + host + " sPageDescriptor=" + sPageDescriptor + " revision= " + revision + " userName=" + userName);
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
+        boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
+        if (!canRead) {
+            return new PageData("You are not permissioned to read this page", "", getTitle(host, sPageDescriptor),  Collections.emptyList(),Collections.emptyList(), PageData.EMPTY_FLAGS);
+        }
+        Page p = pageRepository.findBySiteAndNamespaceAndPagenameAndRevision(site, pageDescriptor.namespace(), pageDescriptor.pageName(), revision);
+
+        if (p == null ) {
+            // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, PageData.EMPTY_FLAGS);
+        }
+        if (p.isDeleted()) {
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, PageData.EMPTY_FLAGS);
+        }
+        String source = p.getText();
+        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), null, new PageFlags(true, false, true, false, false));
+    }
+
 
     public PageCache getCachedPage(String host, String sPageDescriptor) {
         String site = siteService.getSiteForHostname(host);

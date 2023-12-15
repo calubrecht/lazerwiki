@@ -1,7 +1,7 @@
 package us.calubrecht.lazerwiki.controller;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +56,14 @@ public class PageController {
         }
     }
 
-    @RequestMapping(value = {"/diff/{pageDescriptor}/{rev1}/{rev2}", "/history/{rev1}/{rev2}"})
+    @RequestMapping(value = {"/getHistorical/{pageDescriptor}/{revision}", "/getHistorical/{revision}"})
+    public PageData getPageHistorical(@PathVariable Optional<String> pageDescriptor, @PathVariable long revision, Principal principal, HttpServletRequest request ) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? "Guest" : principal.getName();
+        return renderService.getHistoricalRenderedPage(url.getHost(), pageDescriptor.orElse(""), revision, userName);
+    }
+
+    @RequestMapping(value = {"/diff/{pageDescriptor}/{rev1}/{rev2}", "/diff/{rev1}/{rev2}"})
     public ResponseEntity<List<Pair<Integer,String>>> getPageHistory(@PathVariable Optional<String> pageDescriptor, @PathVariable Long rev1, @PathVariable Long rev2, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? "Guest" : principal.getName();

@@ -446,6 +446,11 @@ public class PageServiceTest {
         }
 
         @Override
+        public boolean isDeleted() {
+            return false;
+        }
+
+        @Override
         public Long getRevision() {return revision;}
     }
 

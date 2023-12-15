@@ -23,6 +23,8 @@ public interface PageDesc {
     @SuppressWarnings("SameReturnValue")
     LocalDateTime getModified();
 
+    boolean isDeleted();
+
     @JsonIgnore
     default String getDescriptor() {
         return getNamespace().isBlank() ? getPagename() : getNamespace() + ":" + getPagename();
