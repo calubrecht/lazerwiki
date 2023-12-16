@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.util.Pair;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.*;
@@ -382,6 +383,34 @@ public class PageServiceTest {
     }
 
     @Test
+    public void testHistoricalPageData() {
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        when(namespaceService.canReadNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
+
+        PageData pd = pageService.getHistoricalPageData("localhost", "page1", 1, "joe");
+        // Joe can't read this page
+        assertEquals("You are not permissioned to read this page", pd.rendered());
+        assertEquals(false, pd.flags().userCanRead());
+
+        Page page = new Page();
+        page.setText("This is a page");
+        page.setTags(Collections.emptyList());
+        Page deletedPage = new Page();
+        deletedPage.setDeleted(true);
+        deletedPage.setTags(Collections.emptyList());
+        when(pageRepository.findBySiteAndNamespaceAndPagenameAndRevision("default", "", "page1", 1)).thenReturn(page);
+        when(pageRepository.findBySiteAndNamespaceAndPagenameAndRevision("default", "", "page1", 4)).thenReturn(deletedPage);
+        pd = pageService.getHistoricalPageData("localhost", "page1", 123, "bob");
+        assertEquals("This page doesn't exist", pd.rendered());
+        pd = pageService.getHistoricalPageData("localhost", "page1", 4, "bob");
+        assertEquals("This page doesn't exist", pd.rendered());
+        assertEquals(true, pd.flags().wasDeleted());
+        pd = pageService.getHistoricalPageData("localhost", "page1", 1, "bob");
+        assertEquals("This is a page", pd.source());
+
+    }
+
+    @Test
     void testGetPageHistory() throws PageReadException {
         when(siteService.getSiteForHostname("localhost")).thenReturn("default");
         PageDesc v1 = new PageDescImpl("ns", "page1", 1L);
@@ -393,6 +422,46 @@ public class PageServiceTest {
         assertEquals(3, pageService.getPageHistory("localhost", "ns:page1", "Bob").size());
         assertThrows(PageReadException.class, () -> pageService.getPageHistory("localhost", "ns:page1", "Frank"));
 
+    }
+
+    @Test
+    void testGetPageDiff() throws PageReadException {
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        when(namespaceService.canReadNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
+        Page page = new Page();
+        page.setText("THis is\ntext");
+        PageKey key1 = new PageKey(5L, 1L);
+        when(pageRepository.findById(key1)).thenReturn(Optional.of(page));
+        Page page2 = new Page();
+        page2.setText("THis is\nmore text");
+        PageKey key2 = new PageKey(5L, 5L);
+        when(pageRepository.findById(key2)).thenReturn(Optional.of(page2));
+        Page latestPage = new Page();
+        latestPage.setId(5L);
+        when(pageRepository.getBySiteAndNamespaceAndPagename("default", "", "thisPage")).thenReturn(latestPage);
+
+        // Joe can't read
+        assertThrows(PageReadException.class, () -> pageService.getPageDiff("localhost", "thisPage", 1L, 2L, "joe"));
+        // These revisions don't exist
+        assertThrows(PageReadException.class, () -> pageService.getPageDiff("localhost", "thisPage", 8L, 20L, "bob"));
+        assertThrows(PageReadException.class, () -> pageService.getPageDiff("localhost", "thisPage", 1L, 20L, "bob"));
+
+        List<Pair<Integer, String>> out = pageService.getPageDiff("localhost", "thisPage", 1L, 5L, "bob");
+
+        assertEquals(2, out.size());
+        assertEquals(1, out.get(0).getFirst());
+        assertEquals("THis is", out.get(0).getSecond());
+        assertEquals("<span class=\"editNewInline\">more </span>text", out.get(1).getSecond());
+
+    }
+
+    @Test
+    public void testGenerateDiffs() {
+        List<Pair<Integer, String>> out = pageService.generateDiffs("This is a line\nAnd another", "This is a line\nWith an extra one\nAnd another");
+        assertEquals(3, out.size());
+        assertEquals(-1, out.get(1).getFirst());
+        assertEquals("<span class=\"editNewInline\">With an extra one</span>", out.get(1).getSecond());
+        assertEquals(2, out.get(2).getFirst());
     }
 
     static class PageDescImpl implements PageDesc {
@@ -452,30 +521,6 @@ public class PageServiceTest {
 
         @Override
         public Long getRevision() {return revision;}
-    }
-
-
-    @Test
-    public void testDiff() {
-        List<String> specificDiffs = new ArrayList();
-        DiffRowGenerator generator = DiffRowGenerator.create()
-                .showInlineDiffs(true)
-                .inlineDiffByWord(true)
-                .mergeOriginalRevised(true)
-                //.oldTag(f -> f ? "<span class=\"diffRemoved\">" : "</span>")
-                //.newTag(f -> f ? "<span class=\"diffAdded\">" : "</span>")
-                //.oldTag(f-> "~~")
-                //.oldTag(f-> "*")
-                .build();
-        List<DiffRow> rows = generator.generateDiffRows(
-                Arrays.asList("Blue moon","This is a test senctence.", "This is the second line.", "And here is the finish."),
-                Arrays.asList("Nothing like anohter line", "Blue moon", "This is a test for diffutils.", "This is the second line."));
-
-        System.out.println("|original|new|");
-        System.out.println("|--------|---|");
-        for (DiffRow row : rows) {
-            System.out.println("|" + row.getOldLine() + "|" + row.getNewLine() + "|");
-        }
     }
 
 }

@@ -127,7 +127,30 @@ public class RenderServiceTest {
         when(pageService.getCachedPage("host1", "ns:realPage2")).thenReturn(ignoreCache);
 
         assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage2", "Bob"));
+    }
 
+    @Test
+    public void testGetHistoricalRenderedPage() {
+        PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
+        when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
+        when(pageService.getHistoricalPageData(any(), eq("ns:realPage"), eq(1L), any())).thenReturn(pd);
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
 
+        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getHistoricalRenderedPage("host1", "ns:realPage", 1L,"Bob"));
+
+        PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false));
+        when(pageService.getHistoricalPageData(any(), eq("ns:nonPage"), anyLong(), any())).thenReturn(noPageData);
+        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null, new PageFlags(false, false, true, true, false)), underTest.getHistoricalRenderedPage("host1", "ns:nonPage", 1L,"Bob"));
+
+        PageData nonPermissioned = new PageData("Not for you", "This is raw page text",  null,null, new PageFlags(true, false, false, false, false));
+        when(pageService.getHistoricalPageData(any(), eq("no"), anyLong(), any())).thenReturn(nonPermissioned);
+        assertEquals(new PageData("Not for you", "This is raw page text",   null,null, new PageFlags(true, false, false, false, false)), underTest.getHistoricalRenderedPage("host1", "no", 1L,"Bob"));
+
+        PageData badRender = new PageData(null, "BAD",  null,null, PageData.ALL_RIGHTS);
+        when(pageService.getHistoricalPageData(any(), eq("badRender"), anyLong(), any())).thenReturn(badRender);
+        when(renderer.renderWithInfo(eq("BAD"), any(), any(), any())).thenThrow(new RuntimeException("OUTCH"));
+        assertEquals(new PageData("<h1>Error</h1>\n" +
+                "<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n" +
+                "<code>BAD</code>", "BAD",   null,null,  PageData.ALL_RIGHTS), underTest.getHistoricalRenderedPage("host1", "badRender", 1L,"Bob"));
     }
 }

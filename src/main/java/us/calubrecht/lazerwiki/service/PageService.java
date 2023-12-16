@@ -107,7 +107,7 @@ public class PageService {
             return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, PageData.EMPTY_FLAGS);
         }
         if (p.isDeleted()) {
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, PageData.EMPTY_FLAGS);
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, new PageFlags(false, true, true, false, false));
         }
         String source = p.getText();
         return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), null, new PageFlags(true, false, true, false, false));
@@ -292,9 +292,12 @@ public class PageService {
         if (p2 == null ) {
             throw new PageReadException("Cannot read " + sPageDescriptor + " rev " + rev2);
         }
+        return generateDiffs(p1.getText(), p2.getText());
+    }
 
-        List<String> v1 = List.of(p1.getText().split("\n"));
-        List<String> v2 = List.of(p2.getText().split("\n"));
+    public List<Pair<Integer, String>> generateDiffs(String text1, String text2) {
+        List<String> v1 = List.of(text1.split("\n"));
+        List<String> v2 = List.of(text2.split("\n"));
         DiffRowGenerator generator = DiffRowGenerator.create()
                 .showInlineDiffs(true)
                 .inlineDiffByWord(true)
@@ -307,7 +310,6 @@ public class PageService {
             Integer lineNum = row.getTag() ==DiffRow.Tag.INSERT ? -1 : rowNum++;
             result.add(Pair.of(lineNum, row.getOldLine()));
         }
-       // List<String> res= rows.stream().map(dr -> dr.getOldLine()).toList();
         return result;
     }
 }

@@ -64,7 +64,7 @@ public class PageController {
     }
 
     @RequestMapping(value = {"/diff/{pageDescriptor}/{rev1}/{rev2}", "/diff/{rev1}/{rev2}"})
-    public ResponseEntity<List<Pair<Integer,String>>> getPageHistory(@PathVariable Optional<String> pageDescriptor, @PathVariable Long rev1, @PathVariable Long rev2, Principal principal, HttpServletRequest request ) throws MalformedURLException {
+    public ResponseEntity<List<Pair<Integer,String>>> getPageDiff(@PathVariable Optional<String> pageDescriptor, @PathVariable Long rev1, @PathVariable Long rev2, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? "Guest" : principal.getName();
         try {

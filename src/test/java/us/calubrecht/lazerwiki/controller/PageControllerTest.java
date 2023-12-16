@@ -75,6 +75,11 @@ public class PageControllerTest {
                         principal(auth2)).
                 andExpect(status().isUnauthorized());
 
+        this.mockMvc.perform(get("/api/page/history/testPage")).
+                andExpect(status().isOk());
+        verify(pageService).getPageHistory(eq("localhost"), eq("testPage"), eq("Guest"));
+
+
     }
 
     @Test
@@ -93,6 +98,12 @@ public class PageControllerTest {
         this.mockMvc.perform(get("/api/page/diff/testPage/1/2").
                         principal(auth2)).
                 andExpect(status().isUnauthorized());
+
+        this.mockMvc.perform(get("/api/page/diff/testPage/1/2")).
+                andExpect(status().isOk());
+        verify(pageService).getPageDiff(eq("localhost"), eq("testPage"), eq(1L), eq(2L), eq("Guest"));
+
+
 
     }
 
@@ -188,5 +199,20 @@ public class PageControllerTest {
 
 
         verify(renderService).previewPage(eq("localhost"), eq(""), eq("This is some text"), eq("Bob"));
+    }
+
+    @Test
+    public void testGetPageHistorical() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/api/page/getHistorical/testPage/1").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(renderService).getHistoricalRenderedPage(eq("localhost"), eq("testPage"), eq(1L), eq("Bob"));
+
+        this.mockMvc.perform(get("/api/page/getHistorical/testPage/1")).
+                andExpect(status().isOk());
+
+        verify(renderService).getHistoricalRenderedPage(eq("localhost"), eq("testPage"), eq(1L), eq("Guest"));
     }
 }
