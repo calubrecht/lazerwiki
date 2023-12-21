@@ -292,13 +292,13 @@ public class PageServiceTest {
     }
 
     @Test
-    public void testSearchText() {
+        public void testSearchText() {
         PageCache page1 = new PageCache("site1", "", "page1", "Page 1", "", "This is a page\nWith some bananas\nAnd a cow", false);
         PageCache page2 = new PageCache("site1", "ns", "page2", "Page2", "", "All your bananas\nbelong to me\nThe banana thief", false);
         List<PageCache> pages = List.of(page1, page2);
         List<PageDesc> pagesDesc = List.of(page1, page2);
-        when(pageCacheRepository.searchByTitle(eq("site1"), eq("banana"))).thenReturn(List.of(page1, page2));
-        when(pageCacheRepository.searchByText(eq("site1"), eq("banana"))).thenReturn(List.of(page1, page2));
+        when(pageCacheRepository.searchByTitle(eq("site1"), eq("banana*"))).thenReturn(List.of(page1, page2));
+        when(pageCacheRepository.searchByText(eq("site1"), eq("banana*"))).thenReturn(List.of(page1, page2));
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pagesDesc);
 
@@ -312,6 +312,11 @@ public class PageServiceTest {
         results = pageService.searchPages("host1", "bob",Map.of("text","banana", "ns", "ns"));
         assertEquals(1, results.get("title").size());
         assertEquals(1, results.get("text").size());
+
+        // If asterix specifically applied
+        results = pageService.searchPages("host1", "bob","text:banana*");
+        assertEquals(2, results.get("title").size());
+        assertEquals(2, results.get("text").size());
 
     }
 

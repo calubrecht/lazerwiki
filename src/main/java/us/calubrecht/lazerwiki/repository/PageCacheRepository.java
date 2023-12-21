@@ -13,9 +13,9 @@ public interface PageCacheRepository extends CrudRepository<PageCache, PageCache
 
     void deleteBySite(String site);
 
-    @Query(value = "SELECT * FROM pageCache WHERE MATCH(pageName, title) AGAINST (:searchTerm ) AND site=:site", nativeQuery= true)
+    @Query(value = "SELECT * FROM pageCache WHERE MATCH(pageName, title) AGAINST (:searchTerm IN BOOLEAN MODE) AND site=:site", nativeQuery= true)
     List<PageCache> searchByTitle(String site, String searchTerm);
 
-    @Query(value = "SELECT * FROM pageCache WHERE MATCH(plaintextCache) AGAINST (:searchTerm ) AND site=:site", nativeQuery = true)
+    @Query(value = "SELECT * FROM pageCache WHERE MATCH(plaintextCache) AGAINST (:searchTerm IN BOOLEAN MODE) AND site=:site", nativeQuery = true)
     List<PageCache> searchByText(String site, String searchTerm);
 }

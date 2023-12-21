@@ -207,8 +207,8 @@ public class PageService {
             return Map.of("tag", tagPages);
         }
         else if (searchTerms.containsKey("text")) {
-            String searchTerm = searchTerms.get("text");
-            String searchLower = searchTerm.toLowerCase();
+            String searchTerm = prepareSearchTerm(searchTerms.get("text"));
+            String searchLower = searchTerms.get("text").toLowerCase();
             List<SearchResult> titlePages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(site, searchTerm)), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
@@ -225,6 +225,10 @@ public class PageService {
             return Map.of("title", titlePages, "text", textPages);
         }
         return Collections.emptyMap();
+    }
+
+    String prepareSearchTerm(String terms) {
+        return Stream.of(terms.split(" ")).map(term -> !term.endsWith("*") ? term + "*" : term).collect(Collectors.joining(" "));
     }
 
     SearchResult searchResultFromPlaintext(PageCache pc, List<String> searchTerms) {
