@@ -16,7 +16,9 @@ import us.calubrecht.lazerwiki.service.UserService;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {AdminController.class, VersionController.class})
@@ -74,5 +76,22 @@ class AdminControllerTest {
         this.mockMvc.perform(post("/api/admin/regenCacheTable/default").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
                 andExpect(status().isUnauthorized());
         verify(regenCacheService, times(2)).regenCache("default");
+    }
+
+    @Test
+    void getUsers() throws Exception {
+        when(userService.getUsers()).thenReturn(List.of("Bob", "Frank"));
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        when(userService.getUser("bob")).thenReturn(adminUser);
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(regularUser, "ROLE_USER"));
+        when(userService.getUser("frank")).thenReturn(regularUser);
+
+        this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
+        andExpect(status().isOk()).andExpect(content().json("[\"Bob\", \"Frank\"]"));
+
+        this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
+                andExpect(status().isUnauthorized());
     }
 }

@@ -79,4 +79,12 @@ public class UserServiceTest {
         assertTrue(userService.verifyPassword(u, "ThisPass"));
         assertFalse(userService.verifyPassword(u, "NotThisPass"));
     }
+
+    @Test
+    public void testGetUsers() {
+        List<User> users = List.of (new User("bob",""), new User("Joe", ""));
+        when(userRepository.findAll()).thenReturn(users);
+
+        assertEquals(List.of("bob", "Joe"), userService.getUsers());
+    }
 }

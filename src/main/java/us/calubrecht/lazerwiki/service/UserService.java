@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.apache.commons.lang3.stream.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class UserService {
@@ -45,6 +47,10 @@ public class UserService {
             u.roles.size();
         }
         return u;
+    }
+
+    public List<String> getUsers() {
+        return StreamSupport.stream(userRepository.findAll().spliterator(), false).map(u -> u.userName).toList();
     }
 
     public boolean verifyPassword(User u, String password) {

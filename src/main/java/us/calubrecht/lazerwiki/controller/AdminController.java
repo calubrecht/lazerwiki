@@ -1,17 +1,16 @@
 package us.calubrecht.lazerwiki.controller;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,5 +44,15 @@ public class AdminController {
         }
         regenCacheService.regenCache(site);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("getUsers")
+    public ResponseEntity<List<String>> getUsers(Principal principal) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(userService.getUsers());
     }
 }
