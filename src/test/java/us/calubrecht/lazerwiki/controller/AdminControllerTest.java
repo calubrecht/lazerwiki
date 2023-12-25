@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.UserService;
@@ -80,7 +81,7 @@ class AdminControllerTest {
 
     @Test
     void getUsers() throws Exception {
-        when(userService.getUsers()).thenReturn(List.of("Bob", "Frank"));
+        when(userService.getUsers()).thenReturn(List.of(new UserDTO("Bob",null, List.of("ROLE_ADMIN","ROLE_USER")), new UserDTO("Frank", null, List.of("ROLE_USER"))));
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         when(userService.getUser("bob")).thenReturn(adminUser);
@@ -89,7 +90,7 @@ class AdminControllerTest {
         when(userService.getUser("frank")).thenReturn(regularUser);
 
         this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
-        andExpect(status().isOk()).andExpect(content().json("[\"Bob\", \"Frank\"]"));
+        andExpect(status().isOk()).andExpect(content().json("[{\"userName\":\"Bob\", \"userRoles\":[\"ROLE_ADMIN\", \"ROLE_USER\"]}, {\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}]"));
 
         this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
                 andExpect(status().isUnauthorized());

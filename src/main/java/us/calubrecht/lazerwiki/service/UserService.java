@@ -1,17 +1,15 @@
 package us.calubrecht.lazerwiki.service;
 
-import org.apache.commons.lang3.stream.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -49,8 +47,10 @@ public class UserService {
         return u;
     }
 
-    public List<String> getUsers() {
-        return StreamSupport.stream(userRepository.findAll().spliterator(), false).map(u -> u.userName).toList();
+    public List<UserDTO> getUsers() {
+        return StreamSupport.stream(userRepository.findAll().spliterator(), false).
+                map(user -> new UserDTO(user.userName, null, user.roles.stream().map(role -> role.role).toList()
+                )).toList();
     }
 
     public boolean verifyPassword(User u, String password) {

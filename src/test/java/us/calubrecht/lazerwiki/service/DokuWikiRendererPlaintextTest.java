@@ -100,4 +100,11 @@ public class DokuWikiRendererPlaintextTest {
         assertEquals("| First | Line |\n" +
                 "|Second | Line|", doRender(inputSimpleTable));
     }
+
+    @Test
+    public void testRenderBlockquote() {
+        String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
+        assertEquals(" One quote with some bold\nAnd\nAnother layer of quote", doRender(inputBlockquote));
+
+    }
 }

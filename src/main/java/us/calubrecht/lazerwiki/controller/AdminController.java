@@ -1,11 +1,11 @@
 package us.calubrecht.lazerwiki.controller;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.UserService;
 
@@ -47,7 +47,7 @@ public class AdminController {
     }
 
     @GetMapping("getUsers")
-    public ResponseEntity<List<String>> getUsers(Principal principal) {
+    public ResponseEntity<List<UserDTO>> getUsers(Principal principal) {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
         if (!roles.contains("ROLE_ADMIN")) {

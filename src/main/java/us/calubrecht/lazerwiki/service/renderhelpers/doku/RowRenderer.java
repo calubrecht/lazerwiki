@@ -35,16 +35,20 @@ public class RowRenderer extends FlatteningRenderer {
         return renderChildrenToPlainText(getChildren(tree), renderContext);
     }
 
+    protected String getTagName() {
+        return "div";
+    }
+
     @Override
     public StringBuilder render(List<ParseTree> trees, RenderContext renderContext) {
         StringBuilder ret = new StringBuilder();
-        ret.append("<div>");
+        ret.append("<%s>".formatted(getTagName()));
         List<ParseTree> children = trees.stream().flatMap(
                 (t) -> flattenChildren(t, false).stream()).collect(Collectors.toList());
         ret.append(renderChildren(children, renderContext));
         // Remove trailing new line
         ret.deleteCharAt(ret.length() -1);
-        ret.append("</div>");
+        ret.append("</%s>".formatted(getTagName()));
         return ret;
     }
 

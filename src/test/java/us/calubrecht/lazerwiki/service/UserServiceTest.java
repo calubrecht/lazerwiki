@@ -10,11 +10,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.UserDTO;
+import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -83,8 +83,12 @@ public class UserServiceTest {
     @Test
     public void testGetUsers() {
         List<User> users = List.of (new User("bob",""), new User("Joe", ""));
+        users.get(0).roles = List.of(new UserRole(users.get(0), "ROLE_ADMIN"));
+        users.get(1).roles = Collections.emptyList();
         when(userRepository.findAll()).thenReturn(users);
 
-        assertEquals(List.of("bob", "Joe"), userService.getUsers());
+        assertEquals(List.of(
+                new UserDTO("bob", null, List.of("ROLE_ADMIN")),
+                new UserDTO("Joe", null, Collections.emptyList())), userService.getUsers());
     }
 }

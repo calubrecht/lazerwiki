@@ -459,4 +459,11 @@ public class DokuWikiRendererTest {
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td> <a class=\"wikiLinkMissing\" href=\"/page/LinkToSomePage\">null</a><br> Some text after</td></tr>\n" +
                 "</tbody></table>", doRender(tableWithLink));
     }
+
+    @Test
+    public void testRenderBlockquote() {
+        String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
+        assertEquals("<blockquote> One quote <span class=\"bold\">with some bold</span>\n<br>And\n<br><blockquote>Another layer of quote\n</blockquote></blockquote>", doRender(inputBlockquote));
+
+    }
 }

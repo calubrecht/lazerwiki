@@ -31,10 +31,6 @@ WORD
     : [A-Z0-9a-z]+
     ;
 
-CHARACTER
-   : ~[\r\n]
-   ;
-
 BOLD_TOKEN: '**' ;
 ITALIC_TOKEN: '//' ;
 UNDERLINE_TOKEN: '__';
@@ -46,6 +42,11 @@ SUB_END_TOKEN: '</sub>';
 DEL_START_TOKEN: '<del>';
 DEL_END_TOKEN: '</del>';
 FORCE_LINEBREAK: ' \\\\';
+BLOCKQUOTE_START: '>';
+
+CHARACTER
+   : ~[\r\n]
+   ;
 
 IMG_START_TOKEN: '{{';
 IMG_END_TOKEN: '}}';
@@ -58,7 +59,7 @@ MACRO_END_TOKEN: '~~/MACRO~~' ;
 //options { tokenVocab=DokuLexer; }
 
 page
-    : ( header | row | just_newline | code_box)* EOF
+    : ( header | row | just_newline | code_box | blockquote)* EOF
     ;
 
 just_newline
@@ -119,7 +120,7 @@ del_span
   ;
 
 all_char
-   : WORD | CHARACTER | WS  | DASH | STAR | header_tok
+   : WORD | CHARACTER | WS  | DASH | STAR | BLOCKQUOTE_START | header_tok
    ;
 
 all_char_nows
@@ -200,6 +201,10 @@ ulist_item
 
 row:
   ( line  ) NEWLINE
+  ;
+
+blockquote:
+  ( BLOCKQUOTE_START+ line) NEWLINE
   ;
 
 code_box:
