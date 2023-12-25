@@ -465,5 +465,13 @@ public class DokuWikiRendererTest {
         String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
         assertEquals("<blockquote> One quote <span class=\"bold\">with some bold</span>\n<br>And\n<br><blockquote>Another layer of quote\n</blockquote></blockquote>", doRender(inputBlockquote));
 
+        String inputBlockquoteWithBlankLines = "> **//Some bold//**\n>\n>A blank line\n> \n>And one with just space";
+        assertEquals("<blockquote> <span class=\"bold\"><span class=\"italic\">Some bold</span></span>\n<br>\n<br>A blank line\n<br> \n<br>And one with just space\n</blockquote>", doRender(inputBlockquoteWithBlankLines));
+
+        String inputBlockquoteUpAndDown = ">One Quote\n>>TwoQuote\n>One Quote";
+        assertEquals("<blockquote>One Quote\n" +
+                "<br><blockquote>TwoQuote\n" +
+                "</blockquote><br>One Quote\n" +
+                "</blockquote>", doRender(inputBlockquoteUpAndDown));
     }
 }

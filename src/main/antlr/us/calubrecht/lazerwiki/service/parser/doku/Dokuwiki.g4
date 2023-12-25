@@ -204,7 +204,7 @@ row:
   ;
 
 blockquote:
-  ( BLOCKQUOTE_START+ line) NEWLINE
+  ( BLOCKQUOTE_START+ (line | WS+)?) NEWLINE
   ;
 
 code_box:
