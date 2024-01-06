@@ -55,7 +55,7 @@ ENGINE=InnoDB
 
 CREATE TABLE `userRole` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
-	`userName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	`userName` VARCHAR(150) COLLATE 'latin1_swedish_ci',
 	`role` VARCHAR(10) NOT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `FK_USER` (`userName`) USING BTREE,

@@ -10,7 +10,9 @@ import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -55,5 +57,17 @@ public class UserService {
 
     public boolean verifyPassword(User u, String password) {
         return passwordUtil.matches(password, u.passwordHash);
+    }
+
+    @Transactional
+    public UserDTO deleteRole(String userName, String userRole) {
+        Optional<User> u = userRepository.findById(userName);
+        return u.map(user -> {
+           // List<UserRole> modifiedRoles = new ArrayList<>(user.roles.stream().filter(ur -> !ur.role.equals(userRole)).toList());
+            Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
+            ur.ifPresent( role -> user.roles.remove(role));
+            userRepository.save(user);
+            return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList());
+        }).orElse(null);
     }
 }

@@ -91,4 +91,17 @@ public class UserServiceTest {
                 new UserDTO("bob", null, List.of("ROLE_ADMIN")),
                 new UserDTO("Joe", null, Collections.emptyList())), userService.getUsers());
     }
+
+    @Test
+    public void testDeleteRoles() {
+        User u = new User("Frank", "pass");
+        u.roles = List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER"));
+        when(userRepository.findById("Frank")).thenReturn(Optional.of(u));
+        UserDTO changedUser = userService.deleteRole("Frank", "ROLE_ADMIN");
+
+        assertEquals(List.of("ROLE_USER"), changedUser.userRoles());
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals(List.of("ROLE_USER"), captor.getValue().roles.stream().map(ur -> ur.role).toList());
+    }
 }

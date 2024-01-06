@@ -19,7 +19,7 @@ public class User {
     @Column(name = "passwordHash")
     public String passwordHash;
 
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "userName")
     public List<UserRole> roles; // Should roles be site specific?
 
