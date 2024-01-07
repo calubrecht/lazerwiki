@@ -83,4 +83,13 @@ public class UserService {
             return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList());
         }).orElse(null);
     }
+
+    @Transactional
+    public void resetPassword(String userName, String password) {
+        Optional<User> u = userRepository.findById(userName);
+        u.ifPresent((user) -> {
+            user.passwordHash = passwordUtil.hashPassword(password);
+            userRepository.save(user);
+        });
+    }
 }

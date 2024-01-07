@@ -56,7 +56,7 @@ ENGINE=InnoDB
 CREATE TABLE `userRole` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`userName` VARCHAR(150) COLLATE 'latin1_swedish_ci',
-	`role` VARCHAR(10) NOT NULL COLLATE 'latin1_swedish_ci',
+	`role` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `FK_USER` (`userName`) USING BTREE,
 	CONSTRAINT `FK_USER` FOREIGN KEY (`userName`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT

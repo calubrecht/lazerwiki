@@ -123,4 +123,22 @@ public class UserServiceTest {
         verify(userRepository, times(1)).save(captor.capture());
 
     }
+
+    @Test
+    void testResetPassword() {
+        User u = new User("Frank", "pass");
+        when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
+        when(userRepository.findById("Frank")).thenReturn(Optional.of(u));
+
+        userService.resetPassword("Frank", "password");
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals("hash", captor.getValue().passwordHash);
+
+        // Reset non-existant password is noop
+        userService.resetPassword("NotThere", "password");
+        // Only called once above
+        verify(userRepository, times(1)).save(any());
+    }
 }

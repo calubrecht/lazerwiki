@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
+import us.calubrecht.lazerwiki.model.UserRequest;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.UserService;
 
@@ -78,5 +80,32 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(userService.addRole(userName, userRole));
+    }
+
+    @PutMapping("user/{userName}")
+    public ResponseEntity<UserDTO> addUser(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (userService.getUser(userName) != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        userService.addUser(userName, userRequest.password(), List.of(LazerWikiAuthenticationManager.USER));
+        User u = userService.getUser(userName);
+        UserDTO dto = new UserDTO(u.userName, null, u.roles.stream().map(role -> role.role).toList());
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("passwordReset/{userName}")
+    public ResponseEntity<Void> resetPassword(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        userService.resetPassword(userName, userRequest.password());
+        return ResponseEntity.ok().build();
     }
 }
