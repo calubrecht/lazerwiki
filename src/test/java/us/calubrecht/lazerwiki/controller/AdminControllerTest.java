@@ -123,4 +123,24 @@ class AdminControllerTest {
         this.mockMvc.perform(delete("/api/admin/role/Frank/ROLE_EXTRA").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
                 andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void addRoles() throws Exception {
+        when(userService.addRole(eq("Frank"), eq("ROLE_ADMIN"))).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER")));
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        adminUser.userName = "Bob";
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
+        regularUser.userName = "Frank";
+        when(userService.getUser("Frank")).thenReturn(regularUser);
+
+        this.mockMvc.perform(put("/api/admin/role/Frank/ROLE_ADMIN").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
+
+        // Only Admin can add role
+        this.mockMvc.perform(put("/api/admin/role/Frank/ROLE_EXTRA").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
+                andExpect(status().isUnauthorized());
+    }
 }

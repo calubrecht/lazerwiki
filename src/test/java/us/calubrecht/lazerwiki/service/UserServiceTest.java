@@ -15,14 +15,14 @@ import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = UserService.class)
 @ActiveProfiles("test")
@@ -95,7 +95,7 @@ public class UserServiceTest {
     @Test
     public void testDeleteRoles() {
         User u = new User("Frank", "pass");
-        u.roles = List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER"));
+        u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
         when(userRepository.findById("Frank")).thenReturn(Optional.of(u));
         UserDTO changedUser = userService.deleteRole("Frank", "ROLE_ADMIN");
 
@@ -103,5 +103,24 @@ public class UserServiceTest {
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
         assertEquals(List.of("ROLE_USER"), captor.getValue().roles.stream().map(ur -> ur.role).toList());
+    }
+
+    @Test
+    public void testAddRoles() {
+        User u = new User("Frank", "pass");
+        u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
+        when(userRepository.findById("Frank")).thenReturn(Optional.of(u));
+        UserDTO changedUser = userService.addRole("Frank", "ROLE_ADMIN:oneSite");
+
+        assertEquals(List.of("ROLE_ADMIN", "ROLE_USER", "ROLE_ADMIN:oneSite"), changedUser.userRoles());
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals(List.of("ROLE_ADMIN", "ROLE_USER", "ROLE_ADMIN:oneSite"), captor.getValue().roles.stream().map(ur -> ur.role).toList());
+
+        changedUser = userService.addRole("Frank", "ROLE_ADMIN:oneSite");
+        assertEquals(List.of("ROLE_ADMIN", "ROLE_USER", "ROLE_ADMIN:oneSite"), changedUser.userRoles());
+        // Don't save again if role already exists'
+        verify(userRepository, times(1)).save(captor.capture());
+
     }
 }

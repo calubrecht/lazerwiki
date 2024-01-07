@@ -69,4 +69,14 @@ public class AdminController {
         }
         return ResponseEntity.ok(userService.deleteRole(userName, userRole));
     }
+
+    @PutMapping("role/{userName}/{userRole}")
+    public ResponseEntity<UserDTO> addRole(Principal principal, @PathVariable("userName") String userName, @PathVariable("userRole") String userRole) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(userService.addRole(userName, userRole));
+    }
 }

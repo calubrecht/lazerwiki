@@ -63,10 +63,23 @@ public class UserService {
     public UserDTO deleteRole(String userName, String userRole) {
         Optional<User> u = userRepository.findById(userName);
         return u.map(user -> {
-           // List<UserRole> modifiedRoles = new ArrayList<>(user.roles.stream().filter(ur -> !ur.role.equals(userRole)).toList());
             Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
             ur.ifPresent( role -> user.roles.remove(role));
             userRepository.save(user);
+            return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList());
+        }).orElse(null);
+    }
+
+    @Transactional
+    public UserDTO addRole(String userName, String userRole) {
+        Optional<User> u = userRepository.findById(userName);
+        return u.map(user -> {
+            // List<UserRole> modifiedRoles = new ArrayList<>(user.roles.stream().filter(ur -> !ur.role.equals(userRole)).toList());
+            Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
+            if (!ur.isPresent() ) {
+                user.roles.add(new UserRole(user, userRole));
+                userRepository.save(user);
+            }
             return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList());
         }).orElse(null);
     }
