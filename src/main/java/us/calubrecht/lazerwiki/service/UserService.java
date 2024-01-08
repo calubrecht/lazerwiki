@@ -92,4 +92,9 @@ public class UserService {
             userRepository.save(user);
         });
     }
+
+    @Transactional
+    public void deleteUser(String userName) {
+       userRepository.deleteById(userName);
+    }
 }

@@ -141,4 +141,10 @@ public class UserServiceTest {
         // Only called once above
         verify(userRepository, times(1)).save(any());
     }
+
+    @Test
+    public void test_deleteUser() {
+        userService.deleteUser("Frank");
+        verify(userRepository).deleteById("Frank");
+    }
 }

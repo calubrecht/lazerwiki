@@ -108,4 +108,15 @@ public class AdminController {
         userService.resetPassword(userName, userRequest.password());
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("user/{userName}")
+    public ResponseEntity<Void> deleteUser(Principal principal, @PathVariable("userName") String userName) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        userService.deleteUser(userName);
+        return ResponseEntity.ok().build();
+    }
 }

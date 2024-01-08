@@ -193,4 +193,24 @@ class AdminControllerTest {
                 andExpect(status().isUnauthorized());
         verify(userService, times(1)).resetPassword("User", "password");
     }
+
+    @Test
+    void deleteUser() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        adminUser.userName = "Bob";
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
+        regularUser.userName = "Frank";
+        when(userService.getUser("Frank")).thenReturn(regularUser);
+        this.mockMvc.perform(delete("/api/admin/user/User").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
+                andExpect(status().isOk());
+
+        verify(userService).deleteUser("User");
+        // Only Admin can add user
+        this.mockMvc.perform(delete("/api/admin/user/User").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
+                andExpect(status().isUnauthorized());
+        verify(userService, times(1)).deleteUser("User");
+    }
 }
