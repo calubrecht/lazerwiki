@@ -186,6 +186,7 @@ public class MediaService {
         if (!namespaceService.canDeleteInNamespace(site, splitFile.getLeft(), user)) {
             throw new MediaWriteException("Not permissioned to delete this file");
         }
+
         ensureDir(site, nsPath);
         File f = nsPath.isBlank() ?
                 new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())):
@@ -194,5 +195,16 @@ public class MediaService {
         mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, splitFile.getRight(), splitFile.getLeft());
         Files.delete(f.toPath());
         // XXX: Delete scaled images if exist
+    }
+
+    public long getFileLastModified(String host, String fileName) throws IOException {
+        String site = siteService.getSiteForHostname(host);
+        Pair<String, String> splitFile = getNamespace(fileName);
+        String nsPath = splitFile.getLeft().replaceAll(":", "/");
+        ensureDir(site, nsPath);
+        File f = nsPath.isBlank() ?
+                new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())) :
+                new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
+        return f.lastModified();
     }
 }

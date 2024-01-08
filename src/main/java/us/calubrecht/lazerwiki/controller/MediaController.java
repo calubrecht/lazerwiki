@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.Principal;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("_media/")
@@ -34,7 +36,10 @@ public class MediaController {
             String userName = principal == null ? null : principal.getName();
             String mimeType = URLConnection.guessContentTypeFromName(fileName);
             MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
-            return ResponseEntity.ok().contentType(mediaType).body(mediaService.getBinaryFile(url.getHost(), userName, fileName, size));
+            return ResponseEntity.ok().contentType(mediaType)
+                    .cacheControl(CacheControl.noCache().mustRevalidate())
+                    .lastModified(mediaService.getFileLastModified(url.getHost(), fileName))
+                    .body(mediaService.getBinaryFile(url.getHost(), userName, fileName, size));
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
         } catch (MediaReadException e) {

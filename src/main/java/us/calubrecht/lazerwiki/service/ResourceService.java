@@ -15,6 +15,9 @@ import java.nio.file.Paths;
 @Service
 public class ResourceService {
     final Logger logger = LogManager.getLogger(getClass());
+
+    long bootTime = System.currentTimeMillis();
+
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
 
@@ -39,5 +42,16 @@ public class ResourceService {
         }
         logger.info("Reading file " + f.getAbsoluteFile());
         return Files.readAllBytes(f.toPath());
+    }
+
+    public long getFileLastModified(String host, String fileName) throws IOException {
+        String site = siteService.getSiteForHostname(host);
+        ensureDir(site);
+        File f = new File(String.join("/", staticFileRoot, site, "resources", fileName));
+        return f.exists() ? f.lastModified() : bootTime;
+    }
+
+    public long getBootTime() {
+        return bootTime;
     }
 }

@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +32,10 @@ public class ResourceController {
             URL url = new URL(request.getRequestURL().toString());
             String mimeType = URLConnection.guessContentTypeFromName(fileName);
             MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
-            return ResponseEntity.ok().contentType(mediaType).body(resourceService.getBinaryFile(url.getHost(), fileName));
+            return ResponseEntity.ok().contentType(mediaType).
+                    cacheControl(CacheControl.noCache().mustRevalidate()).
+                    lastModified(resourceService.getFileLastModified(url.getHost(), fileName)).
+                    body(resourceService.getBinaryFile(url.getHost(), fileName));
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
         }
@@ -42,7 +46,10 @@ public class ResourceController {
         String mimeType = URLConnection.guessContentTypeFromName(fileName);
         MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
         if (fileName.equals("plugin.css")) {
-            return ResponseEntity.ok().contentType(mediaType).body(macroCssService.getCss().getBytes());
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.noCache())
+                    .lastModified(resourceService.getBootTime())
+                    .contentType(mediaType).body(macroCssService.getCss().getBytes());
         }
         return ResponseEntity.notFound().build();
     }
