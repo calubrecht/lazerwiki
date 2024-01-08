@@ -1,6 +1,8 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.User;
@@ -27,6 +29,7 @@ public class UserService {
     PasswordUtil passwordUtil = new PasswordUtil();
 
     @Transactional
+    @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
     public void addUser(String userName, String password, List<GrantedAuthority> roles) {
 
         User newUser = new User(userName, passwordUtil.hashPassword(password));
@@ -35,6 +38,7 @@ public class UserService {
     }
 
     @Transactional
+    @Cacheable("UserService-getUser")
     public User getUser(String userName) {
         if (userName.equals(SYS_USER)) {
             User u = new User();
@@ -49,6 +53,7 @@ public class UserService {
         return u;
     }
 
+    @Cacheable("UserService-getUsers")
     public List<UserDTO> getUsers() {
         return StreamSupport.stream(userRepository.findAll().spliterator(), false).
                 map(user -> new UserDTO(user.userName, null, user.roles.stream().map(role -> role.role).toList()
@@ -60,6 +65,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public UserDTO deleteRole(String userName, String userRole) {
         Optional<User> u = userRepository.findById(userName);
         return u.map(user -> {
@@ -71,6 +77,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public UserDTO addRole(String userName, String userRole) {
         Optional<User> u = userRepository.findById(userName);
         return u.map(user -> {
@@ -85,6 +92,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public void resetPassword(String userName, String password) {
         Optional<User> u = userRepository.findById(userName);
         u.ifPresent((user) -> {
@@ -94,6 +102,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public void deleteUser(String userName) {
        userRepository.deleteById(userName);
     }
