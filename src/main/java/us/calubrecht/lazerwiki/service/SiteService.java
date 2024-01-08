@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
@@ -16,6 +17,7 @@ public class SiteService {
 
     @Autowired
     SiteRepository siteRepository;
+    @Cacheable("sitesForHostname")
     public String getSiteForHostname(String hostname) {
         Site s =  siteRepository.findByHostname(hostname.toLowerCase());
         if (s != null) {

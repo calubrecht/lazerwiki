@@ -11,10 +11,12 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.event.EventListener;
 import us.calubrecht.lazerwiki.controller.VersionController;
 
 @SpringBootApplication
+@EnableCaching
 public class LazerWikiApplication  extends SpringBootServletInitializer {
 	final Logger logger = LoggerFactory.getLogger(getClass());
 

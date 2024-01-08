@@ -129,14 +129,19 @@ public class MacroService {
 
         @Override
         public Pair<String, Map<String, Object>> getCachedRender(String pageDescriptor) {
+            long start = System.currentTimeMillis();
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
+            long fetchedPageData = System.currentTimeMillis();
             if (!page.flags().exists() || !page.flags().userCanRead()) {
                 return Pair.of("", new HashMap<String,Object>(page.flags().toMap()));
             }
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
+            long fetchedCache = System.currentTimeMillis();
             if (pageCache != null) { // In this case, ignore useCache flag
                 Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                 renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
+                long end = System.currentTimeMillis();
+                logger.info("getCachedRender(" + pageDescriptor +") total= " + (end -start) + " fetchPageData= " + (fetchedPageData - start) + " fetchCache= " + (fetchedCache - fetchedPageData) + " else=" + (end - fetchedCache));
                 return Pair.of(pageCache.renderedCache, renderState);
             }
             return doRender(page);
