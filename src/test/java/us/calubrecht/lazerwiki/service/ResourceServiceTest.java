@@ -7,7 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +25,9 @@ class ResourceServiceTest {
     @MockBean
     SiteService siteService;
 
+    @Value("${lazerwiki.static.file.root}")
+    String staticFileRoot;
+
     @Test
     void getBinaryFile() throws IOException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
@@ -37,5 +42,19 @@ class ResourceServiceTest {
 
         // Missing File
         assertThrows(IOException.class, () -> underTest.getBinaryFile("localhost", "what.css"));
+    }
+
+    @Test
+    void getFileLastModified() throws IOException {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        long modifiedtime = underTest.getFileLastModified("localhost",  "bluecircle.png");
+
+        File f = Paths.get(staticFileRoot, "default", "resources", "bluecircle.png").toFile();
+        assertEquals(f.lastModified(), modifiedtime);
+    }
+
+    @Test
+    void testBootTime() throws IOException {
+        assertTrue(underTest.getBootTime() > 0);
     }
 }

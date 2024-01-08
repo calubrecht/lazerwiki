@@ -26,6 +26,7 @@ public class ResourceController {
     @Autowired
     MacroCssService macroCssService;
 
+
     @RequestMapping("{fileName}")
     public ResponseEntity<byte[]> getFile(@PathVariable String fileName, HttpServletRequest request) {
         try {

@@ -285,4 +285,16 @@ class MediaServiceTest {
         assertThrows(MediaWriteException.class, () ->  underTest.deleteFile("host", "test.write", "joe"));
 
     }
+
+    @Test
+    void getFileLastModified() throws IOException {
+        long modifiedtime = underTest.getFileLastModified("localhost",  "circle.png");
+
+        File f = Paths.get(staticFileRoot, "circle.png").toFile();
+        assertEquals(f.lastModified(), modifiedtime);
+
+        modifiedtime = underTest.getFileLastModified("localhost",  "ns:circleWdot.png");
+        f = Paths.get(staticFileRoot, "ns","circleWdot.png").toFile();
+        assertEquals(f.lastModified(), modifiedtime);
+    }
 }
