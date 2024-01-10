@@ -9,6 +9,7 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRequest;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
+import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.security.Principal;
@@ -25,6 +26,9 @@ public class AdminController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    SiteService siteService;
 
     @PostMapping("regenLinkTable/{site}")
     public ResponseEntity<Void> regenLinkTable(@PathVariable("site") String site, Principal principal) {
@@ -118,5 +122,10 @@ public class AdminController {
         }
         userService.deleteUser(userName);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("sites")
+    public List<String> getAllSites() {
+        return siteService.getAllSites();
     }
 }

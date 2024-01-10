@@ -13,6 +13,7 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
+import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.util.Collections;
@@ -32,6 +33,9 @@ class AdminControllerTest {
 
     @MockBean
     UserService userService;
+
+    @MockBean
+    SiteService siteService;
 
     @MockBean
     RegenCacheService regenCacheService;
@@ -212,5 +216,12 @@ class AdminControllerTest {
         this.mockMvc.perform(delete("/api/admin/user/User").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
                 andExpect(status().isUnauthorized());
         verify(userService, times(1)).deleteUser("User");
+    }
+
+    @Test
+    void getSites() throws Exception {
+        when(siteService.getAllSites()).thenReturn(List.of("OneWiki", "TwoWiki"));
+        this.mockMvc.perform(get("/api/admin/sites").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
     }
 }

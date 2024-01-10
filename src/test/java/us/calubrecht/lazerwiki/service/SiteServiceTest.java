@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -96,5 +97,19 @@ public class SiteServiceTest {
         blue.hostname = "water.com";
         when(repository.findById("blue")).thenReturn(Optional.of(blue));
         assertEquals("water.com", underTest.getHostForSitename("blue"));
+    }
+
+    @Test
+    void getAllSites() {
+        Site blue = new Site();
+        blue.siteName = "BlueWiki";
+        blue.hostname = "water.com";
+        Site red = new Site();
+        red.siteName = "FireWiki";
+        red.hostname = "fire.com";
+        when(repository.findAll()).thenReturn(List.of(blue, red));
+
+        List<String> sites = underTest.getAllSites();
+        assertEquals(List.of("BlueWiki", "FireWiki"), sites);
     }
 }

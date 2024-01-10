@@ -3,11 +3,14 @@ package us.calubrecht.lazerwiki.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 @Service
 public class SiteService {
@@ -51,5 +54,9 @@ public class SiteService {
     public String getHostForSitename(String site) {
         Optional<Site> s =  siteRepository.findById(site);
         return s.map(ss -> ss.hostname).orElse("*");
+    }
+
+    public List<String> getAllSites() {
+        return StreamSupport.stream(siteRepository.findAll().spliterator(), false).map(site -> site.siteName).toList();
     }
 }
