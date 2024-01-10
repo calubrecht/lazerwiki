@@ -2,10 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.model.MediaRecord;
-import us.calubrecht.lazerwiki.model.Namespace;
-import us.calubrecht.lazerwiki.model.PageDesc;
-import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
 
 import java.util.ArrayList;
@@ -107,6 +104,12 @@ public class NamespaceService {
         Set<String> unreadableNamespaces = allValid.stream().map(PageDesc::getNamespace).distinct().
                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
         return allValid.stream().filter(p -> !unreadableNamespaces.contains(p.getNamespace())).toList();
+    }
+
+    public List<PageDescriptor>  filterReadablePageDescriptors(List<PageDescriptor> allValid, String site, String userName) {
+        Set<String> unreadableNamespaces = allValid.stream().map(PageDescriptor::namespace).distinct().
+                filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
+        return allValid.stream().filter(p -> !unreadableNamespaces.contains(p.namespace())).toList();
     }
 
     public List<MediaRecord> filterReadableMedia(List<MediaRecord> allValid, String site, String userName) {

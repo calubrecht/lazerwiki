@@ -141,6 +141,9 @@ public class PageServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
         when(linkService.getBacklinks("site1", "ns:realPage")).thenReturn(List.of("page1", "page2"));
+        when(namespaceService.filterReadablePageDescriptors(any(), any(), any())).thenReturn(
+                List.of(new PageDescriptor("", "page1"), new PageDescriptor("", "page2"))
+        );
 
         assertEquals(new PageData(null, "This is raw page text", "Real Page", Collections.emptyList(), List.of("page1", "page2"), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "ns:realPage", "Bob"));
     }

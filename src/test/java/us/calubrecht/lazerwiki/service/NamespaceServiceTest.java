@@ -165,6 +165,34 @@ public class NamespaceServiceTest {
     }
 
     @Test
+    public void test_filterReadablePageDescriptors() {
+        Namespace ns1 = new Namespace();
+        ns1.restriction_type = Namespace.RESTRICTION_TYPE.OPEN;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(ns1);
+        Namespace ns_closed = new Namespace();
+        ns_closed.namespace="closed";
+        ns_closed.restriction_type = Namespace.RESTRICTION_TYPE.READ_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(ns_closed);
+
+        User globalAdmin = new User();
+        globalAdmin.roles = List.of(new UserRole(globalAdmin, "ROLE_ADMIN"));
+        when(userService.getUser("bob")).thenReturn(globalAdmin);
+
+        PageDescriptor Page1 = new PageDescriptor("ns1", "blue");
+        PageDescriptor Page2 = new PageDescriptor("closed", "secret");
+        List<PageDescriptor> allPages = List.of(Page1, Page2);
+
+        List<PageDescriptor> filtered = underTest.filterReadablePageDescriptors(
+                allPages, "site1", "bob");
+        assertEquals(2, filtered.size());
+        filtered = underTest.filterReadablePageDescriptors(
+                allPages, "site1", null);
+        assertEquals(1, filtered.size());
+        assertEquals("blue", filtered.get(0).pageName());
+    }
+
+
+    @Test
     public void test_filterMedia() {
         Namespace ns1 = new Namespace();
         ns1.restriction_type = Namespace.RESTRICTION_TYPE.OPEN;

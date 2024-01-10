@@ -79,16 +79,19 @@ public class PageService {
         }
         Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
+        List<String> visibleBacklinks = namespaceService.
+          filterReadablePageDescriptors(backlinks.stream().map(bl -> PageDescriptor.fromFullName(bl)).toList(), site, userName).stream().
+                map(PageDescriptor::toString).toList();
 
         if (p == null ) {
             // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), backlinks, new PageFlags(false, false, true, canWrite, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, false, true, canWrite, false));
         }
         if (p.isDeleted()) {
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), backlinks, new PageFlags(false, true, true, canWrite, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, canWrite, false));
         }
         String source = p.getText();
-        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), backlinks, new PageFlags(true, false, true, canWrite, canDelete));
+        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), visibleBacklinks, new PageFlags(true, false, true, canWrite, canDelete));
     }
 
     @Transactional

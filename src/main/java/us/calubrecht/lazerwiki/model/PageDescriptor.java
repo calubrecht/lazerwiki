@@ -1,5 +1,8 @@
 package us.calubrecht.lazerwiki.model;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +14,7 @@ public record PageDescriptor(String namespace, String pageName) {
 
     @Override
     public String toString() {
-        return this.namespace + ":" + this.pageName;
+        return Strings.isBlank(this.namespace) ? this.pageName : this.namespace + ":" + this.pageName;
     }
 
     final static Pattern WORD_FINDER = Pattern.compile("([A-Z]?[a-z]+)|[A-Z]|[0-9]+");
@@ -30,5 +33,15 @@ public record PageDescriptor(String namespace, String pageName) {
 
     public boolean isHome() {
         return (pageName + namespace).isEmpty();
+    }
+
+    public static PageDescriptor fromFullName(String fullName) {
+        int index = fullName.lastIndexOf(":");
+        if (index == -1) {
+            return new PageDescriptor("", fullName);
+        }
+        String ns = fullName.substring(0, index);
+        String pageName = fullName.substring(index+1);
+        return new PageDescriptor(ns, pageName);
     }
 }
