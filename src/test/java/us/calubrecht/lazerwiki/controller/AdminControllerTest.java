@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
+import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.UserService;
@@ -39,6 +40,9 @@ class AdminControllerTest {
 
     @MockBean
     RegenCacheService regenCacheService;
+
+    @MockBean
+    PageUpdateService pageUpdateService;
 
     @Test
     void regenLinkTable() throws Exception {
@@ -223,5 +227,37 @@ class AdminControllerTest {
         when(siteService.getAllSites()).thenReturn(List.of("OneWiki", "TwoWiki"));
         this.mockMvc.perform(get("/api/admin/sites").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
+    }
+
+    @Test
+    void addSite() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        adminUser.userName = "Bob";
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
+        regularUser.userName = "Frank";
+        when(userService.getUser("Frank")).thenReturn(regularUser);
+        when(siteService.getAllSites()).thenReturn(List.of("OneWiki", "TwoWiki"));
+
+        // No for Frank
+        // {"siteName":"site1", "displayName":"Site 1", "hostName":"site.com"}
+        String content = "{\"name\":\"site1\", \"siteName\":\"Site 1\", \"hostName\":\"site.com\"}";
+        this.mockMvc.perform(put("/api/admin/site/site1").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
+                andExpect(status().isUnauthorized());
+
+        // Creat site fails, don't go an and call create Page
+        this.mockMvc.perform(put("/api/admin/site/site1").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
+        verify(siteService).addSite("site1", "site.com", "Site 1");
+        verify(pageUpdateService, never()).createDefaultSiteHomepage(any(), any(), any());
+
+        // Create site passes, then create page
+        content = "{\"name\":\"site2\", \"siteName\":\"Site 2\", \"hostName\":\"site2.com\"}";
+        when(siteService.addSite("site2", "site2.com", "Site 2")).thenReturn(true);
+        this.mockMvc.perform(put("/api/admin/site/site2").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
+        verify(pageUpdateService).createDefaultSiteHomepage("site2", "Site 2", "Bob");
     }
 }

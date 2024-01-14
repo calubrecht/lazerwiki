@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,8 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = SiteService.class)
@@ -111,5 +113,22 @@ public class SiteServiceTest {
 
         List<String> sites = underTest.getAllSites();
         assertEquals(List.of("BlueWiki", "FireWiki"), sites);
+    }
+
+    @Test
+    void addSite() {
+        when(repository.findById("existingSite")).thenReturn(Optional.of(new Site("existingSite", "", "")));
+
+        assertFalse(underTest.addSite("existingSite", "", ""));
+
+        assertTrue(underTest.addSite("newSite", "site.com", "New Site"));
+
+        ArgumentCaptor<Site> captor = ArgumentCaptor.forClass(Site.class);
+
+        verify(repository).save(captor.capture());
+
+        assertEquals("newSite", captor.getValue().name);
+        assertEquals("site.com", captor.getValue().hostname);
+        assertEquals("New Site", captor.getValue().siteName);
     }
 }

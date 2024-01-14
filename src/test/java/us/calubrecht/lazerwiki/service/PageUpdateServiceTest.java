@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -191,5 +192,24 @@ public class PageUpdateServiceTest {
         assertEquals(1000L, newPage.getId());
         assertEquals(11L, newPage.getRevision());
         assertTrue(newPage.isDeleted());
+    }
+
+
+    @Test
+    public void testCreateDefaultSiteHomepage() throws PageWriteException, IOException {
+        when(pageRepository.getBySiteAndNamespaceAndPagename("existingSite", "", "")).thenReturn(new Page());
+        when(namespaceService.canWriteNamespace(eq("newSite"), any(), eq("Bob"))).thenReturn(true);
+        when(siteService.getSiteForHostname("site.com")).thenReturn("newSite");
+        when(siteService.getHostForSitename("newSite")).thenReturn("site.com");
+
+        assertFalse(pageUpdateService.createDefaultSiteHomepage("existingSite", "New Site", "Bob"));
+        assertTrue(pageUpdateService.createDefaultSiteHomepage("newSite", "New Site", "Bob"));
+
+        ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
+        verify(pageRepository).save(captor.capture());
+
+        assertEquals("newSite", captor.getValue().getSite());
+        assertEquals("", captor.getValue().getPagename());
+        assertEquals("======New Site======", captor.getValue().getText().split("\n")[0]);
     }
 }

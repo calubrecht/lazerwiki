@@ -12,9 +12,14 @@ import us.calubrecht.lazerwiki.model.PageTag;
 import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Service
 public class PageUpdateService {
@@ -49,7 +54,7 @@ public class PageUpdateService {
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
-        if (!namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName)) {
+        if (!namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName)) {
             throw new PageWriteException("You don't have permission to write this page.");
         }
         logger.info("Saving Page %s->%s".formatted(site, sPageDescriptor));
@@ -120,5 +125,19 @@ public class PageUpdateService {
         pageCacheRepository.deleteById(key);
         em.flush(); // Flush so regen can work?
         regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
+    }
+
+
+    @Transactional
+    public boolean createDefaultSiteHomepage(String siteName, String displayName, String userName) throws PageWriteException, IOException {
+        if (pageRepository.getBySiteAndNamespaceAndPagename(siteName, "","") != null) {
+            return false;
+        }
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("defaultSiteHomepage.tmpl")))) {
+            String template = br.lines().collect(Collectors.joining(("\n")));
+            savePage(siteService.getHostForSitename(siteName), "", template.replaceAll("%SITENAME%", displayName), Collections.emptyList(), Collections.emptyList(), "Home", userName);
+        }
+        return true;
     }
 }

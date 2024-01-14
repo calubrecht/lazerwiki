@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
@@ -58,5 +59,15 @@ public class SiteService {
 
     public List<String> getAllSites() {
         return StreamSupport.stream(siteRepository.findAll().spliterator(), false).map(site -> site.siteName).toList();
+    }
+
+    @Transactional
+    public boolean addSite(String name, String hostName, String siteName) {
+        if (siteRepository.findById(name).isPresent()) {
+            return false;
+        }
+        Site s = new Site(name, hostName, siteName);
+        siteRepository.save(s);
+        return true;
     }
 }

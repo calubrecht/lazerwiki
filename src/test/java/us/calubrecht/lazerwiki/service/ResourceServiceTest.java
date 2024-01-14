@@ -51,6 +51,11 @@ class ResourceServiceTest {
 
         File f = Paths.get(staticFileRoot, "default", "resources", "bluecircle.png").toFile();
         assertEquals(f.lastModified(), modifiedtime);
+
+        underTest.bootTime = 5;
+
+        assertEquals(5, underTest.getFileLastModified("localHost", "thisfileisnthere.jpg"));
+
     }
 
     @Test

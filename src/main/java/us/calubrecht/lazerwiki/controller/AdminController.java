@@ -8,10 +8,14 @@ import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRequest;
+import us.calubrecht.lazerwiki.requests.SiteRequest;
+import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RegenCacheService;
 import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.UserService;
+import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +33,9 @@ public class AdminController {
 
     @Autowired
     SiteService siteService;
+
+    @Autowired
+    PageUpdateService pageUpdateService;
 
     @PostMapping("regenLinkTable/{site}")
     public ResponseEntity<Void> regenLinkTable(@PathVariable("site") String site, Principal principal) {
@@ -128,4 +135,19 @@ public class AdminController {
     public List<String> getAllSites() {
         return siteService.getAllSites();
     }
+
+    @PutMapping("site/{siteName}")
+    public ResponseEntity<List<String>> addSite(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteRequest siteRequest) throws PageWriteException, IOException {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (siteService.addSite(siteRequest.name(), siteRequest.hostName(), siteRequest.siteName() )) {
+            pageUpdateService.createDefaultSiteHomepage(siteRequest.name(), siteRequest.siteName(), user.userName);
+        }
+        return ResponseEntity.ok(getAllSites());
+    }
+
+
 }
