@@ -224,7 +224,11 @@ class AdminControllerTest {
 
     @Test
     void getSites() throws Exception {
-        when(siteService.getAllSites()).thenReturn(List.of("OneWiki", "TwoWiki"));
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        adminUser.userName = "Bob";
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        when(siteService.getAllSites(adminUser)).thenReturn(List.of("OneWiki", "TwoWiki"));
         this.mockMvc.perform(get("/api/admin/sites").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
     }
@@ -239,7 +243,7 @@ class AdminControllerTest {
         regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
         regularUser.userName = "Frank";
         when(userService.getUser("Frank")).thenReturn(regularUser);
-        when(siteService.getAllSites()).thenReturn(List.of("OneWiki", "TwoWiki"));
+        when(siteService.getAllSites(any())).thenReturn(List.of("OneWiki", "TwoWiki"));
 
         // No for Frank
         // {"siteName":"site1", "displayName":"Site 1", "hostName":"site.com"}

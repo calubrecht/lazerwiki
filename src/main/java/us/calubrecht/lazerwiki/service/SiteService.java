@@ -7,6 +7,7 @@ import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.Site;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
 import java.util.List;
@@ -57,8 +58,16 @@ public class SiteService {
         return s.map(ss -> ss.hostname).orElse("*");
     }
 
-    public List<String> getAllSites() {
-        return StreamSupport.stream(siteRepository.findAll().spliterator(), false).map(site -> site.siteName).toList();
+    public List<String> getAllSites(User u) {
+        List<String> roles = u.getRolesString();
+        return StreamSupport.stream(siteRepository.findAll().spliterator(), false).
+                filter(site -> canAdminSite(roles, site.name)).
+                map(site -> site.siteName).
+                toList();
+    }
+
+    boolean canAdminSite(List<String> roles, String siteName){
+        return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_ADMIN:" + siteName);
     }
 
     @Transactional

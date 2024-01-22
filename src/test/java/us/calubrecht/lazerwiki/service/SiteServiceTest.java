@@ -7,8 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Site;
+import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,16 +106,31 @@ public class SiteServiceTest {
 
     @Test
     void getAllSites() {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        adminUser.userName = "Bob";
         Site blue = new Site();
+        blue.name="blue";
         blue.siteName = "BlueWiki";
         blue.hostname = "water.com";
         Site red = new Site();
+        red.name="fire";
         red.siteName = "FireWiki";
         red.hostname = "fire.com";
         when(repository.findAll()).thenReturn(List.of(blue, red));
 
-        List<String> sites = underTest.getAllSites();
+        List<String> sites = underTest.getAllSites(adminUser);
         assertEquals(List.of("BlueWiki", "FireWiki"), sites);
+
+        User siteAdmin = new User();
+        siteAdmin.roles = List.of(new UserRole(siteAdmin, "ROLE_ADMIN:fire"));
+        sites = underTest.getAllSites(siteAdmin);
+        assertEquals(List.of("FireWiki"), sites);
+
+        User user = new User();
+        user.roles = List.of(new UserRole(user, "ROLE_USER"));
+        sites = underTest.getAllSites(user);
+        assertEquals(Collections.emptyList(), sites);
     }
 
     @Test

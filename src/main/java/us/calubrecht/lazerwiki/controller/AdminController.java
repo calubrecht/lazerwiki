@@ -132,8 +132,9 @@ public class AdminController {
     }
 
     @GetMapping("sites")
-    public List<String> getAllSites() {
-        return siteService.getAllSites();
+    public List<String> getAllSites(Principal principal) {
+        User user = userService.getUser(principal.getName());
+        return siteService.getAllSites(user);
     }
 
     @PutMapping("site/{siteName}")
@@ -146,7 +147,7 @@ public class AdminController {
         if (siteService.addSite(siteRequest.name(), siteRequest.hostName(), siteRequest.siteName() )) {
             pageUpdateService.createDefaultSiteHomepage(siteRequest.name(), siteRequest.siteName(), user.userName);
         }
-        return ResponseEntity.ok(getAllSites());
+        return ResponseEntity.ok(siteService.getAllSites(user));
     }
 
 
