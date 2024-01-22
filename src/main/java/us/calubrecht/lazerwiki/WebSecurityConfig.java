@@ -28,10 +28,16 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        CookieCsrfTokenRepository cookieRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        cookieRepo.setCookieCustomizer(
+                c -> {
+                    c.sameSite("Strict");
+
+                });
         RequestMatcher createAdminMatcher = new AntPathRequestMatcher("/specialAdmin/createNewAdmin");
         http.csrf((csrf) -> csrf
                 .ignoringRequestMatchers(createAdminMatcher)
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRepository(cookieRepo)
                 .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()::handle)
         );
         http
