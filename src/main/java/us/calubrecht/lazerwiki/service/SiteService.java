@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
+import us.calubrecht.lazerwiki.util.DbSupport;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +61,7 @@ public class SiteService {
 
     public List<String> getAllSites(User u) {
         List<String> roles = u.getRolesString();
-        return StreamSupport.stream(siteRepository.findAll().spliterator(), false).
+        return DbSupport.toStream(siteRepository.findAll()).
                 filter(site -> canAdminSite(roles, site.name)).
                 map(site -> site.siteName).
                 toList();

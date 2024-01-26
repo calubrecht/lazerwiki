@@ -7,6 +7,7 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.LazerWikiApplication;
 import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.model.PageDesc;
+import us.calubrecht.lazerwiki.model.PageText;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ class PageRepositoryTest {
     @Test
     void getAllValid() {
         List<PageDesc> pages = pageRepository.getAllValid("site1");
-        assertEquals(1, pages.size());
+        assertEquals(2, pages.size());
     }
 
     @Test
@@ -57,5 +58,15 @@ class PageRepositoryTest {
         List<PageDesc> pageDescs = pageRepository.findAllBySiteAndNamespaceAndPagenameOrderByRevision("site1", "ns", "page1");
         assertEquals(2, pageDescs.size());
 
+    }
+
+    @Test
+    void getAllBySiteAndNamespaceAndPagename() {
+        List<PageText> pages = pageRepository.getAllBySiteAndNamespaceAndPagename("site1", List.of("ns:page1", "ns:page2"));
+        assertEquals(2, pages.size());
+        assertEquals("page1", pages.get(0).getPagename());
+        assertEquals("some text", pages.get(0).getText());
+        assertEquals("page2", pages.get(1).getPagename());
+        assertEquals("othertext", pages.get(1).getText());
     }
 }

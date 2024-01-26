@@ -53,11 +53,13 @@ CREATE TABLE userRole (
 insert into page_ids () VALUES ();
 insert into page_ids () VALUES ();
 insert into page_ids () VALUES ();
+insert into page_ids () VALUES ();
 
 insert into page (id, revision, site, namespace, pagename, text, title, validTS, deleted) VALUES(1, 1, 'site1', 'ns', 'page1', 'old text', 'Page Title', '2023-11-04 00:00:00', 0);
 insert into page (id, revision, site, namespace, pagename, text, title, deleted) VALUES(1, 2, 'site1', 'ns', 'page1', 'some text', 'Page Title', 0);
 insert into page (id, revision, site, namespace, pagename, text, title, validTS, deleted) VALUES(3, 1, 'site1', 'ns', 'deletedPage', 'some text', 'Page Title', '2023-12-03 16:00:00',0);
 insert into page (id, revision, site, namespace, pagename, text, title, deleted) VALUES(3, 2, 'site1', 'ns', 'deletedPage', '', '', 1);
+insert into page (id, revision, site, namespace, pagename, text, title, deleted) VALUES(4, 1, 'site1', 'ns', 'page2', 'othertext', 'Page Title', 0);
 
 insert into userRecord (userName, passwordHash) VALUES ('Bob', '');
 insert into userRole (userName, role) VALUES ('Bob', 'Admin');

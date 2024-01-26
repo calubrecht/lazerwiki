@@ -44,11 +44,11 @@ public class IncludeMacro extends Macro {
             return "";
         }
         String includePath = macroArgs.trim();
-        Pair<String, Map<String, Object>> p = context.renderPage(includePath);
+        MacroContext.RenderOutput p = context.renderPage(includePath);
         context.setPageDontCache();
-        if (p.getRight().get("userCanWrite").toString().equals("true")) {
-            return "<div class=\"include\">%s<a href=\"/page/%s#Edit\" className=\"includePageLink\">Edit %s</a></div>".formatted(p.getLeft(), includePath,includePath);
+        if (p.getState().get("userCanWrite").toString().equals("true")) {
+            return "<div class=\"include\">%s<a href=\"/page/%s#Edit\" className=\"includePageLink\">Edit %s</a></div>".formatted(p.getHtml(), includePath,includePath);
         }
-        return "<div class=\"include\">%s</div>".formatted(p.getLeft());
+        return "<div class=\"include\">%s</div>".formatted(p.getHtml());
     }
 }

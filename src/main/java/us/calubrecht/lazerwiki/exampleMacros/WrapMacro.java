@@ -18,7 +18,7 @@ public class WrapMacro extends Macro {
             return "<div class=\"%s\"></div>".formatted(toks[0]);
         }
         boolean multiLine = toks[1].indexOf("\n") != -1;
-        String innerText = context.renderMarkup(toks[1]).getLeft();
+        String innerText = context.renderMarkup(toks[1]).getHtml();
         if (!multiLine) {
             // Strip the div that comes from the renderer.
             innerText = innerText.

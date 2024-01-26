@@ -13,12 +13,14 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 import us.calubrecht.lazerwiki.model.PageCache;
+import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MacroService {
@@ -45,11 +47,11 @@ public class MacroService {
 
     @PostConstruct
     public void registerMacros() {
-        AnnotatedTypeScanner scanner= new AnnotatedTypeScanner(CustomMacro.class);
+        AnnotatedTypeScanner scanner = new AnnotatedTypeScanner(CustomMacro.class);
         Set<Class<?>> macroClasses = scanner.findTypes(macroPackages);
         macroClasses.forEach((cl) -> {
             try {
-                Macro macro = (Macro)cl.getDeclaredConstructor().newInstance();
+                Macro macro = (Macro) cl.getDeclaredConstructor().newInstance();
                 registerMacro(macro);
 
             } catch (Exception e) {
@@ -77,10 +79,9 @@ public class MacroService {
             return "";
         }
         renderContext.renderState().put(macroKey, "1");
-        try{
+        try {
             return macro.render(new MacroContextImpl(renderContext), macroArgs);
-        } finally
-        {
+        } finally {
             renderContext.renderState().remove(macroKey);
         }
     }
@@ -98,16 +99,16 @@ public class MacroService {
         }
 
         @Override
-        public Pair<String, Map<String, Object>> renderPage(String pageDescriptor) {
+        public RenderOutput renderPage(String pageDescriptor) {
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
             if (!page.flags().exists() || !page.flags().userCanRead()) {
-                return Pair.of("", new HashMap<String,Object>(page.flags().toMap()));
+                return new RenderOutputImpl("", new HashMap<String, Object>(page.flags().toMap()));
             }
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             if (pageCache != null && pageCache.useCache) {
                 Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                 renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
-                return Pair.of(pageCache.renderedCache, renderState);
+                return new RenderOutputImpl(pageCache.renderedCache, renderState);
             }
 
             return doRender(page);
@@ -115,25 +116,25 @@ public class MacroService {
         }
 
         @NotNull
-        private Pair<String, Map<String, Object>> doRender(PageData page) {
+        private RenderOutput doRender(PageData page) {
             RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(),
-                    renderContext.user(),renderContext.renderer(), new HashMap<>());
+                    renderContext.user(), renderContext.renderer(), new HashMap<>());
             subrenderContext.renderState().putAll(renderContext.renderState());
             // Allow inner page render to generate its own title
             subrenderContext.renderState().remove(RenderResult.RENDER_STATE_KEYS.TITLE.name());
-            RenderResult res = renderContext.renderer().renderWithInfo(page.source(),subrenderContext);
+            RenderResult res = renderContext.renderer().renderWithInfo(page.source(), subrenderContext);
             Map<String, Object> renderState = new HashMap<>(res.renderState());
             renderState.putAll(page.flags().toMap());
-            return Pair.of(res.renderedText(), renderState);
+            return new RenderOutputImpl(res.renderedText(), renderState);
         }
 
         @Override
-        public Pair<String, Map<String, Object>> getCachedRender(String pageDescriptor) {
+        public RenderOutput getCachedRender(String pageDescriptor) {
             long start = System.currentTimeMillis();
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
             long fetchedPageData = System.currentTimeMillis();
             if (!page.flags().exists() || !page.flags().userCanRead()) {
-                return Pair.of("", new HashMap<String,Object>(page.flags().toMap()));
+                return new RenderOutputImpl("", new HashMap<String, Object>(page.flags().toMap()));
             }
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             long fetchedCache = System.currentTimeMillis();
@@ -141,11 +142,42 @@ public class MacroService {
                 Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                 renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
                 long end = System.currentTimeMillis();
-                logger.info("getCachedRender(" + pageDescriptor +") total= " + (end -start) + " fetchPageData= " + (fetchedPageData - start) + " fetchCache= " + (fetchedCache - fetchedPageData) + " else=" + (end - fetchedCache));
-                return Pair.of(pageCache.renderedCache, renderState);
+                logger.info("getCachedRender(" + pageDescriptor + ") total= " + (end - start) + " fetchPageData= " + (fetchedPageData - start) + " fetchCache= " + (fetchedCache - fetchedPageData) + " else=" + (end - fetchedCache));
+                return new RenderOutputImpl(pageCache.renderedCache, renderState);
             }
             return doRender(page);
+        }
 
+        @Override
+        public Map<String, RenderOutput> getCachedRenders(List<String> pageDescriptors) {
+            long start = System.currentTimeMillis();
+            Map<PageDescriptor, PageData> pages = pageService.getPageData(renderContext.host(), pageDescriptors, renderContext.user());
+            List<PageCache> pageCaches = pageService.getCachedPages(renderContext.host(), pageDescriptors);
+            Map<String, PageData> pageMap = pages.entrySet().stream().collect(Collectors.toMap(pd -> pd.getKey().toString(), pd -> pd.getValue()));
+            Map<String, PageCache> pageCacheMap = pageCaches.stream().collect(Collectors.toMap(pc -> new PageDescriptor(pc.namespace, pc.pageName).toString(), pc -> pc));
+            Map<String, RenderOutput> outputMap = new HashMap<>();
+            pageDescriptors.forEach(pd -> {
+                        PageData page = pageMap.get(pd);
+                        if (page == null) {
+                            outputMap.put(pd, new RenderOutputImpl("",  new HashMap<>()));
+                            return;
+                        }
+                        if (page == null || !page.flags().exists() || !page.flags().userCanRead()) {
+                            outputMap.put(pd, new RenderOutputImpl("", new HashMap<String, Object>(page.flags().toMap())));
+                            return;
+                        }
+                        PageCache pageCache = pageCacheMap.get(pd);
+                        if (pageCache != null) { // In this case, ignore useCache flag
+                            Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
+                            renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
+                            outputMap.put(pd, new RenderOutputImpl(pageCache.renderedCache, renderState));
+                            return;
+                        }
+                        outputMap.put(pd, doRender(page));
+                    }
+            );
+
+            return outputMap;
         }
 
         @Override
@@ -166,14 +198,14 @@ public class MacroService {
         }
 
         @Override
-        public Pair<String, Map<String, Object>> renderMarkup(String markup) {
+        public RenderOutput renderMarkup(String markup) {
             RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(),
-                    renderContext.user(),renderContext.renderer(), new HashMap<>());
+                    renderContext.user(), renderContext.renderer(), new HashMap<>());
             subrenderContext.renderState().putAll(renderContext.renderState());
             // Allow inner page render to generate its own title
             subrenderContext.renderState().remove(RenderResult.RENDER_STATE_KEYS.TITLE.name());
-            RenderResult res = renderContext.renderer().renderWithInfo(markup,subrenderContext);
-            return Pair.of(res.renderedText(), res.renderState());
+            RenderResult res = renderContext.renderer().renderWithInfo(markup, subrenderContext);
+            return new RenderOutputImpl(res.renderedText(), res.renderState());
         }
 
         @Override
@@ -185,5 +217,26 @@ public class MacroService {
         public boolean isPlaintextRender() {
             return Boolean.TRUE.equals(renderContext.renderState().get("plainText"));
         }
+    }
+
+    public static class RenderOutputImpl extends Macro.MacroContext.RenderOutput {
+        String html;
+        Map<String, Object> state;
+
+        RenderOutputImpl(String html, Map<String, Object> state) {
+            this.html = html;
+            this.state = state;
+        }
+
+        @Override
+        public String getHtml() {
+            return html;
+        }
+
+        @Override
+        public Map<String, Object> getState() {
+            return state;
+        }
+
     }
 }

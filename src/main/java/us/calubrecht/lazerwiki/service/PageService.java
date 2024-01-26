@@ -18,6 +18,7 @@ import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
+import us.calubrecht.lazerwiki.util.DbSupport;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -95,6 +96,42 @@ public class PageService {
     }
 
     @Transactional
+    /**
+     * Bulk page get, does not retireve backlinks or tags
+     */
+    public Map<PageDescriptor, PageData> getPageData(String host, List<String> pageDescriptors, String userName) {
+        String site = siteService.getSiteForHostname(host);
+        List<String> keys = pageDescriptors.stream().map( desc ->
+        {
+            PageDescriptor pageDescriptor = decodeDescriptor(desc);
+            return pageDescriptor.namespace() + ":" + pageDescriptor.pageName();
+        }).toList();
+        List<PageText> pageTexts = pageRepository.getAllBySiteAndNamespaceAndPagename(site, keys);
+        return pageTexts.stream().collect(Collectors.toMap(
+                pageText -> new PageDescriptor(pageText.getNamespace(), pageText.getPagename()),
+                pageText -> {
+            PageDescriptor pageDescriptor = new PageDescriptor(pageText.getNamespace(), pageText.getPagename());
+            String sPageDescriptor= pageDescriptor.renderedName();
+            boolean canWrite = namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName);
+            boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
+            boolean canDelete = namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) && !pageDescriptor.isHome();
+            if (!canRead) {
+                return new PageData("You are not permissioned to read this page", "", sPageDescriptor,  Collections.emptyList(),Collections.emptyList(), PageData.EMPTY_FLAGS);
+            }
+            Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+            if (p == null ) {
+                return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  sPageDescriptor, Collections.emptyList(),  Collections.emptyList(), new PageFlags(false, false, true, canWrite, false));
+            }
+            if (p.isDeleted()) {
+                return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  sPageDescriptor, Collections.emptyList(),  Collections.emptyList(), new PageFlags(false, true, true, canWrite, false));
+            }
+            String source = p.getText();
+            return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(),  Collections.emptyList(), new PageFlags(true, false, true, canWrite, canDelete));
+
+        }));
+    }
+
+    @Transactional
     public PageData getHistoricalPageData(String host, String sPageDescriptor, long revision, String userName) {
         logger.info("fetch page: host=" + host + " sPageDescriptor=" + sPageDescriptor + " revision= " + revision + " userName=" + userName);
         String site = siteService.getSiteForHostname(host);
@@ -122,6 +159,16 @@ public class PageService {
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
         PageCache.PageCacheKey key = new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         return pageCacheRepository.findById(key).orElse(null);
+    }
+
+    List<PageCache> getCachedPages(String host, List<String> pageDescriptors) {
+        String site = siteService.getSiteForHostname(host);
+        List<PageCache.PageCacheKey> keys = pageDescriptors.stream().map( desc ->
+        {
+            PageDescriptor pageDescriptor = decodeDescriptor(desc);
+            return new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+        }).toList();
+        return DbSupport.toList(pageCacheRepository.findAllById(keys));
     }
 
     @Transactional

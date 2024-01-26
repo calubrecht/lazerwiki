@@ -35,18 +35,24 @@ public abstract class Macro {
     public interface MacroContext {
         String sanitize(String input);
 
-        Pair<String, Map<String, Object>> renderPage(String pageDescriptor);
-        Pair<String, Map<String, Object>> getCachedRender(String pageDescriptor);
+        RenderOutput renderPage(String pageDescriptor);
+        RenderOutput getCachedRender(String pageDescriptor);
+        Map<String, RenderOutput> getCachedRenders(List<String> pageDescriptors);
 
         List<String> getPagesByNSAndTag(String ns, String tag);
         List<String> getAllPages();
 
         List<String> getLinksOnPage(String page);
 
-        Pair<String, Map<String, Object>> renderMarkup(String markup);
+        RenderOutput renderMarkup(String markup);
 
         void setPageDontCache();
 
         boolean isPlaintextRender();
+
+        public static abstract class RenderOutput {
+            public abstract String getHtml();
+            public abstract Map<String,Object> getState();
+        }
     }
 }

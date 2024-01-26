@@ -9,6 +9,7 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.repository.UserRepository;
+import us.calubrecht.lazerwiki.util.DbSupport;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,7 +56,7 @@ public class UserService {
 
     @Cacheable("UserService-getUsers")
     public List<UserDTO> getUsers() {
-        return StreamSupport.stream(userRepository.findAll().spliterator(), false).
+        return DbSupport.toStream(userRepository.findAll()).
                 map(user -> new UserDTO(user.userName, null, user.roles.stream().map(role -> role.role).toList()
                 )).toList();
     }

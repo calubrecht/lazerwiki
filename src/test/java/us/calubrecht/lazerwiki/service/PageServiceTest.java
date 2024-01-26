@@ -531,4 +531,37 @@ public class PageServiceTest {
         public Long getRevision() {return revision;}
     }
 
+    public static class PageTextImpl implements PageText {
+        String namespace;
+        String pagename;
+        String title;
+        String text;
+
+        public PageTextImpl(String namespace, String pagename, String title, String text) {
+            this.namespace = namespace;
+            this.pagename = pagename;
+            this.title = title;
+            this.text = text;
+        }
+        @Override
+        public String getNamespace() {
+            return namespace;
+        }
+
+        @Override
+        public String getPagename() {
+            return pagename;
+        }
+
+        @Override
+        public String getTitle() {
+            return title;
+        }
+
+        @Override
+        public String getText() {
+            return text;
+        }
+    }
+
 }
