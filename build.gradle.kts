@@ -121,11 +121,17 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/repository/EntityManagerProxy.class",
 							"us/calubrecht/lazerwiki/repository/SiteRepository.class",
 							"us/calubrecht/lazerwiki/repository/UserRepository.class",
+							"us/calubrecht/lazerwiki/repository/NamespaceRepository.class",
+							"us/calubrecht/lazerwiki/repository/PageCacheRepository.class",
+							"us/calubrecht/lazerwiki/repository/LinkRepository.class",
 							"us/calubrecht/lazerwiki/repository/TagRepository.class",
 							"us/calubrecht/lazerwiki/repository/MediaRecordRepository.class",
 							"us/calubrecht/lazerwiki/service/IMarkupRenderer.class",
 							"us/calubrecht/lazerwiki/service/parser/doku/*",
+							"us/calubrecht/lazerwiki/plugin/WikiPlugin.class",
+							"us/calubrecht/lazerwiki/macro/CustomMacro.class",
 							"us/calubrecht/lazerwiki/util/ImageUtil.class",
+							"us/calubrecht/lazerwiki/util/IOSupplier.class",
 							"us/calubrecht/lazerwiki/examplePlugins/ClearFloats.class",
 							"localMacros/*")
 				}
