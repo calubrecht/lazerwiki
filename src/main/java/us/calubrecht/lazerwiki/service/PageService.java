@@ -118,16 +118,7 @@ public class PageService {
             if (!canRead) {
                 return new PageData("You are not permissioned to read this page", "", sPageDescriptor,  Collections.emptyList(),Collections.emptyList(), PageData.EMPTY_FLAGS);
             }
-            Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
-            if (p == null ) {
-                return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  sPageDescriptor, Collections.emptyList(),  Collections.emptyList(), new PageFlags(false, false, true, canWrite, false));
-            }
-            if (p.isDeleted()) {
-                return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  sPageDescriptor, Collections.emptyList(),  Collections.emptyList(), new PageFlags(false, true, true, canWrite, false));
-            }
-            String source = p.getText();
-            return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(),  Collections.emptyList(), new PageFlags(true, false, true, canWrite, canDelete));
-
+            return new PageData(null, pageText.getText(), sPageDescriptor, Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, canWrite, canDelete));
         }));
     }
 

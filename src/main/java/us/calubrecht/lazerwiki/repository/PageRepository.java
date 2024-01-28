@@ -42,7 +42,7 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
         return findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(site, MAX_DATE, false);
     }
 
-    @Query(value="SELECT namespace, pagename, title, text FROM page WHERE site=:site AND deleted=0 and validTS='9999-12-31 00:00:00' AND concat(namespace , ':' , pagename) IN (:pageDescs)",
+    @Query(value="SELECT namespace, pagename, title, text, deleted FROM page WHERE site=:site AND deleted=0 and validTS='9999-12-31 00:00:00' AND concat(namespace , ':' , pagename) IN (:pageDescs)",
             nativeQuery = true)
     List<PageText> getAllBySiteAndNamespaceAndPagename(String site, List<String> pageDescs);
 }

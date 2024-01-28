@@ -12,16 +12,14 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 import us.calubrecht.lazerwiki.model.PageCache;
+import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -158,29 +156,30 @@ class MacroServiceTest {
         when(pageService.getPageData(any(), eq("nonCached"), any())).thenReturn(ok);
         assertEquals("<div>OK page</div>", macroContext.getCachedRender("nonCached").getHtml());
     }
+
+    @Test
     void testMacroContextGetCachedRenders() {
-  /*      PageData none = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true));
-        PageData forbidden = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true));
-        when(pageService.getPageData(any(), eq(List.of("noPage", "forbiddenPage")), any())).thenReturn(List.of(none, forbidden));
+        PageData notExists = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true));
+        PageData cannotRead = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true));
+        PageData cached = new PageData("", "", null, null, new PageData.PageFlags(true, false, true, true, true));
+        PageData notCached = new PageData("", "**notCachedPage**", null, null, new PageData.PageFlags(true, false, true, true, true));
+        when(pageService.getPageData(any(), any(List.class), any())).thenReturn(
+                Map.of(
+                        new PageDescriptor("","cached"), cached,
+                        new PageDescriptor("","notCached"), notCached,
+                        new PageDescriptor("","notExists"), notExists,
+                        new PageDescriptor("", "cannotRead"), cannotRead));
+        when(pageService.getCachedPages(any(), any(List.class))).thenReturn(List.of(new PageCache("default", "", "cached", "cached Title", "rendered Cache", "plaintextCache", true)));
+
         RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
-        assertEquals("", macroContext.getCachedRender("noPage").getHtml());
-        assertEquals("", macroContext.getCachedRender("forbiddenPage").getHtml());
-        PageData ok = new PageData("", "OK page", null, null, new PageData.PageFlags(true, false, true, true, true));
-        when(pageService.getPageData(any(), eq("cachedPage"), any())).thenReturn(ok);
-        PageCache cached = new PageCache();
-        cached.useCache = true;
-        cached.renderedCache = "From cache";
-        when(pageService.getCachedPage("localhost", "cachedPage")).thenReturn(cached);
-        assertEquals("From cache", macroContext.getCachedRender("cachedPage").getHtml());
-        when(pageService.getPageData(any(), eq("ignorableCache"), any())).thenReturn(ok);
-        PageCache ignorableCache = new PageCache();
-        ignorableCache.useCache = false;
-        ignorableCache.renderedCache = "From cache but transient";
-        when(pageService.getCachedPage("localhost", "ignorableCache")).thenReturn(ignorableCache);
-        assertEquals("From cache but transient", macroContext.getCachedRender("ignorableCache").getHtml());
-        when(pageService.getPageData(any(), eq("nonCached"), any())).thenReturn(ok);
-        assertEquals("<div>OK page</div>", macroContext.getCachedRender("nonCached").getHtml()); */
+        Map<String, Macro.MacroContext.RenderOutput> res = macroContext.getCachedRenders(List.of("cached", "notCached", "notExists", "cannotRead", "null"));
+
+        assertEquals("rendered Cache", res.get("cached").getHtml());
+        assertEquals("", res.get("notExists").getHtml());
+        assertEquals("", res.get("cannotRead").getHtml());
+        assertEquals("", res.get("null").getHtml());
+        assertEquals("<div><span class=\"bold\">notCachedPage</span></div>", res.get("notCached").getHtml());
     }
 
 

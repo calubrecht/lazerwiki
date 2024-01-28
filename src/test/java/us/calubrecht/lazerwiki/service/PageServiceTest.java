@@ -357,6 +357,27 @@ public class PageServiceTest {
         PageCache ret = pageService.getCachedPage("localhost", "ns:cached");
         assertEquals("Rendered", ret.renderedCache);
     }
+
+    @Test
+    public void testGetCachedPages() {
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        PageCache cache1 = new PageCache();
+        cache1.renderedCache = "Text 1";
+        PageCache cache2 = new PageCache();
+        cache2.renderedCache = "Text 2";
+        ArgumentCaptor<List<PageCache.PageCacheKey>> captor = ArgumentCaptor.forClass(List.class);
+        when(pageCacheRepository.findAllById(captor.capture())).thenReturn(List.of(cache1, cache2));
+        List<PageCache> ret = pageService.getCachedPages("localhost", List.of("page1", "ns:page2"));
+        assertEquals(2, ret.size());
+
+        List<PageCache.PageCacheKey> arg = captor.getValue();
+        assertEquals("default", arg.get(0).site);
+        assertEquals("", arg.get(0).namespace);
+        assertEquals("page1", arg.get(0).pageName);
+        assertEquals("ns", arg.get(1).namespace);
+        assertEquals("page2", arg.get(1).pageName);
+    }
+
     @Test
     public void testSavePage() {
         when(siteService.getSiteForHostname("localhost")).thenReturn("default");
@@ -471,6 +492,46 @@ public class PageServiceTest {
         assertEquals("<span class=\"editNewInline\">With an extra one</span>", out.get(1).getSecond());
         assertEquals(2, out.get(2).getFirst());
     }
+
+    @Test
+    public void testGetPageData_bulk() {
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+
+        Page p = new Page();
+        p.setText("This is raw page text");
+        p.setTags(Collections.emptyList());
+        PageText pt1 = new PageTextImpl("", "page1", "", "text");
+        PageText pt2 = new PageTextImpl("ns_secret", "secret", "","text");
+        PageText pt3 = new PageTextImpl("", "", "","text_home");
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+
+        ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
+        when(pageRepository.getAllBySiteAndNamespaceAndPagename(eq("site1"), captor.capture())).
+                thenReturn(List.of(pt1, pt2, pt3));
+
+        Map<PageDescriptor, PageData> res = pageService.getPageData("localhost", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Bob");
+
+        assertEquals(":page1", captor.getValue().get(0));
+        assertEquals("ns:notPage", captor.getValue().get(1));
+
+        assertEquals("text", res.get(new PageDescriptor("", "page1")).source());
+        assertFalse(res.containsKey(new PageDescriptor("ns", "notPage")));
+        assertEquals("text", res.get(new PageDescriptor("ns_secret", "secret")).source());
+        assertFalse(res.get(new PageDescriptor("", "")).flags().userCanDelete());
+
+        when(namespaceService.canReadNamespace(eq("site1"), eq(""), eq("Frank"))).thenReturn(true);
+        when(namespaceService.canReadNamespace(eq("site1"), eq("ns_secret"), eq("Frank"))).thenReturn(false);
+        res = pageService.getPageData("localhost", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Frank");
+
+        assertEquals("text", res.get(new PageDescriptor("", "page1")).source());
+        assertEquals("", res.get(new PageDescriptor("ns_secret", "secret")).source());
+        assertEquals("You are not permissioned to read this page", res.get(new PageDescriptor("ns_secret", "secret")).rendered());
+
+    }
+
 
     static class PageDescImpl implements PageDesc {
         final String namespace;

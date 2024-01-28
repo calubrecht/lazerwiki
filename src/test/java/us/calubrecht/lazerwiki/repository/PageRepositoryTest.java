@@ -8,6 +8,7 @@ import us.calubrecht.lazerwiki.LazerWikiApplication;
 import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.PageText;
+import us.calubrecht.lazerwiki.util.DbSupport;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,8 @@ class PageRepositoryTest {
 
     @Autowired
     PageRepository pageRepository;
+
+    DbSupport dbSupport = new DbSupport(); // Does nothing but satisfy coverage. Constructor for utility class with only static methods
 
     @Test
     void findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted() {

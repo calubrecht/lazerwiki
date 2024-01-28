@@ -162,7 +162,7 @@ public class MacroService {
                             outputMap.put(pd, new RenderOutputImpl("",  new HashMap<>()));
                             return;
                         }
-                        if (page == null || !page.flags().exists() || !page.flags().userCanRead()) {
+                        if (!page.flags().exists() || !page.flags().userCanRead()) {
                             outputMap.put(pd, new RenderOutputImpl("", new HashMap<String, Object>(page.flags().toMap())));
                             return;
                         }
