@@ -193,6 +193,21 @@ public class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderUnformat() {
+        String input1 = "%%This **should not be bold**%%";
+        assertEquals("<div>This **should not be bold**</div>", doRender(input1));
+        String input2 = "%%This [[underline|under line]]__ should not have a link%%";
+        assertEquals("<div>This [[underline|under line]]__ should not have a link</div>", doRender(input2));
+
+        String input3 = "Some unformats %%aren't matched";
+        assertEquals("<div>Some unformats %%aren't matched</div>", doRender(input3));
+        String input4 = "Can %%unformats\nspan lines?%%";
+        assertEquals("<div>Can unformats\nspan lines?</div>", doRender(input4));
+        String input5 = "Can **%% be in%% bold**?";
+        assertEquals("<div>Can <span class=\"bold\"> be in bold</span>?</div>", doRender(input5));
+    }
+
+    @Test
     public void testRenderMonospace() {
         String input1 = "''This'' should be monospace.";
         assertEquals("<div><span class=\"monospace\">This</span> should be monospace.</div>", doRender(input1));

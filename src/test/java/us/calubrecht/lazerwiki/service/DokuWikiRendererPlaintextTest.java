@@ -89,6 +89,12 @@ public class DokuWikiRendererPlaintextTest {
     }
 
     @Test
+    public void testRenderUnformat() {
+        String input1 = "%%This **should not be bold**%%";
+        assertEquals("This **should not be bold**", doRender(input1));
+    }
+
+    @Test
     public void testRenderLinebreak() {
         String input = "This is a line \\\\ with a linebreak";
         assertEquals("This is a line\n with a linebreak", doRender(input));

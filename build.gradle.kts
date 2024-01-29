@@ -5,10 +5,11 @@ plugins {
 	jacoco
 	id("org.springframework.boot") version "3.1.4"
 	id("io.spring.dependency-management") version "1.1.3"
+	id("com.github.jk1.dependency-license-report") version "2.5"
 }
 
 group = "us.calubrecht"
-version = "0.1.9.19"
+version = "0.1.9.20"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17

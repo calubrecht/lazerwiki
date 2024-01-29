@@ -43,6 +43,9 @@ DEL_START_TOKEN: '<del>';
 DEL_END_TOKEN: '</del>';
 FORCE_LINEBREAK: ' \\\\';
 BLOCKQUOTE_START: '>';
+UNFORMAT_TOKEN: '%%' ;
+UNFORMAT_TAG_START: '<nowiki>';
+UNFORMAT_TAG_END: '</nowiki>';
 
 CHARACTER
    : ~[\r\n]
@@ -119,6 +122,12 @@ del_span
       DEL_START_TOKEN (all_char | link | PIPE | NEWLINE | styled_span)+? DEL_END_TOKEN
   ;
 
+unformat_span
+  :
+     (UNFORMAT_TOKEN (all_char | link | PIPE | NEWLINE | no_unformat_span | broken_span)+? UNFORMAT_TOKEN) |
+     (UNFORMAT_TAG_START ((all_char | link | PIPE | NEWLINE | no_unformat_span | broken_span)+? UNFORMAT_TAG_END))
+  ;
+
 all_char
    : WORD | CHARACTER | WS  | DASH | STAR | BLOCKQUOTE_START | header_tok
    ;
@@ -163,30 +172,40 @@ broken_del
    DEL_START_TOKEN | DEL_END_TOKEN
   ;
 
+broken_unformat
+  :
+    UNFORMAT_TOKEN | UNFORMAT_TAG_END | UNFORMAT_TAG_END
+  ;
+
 styled_span
   :
-    (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span )
+    (bold_span | italic_span | underline_span | monospace_span| sup_span| sub_span| del_span | unformat_span )
   ;
 
 // Can create "no_x_span" for other styled_spans, but not that worried about them, less used.
 no_bold_span
 :
-( italic_span | underline_span | monospace_span| sup_span| sub_span| del_span )
+( italic_span | underline_span | monospace_span| sup_span| sub_span| del_span | unformat_span )
 ;
 
 no_italic_span
   :
-    (bold_span  | underline_span | monospace_span| sup_span| sub_span| del_span )
+    (bold_span  | underline_span | monospace_span| sup_span| sub_span| del_span | unformat_span)
   ;
 
 no_underline_span
    :
-      (bold_span | italic_span  | monospace_span| sup_span| sub_span| del_span )
+      (bold_span | italic_span  | monospace_span| sup_span| sub_span| del_span | unformat_span)
    ;
+
+no_unformat_span
+  :
+        (bold_span | italic_span  | monospace_span| sup_span| sub_span| del_span | underline_span)
+  ;
 
 broken_span
  :
- broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span | broken_sup | broken_sub | broken_del
+ broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span | broken_sup | broken_sub | broken_del | broken_unformat
  ;
 
 olist_item
