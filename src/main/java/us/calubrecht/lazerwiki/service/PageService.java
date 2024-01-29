@@ -118,7 +118,9 @@ public class PageService {
             if (!canRead) {
                 return new PageData("You are not permissioned to read this page", "", sPageDescriptor,  Collections.emptyList(),Collections.emptyList(), PageData.EMPTY_FLAGS);
             }
-            return new PageData(null, pageText.getText(), sPageDescriptor, Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, canWrite, canDelete));
+
+            String title = pageText.getTitle() != null ? pageText.getTitle() : pageText.getPagename();
+            return new PageData(null, pageText.getText(), title, Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, canWrite, canDelete));
         }));
     }
 

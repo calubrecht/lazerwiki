@@ -503,9 +503,9 @@ public class PageServiceTest {
         Page p = new Page();
         p.setText("This is raw page text");
         p.setTags(Collections.emptyList());
-        PageText pt1 = new PageTextImpl("", "page1", "", "text");
+        PageText pt1 = new PageTextImpl("", "page1", null, "text");
         PageText pt2 = new PageTextImpl("ns_secret", "secret", "","text");
-        PageText pt3 = new PageTextImpl("", "", "","text_home");
+        PageText pt3 = new PageTextImpl("", "", "Home Page","text_home");
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
         ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
@@ -527,8 +527,10 @@ public class PageServiceTest {
         res = pageService.getPageData("localhost", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Frank");
 
         assertEquals("text", res.get(new PageDescriptor("", "page1")).source());
+        assertEquals("page1", res.get(new PageDescriptor("", "page1")).title());
         assertEquals("", res.get(new PageDescriptor("ns_secret", "secret")).source());
         assertEquals("You are not permissioned to read this page", res.get(new PageDescriptor("ns_secret", "secret")).rendered());
+        assertEquals("Home Page", res.get(new PageDescriptor("", "")).title());
 
     }
 
