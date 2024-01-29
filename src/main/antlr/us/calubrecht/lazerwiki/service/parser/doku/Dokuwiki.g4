@@ -66,7 +66,7 @@ page
     ;
 
 code_box:
-  ( WS WS line? NEWLINE )
+  ( WS WS+ line ? NEWLINE )
   ;
 
 just_newline
