@@ -387,6 +387,12 @@ public class DokuWikiRendererTest {
                 "<div><span class=\"bold\">bold on one line</span></div><pre class=\"code\">Raw text box, do not render **bold things**\n</pre>",
                 doRender(input2)
         );
+
+        String input3 = "  This is a block\n  Should all be one block\n  \n  Even if a line with only 2 spaces and nothing more\n";
+        assertEquals(
+                "<pre class=\"code\">This is a block\nShould all be one block\n\nEven if a line with only 2 spaces and nothing more\n</pre>",
+                doRender(input3)
+        );
     }
 
     @Test

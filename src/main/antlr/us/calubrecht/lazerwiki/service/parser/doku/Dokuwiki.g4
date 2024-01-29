@@ -65,8 +65,12 @@ page
     : ( header | row | just_newline | code_box | blockquote)* EOF
     ;
 
+code_box:
+  ( WS WS line? NEWLINE )
+  ;
+
 just_newline
-  : ( NEWLINE | WS)* NEWLINE
+  : (WS? | WS WS WS+) NEWLINE
   ;
 
 header_tok
@@ -224,10 +228,6 @@ row:
 
 blockquote:
   ( BLOCKQUOTE_START+ (line | WS+)?) NEWLINE
-  ;
-
-code_box:
-  ( WS WS line) NEWLINE
   ;
 
 
