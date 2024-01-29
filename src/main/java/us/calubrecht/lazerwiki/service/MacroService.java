@@ -20,6 +20,7 @@ import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
@@ -152,10 +153,15 @@ public class MacroService {
         public Map<String, RenderOutput> getCachedRenders(List<String> pageDescriptors) {
             long start = System.currentTimeMillis();
             Map<PageDescriptor, PageData> pages = pageService.getPageData(renderContext.host(), pageDescriptors, renderContext.user());
+            long gotPageData = System.currentTimeMillis();
             List<PageCache> pageCaches = pageService.getCachedPages(renderContext.host(), pageDescriptors);
+            long gotCacheData = System.currentTimeMillis();
             Map<String, PageData> pageMap = pages.entrySet().stream().collect(Collectors.toMap(pd -> pd.getKey().toString(), pd -> pd.getValue()));
             Map<String, PageCache> pageCacheMap = pageCaches.stream().collect(Collectors.toMap(pc -> new PageDescriptor(pc.namespace, pc.pageName).toString(), pc -> pc));
             Map<String, RenderOutput> outputMap = new HashMap<>();
+            AtomicLong totalRenderTime = new AtomicLong(0);
+            AtomicLong numCachedPages = new AtomicLong(0);
+            AtomicLong numRenderedPages = new AtomicLong(0);
             pageDescriptors.forEach(pd -> {
                         PageData page = pageMap.get(pd);
                         if (page == null) {
@@ -168,15 +174,21 @@ public class MacroService {
                         }
                         PageCache pageCache = pageCacheMap.get(pd);
                         if (pageCache != null) { // In this case, ignore useCache flag
+                            numCachedPages.addAndGet(1);
                             Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                             renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
                             outputMap.put(pd, new RenderOutputImpl(pageCache.renderedCache, renderState));
                             return;
                         }
+                        long renderStart = System.currentTimeMillis();
                         outputMap.put(pd, doRender(page));
+                        long renderEnd = System.currentTimeMillis();
+                        numRenderedPages.addAndGet(1);
+                        totalRenderTime.addAndGet(renderEnd - renderStart);
                     }
             );
-
+            logger.info("getCachedRenders. {} pages. getPageData={}ms. getCachedPages={}ms. {} cachedPages. {} renderedPages. renderTime={}",
+              pageDescriptors.size(), gotPageData - start, gotCacheData-gotPageData, numCachedPages.get(), numRenderedPages.get(), totalRenderTime.get());
             return outputMap;
         }
 
