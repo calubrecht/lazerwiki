@@ -176,11 +176,12 @@ public class PageServiceTest {
         Page p = new Page();
         p.setText("Hi");
         p.setTags(Collections.emptyList());
+        p.setId(1L);
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "")).
                 thenReturn(p);
 
-        assertEquals(new PageData(null, "Hi", "Home", Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, true, false)), pageService.getPageData("host1", "", "Bob"));
+        assertEquals(new PageData(null, "Hi", "Home", Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, true, false), 1L), pageService.getPageData("host1", "", "Bob"));
 
 
     }

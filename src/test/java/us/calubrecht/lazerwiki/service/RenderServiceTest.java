@@ -39,12 +39,12 @@ public class RenderServiceTest {
 
     @Test
     public void testRender() {
-        PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
+        PageData pd = new PageData(null, "This is raw page text",  null,null, null, PageData.ALL_RIGHTS, 1L);
         when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
-        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,null, PageData.ALL_RIGHTS, 1L), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
         PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false));
         when(pageService.getPageData(any(), eq("ns:nonPage"), any())).thenReturn(noPageData);

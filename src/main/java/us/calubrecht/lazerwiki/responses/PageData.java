@@ -3,10 +3,14 @@ package us.calubrecht.lazerwiki.responses;
 import java.util.List;
 import java.util.Map;
 
-public record PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags) {
+public record PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id) {
 
     public PageData(String rendered, String source, List<String> tags, List<String> backlinks, PageFlags flags) {
-        this(rendered, source, null, tags, backlinks, flags);
+        this(rendered, source, null, tags, backlinks, flags, null);
+    }
+
+    public PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags) {
+        this(rendered, source, title, tags, backlinks, flags, null);
     }
     public record PageFlags(boolean exists, boolean wasDeleted, boolean userCanRead, boolean userCanWrite, boolean userCanDelete) {
 
