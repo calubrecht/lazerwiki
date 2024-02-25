@@ -59,11 +59,10 @@ public class SiteService {
         return s.map(ss -> ss.hostname).orElse("*");
     }
 
-    public List<String> getAllSites(User u) {
+    public List<Site> getAllSites(User u) {
         List<String> roles = u.getRolesString();
         return DbSupport.toStream(siteRepository.findAll()).
                 filter(site -> canAdminSite(roles, site.name)).
-                map(site -> site.siteName).
                 toList();
     }
 

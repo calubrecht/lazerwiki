@@ -1,10 +1,12 @@
 package us.calubrecht.lazerwiki.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
+import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRequest;
@@ -132,13 +134,13 @@ public class AdminController {
     }
 
     @GetMapping("sites")
-    public List<String> getAllSites(Principal principal) {
+    public List<Site> getAllSites(Principal principal) {
         User user = userService.getUser(principal.getName());
         return siteService.getAllSites(user);
     }
 
     @PutMapping("site/{siteName}")
-    public ResponseEntity<List<String>> addSite(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteRequest siteRequest) throws PageWriteException, IOException {
+    public ResponseEntity<List<Site>> addSite(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteRequest siteRequest) throws PageWriteException, IOException {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
         if (!roles.contains("ROLE_ADMIN")) {

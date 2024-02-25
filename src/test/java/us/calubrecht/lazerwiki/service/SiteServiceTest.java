@@ -119,13 +119,13 @@ public class SiteServiceTest {
         red.hostname = "fire.com";
         when(repository.findAll()).thenReturn(List.of(blue, red));
 
-        List<String> sites = underTest.getAllSites(adminUser);
-        assertEquals(List.of("BlueWiki", "FireWiki"), sites);
+        List<Site> sites = underTest.getAllSites(adminUser);
+        assertEquals(List.of("BlueWiki", "FireWiki"), sites.stream().map(site -> site.siteName).toList());
 
         User siteAdmin = new User();
         siteAdmin.roles = List.of(new UserRole(siteAdmin, "ROLE_ADMIN:fire"));
         sites = underTest.getAllSites(siteAdmin);
-        assertEquals(List.of("FireWiki"), sites);
+        assertEquals(List.of("FireWiki"), sites.stream().map(site -> site.siteName).toList());
 
         User user = new User();
         user.roles = List.of(new UserRole(user, "ROLE_USER"));

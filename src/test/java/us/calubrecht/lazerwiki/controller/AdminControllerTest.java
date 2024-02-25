@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
@@ -228,9 +229,9 @@ class AdminControllerTest {
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";
         when(userService.getUser("Bob")).thenReturn(adminUser);
-        when(siteService.getAllSites(adminUser)).thenReturn(List.of("OneWiki", "TwoWiki"));
+        when(siteService.getAllSites(adminUser)).thenReturn(List.of(new Site("OneWiki", "wiki.com", "One Wiki"), new Site("TwoWiki", "wiki2.com", "Two Wiki")));
         this.mockMvc.perform(get("/api/admin/sites").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
-                andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
+                andExpect(status().isOk()).andExpect(content().json("[{\"name\":\"OneWiki\", \"hostname\":\"wiki.com\", \"siteName\":\"One Wiki\"},{\"name\":\"TwoWiki\"}]"));
     }
 
     @Test
@@ -243,7 +244,7 @@ class AdminControllerTest {
         regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
         regularUser.userName = "Frank";
         when(userService.getUser("Frank")).thenReturn(regularUser);
-        when(siteService.getAllSites(any())).thenReturn(List.of("OneWiki", "TwoWiki"));
+        when(siteService.getAllSites(any())).thenReturn(List.of(new Site("OneWiki", "wiki.com", "One Wiki"), new Site("TwoWiki", "wiki2.com", "Two Wiki")));
 
         // No for Frank
         // {"siteName":"site1", "displayName":"Site 1", "hostName":"site.com"}
@@ -253,7 +254,7 @@ class AdminControllerTest {
 
         // Creat site fails, don't go an and call create Page
         this.mockMvc.perform(put("/api/admin/site/site1").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
-                andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
+                andExpect(status().isOk()).andExpect(content().json("[{\"name\":\"OneWiki\", \"hostname\":\"wiki.com\", \"siteName\":\"One Wiki\"},{\"name\":\"TwoWiki\"}]"));
         verify(siteService).addSite("site1", "site.com", "Site 1");
         verify(pageUpdateService, never()).createDefaultSiteHomepage(any(), any(), any());
 
@@ -261,7 +262,7 @@ class AdminControllerTest {
         content = "{\"name\":\"site2\", \"siteName\":\"Site 2\", \"hostName\":\"site2.com\"}";
         when(siteService.addSite("site2", "site2.com", "Site 2")).thenReturn(true);
         this.mockMvc.perform(put("/api/admin/site/site2").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
-                andExpect(status().isOk()).andExpect(content().json("[\"OneWiki\",\"TwoWiki\"]"));
+                andExpect(status().isOk()).andExpect(content().json("[{\"name\":\"OneWiki\", \"hostname\":\"wiki.com\", \"siteName\":\"One Wiki\"},{\"name\":\"TwoWiki\"}]"));
         verify(pageUpdateService).createDefaultSiteHomepage("site2", "Site 2", "Bob");
     }
 }
