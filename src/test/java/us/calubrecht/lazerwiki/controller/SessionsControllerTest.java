@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.controller;
 
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,7 +47,7 @@ public class SessionsControllerTest {
         when(userService.getUser(any())).thenReturn(user);
         when(siteService.getSiteForHostname("localhost")).thenReturn("default");
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        this.mockMvc.perform(get("/api/sessions/username").principal(auth)).andExpect(status().isOk())
+        this.mockMvc.perform(get("/api/sessions/username").principal(auth).cookie(new Cookie("JSESSIONID", "COOKIE"))).andExpect(status().isOk())
                 .andExpect(content().json("{\"userName\": \"Bob\", \"siteName\": \"default\", \"userRoles\":[\"ROLE_ADMIN\"]}"));
     }
 
