@@ -27,9 +27,13 @@ PIPE: '|';
 STAR: '*' ;
 DASH: '-' ;
 
+NUM : [0-9]+ ;
+
 WORD
     : [A-Z0-9a-z]+
     ;
+
+
 
 BOLD_TOKEN: '**' ;
 ITALIC_TOKEN: '//' ;
@@ -78,7 +82,7 @@ header_tok
    ;
 
 link_target
-  : (WORD | CHARACTER | WS | ITALIC_TOKEN | DASH | UNDERLINE_TOKEN) *
+  : (WORD | NUM | CHARACTER | WS | ITALIC_TOKEN | DASH | UNDERLINE_TOKEN) *
   ;
 
 link_display
@@ -133,12 +137,12 @@ unformat_span
   ;
 
 all_char
-   : WORD | CHARACTER | WS  | DASH | STAR | BLOCKQUOTE_START | header_tok
+   : WORD | NUM | CHARACTER | WS  | DASH | STAR | BLOCKQUOTE_START | header_tok
    ;
 
 all_char_nows
    :
-     WORD | CHARACTER | DASH | STAR | header_tok
+     WORD | NUM | CHARACTER | DASH | STAR | header_tok
    ;
 
 broken_bold_span
@@ -214,12 +218,12 @@ broken_span
 
 olist_item
   :
-    WS+ DASH WS* (inner_text | styled_span)+
+    WS+ DASH (IMG_START_TOKEN NUM IMG_END_TOKEN)? WS* (inner_text | styled_span)+
   ;
 
 ulist_item
   :
-    WS+ STAR WS* (inner_text | styled_span)+
+    WS+ STAR  WS* (inner_text | styled_span)+
   ;
 
 row:
