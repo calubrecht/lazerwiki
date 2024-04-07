@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,7 @@ public class SiteService {
     }
 
     @Transactional
+    @CacheEvict(value = "sitesForHostname", allEntries = true)
     public boolean addSite(String name, String hostName, String siteName) {
         if (siteRepository.findById(name).isPresent()) {
             return false;
