@@ -95,11 +95,34 @@ public class ImageRenderer  extends TreeRenderer {
         return false;
     }
 
+    boolean isLinkOnly(String options) {
+        if (options == null) {
+            return false;
+        }
+        String[] toks = options.split("&");
+        for (String tok : toks) {
+            if (tok.equals("linkonly")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     StringBuilder parseInner(String inner) {
         StringBuilder sb = new StringBuilder();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
         String className = "media";
         String imageTok = innards.get(INNARD_TOKEN.FILE_TOK);
+        if (isLinkOnly(innards.get(INNARD_TOKEN.OPTIONS))) {
+            sb.append("<a href=\"/_media/");
+            String fileName= innards.get(INNARD_TOKEN.FILE_NAME).trim();
+            sb.append(fileName);
+            sb.append("\" class=\"media linkOnly\" target=\"_blank\">");
+            String titleText = Strings.isBlank(innards.get(INNARD_TOKEN.TITLE)) ? fileName : innards.get(INNARD_TOKEN.TITLE).trim();
+            sb.append(titleText);
+            sb.append("</a>");
+            return sb;
+        }
         if (imageTok.startsWith(" ") && imageTok.endsWith(" ")) {
             className = "mediacenter";
         }

@@ -295,6 +295,17 @@ public class DokuWikiRendererTest {
                 "<div><img src=\"/_media/image.jpg\" class=\"media fullLink\" loading=\"lazy\"></div>",
                 doRender(inputWithTypeFullLink)
         );
+
+        String inputWithLinkOnly = "{{image.jpg?linkonly}}";
+        assertEquals(
+                "<div><a href=\"/_media/image.jpg\" class=\"media linkOnly\" target=\"_blank\">image.jpg</a></div>",
+                doRender(inputWithLinkOnly)
+        );
+        String inputWithLinkOnlyAndName = "{{image.jpg?linkonly|LinkName}}";
+        assertEquals(
+                "<div><a href=\"/_media/image.jpg\" class=\"media linkOnly\" target=\"_blank\">LinkName</a></div>",
+                doRender(inputWithLinkOnlyAndName)
+        );
     }
 
 
