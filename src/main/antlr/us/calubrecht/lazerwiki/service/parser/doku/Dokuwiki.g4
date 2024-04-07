@@ -218,12 +218,12 @@ broken_span
 
 olist_item
   :
-    WS+ DASH (IMG_START_TOKEN NUM IMG_END_TOKEN)? WS* (inner_text | styled_span)+
+    WS+ DASH (IMG_START_TOKEN NUM IMG_END_TOKEN)? WS* (inner_text | styled_span | macro)+
   ;
 
 ulist_item
   :
-    WS+ STAR  WS* (inner_text | styled_span)+
+    WS+ STAR  WS* (inner_text | styled_span | macro)+
   ;
 
 row:

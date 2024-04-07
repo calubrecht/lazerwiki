@@ -71,7 +71,7 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
         return sb;
     }
 
-    Set<Class<? extends ParseTree>> innerTreesToRender = Set.of(DokuwikiParser.Inner_textContext.class, DokuwikiParser.Styled_spanContext.class);
+    Set<Class<? extends ParseTree>> innerTreesToRender = Set.of(DokuwikiParser.Inner_textContext.class, DokuwikiParser.Styled_spanContext.class, DokuwikiParser.MacroContext.class);
 
     @Override
     public StringBuilder render(ParseTree tree, RenderContext renderContext) {
