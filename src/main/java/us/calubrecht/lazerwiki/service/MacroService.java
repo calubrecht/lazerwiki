@@ -1,7 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +21,8 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
 @Service
 public class MacroService {
@@ -228,6 +229,15 @@ public class MacroService {
         @Override
         public boolean isPlaintextRender() {
             return Boolean.TRUE.equals(renderContext.renderState().get("plainText"));
+        }
+
+        @Override
+        public void addLinks(Collection<String> newLinks) {
+            if (newLinks == null) {
+                return;
+            }
+            Collection<String> existingLinks = (Collection<String>) renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>());
+            existingLinks.addAll(newLinks);
         }
     }
 

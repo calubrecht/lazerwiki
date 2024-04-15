@@ -9,9 +9,14 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
 @SpringBootTest(classes = {MacroService.class, DokuWikiRenderer.class, RendererRegistrar.class, us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
@@ -51,5 +56,20 @@ class WrapMacroTest {
         RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
         assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag", renderContext));
         assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag:", renderContext));
+    }
+
+    @Test
+    void renderWithLinks() {
+        when(pageService.getTitle(anyString(), anyString())).thenReturn("title");
+        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        macroService.renderMacro("wrap:withLink:[[aLink]]", renderContext);
+
+        assertEquals(new HashSet<>(Arrays.asList("aLink")), renderContext.renderState().get(LINKS.name()));
+
+        renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        renderContext.renderState().put(LINKS.name(), new HashSet<>(Arrays.asList("existingLink")));
+        macroService.renderMacro("wrap:withLink:[[aLink]]", renderContext);
+
+        assertEquals(new HashSet<>(Arrays.asList("aLink", "existingLink")), renderContext.renderState().get(LINKS.name()));
     }
 }

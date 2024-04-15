@@ -50,6 +50,8 @@ public abstract class Macro {
 
         boolean isPlaintextRender();
 
+        void addLinks(Collection<String> newLinks);
+
         public static abstract class RenderOutput {
             public abstract String getHtml();
             public abstract Map<String,Object> getState();

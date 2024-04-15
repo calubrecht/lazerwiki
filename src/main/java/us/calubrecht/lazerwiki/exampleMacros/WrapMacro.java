@@ -3,6 +3,10 @@ package us.calubrecht.lazerwiki.exampleMacros;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 
+import java.util.Collection;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
+
 @CustomMacro
 public class WrapMacro extends Macro {
 
@@ -18,12 +22,14 @@ public class WrapMacro extends Macro {
             return "<div class=\"%s\"></div>".formatted(toks[0]);
         }
         boolean multiLine = toks[1].indexOf("\n") != -1;
-        String innerText = context.renderMarkup(toks[1]).getHtml();
+        MacroContext.RenderOutput renderOutput = context.renderMarkup(toks[1]);
+        String innerText = renderOutput.getHtml();
         if (!multiLine) {
             // Strip the div that comes from the renderer.
             innerText = innerText.
                     substring(5, innerText.length() - 6);
         }
+        context.addLinks((Collection<String>)(renderOutput.getState().get(LINKS.name())));
         return "<div class=\"%s\">%s</div>".formatted(toks[0],innerText);
     }
 }
