@@ -67,6 +67,14 @@ public class LinkCheckMacro extends Macro{
                     map(ns -> ns.endsWith(":") ? ns : ns + ":").collect(Collectors.toSet());
             nsFilter = (page) -> nsMatches(page, nsWhitelist);
         }
+        Predicate<String> orphanNsFilter = nsFilter;
+        if (argsMap.containsKey("filterOrphanNS")) {
+            Set<String> orphanBlacklist = Stream.of(argsMap.get("filterOrphanNS").split(",")).map(String::toLowerCase).
+                    map(ns -> ns.endsWith(":") ? ns : ns + ":").collect(Collectors.toSet());
+            Predicate<String> mainFilter = nsFilter;
+            orphanNsFilter = (page) -> mainFilter.test(page) && !nsMatches(page, orphanBlacklist);
+
+        }
 
         Map<String, String> caseInsensitiveMapping = context.getAllPages().stream().filter(nsFilter).filter(p -> !p.endsWith(":_template") && !p.equals("_template")).collect(Collectors.toMap(String::toLowerCase, Function.identity()));
         Map<String, String> brokenLinksMapping = new HashMap<>();
@@ -84,7 +92,7 @@ public class LinkCheckMacro extends Macro{
                 }
             });
         });
-        Set<String> orphanedPages = new HashSet<>(allPages);
+        Set<String> orphanedPages = allPages.stream().filter(orphanNsFilter).collect(Collectors.toSet());
         orphanedPages.removeAll(linkedTo);
         orphanedPages.remove("");
         context.setPageDontCache();
