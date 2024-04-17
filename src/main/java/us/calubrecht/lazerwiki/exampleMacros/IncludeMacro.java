@@ -4,8 +4,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
 @CustomMacro
 public class IncludeMacro extends Macro {
@@ -44,6 +48,7 @@ public class IncludeMacro extends Macro {
             return "";
         }
         String includePath = macroArgs.trim();
+        context.addLinks(List.of(includePath));
         MacroContext.RenderOutput p = context.renderPage(includePath);
         context.setPageDontCache();
         if (p.getState().get("userCanWrite").toString().equals("true")) {
