@@ -21,6 +21,9 @@ public class RegenCacheService {
     LinkService linkService;
 
     @Autowired
+    ImageRefService imageRefService;
+
+    @Autowired
     IMarkupRenderer renderer;
 
     @Autowired
@@ -42,8 +45,11 @@ public class RegenCacheService {
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.getNamespace(), pd.getPagename(), false);
             RenderResult res = renderer.renderWithInfo(p.getText(), "", site, UserService.SYS_USER);
             Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
+            Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
             logger.info("Setting " + links.size() + " links for " + pd.getNamespace() + ":" + pd.getPagename());
             linkService.setLinksFromPage(site, pd.getNamespace(), pd.getPagename(), links);
+            logger.info("Setting " + links.size() + " images for " + pd.getNamespace() + ":" + pd.getPagename());
+            imageRefService.setImageRefsFromPage(site, pd.getNamespace(), pd.getPagename(), images);
         });
     }
 

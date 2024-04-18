@@ -38,6 +38,9 @@ class RegenCacheServiceTest {
     LinkService linkService;
 
     @MockBean
+    ImageRefService imageRefService;
+
+    @MockBean
     PageCacheRepository pageCacheRepository;
 
     @MockBean

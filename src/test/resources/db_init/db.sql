@@ -84,3 +84,22 @@ insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageN
 insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('site1', '', '', '', 'page3');
 insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('default', '', 'page1', '', 'page2');
 insert into links (site, sourcePageNS, sourcePageName, targetPageNS, targetPageName) values ('default', '', 'page1', 'ns', 'nsPage');
+
+CREATE TABLE `imageRefs` (
+	`id` NUMBER(11) NOT NULL AUTO_INCREMENT,
+	`site` VARCHAR(50) NOT NULL ,
+	`sourcePageNS` VARCHAR(50) NOT NULL,
+	`sourcePageName` VARCHAR(200) NOT NULL,
+    `imageNS` VARCHAR(50) NOT NULL,
+    `imageRef` VARCHAR(200) NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX (`site`, `sourcePageNS`, `sourcePageName`),
+	CONSTRAINT `imageRefSiteFK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+;
+
+insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) values ('site1', 'ns1', 'page1', '', 'image1.jpg');
+insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) values ('site1', 'ns1', 'page1', '', 'image2.jpg');
+insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) values ('site1', 'ns2', 'page2', '', 'image1.jpg');
+insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) values ('site1', 'ns1', 'page3', '', 'image3.jpg');
+insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) values ('site1', 'ns1', 'page4', '', 'image3.jpg');

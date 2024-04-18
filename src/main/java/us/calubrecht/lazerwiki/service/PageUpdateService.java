@@ -14,7 +14,6 @@ import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -44,13 +43,16 @@ public class PageUpdateService {
     LinkService linkService;
 
     @Autowired
+    ImageRefService imageRefService;
+
+    @Autowired
     RegenCacheService regenCacheService;
 
     @Autowired
     PageCacheRepository pageCacheRepository;
 
     @Transactional
-    public void savePage(String host, String sPageDescriptor, String text, Collection<String> tags, Collection<String> links, String title, String userName) throws PageWriteException{
+    public void savePage(String host, String sPageDescriptor, String text, Collection<String> tags, Collection<String> links, Collection<String> images, String title, String userName) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
@@ -79,6 +81,7 @@ public class PageUpdateService {
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
+        imageRefService.setImageRefsFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), images);
         if (p == null  || p.isDeleted()) {
             em.flush(); // Flush so regen can work?
             regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
@@ -136,7 +139,7 @@ public class PageUpdateService {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("defaultSiteHomepage.tmpl")))) {
             String template = br.lines().collect(Collectors.joining(("\n")));
-            savePage(siteService.getHostForSitename(siteName), "", template.replaceAll("%SITENAME%", displayName), Collections.emptyList(), Collections.emptyList(), "Home", userName);
+            savePage(siteService.getHostForSitename(siteName), "", template.replaceAll("%SITENAME%", displayName), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),"Home", userName);
         }
         return true;
     }

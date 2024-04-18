@@ -41,6 +41,8 @@ public class PageUpdateServiceTest {
     LinkService linkService;
 
     @MockBean
+    ImageRefService imageRefService;
+    @MockBean
     PageCacheRepository pageCacheRepository;
 
     @MockBean
@@ -61,7 +63,7 @@ public class PageUpdateServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
+        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  Collections.emptyList(),Collections.emptyList(),"Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository).save(pageCaptor.capture());
         // new Page, should regen cache
@@ -89,7 +91,7 @@ public class PageUpdateServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
 
-        pageUpdateService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
+        pageUpdateService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService, never()).regenCachesForBacklinks(anyString(), anyString());
@@ -124,7 +126,7 @@ public class PageUpdateServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "deletedPage")).
                 thenReturn(p);
 
-        pageUpdateService.savePage("host1", "deletedPage", "Some text", Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
+        pageUpdateService.savePage("host1", "deletedPage", "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService).regenCachesForBacklinks("site1", "deletedPage");
@@ -141,7 +143,7 @@ public class PageUpdateServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
         assertThrows(PageWriteException.class, () ->
-                pageUpdateService.savePage("host1", "newPage", "Some text", null,  Collections.emptyList(),"Title","Joe"));
+                pageUpdateService.savePage("host1", "newPage", "Some text", null,  Collections.emptyList(),Collections.emptyList(),"Title","Joe"));
     }
 
     @Test
@@ -151,9 +153,21 @@ public class PageUpdateServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  List.of("page1", "page2"),"Title","someUser");
+        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  List.of("page1", "page2"),Collections.emptyList(),"Title","someUser");
 
         verify(linkService).setLinksFromPage("site1", "", "newPage",  List.of("page1", "page2"));
+    }
+
+    @Test
+    public void testSavePageWithImages() throws PageWriteException {
+        when(idRepository.getNewId()).thenReturn(55L);
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+
+        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  List.of("page1", "page2"), List.of("image1.jpg", "image2.jpg"),"Title","someUser");
+
+        verify(imageRefService).setImageRefsFromPage("site1", "", "newPage",  List.of("image1.jpg", "image2.jpg"));
     }
 
     @Test

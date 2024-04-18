@@ -9,11 +9,12 @@ import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGES;
 
 @Component
 public class ImageRenderer  extends TreeRenderer {
@@ -26,7 +27,7 @@ public class ImageRenderer  extends TreeRenderer {
     @Override
     public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext).toString();
-        return parseInner(inner);
+        return parseInner(inner, renderContext);
     }
 
     @Override
@@ -108,7 +109,7 @@ public class ImageRenderer  extends TreeRenderer {
         return false;
     }
 
-    StringBuilder parseInner(String inner) {
+    StringBuilder parseInner(String inner, RenderContext renderContext) {
         StringBuilder sb = new StringBuilder();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
         String className = "media";
@@ -121,6 +122,7 @@ public class ImageRenderer  extends TreeRenderer {
             String titleText = Strings.isBlank(innards.get(INNARD_TOKEN.TITLE)) ? fileName : innards.get(INNARD_TOKEN.TITLE).trim();
             sb.append(titleText);
             sb.append("</a>");
+            ((Set<String>)renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(fileName);
             return sb;
         }
         if (imageTok.startsWith(" ") && imageTok.endsWith(" ")) {
@@ -135,10 +137,12 @@ public class ImageRenderer  extends TreeRenderer {
         if (getIsLink(innards.get(INNARD_TOKEN.OPTIONS))) {
             className += " fullLink";
         }
+        String fileName = innards.get(INNARD_TOKEN.FILE_NAME).trim();
         sb.append("<img src=\"/_media/");
-        sb.append(innards.get(INNARD_TOKEN.FILE_NAME).trim()).append(getSizeTok(innards.get(INNARD_TOKEN.OPTIONS)));
+        sb.append(fileName).append(getSizeTok(innards.get(INNARD_TOKEN.OPTIONS)));
         String titleText = Strings.isBlank(innards.get(INNARD_TOKEN.TITLE)) ? "" : " title=\"" + innards.get(INNARD_TOKEN.TITLE).trim() + "\"";
         sb.append("\" class=\"").append(className).append("\"").append(titleText).append(" loading=\"lazy\">");
+        ((Set<String>)renderContext.renderState().computeIfAbsent(IMAGES.name(), (k) -> new HashSet<>())).add(fileName);
         return sb;
     }
 }

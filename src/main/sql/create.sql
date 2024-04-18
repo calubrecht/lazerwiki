@@ -150,6 +150,21 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
+CREATE TABLE `imageRefs` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`sourcePageNS` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`sourcePageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	`imageNS` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`imageRef` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `imageRefSourceKey` (`site`, `sourcePageNS`, `sourcePageName`) USING BTREE,
+	CONSTRAINT `imageRefSiteFK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
 CREATE TABLE `pageCache` (
 	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`namespace` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',

@@ -101,7 +101,8 @@ public class RenderService {
         String site = siteService.getSiteForHostname(host);
         RenderResult res = renderer.renderWithInfo(text, host, site, userName);
         Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
-        pageUpdateService.savePage(host, sPageDescriptor, text, tags, links, res.getTitle(), userName);
+        Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
+        pageUpdateService.savePage(host, sPageDescriptor, text, tags, links, images, res.getTitle(), userName);
         pageService.saveCache(host, sPageDescriptor, res);
     }
 

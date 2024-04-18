@@ -317,6 +317,16 @@ public class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderImageRecordsRefs() {
+        String imageInput = "{{image.jpg}}";
+        RenderResult renderRes = underTest.renderWithInfo(imageInput, "host", "site", "user");
+        assertEquals(Set.of("image.jpg"), renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.IMAGES.name()));
+        String linkOnlyInput = "{{image.jpg?linkonly}}";
+        renderRes = underTest.renderWithInfo(imageInput, "host", "site", "user");
+        assertEquals(Set.of("image.jpg"), renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.IMAGES.name()));
+    }
+
+    @Test
     public void testRenderUList() {
         String input1 = " * Simple List\n *With 2 rows\nThen * non-matching\n";
         assertEquals(
