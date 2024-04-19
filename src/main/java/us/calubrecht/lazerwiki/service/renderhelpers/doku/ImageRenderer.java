@@ -40,7 +40,7 @@ public class ImageRenderer  extends TreeRenderer {
         return new StringBuilder(innards.get(INNARD_TOKEN.FILE_NAME));
     }
 
-    final Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w.:\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");
+    final Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w. :\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");
 
     enum INNARD_TOKEN {FILE_NAME, FILE_TOK, OPTIONS, TITLE}
 
