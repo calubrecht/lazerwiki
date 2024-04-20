@@ -17,7 +17,7 @@ public class ClearFloats extends Plugin {
     public List<EditToolbarDef> getEditToolbarDefinitions() {
         String script = """
             (currentText, selectStart, selectEnd) => {
-            return {action:"insert", location:-1, value:"\\n~~~MACRO~~wrap:clear~~/MACRO~~"};}
+            return {action:"insert", location:-1, value:"\\n~~MACRO~~wrap:clear~~/MACRO~~"};}
             """;
         return List.of(new EditToolbarDef("Clear Floats", "clearFloats.png", script));
     }
