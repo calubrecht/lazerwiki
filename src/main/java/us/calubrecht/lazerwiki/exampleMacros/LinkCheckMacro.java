@@ -72,7 +72,7 @@ public class LinkCheckMacro extends Macro{
             Set<String> orphanBlacklist = Stream.of(argsMap.get("filterOrphanNS").split(",")).map(String::toLowerCase).
                     map(ns -> ns.endsWith(":") ? ns : ns + ":").collect(Collectors.toSet());
             Predicate<String> mainFilter = nsFilter;
-            orphanNsFilter = (page) -> mainFilter.test(page) && !nsMatches(page, orphanBlacklist);
+            orphanNsFilter = (page) -> !nsMatches(page, orphanBlacklist);
 
         }
 

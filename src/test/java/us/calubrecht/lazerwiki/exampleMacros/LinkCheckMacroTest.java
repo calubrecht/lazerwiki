@@ -116,5 +116,12 @@ public class LinkCheckMacroTest {
         // doesn't count notOrphan as orphan
         assertEquals(4, split[1].split("<tr>").length);
 
+        rendered = macroService.renderMacro("linkCheck:filterOrphanNS=notOrphan:", renderContext);
+        split = rendered.split("Orphaned Pages");
+        // Counts broken link on notOrphan page
+        assertEquals(5, split[0].split("<tr>").length);
+        // doesn't count notOrphan as orphan
+        assertEquals(4, split[1].split("<tr>").length);
+
     }
 }
