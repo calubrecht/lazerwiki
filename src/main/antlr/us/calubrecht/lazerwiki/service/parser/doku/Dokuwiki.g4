@@ -231,7 +231,7 @@ row:
   ;
 
 blockquote:
-  ( BLOCKQUOTE_START+ (line | WS+)?) NEWLINE
+  ( BLOCKQUOTE_START+ WS? (line | WS+)?) NEWLINE
   ;
 
 

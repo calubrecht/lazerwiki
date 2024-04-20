@@ -40,7 +40,7 @@ public class ImageRenderer  extends TreeRenderer {
         return new StringBuilder(innards.get(INNARD_TOKEN.FILE_NAME));
     }
 
-    final Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w. :\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");
+    final Pattern innardsPattern = Pattern.compile("^(?<fileTok> *(?<fileName>[\\w.:\\-]+)(\\?(?<options>\\w+(&\\w+)*))? *)(\\|(?<title>.*))?$");
 
     enum INNARD_TOKEN {FILE_NAME, FILE_TOK, OPTIONS, TITLE}
 
@@ -122,7 +122,7 @@ public class ImageRenderer  extends TreeRenderer {
             String titleText = Strings.isBlank(innards.get(INNARD_TOKEN.TITLE)) ? fileName : innards.get(INNARD_TOKEN.TITLE).trim();
             sb.append(titleText);
             sb.append("</a>");
-            ((Set<String>)renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(fileName);
+            ((Set<String>)renderContext.renderState().computeIfAbsent(IMAGES.name(), (k) -> new HashSet<>())).add(fileName);
             return sb;
         }
         if (imageTok.startsWith(" ") && imageTok.endsWith(" ")) {

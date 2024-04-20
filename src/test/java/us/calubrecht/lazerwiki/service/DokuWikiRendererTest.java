@@ -525,4 +525,10 @@ public class DokuWikiRendererTest {
                 "</blockquote><br>One Quote\n" +
                 "</blockquote>", doRender(inputBlockquoteUpAndDown));
     }
+
+    @Test
+    public void testRenderBlockquoteSpaceIMage() {
+        String inputBlockquote = "> {{animage}}";
+        assertEquals("<blockquote> <img src=\"/_media/animage\" class=\"media\" loading=\"lazy\">\n</blockquote>", doRender(inputBlockquote));
+    }
 }
