@@ -7,10 +7,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
+import us.calubrecht.lazerwiki.repository.PageRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {NamespaceService.class})
@@ -24,6 +27,9 @@ public class NamespaceServiceTest {
 
     @MockBean
     UserService userService;
+
+    @MockBean
+    PageRepository pageRepository;
 
     @Test
     public void testCanReadNamespace() {
@@ -264,5 +270,20 @@ public class NamespaceServiceTest {
         assertEquals("", underTest.parentNamespace("ns"));
         assertEquals("ns", underTest.parentNamespace("ns:n2"));
         assertEquals("ns:n2", underTest.parentNamespace("ns:n2:n5"));
+    }
+
+    @Test
+    public void testReadableNamespaces() {
+        when(pageRepository.getAllNamespaces(eq("site1"))).thenReturn(List.of("ns1", "ns2", "ns3"));
+        Namespace ns_closed = new Namespace();
+        ns_closed.namespace="ns3";
+        ns_closed.restriction_type = Namespace.RESTRICTION_TYPE.READ_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "ns3")).thenReturn(ns_closed);
+        User bob = new User("Bob", "");
+        bob.roles = new ArrayList<>();
+        when(userService.getUser("Bob")).thenReturn(bob);
+        List<String> namespaces = underTest.getReadableNamespaces("site1", "Bob");
+
+        assertEquals(List.of("ns1", "ns2"), namespaces);
     }
 }

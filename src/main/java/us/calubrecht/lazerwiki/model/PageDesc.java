@@ -29,4 +29,8 @@ public interface PageDesc {
     default String getDescriptor() {
         return getNamespace().isBlank() ? getPagename() : getNamespace() + ":" + getPagename();
     }
+
+    default String getString() {
+        return getDescriptor() + "#" + getRevision() + "-" + getModifiedBy() + "-" + getModified() + (isDeleted() ? "-Deleted" : "");
+    }
 }

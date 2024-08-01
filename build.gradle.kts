@@ -3,13 +3,13 @@ plugins {
 	antlr
 	war
 	jacoco
-	id("org.springframework.boot") version "3.1.4"
+	id("org.springframework.boot") version "3.3.2"
 	id("io.spring.dependency-management") version "1.1.3"
 	id("com.github.jk1.dependency-license-report") version "2.5"
 }
 
 group = "us.calubrecht"
-version = "0.1.9.35"
+version = "0.1.9.36"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17

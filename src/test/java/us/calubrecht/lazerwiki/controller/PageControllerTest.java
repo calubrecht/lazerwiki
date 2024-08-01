@@ -215,4 +215,18 @@ public class PageControllerTest {
 
         verify(renderService).getHistoricalRenderedPage(eq("localhost"), eq("testPage"), eq(1L), eq("Guest"));
     }
+
+    @Test
+    public void testGetRecentChanges() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/api/page/recentChanges").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).recentChanges(eq("localhost"), eq("Bob"));
+
+        this.mockMvc.perform(get("/api/page/recentChanges")).
+                andExpect(status().isOk());
+        verify(pageService).recentChanges(eq("localhost"), eq("Guest"));
+    }
 }

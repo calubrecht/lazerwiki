@@ -535,6 +535,27 @@ public class PageServiceTest {
 
     }
 
+    @Test
+    void recentChanges() {
+        when(siteService.getSiteForHostname(eq("theHost"))).thenReturn("site1");
+        when(pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(any(), eq("site1"), any())).thenReturn(
+                List.of(new PageDescImpl("ns", "page1", 2L), new PageDescImpl("ns", "page2", 1L),
+                        new PageDescImpl("ns", "page4", 3L,  true))
+        );
+        RecentChangesResponse changes = pageService.recentChanges("theHost", "Bob");
+
+        assertEquals(3, changes.changes().size());
+        RecentChangesResponse.RecentChangeRec rec1 = changes.changes().get(0);
+        assertEquals("page1", rec1.pageDesc().getPagename());
+        assertEquals("Modified", rec1.action());
+        RecentChangesResponse.RecentChangeRec rec2 = changes.changes().get(1);
+        assertEquals("page2", rec2.pageDesc().getPagename());
+        assertEquals("Created", rec2.action());
+        RecentChangesResponse.RecentChangeRec rec3 = changes.changes().get(2);
+        assertEquals("page4", rec3.pageDesc().getPagename());
+        assertEquals("Deleted", rec3.action());
+    }
+
 
     static class PageDescImpl implements PageDesc {
         final String namespace;
@@ -543,6 +564,7 @@ public class PageServiceTest {
         String modifiedBy;
 
         Long revision;
+        boolean deleted = false;
 
         PageDescImpl(String namespace, String pageName, String title, String modifiedBy) {
             this.namespace = namespace;
@@ -554,6 +576,13 @@ public class PageServiceTest {
         PageDescImpl(String namespace, String pageName) {
             this.namespace = namespace;
             this.pageName = pageName;
+        }
+
+        PageDescImpl(String namespace, String pageName, Long revision, boolean deleted) {
+            this.namespace = namespace;
+            this.pageName = pageName;
+            this.deleted = deleted;
+            this.revision = revision;
         }
         PageDescImpl(String namespace, String pageName, Long revision) {
             this.namespace = namespace;
@@ -588,7 +617,7 @@ public class PageServiceTest {
 
         @Override
         public boolean isDeleted() {
-            return false;
+            return deleted;
         }
 
         @Override

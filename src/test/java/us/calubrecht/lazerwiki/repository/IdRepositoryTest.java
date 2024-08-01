@@ -20,7 +20,7 @@ public class IdRepositoryTest {
 
     @Test
     void testGetNewId() {
-        assertEquals(5L, idRepository.getNewId());
-        assertEquals(6L, idRepository.getNewId());
+        assertEquals(8L, idRepository.getNewId());
+        assertEquals(9L, idRepository.getNewId());
     }
 }

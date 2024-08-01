@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.util.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
@@ -217,6 +218,13 @@ public class PageService {
         List<PageDesc> pages = namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
         NsNode node = getNsNode("", pages);
         return new PageListResponse(pages.stream().sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).collect(Collectors.groupingBy(PageDesc::getNamespace)), node);
+    }
+
+    public RecentChangesResponse recentChanges(String host, String userName) {
+        String site = siteService.getSiteForHostname(host);
+        List<String> namespaces = namespaceService.getReadableNamespaces(site, userName);
+        List<PageDesc> pages = pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(Limit.of(10), site, namespaces);
+        return new RecentChangesResponse(pages.stream().map(RecentChangesResponse::recFor).toList());
     }
 
     public List<String> getAllPagesFlat(String host, String userName) {

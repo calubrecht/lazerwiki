@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
+import us.calubrecht.lazerwiki.repository.PageRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.stream.Collectors;
 public class NamespaceService {
     @Autowired
     NamespaceRepository namespaceRepository;
+
+    @Autowired
+    PageRepository pageRepository;
 
     @Autowired
     UserService userService;
@@ -116,5 +120,10 @@ public class NamespaceService {
         var unreadableNamespaces = allValid.stream().map(MediaRecord::getNamespace).distinct().
                 filter(ns -> !canReadNamespace(site, ns, userName)).collect(Collectors.toSet());
         return allValid.stream().filter(m -> !unreadableNamespaces.contains(m.getNamespace())).toList();
+    }
+
+    public List<String> getReadableNamespaces(String site, String userName) {
+        List<String> allNS = pageRepository.getAllNamespaces(site);
+        return allNS.stream().filter(ns -> canReadNamespace(site, ns, userName)).toList();
     }
 }

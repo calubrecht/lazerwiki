@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import us.calubrecht.lazerwiki.model.PageDesc;
+import us.calubrecht.lazerwiki.model.RecentChangesResponse;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
@@ -94,6 +95,13 @@ public class PageController {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? User.GUEST : principal.getName();
         return pageService.getAllPages(url.getHost(), userName);
+    }
+
+    @RequestMapping(value = "/recentChanges")
+    public RecentChangesResponse recentChanges(Principal principal, HttpServletRequest request) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? User.GUEST : principal.getName();
+        return pageService.recentChanges(url.getHost(), userName);
     }
 
     @RequestMapping(value = "/searchPages")

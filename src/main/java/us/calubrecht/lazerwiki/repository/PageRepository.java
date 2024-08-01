@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -20,11 +21,15 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
 
     Page findBySiteAndNamespaceAndPagenameAndRevision(String site, String namespace, String pagename, long revision);
     List<PageDesc> findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(String site, LocalDateTime validts, boolean deleted);
+    List<PageDesc> findAllBySiteAndNamespaceInOrderByModifiedDesc(Limit limit, String site, List<String> namespaces);
     List<PageDesc> findAllBySiteAndNamespaceAndPagenameOrderByRevision(String site, String namespace, String pagename);
 
     @Query(value="SELECT namespace, pagename, title, modifiedBy, modified FROM page p inner join tag t on p.id= t.pageId and p.revision = t.revision  where p.site = :site and t.tag=:tagName and deleted=0 and validTS='9999-12-31 00:00:00'",
             nativeQuery = true)
     List<PageDesc> getByTagname(@Param("site") String site, @Param("tagName") String tagName);
+
+    @Query(value="SELECT distinct namespace FROM page where site=:site")
+    List<String> getAllNamespaces(@Param("site") String site);
 
     LocalDateTime MAX_DATE = LocalDateTime.of(9999, 12, 31, 0, 0, 0);
     default Page getBySiteAndNamespaceAndPagenameAndDeleted(String site, String namespace, String pagename, boolean deleted)

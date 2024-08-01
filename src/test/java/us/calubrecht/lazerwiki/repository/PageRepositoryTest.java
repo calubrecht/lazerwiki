@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Limit;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.LazerWikiApplication;
 import us.calubrecht.lazerwiki.model.Page;
@@ -10,9 +11,9 @@ import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.PageText;
 import us.calubrecht.lazerwiki.util.DbSupport;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.calubrecht.lazerwiki.repository.PageRepository.MAX_DATE;
@@ -71,5 +72,25 @@ class PageRepositoryTest {
         assertEquals("some text", pages.get(0).getText());
         assertEquals("page2", pages.get(1).getPagename());
         assertEquals("othertext", pages.get(1).getText());
+    }
+
+    @Test
+    void findAllBySiteOrderByModifiedDesc() {
+        List<PageDesc> pageDescs = pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(Limit.of(10), "site1", List.of("ns"));
+        assertEquals(5, pageDescs.size());
+
+        assertEquals("ns:page2#1", pageDescs.get(0).getDescriptor() + "#" + pageDescs.get(0).getRevision());
+        assertEquals("ns:deletedPage#2", pageDescs.get(1).getDescriptor() + "#" + pageDescs.get(1).getRevision());
+        assertTrue(pageDescs.get(1).isDeleted());
+        assertEquals("ns:deletedPage#1", pageDescs.get(2).getDescriptor() + "#" + pageDescs.get(2).getRevision());
+        assertFalse(pageDescs.get(2).isDeleted());
+    }
+
+    @Test
+    void getAllActiveNamespaces() {
+        List<String> namespaces = pageRepository.getAllNamespaces("site2");
+
+        assertEquals(2, namespaces.size());
+        assertEquals(Set.of("ns2", "ns5"), new HashSet<>(namespaces));
     }
 }
