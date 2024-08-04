@@ -6,10 +6,12 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
+import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
+import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.responses.NsNode;
@@ -40,6 +42,9 @@ public class MediaService {
 
     @Autowired
     MediaCacheService mediaCacheService;
+
+    @Autowired
+    MediaHistoryRepository mediaHistoryRepository;
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
@@ -119,11 +124,13 @@ public class MediaService {
         String fileName = mfile.getOriginalFilename();
         MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, namespace, fileName);
         Long id = null;
+        String action = "Uploaded";
         if (oldRecord != null){
             if (!namespaceService.canDeleteInNamespace(site, namespace, userName)) {
                 throw new MediaWriteException("Not permissioned to overwrite existing file");
             }
             id = oldRecord.getId();
+            action = "Replaced";
         }
         byte[] fileBytes = mfile.getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
@@ -131,6 +138,8 @@ public class MediaService {
         MediaRecord newRecord = new MediaRecord(fileName, site, namespace, userName, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
         newRecord.setId(id);
         mediaRecordRepository.save(newRecord);
+        MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, userName, action);
+        mediaHistoryRepository.save(historyRecord);
         File f = nsPath.isBlank() ?
                 new File(String.join("/", staticFileRoot, site, "media", fileName)):
                 new File(String.join("/", staticFileRoot, site, "media", nsPath, fileName));
@@ -193,6 +202,8 @@ public class MediaService {
                 new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
         logger.info("Deleting file " + f.getAbsoluteFile());
         mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, splitFile.getRight(), splitFile.getLeft());
+        MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, splitFile.getLeft(), user, "Deleted");
+        mediaHistoryRepository.save(historyRecord);
         Files.delete(f.toPath());
         // XXX: Delete scaled images if exist
     }
@@ -206,5 +217,11 @@ public class MediaService {
                 new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())) :
                 new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
         return f.lastModified();
+    }
+
+    public List<MediaHistoryRecord> getRecentChanges(String host, String user) {
+        String site = siteService.getSiteForHostname(host);
+        List<String> namespaces = namespaceService.getReadableNamespaces(site, user);
+        return mediaHistoryRepository.findAllBySiteAndNamespaceInOrderByTsDesc(Limit.of(10), site, namespaces);
     }
 }

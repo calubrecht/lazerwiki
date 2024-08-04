@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.service.MediaService;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
@@ -18,8 +20,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("_media/")
@@ -76,5 +78,12 @@ public class MediaController {
         } catch (MediaWriteException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @RequestMapping(value = "/recentChanges")
+    public List<MediaHistoryRecord> recentChanges(Principal principal, HttpServletRequest request) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal == null ? User.GUEST : principal.getName();
+        return mediaService.getRecentChanges(url.getHost(), userName);
     }
 }

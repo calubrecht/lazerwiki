@@ -5,8 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Limit;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
+import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
@@ -46,6 +49,9 @@ class MediaServiceTest {
 
     @MockBean
     MediaRecordRepository mediaRecordRepository;
+
+    @MockBean
+    MediaHistoryRepository mediaHistoryRepository;
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
@@ -128,6 +134,8 @@ class MediaServiceTest {
         // Not real image so dimensions recorded as 0, 0
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "","Bob", 7, 0, 0);
         verify(mediaRecordRepository).save(eq(newRecord));
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", "Bob", "Uploaded");
+        verify(mediaHistoryRepository).save(eq(newHistoryRecord));
 
         FileInputStream fis = new FileInputStream(f);
         byte[] bytesRead = fis.readAllBytes();
@@ -209,6 +217,8 @@ class MediaServiceTest {
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "","Bob", 7, 0, 0);
         newRecord.setId(10L);
         verify(mediaRecordRepository).save(eq(newRecord));
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", "Bob", "Replaced");
+        verify(mediaHistoryRepository).save(eq(newHistoryRecord));
     }
 
 
@@ -269,6 +279,8 @@ class MediaServiceTest {
         underTest.deleteFile("host", "test.write", "bob");
 
         verify(mediaRecordRepository).deleteBySiteAndFilenameAndNamespace("default","test.write", "");
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("test.write", "default", "", "bob", "Deleted");
+        verify(mediaHistoryRepository).save(eq(newHistoryRecord));
         assertFalse(f.exists());
 
         f = Paths.get(staticFileRoot, "default", "media", "ns", "test.write2").toFile();
@@ -296,5 +308,20 @@ class MediaServiceTest {
         modifiedtime = underTest.getFileLastModified("localhost",  "ns:circleWdot.png");
         f = Paths.get(staticFileRoot, "ns","circleWdot.png").toFile();
         assertEquals(f.lastModified(), modifiedtime);
+    }
+
+    @Test
+    void getRecentChanges() {
+        when(mediaHistoryRepository.findAllBySiteAndNamespaceInOrderByTsDesc(any(), any(), eq(List.of("ns1","ns2")))).thenReturn(
+                List.of(new MediaHistoryRecord("img1.jpg", "site1", "ns1", "Bob", "Uploaded"),
+                        new MediaHistoryRecord("img2.jpg", "site1", "ns1", "Bob", "Uploaded")
+                        )
+        );
+        when(siteService.getSiteForHostname("defaultHost")).thenReturn("site1");
+        when(namespaceService.getReadableNamespaces("site1", "Bob")).thenReturn(List.of("ns1", "ns2"));
+        List<MediaHistoryRecord> changes = underTest.getRecentChanges("defaultHost", "Bob");
+
+        assertEquals(2, changes.size());
+        assertEquals("img1.jpg", changes.get(0).getFileName());
     }
 }

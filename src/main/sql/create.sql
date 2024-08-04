@@ -85,6 +85,41 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
+CREATE TABLE enumAction (
+	`Action` varchar(100) NOT NULL,
+	CONSTRAINT enumAction_pk PRIMARY KEY (`Action`)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=latin1
+COLLATE=latin1_swedish_ci;
+
+INSERT INTO enumAction (Action) values ('Created');
+INSERT INTO enumAction (Action) values ('Modified');
+INSERT INTO enumAction (Action) values ('Uploaded');
+INSERT INTO enumAction (Action) values ('Replaced');
+INSERT INTO enumAction (Action) values ('Deleted');
+
+
+CREATE TABLE mediaHistory (
+	id INT UNSIGNED auto_increment NOT NULL,
+	site varchar(50) NOT NULL,
+	namespace VARCHAR(50) NOT NULL,
+	fileName varchar(150) NOT NULL,
+	uploadedBy varchar(150) NOT NULL,
+	`action` varchar(100) NOT NULL,
+	ts DATETIME DEFAULT current_timestamp() NOT NULL,
+	INDEX mediaHistory_site_IDX (site,ts) USING BTREE,
+	CONSTRAINT mediaHistory_pk PRIMARY KEY (id),
+	CONSTRAINT mediaHistory_sites_FK FOREIGN KEY (site) REFERENCES sites(hostname) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	CONSTRAINT mediaHistory_enumAction_FK FOREIGN KEY (`action`) REFERENCES enumAction(`Action`) ON DELETE RESTRICT ON UPDATE RESTRICT
+
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=latin1
+COLLATE=latin1_swedish_ci;
+
+
+
 CREATE TABLE `ns_restriction_types` (
 	`type` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`type`) USING BTREE

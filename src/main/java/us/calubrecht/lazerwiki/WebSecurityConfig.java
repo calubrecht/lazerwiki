@@ -58,6 +58,7 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/api/page/listTags", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/page/searchPages", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/page/recentChanges", HttpMethod.GET.toString()),
+                                            new AntPathRequestMatcher("/api/history/recentChanges", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/site/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/plugin/**", HttpMethod.GET.toString()),
                                             // Ignore for CORS requests

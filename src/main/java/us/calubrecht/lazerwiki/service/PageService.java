@@ -34,7 +34,6 @@ public class PageService {
     @Autowired
     PageRepository pageRepository;
 
-
     @Autowired
     SiteService siteService;
 
@@ -224,7 +223,7 @@ public class PageService {
         String site = siteService.getSiteForHostname(host);
         List<String> namespaces = namespaceService.getReadableNamespaces(site, userName);
         List<PageDesc> pages = pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(Limit.of(10), site, namespaces);
-        return new RecentChangesResponse(pages.stream().map(RecentChangesResponse::recFor).toList());
+        return new RecentChangesResponse(pages.stream().map(RecentChangesResponse::recFor).toList(), null, null);
     }
 
     public List<String> getAllPagesFlat(String host, String userName) {

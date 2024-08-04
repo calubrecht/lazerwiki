@@ -118,4 +118,18 @@ class MediaControllerTest {
         Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
         this.mockMvc.perform(delete("/_media/unauthfile.jpg").principal(authJoe)).andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void testRecentChanges() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/_media/recentChanges").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(mediaService).getRecentChanges(eq("localhost"), eq("Bob"));
+
+        this.mockMvc.perform(get("/_media/recentChanges")).
+                andExpect(status().isOk());
+        verify(mediaService).getRecentChanges(eq("localhost"), eq("Guest"));
+    }
 }

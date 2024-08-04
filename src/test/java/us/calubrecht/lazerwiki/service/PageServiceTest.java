@@ -557,11 +557,12 @@ public class PageServiceTest {
     }
 
 
-    static class PageDescImpl implements PageDesc {
+    public static class PageDescImpl implements PageDesc {
         final String namespace;
         final String pageName;
         String title;
         String modifiedBy;
+        LocalDateTime modified;
 
         Long revision;
         boolean deleted = false;
@@ -584,7 +585,7 @@ public class PageServiceTest {
             this.deleted = deleted;
             this.revision = revision;
         }
-        PageDescImpl(String namespace, String pageName, Long revision) {
+        public PageDescImpl(String namespace, String pageName, Long revision) {
             this.namespace = namespace;
             this.pageName = pageName;
             this.revision = revision;
@@ -612,8 +613,11 @@ public class PageServiceTest {
 
         @Override
         public LocalDateTime getModified() {
-            return null;
+            return modified;
         }
+
+        public void setModified(LocalDateTime date) {
+            modified = date;}
 
         @Override
         public boolean isDeleted() {
