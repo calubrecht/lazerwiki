@@ -13,7 +13,9 @@ import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.requests.SavePageRequest;
+import us.calubrecht.lazerwiki.responses.PageLockResponse;
 import us.calubrecht.lazerwiki.responses.SearchResult;
+import us.calubrecht.lazerwiki.service.PageLockService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
@@ -38,6 +40,9 @@ public class PageController {
 
     @Autowired
     RenderService renderService;
+
+    @Autowired
+    PageLockService pageLockService;
 
     @RequestMapping(value = {"/get/{pageDescriptor}", "/get/"})
     public PageData getPage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
@@ -123,5 +128,12 @@ public class PageController {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
         return renderService.previewPage(url.getHost(), pageDescriptor.orElse(""), body.getText(), userName);
+    }
+
+    @PostMapping(value = {"/lock/{pageDescriptor}"})
+    public PageLockResponse lockPage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestParam Optional<Boolean> overrideLock) throws MalformedURLException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal.getName();
+        return pageLockService.getPageLock(url.getHost(), pageDescriptor.orElse(""), userName, overrideLock.orElse(false));
     }
 }

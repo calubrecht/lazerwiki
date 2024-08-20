@@ -17,7 +17,7 @@ import java.util.List;
 public interface PageRepository extends CrudRepository<Page, PageKey> {
 
     Page findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(String site, String namespace, String pagename, LocalDateTime validts, boolean deleted);
-    Page findBySiteAndNamespaceAndPagenameAndValidts(String site, String namespace, String pagename, LocalDateTime validts);
+    <T> T findBySiteAndNamespaceAndPagenameAndValidts(String site, String namespace, String pagename, LocalDateTime validts, Class<T> type);
 
     Page findBySiteAndNamespaceAndPagenameAndRevision(String site, String namespace, String pagename, long revision);
     List<PageDesc> findAllBySiteAndValidtsAndDeletedOrderByModifiedDesc(String site, LocalDateTime validts, boolean deleted);
@@ -39,7 +39,13 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
 
     default Page getBySiteAndNamespaceAndPagename(String site, String namespace, String pagename)
     {
-        return findBySiteAndNamespaceAndPagenameAndValidts(site, namespace, pagename, MAX_DATE);
+        return findBySiteAndNamespaceAndPagenameAndValidts(site, namespace, pagename, MAX_DATE, Page.class);
+    }
+
+    default Long getLastRevisionBySiteAndNamespaceAndPagename(String site, String namespace, String pagename)
+    {
+        PageDesc desc =  findBySiteAndNamespaceAndPagenameAndValidts(site, namespace, pagename, MAX_DATE, PageDesc.class);
+        return desc == null ? null : desc.getRevision();
     }
 
     default List<PageDesc> getAllValid(String site)

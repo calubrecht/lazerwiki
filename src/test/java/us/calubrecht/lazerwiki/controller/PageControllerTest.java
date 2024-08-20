@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import us.calubrecht.lazerwiki.service.PageLockService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
@@ -39,6 +40,9 @@ public class PageControllerTest {
 
     @MockBean
     RenderService renderService;
+
+    @MockBean
+    PageLockService pageLockService;
 
     @Test
     public void testGetPage() throws Exception {
@@ -228,5 +232,23 @@ public class PageControllerTest {
         this.mockMvc.perform(get("/api/page/recentChanges")).
                 andExpect(status().isOk());
         verify(pageService).recentChanges(eq("localhost"), eq("Guest"));
+    }
+
+    @Test
+    public void testGetPageLock() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(post("/api/page/lock/testPage").
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageLockService).getPageLock(eq("localhost"), eq("testPage"), eq("Bob"), eq(false));
+
+        this.mockMvc.perform(post("/api/page/lock/testPage?overrideLock=true").
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageLockService).getPageLock(eq("localhost"), eq("testPage"), eq("Bob"), eq(true));
     }
 }
