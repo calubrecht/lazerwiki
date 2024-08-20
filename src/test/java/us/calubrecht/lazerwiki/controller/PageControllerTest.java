@@ -251,4 +251,15 @@ public class PageControllerTest {
 
         verify(pageLockService).getPageLock(eq("localhost"), eq("testPage"), eq("Bob"), eq(true));
     }
+
+    @Test
+    public void testReleasePageLock() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(post("/api/page/releaseLock/testPage").
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageLockService).releasePageLock(eq("localhost"), eq("testPage"));
+    }
 }

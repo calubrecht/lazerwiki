@@ -36,5 +36,9 @@ public class PageLockService {
         return new PageLockResponse(p.namespace(), p.pageName(), revision, lock.getOwner(), lock.getLockTime(), false);
     }
 
-    // TODO: Still need releasePageLock
+    public synchronized void releasePageLock(String host, String sPageDescriptor) {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
+        repository.deleteBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
+    }
 }

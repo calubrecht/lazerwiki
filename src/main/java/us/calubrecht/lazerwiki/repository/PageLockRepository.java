@@ -6,4 +6,6 @@ import us.calubrecht.lazerwiki.model.PageLockKey;
 
 public interface PageLockRepository  extends CrudRepository<PageLock, PageLockKey> {
     PageLock findBySiteAndNamespaceAndPagename(String site, String namespace, String pagename);
+
+    void deleteBySiteAndNamespaceAndPagename(String site, String namespace, String pagename);
 }

@@ -51,6 +51,9 @@ public class PageUpdateService {
     @Autowired
     PageCacheRepository pageCacheRepository;
 
+    @Autowired
+    PageLockService pageLockService;
+
     @Transactional
     public void savePage(String host, String sPageDescriptor, String text, Collection<String> tags, Collection<String> links, Collection<String> images, String title, String userName) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
@@ -80,6 +83,7 @@ public class PageUpdateService {
         newP.setModifiedBy(userName);
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
+        pageLockService.releasePageLock(host, sPageDescriptor);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
         imageRefService.setImageRefsFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), images);
         if (p == null  || p.isDeleted()) {

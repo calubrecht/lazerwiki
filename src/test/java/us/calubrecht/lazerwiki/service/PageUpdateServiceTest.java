@@ -48,6 +48,9 @@ public class PageUpdateServiceTest {
     @MockBean
     RegenCacheService regenCacheService;
 
+    @MockBean
+    PageLockService pageLockService;
+
 
     @MockBean
     EntityManagerProxy em;

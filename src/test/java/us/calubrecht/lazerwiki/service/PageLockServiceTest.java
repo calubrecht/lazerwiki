@@ -123,4 +123,12 @@ class PageLockServiceTest {
         assertEquals("Bob", captor.getValue().getOwner());
         assertTrue(LocalDateTime.now().isBefore(captor.getValue().getLockTime()));
     }
+
+    @Test
+    void releasePageLock() {
+        when(siteService.getSiteForHostname("host")).thenReturn("site1");
+        underTest.releasePageLock("host", "ns:page1");
+
+        verify(pageLockRepository).deleteBySiteAndNamespaceAndPagename("site1", "ns", "page1");
+    }
 }
