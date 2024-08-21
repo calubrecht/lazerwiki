@@ -47,6 +47,8 @@ class PageLockServiceTest {
         assertEquals("Bob", r.owner());
         assertEquals(true, r.success());
         assertEquals(1L, r.revision());
+        assertNotNull(r.pageLockId());
+        assertEquals(40, r.pageLockId().length());
         assertTrue(r.lockTime().isAfter(LocalDateTime.now()));
 
         ArgumentCaptor<PageLock> captor = ArgumentCaptor.forClass(PageLock.class);
@@ -54,13 +56,14 @@ class PageLockServiceTest {
 
         assertEquals("Bob", captor.getValue().getOwner());
         assertTrue(LocalDateTime.now().isBefore(captor.getValue().getLockTime()));
+        assertEquals(r.pageLockId(), captor.getValue().getLockId());
     }
 
     @Test
     void getPageLock_ignoreExpiredLock() {
         when(siteService.getSiteForHostname("host")).thenReturn("site1");
         LocalDateTime lockTime = LocalDateTime.now().minusSeconds(1);
-        PageLock lock = new PageLock("default", "ns", "page1", "Joe", lockTime);
+        PageLock lock = new PageLock("default", "ns", "page1", "Joe", lockTime, "id1");
         when(pageLockRepository.findBySiteAndNamespaceAndPagename("site1", "ns", "page1")).thenReturn(lock);
         when(pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1")).thenReturn(1L);
 
@@ -72,19 +75,22 @@ class PageLockServiceTest {
         assertTrue(r.success());
         assertEquals(1L, r.revision());
         assertTrue(r.lockTime().isAfter(LocalDateTime.now()));
+        assertNotNull(r.pageLockId());
+        assertNotEquals("id1", r.pageLockId());
 
         ArgumentCaptor<PageLock> captor = ArgumentCaptor.forClass(PageLock.class);
         verify(pageLockRepository).save(captor.capture());
 
         assertEquals("Bob", captor.getValue().getOwner());
         assertTrue(LocalDateTime.now().isBefore(captor.getValue().getLockTime()));
+        assertEquals(r.pageLockId(), captor.getValue().getLockId());
     }
 
     @Test
     void getPageLock_failIfLocked() {
         when(siteService.getSiteForHostname("host")).thenReturn("site1");
         LocalDateTime lockTime = LocalDateTime.now().plusSeconds(10);
-        PageLock lock = new PageLock("default", "ns", "page1", "Joe", lockTime);
+        PageLock lock = new PageLock("default", "ns", "page1", "Joe", lockTime, "id1");
         when(pageLockRepository.findBySiteAndNamespaceAndPagename("site1", "ns", "page1")).thenReturn(lock);
         when(pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1")).thenReturn(1L);
 
@@ -96,6 +102,7 @@ class PageLockServiceTest {
         assertFalse(r.success());
         assertEquals(1L, r.revision());
         assertTrue(r.lockTime().isAfter(LocalDateTime.now()));
+        assertNull(r.pageLockId());
 
         verify(pageLockRepository, never()).save(any());
     }
@@ -104,7 +111,7 @@ class PageLockServiceTest {
     void getPageLock_overrideLock() {
         when(siteService.getSiteForHostname("host")).thenReturn("site1");
         LocalDateTime lockTime = LocalDateTime.now().plusSeconds(10);
-        PageLock lock = new PageLock("default", "ns", "page1", "Joe", lockTime);
+        PageLock lock = new PageLock("default", "ns", "page1", "Joe", lockTime, "id1");
         when(pageLockRepository.findBySiteAndNamespaceAndPagename("site1", "ns", "page1")).thenReturn(lock);
         when(pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1")).thenReturn(1L);
 
@@ -127,8 +134,8 @@ class PageLockServiceTest {
     @Test
     void releasePageLock() {
         when(siteService.getSiteForHostname("host")).thenReturn("site1");
-        underTest.releasePageLock("host", "ns:page1");
+        underTest.releasePageLock("host", "ns:page1", "lockId");
 
-        verify(pageLockRepository).deleteBySiteAndNamespaceAndPagename("site1", "ns", "page1");
+        verify(pageLockRepository).deleteBySiteAndNamespaceAndPagenameAndLockId("site1", "ns", "page1", "lockId");
     }
 }

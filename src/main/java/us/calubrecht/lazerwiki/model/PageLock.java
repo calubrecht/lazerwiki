@@ -12,12 +12,13 @@ public class PageLock {
     public PageLock() {
     }
 
-    public PageLock(String site, String namespace, String pagename, String owner, LocalDateTime lockTime) {
+    public PageLock(String site, String namespace, String pagename, String owner, LocalDateTime lockTime, String lockId) {
         this.site = site;
         this.namespace = namespace;
         this.pagename = pagename;
         this.owner = owner;
         this.lockTime = lockTime;
+        this.lockId = lockId;
     }
 
     @Id
@@ -30,7 +31,9 @@ public class PageLock {
     private String owner;
 
     @CreationTimestamp
-    LocalDateTime lockTime;
+    private LocalDateTime lockTime;
+
+    private String lockId;
 
     public String getSite() {
         return site;
@@ -72,17 +75,25 @@ public class PageLock {
         this.lockTime = lockTime;
     }
 
+    public String getLockId() {
+        return lockId;
+    }
+
+    public void setLockId(String lockId) {
+        this.lockId = lockId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PageLock pageLock = (PageLock) o;
-        return Objects.equals(site, pageLock.site) && Objects.equals(namespace, pageLock.namespace) && Objects.equals(pagename, pageLock.pagename) && Objects.equals(owner, pageLock.owner) && Objects.equals(lockTime, pageLock.lockTime);
+        return Objects.equals(site, pageLock.site) && Objects.equals(namespace, pageLock.namespace) && Objects.equals(pagename, pageLock.pagename) && Objects.equals(owner, pageLock.owner) && Objects.equals(lockTime, pageLock.lockTime) && Objects.equals(lockId, pageLock.lockId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash( site, namespace, pagename, owner, lockTime);
+        return Objects.hash(site, namespace, pagename, owner, lockTime, lockId);
     }
 
     @Override
@@ -93,6 +104,7 @@ public class PageLock {
                 ", pagename='" + pagename + '\'' +
                 ", owner='" + owner + '\'' +
                 ", lockTime=" + lockTime +
+                ", lockId='" + lockId + '\'' +
                 '}';
     }
 }

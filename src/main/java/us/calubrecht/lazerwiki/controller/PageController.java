@@ -137,9 +137,9 @@ public class PageController {
         return pageLockService.getPageLock(url.getHost(), pageDescriptor.orElse(""), userName, overrideLock.orElse(false));
     }
 
-    @PostMapping(value = {"/releaseLock/{pageDescriptor}"})
-    public void releaseLock(@PathVariable Optional<String> pageDescriptor, HttpServletRequest request) throws MalformedURLException {
+    @PostMapping(value = {"/releaseLock/{pageDescriptor}/id/{lock}", "/releaseLock/id/{lock}"})
+    public void releaseLock(@PathVariable Optional<String> pageDescriptor, @PathVariable String lock, HttpServletRequest request) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
-        pageLockService.releasePageLock(url.getHost(), pageDescriptor.orElse(""));
+        pageLockService.releasePageLock(url.getHost(), pageDescriptor.orElse(""), lock);
     }
 }

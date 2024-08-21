@@ -255,11 +255,18 @@ public class PageControllerTest {
     @Test
     public void testReleasePageLock() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        this.mockMvc.perform(post("/api/page/releaseLock/testPage").
+        this.mockMvc.perform(post("/api/page/releaseLock/testPage/id/abcd").
                         contentType(MediaType.APPLICATION_JSON).
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageLockService).releasePageLock(eq("localhost"), eq("testPage"));
+        verify(pageLockService).releasePageLock(eq("localhost"), eq("testPage"), eq("abcd"));
+
+        this.mockMvc.perform(post("/api/page/releaseLock/id/abcd").
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageLockService).releasePageLock(eq("localhost"), eq(""), eq("abcd"));
     }
 }

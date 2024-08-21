@@ -43,20 +43,22 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
-CREATE TABLE `pageLock` (
-	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`namespace` VARCHAR(50) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
-	`pagename` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
-	`lockTime` DATETIME NOT NULL,
-	`owner` VARCHAR(255) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	PRIMARY KEY (`site`, `namespace`, `pagename`) USING BTREE,
-	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`) USING BTREE,
-   	CONSTRAINT `FK_LOCK_OWNER` FOREIGN KEY (`owner`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  	CONSTRAINT `FK_LOCK_SITE` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB
-;
+CCREATE TABLE `pageLock` (
+ 	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+ 	`namespace` VARCHAR(50) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+ 	`pagename` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+ 	`lockTime` DATETIME NOT NULL,
+ 	`owner` VARCHAR(255) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+ 	`lockId` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+ 	PRIMARY KEY (`site`, `namespace`, `pagename`) USING BTREE,
+ 	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`) USING BTREE,
+ 	INDEX `pageLockId` (`lockId`) USING BTREE,
+    	CONSTRAINT `FK_LOCK_OWNER` FOREIGN KEY (`owner`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+   	CONSTRAINT `FK_LOCK_SITE` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+ )
+ COLLATE='latin1_swedish_ci'
+ ENGINE=InnoDB
+ ;
 
 CREATE TABLE `userRecord` (
 	`userName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',

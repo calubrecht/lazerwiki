@@ -83,7 +83,7 @@ public class PageUpdateService {
         newP.setModifiedBy(userName);
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
-        pageLockService.releasePageLock(host, sPageDescriptor);
+        pageLockService.releasePageLock(host, sPageDescriptor, null);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
         imageRefService.setImageRefsFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), images);
         if (p == null  || p.isDeleted()) {
