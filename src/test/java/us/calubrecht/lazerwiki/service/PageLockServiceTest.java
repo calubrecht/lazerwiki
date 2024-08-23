@@ -138,4 +138,12 @@ class PageLockServiceTest {
 
         verify(pageLockRepository).deleteBySiteAndNamespaceAndPagenameAndLockId("site1", "ns", "page1", "lockId");
     }
+
+    @Test
+    void releaseAnyPageLock() {
+        when(siteService.getSiteForHostname("host")).thenReturn("site1");
+        underTest.releaseAnyPageLock("host", "ns:page1");
+
+        verify(pageLockRepository).deleteBySiteAndNamespaceAndPagename("site1", "ns", "page1");
+    }
 }

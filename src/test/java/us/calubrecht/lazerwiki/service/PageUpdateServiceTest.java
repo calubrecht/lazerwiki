@@ -71,6 +71,7 @@ public class PageUpdateServiceTest {
         verify(pageRepository).save(pageCaptor.capture());
         // new Page, should regen cache
         verify(regenCacheService).regenCachesForBacklinks("site1", "newPage");
+        verify(pageLockService).releaseAnyPageLock("host1", "newPage");
         Page p = pageCaptor.getValue();
         assertEquals("Some text", p.getText());
         assertEquals(55L, p.getId());

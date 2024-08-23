@@ -43,7 +43,7 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
-CCREATE TABLE `pageLock` (
+CREATE TABLE `pageLock` (
  	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
  	`namespace` VARCHAR(50) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
  	`pagename` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',

@@ -130,7 +130,7 @@ public class PageController {
         return renderService.previewPage(url.getHost(), pageDescriptor.orElse(""), body.getText(), userName);
     }
 
-    @PostMapping(value = {"/lock/{pageDescriptor}"})
+    @PostMapping(value = {"/lock/{pageDescriptor}", "/lock/"})
     public PageLockResponse lockPage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestParam Optional<Boolean> overrideLock) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();

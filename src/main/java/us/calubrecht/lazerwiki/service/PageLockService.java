@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
+@Transactional
 public class PageLockService {
     @Autowired
     PageLockRepository repository;
@@ -40,12 +41,13 @@ public class PageLockService {
     public synchronized void releasePageLock(String host, String sPageDescriptor, String lockId) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
-        if (lockId == null) {
-            repository.deleteBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
-        }
-        else {
-            repository.deleteBySiteAndNamespaceAndPagenameAndLockId(site, p.namespace(), p.pageName(), lockId);
-        }
+        repository.deleteBySiteAndNamespaceAndPagenameAndLockId(site, p.namespace(), p.pageName(), lockId);
+    }
+
+    public synchronized void releaseAnyPageLock(String host, String sPageDescriptor) {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
+        repository.deleteBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
     }
 
     String newLockId() {
