@@ -92,7 +92,7 @@ public class PageService {
             return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, canWrite, false));
         }
         String source = p.getText();
-        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), visibleBacklinks, new PageFlags(true, false, true, canWrite, canDelete), p.getId());
+        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), visibleBacklinks, new PageFlags(true, false, true, canWrite, canDelete), p.getId(), p.getRevision());
     }
 
     @Transactional

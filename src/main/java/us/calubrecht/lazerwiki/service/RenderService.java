@@ -47,7 +47,7 @@ public class RenderService {
         long queryMillis = sw.getSplitTime();
         PageCache cachedPage = pageService.getCachedPage(host, sPageDescriptor);
         if (cachedPage != null && cachedPage.useCache) {
-            PageData pd = new PageData(cachedPage.renderedCache, d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id());
+            PageData pd = new PageData(cachedPage.renderedCache, d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,QueryCache)");
@@ -55,7 +55,7 @@ public class RenderService {
         }
         try {
             RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, userName);
-            PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id());
+            PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
             sw.stop();
             long totalMillis = sw.getTime();
             pageService.saveCache(host, sPageDescriptor, rendered);
