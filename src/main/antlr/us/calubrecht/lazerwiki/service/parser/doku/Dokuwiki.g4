@@ -238,7 +238,7 @@ blockquote:
   ;
 
 hidden:
-  HIDDEN_START ( row | line | just_newline )* HIDDEN_END
+  HIDDEN_START ( header | row | just_newline | code_box | blockquote  )* HIDDEN_END
   ;
 
 
