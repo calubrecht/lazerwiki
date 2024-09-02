@@ -20,6 +20,10 @@ public record PageData(String rendered, String source, String title, List<String
 
     }
 
+    public PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id) {
+        this(rendered, source, title, tags, backlinks, flags, id, null);
+    }
+
     public static final PageFlags EMPTY_FLAGS = new PageFlags(false, false, false, false, false);
     public static final PageFlags ALL_RIGHTS = new PageFlags(true, false, true, true, true);
 }

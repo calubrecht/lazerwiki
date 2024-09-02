@@ -48,6 +48,9 @@ class MacroServiceTest {
     @MockBean
     LinkService linkService;
 
+    @MockBean
+    RandomService randomService;
+
     @Test
     @Order(1)
     void registerMacros() {

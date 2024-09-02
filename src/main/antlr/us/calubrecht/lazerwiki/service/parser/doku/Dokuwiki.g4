@@ -51,6 +51,9 @@ UNFORMAT_TOKEN: '%%' ;
 UNFORMAT_TAG_START: '<nowiki>';
 UNFORMAT_TAG_END: '</nowiki>';
 
+HIDDEN_START: '<hidden>';
+HIDDEN_END: '</hidden>';
+
 CHARACTER
    : ~[\r\n]
    ;
@@ -66,7 +69,7 @@ MACRO_END_TOKEN: '~~/MACRO~~' ;
 //options { tokenVocab=DokuLexer; }
 
 page
-    : ( header | row | just_newline | code_box | blockquote)* EOF
+    : ( header | row | just_newline | code_box | blockquote | hidden)* EOF
     ;
 
 code_box:
@@ -227,11 +230,15 @@ ulist_item
   ;
 
 row:
-  ( line  ) NEWLINE
+  ( line  ) NEWLINE?
   ;
 
 blockquote:
   ( BLOCKQUOTE_START+ WS? (line | WS+)?) NEWLINE
+  ;
+
+hidden:
+  HIDDEN_START ( row | line | just_newline )* HIDDEN_END
   ;
 
 

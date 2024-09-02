@@ -47,7 +47,9 @@ public class RowRenderer extends FlatteningRenderer {
                 (t) -> flattenChildren(t, false).stream()).collect(Collectors.toList());
         ret.append(renderChildren(children, renderContext));
         // Remove trailing new line
-        ret.deleteCharAt(ret.length() -1);
+        if (ret.charAt(ret.length() -1) == '\n') {
+            ret.deleteCharAt(ret.length() -1);
+        }
         ret.append("</%s>".formatted(getTagName()));
         return ret;
     }

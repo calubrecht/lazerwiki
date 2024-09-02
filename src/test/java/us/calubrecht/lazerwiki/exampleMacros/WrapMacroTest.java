@@ -38,6 +38,8 @@ class WrapMacroTest {
     @MockBean
     LinkService linkService;
 
+    @MockBean
+    RandomService randomService;
 
     @Test
     void render() {

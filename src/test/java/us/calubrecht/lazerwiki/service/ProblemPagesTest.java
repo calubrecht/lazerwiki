@@ -34,6 +34,9 @@ public class ProblemPagesTest {
     @MockBean
     LinkService linkService;
 
+    @MockBean
+    RandomService randomService;
+
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
     public static class TestConfig {

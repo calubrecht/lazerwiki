@@ -40,6 +40,9 @@ class IncludeMacroTest {
     @MockBean
     LinkService linkService;
 
+    @MockBean
+    RandomService randomService;
+
     @Test
     public void testIncludeMacro() {
         RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());

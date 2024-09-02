@@ -32,6 +32,9 @@ public class DokuWikiRendererPlaintextTest {
     @MockBean
     MacroService macroService;
 
+    @MockBean
+    RandomService randomService;
+
     String doRender(String source) {
         RenderContext context = new RenderContext("localhost", "default", "jack");
         return underTest.renderToPlainText(source, context);
@@ -112,5 +115,15 @@ public class DokuWikiRendererPlaintextTest {
         String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
         assertEquals(" One quote with some bold\nAnd\nAnother layer of quote", doRender(inputBlockquote));
 
+    }
+
+    @Test
+    public void testHidden() {
+        when(randomService.nextInt()).thenReturn(5,8);
+        String inputBlockquote = "<hidden>simple</hidden>";
+        assertEquals("simple", doRender(inputBlockquote));
+
+        assertEquals("line1\n\nline2with some title text",
+                doRender("<hidden>line1\n\nline2{{animage|with some title text}}</hidden>"));
     }
 }

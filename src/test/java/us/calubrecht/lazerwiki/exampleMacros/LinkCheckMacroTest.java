@@ -40,6 +40,9 @@ public class LinkCheckMacroTest {
     @MockBean
     LinkService linkService;
 
+    @MockBean
+    RandomService randomService;
+
     @Test
     public void testChecklinks() {
         RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
