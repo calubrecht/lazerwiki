@@ -6,32 +6,32 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
+import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser.ImageContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
-import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
+import us.calubrecht.lazerwiki.service.renderhelpers.TypedRenderer;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGES;
 
 @Component
-public class ImageRenderer  extends TreeRenderer {
+public class ImageRenderer  extends TypedRenderer<ImageContext> {
     final Logger logger = LogManager.getLogger(getClass());
     @Override
     public List<Class<? extends ParseTree>> getTargets() {
-        return List.of(DokuwikiParser.ImageContext.class);
+        return List.of(ImageContext.class);
     }
 
     @Override
-    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderContext(ImageContext tree, RenderContext renderContext) {
         String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext).toString();
         return parseInner(inner, renderContext);
     }
 
     @Override
-    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderContextToPlainText(ImageContext tree, RenderContext renderContext) {
         String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext).toString();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
         if (innards.get(INNARD_TOKEN.TITLE) != null) {

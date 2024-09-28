@@ -9,6 +9,8 @@ import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
+import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser.LinkContext;
+import us.calubrecht.lazerwiki.service.renderhelpers.TypedRenderer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,7 +21,7 @@ import java.util.Set;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
 @Component
-public class LinkRenderer extends TreeRenderer {
+public class LinkRenderer extends TypedRenderer<LinkContext> {
     final Logger logger = LogManager.getLogger(getClass());
     static final String MISSING_LINK_CLASS ="wikiLinkMissing";
     static final String LINK_CLASS ="wikiLink";
@@ -33,8 +35,8 @@ public class LinkRenderer extends TreeRenderer {
         return List.of(DokuwikiParser.LinkContext.class);
     }
 
-    protected String getLinkTarget(ParseTree tree) {
-        String rawTarget = tree.getChild(1).getText().strip();
+    protected String getLinkTarget(LinkContext ctx) {
+        String rawTarget = ctx.link_target().getText().strip();
         if (!isInternal(rawTarget)) {
             try {
                 URI uri = new URI(rawTarget);
@@ -51,9 +53,9 @@ public class LinkRenderer extends TreeRenderer {
         return ret;
     }
 
-    protected String getLinkDisplay(ParseTree tree, String linkTarget, RenderContext renderContext) {
-        if (tree.getChildCount() > 3) {
-            String linkText =  renderChildren(getChildren(tree, 2, 3), renderContext).toString();
+    protected String getLinkDisplay(LinkContext ctx, String linkTarget, RenderContext renderContext) {
+        if (ctx.link_display() != null) {
+            String linkText =  renderChildren(List.of(ctx.link_display()), renderContext).toString();
             if (!linkText.isBlank()) {
                 return linkText;
             }
@@ -68,7 +70,6 @@ public class LinkRenderer extends TreeRenderer {
     protected String getCssClass(String targetName, String host) {
         if (isInternal(targetName)) {
             boolean exists =  pageService.exists(host, targetName);
-            logger.info("Does %s->%s exist? %s".formatted(host, targetName, exists));
             return exists? LINK_CLASS : MISSING_LINK_CLASS;
 
         }
@@ -81,7 +82,7 @@ public class LinkRenderer extends TreeRenderer {
 
     @SuppressWarnings("unchecked")
     @Override
-    public StringBuilder render(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderContext(LinkContext tree, RenderContext renderContext) {
         String linkTarget = getLinkTarget(tree);
         String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
         if (isInternal(linkTarget)) {
@@ -93,7 +94,7 @@ public class LinkRenderer extends TreeRenderer {
     }
 
     @Override
-    public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
+    public StringBuilder renderContextToPlainText(LinkContext tree, RenderContext renderContext) {
         String linkTarget = getLinkTarget(tree);
         if (tree.getChildCount() > 3) {
             StringBuilder linkText = renderChildrenToPlainText(getChildren(tree, 2, 3), renderContext);
