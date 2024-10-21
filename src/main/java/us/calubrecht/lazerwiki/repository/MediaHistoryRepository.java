@@ -16,4 +16,6 @@ public interface MediaHistoryRepository  extends CrudRepository<MediaHistoryReco
     List<String> getAllNamespaces(@Param("site") String site);
 
     List<MediaHistoryRecord> findAllBySiteAndNamespaceInOrderByTsDesc(Limit limit, String site, List<String> namespaces);
+
+    void deleteBySite(String site);
 }

@@ -10,4 +10,6 @@ public interface PageLockRepository  extends CrudRepository<PageLock, PageLockKe
     void deleteBySiteAndNamespaceAndPagenameAndLockId(String site, String namespace, String pagename, String lockId);
 
     void deleteBySiteAndNamespaceAndPagename(String site, String namespace, String pagename);
+
+    void deleteBySite(String site);
 }

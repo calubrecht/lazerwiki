@@ -19,4 +19,6 @@ public interface MediaRecordRepository extends CrudRepository<MediaRecord, Long>
     @Modifying
     @Query("DELETE FROM mediaRecord WHERE fileName = :fileName and site= :site and namespace= :namespace")
     void deleteBySiteAndFilenameAndNamespace(@Param("site") String site, @Param("fileName") String fileName, @Param("namespace") String namespace);
+
+    void deleteBySite(String site);
 }

@@ -56,4 +56,6 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
     @Query(value="SELECT namespace, pagename, title, text, deleted FROM page WHERE site=:site AND deleted=0 and validTS='9999-12-31 00:00:00' AND concat(namespace , ':' , pagename) IN (:pageDescs)",
             nativeQuery = true)
     List<PageText> getAllBySiteAndNamespaceAndPagename(String site, List<String> pageDescs);
+
+    void deleteBySite(String site);
 }

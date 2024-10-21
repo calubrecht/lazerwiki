@@ -13,10 +13,7 @@ import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
-import us.calubrecht.lazerwiki.service.PageUpdateService;
-import us.calubrecht.lazerwiki.service.RegenCacheService;
-import us.calubrecht.lazerwiki.service.SiteService;
-import us.calubrecht.lazerwiki.service.UserService;
+import us.calubrecht.lazerwiki.service.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +41,9 @@ class AdminControllerTest {
 
     @MockBean
     PageUpdateService pageUpdateService;
+
+    @MockBean
+    SiteDelService siteDelService;
 
     @Test
     void regenLinkTable() throws Exception {
@@ -264,5 +264,27 @@ class AdminControllerTest {
         this.mockMvc.perform(put("/api/admin/site/site2").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk()).andExpect(content().json("[{\"name\":\"OneWiki\", \"hostname\":\"wiki.com\", \"siteName\":\"One Wiki\"},{\"name\":\"TwoWiki\"}]"));
         verify(pageUpdateService).createDefaultSiteHomepage("site2", "Site 2", "Bob");
+    }
+
+    @Test
+    void delSite() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        adminUser.userName = "Bob";
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
+        regularUser.userName = "Frank";
+        when(userService.getUser("Frank")).thenReturn(regularUser);
+        when(siteService.getAllSites(any())).thenReturn(List.of(new Site("OneWiki", "wiki.com", "One Wiki"), new Site("TwoWiki", "wiki2.com", "Two Wiki")));
+
+        // No for Frank
+        this.mockMvc.perform(delete("/api/admin/site/site1").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
+                andExpect(status().isUnauthorized());
+
+        // Yes forBob
+        this.mockMvc.perform(delete("/api/admin/site/site1").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("[{\"name\":\"OneWiki\", \"hostname\":\"wiki.com\", \"siteName\":\"One Wiki\"},{\"name\":\"TwoWiki\"}]"));
+        verify(siteDelService).deleteSiteCompletely("site1", "Bob");
     }
 }

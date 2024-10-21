@@ -8,4 +8,6 @@ import us.calubrecht.lazerwiki.model.Site;
 @Repository
 public interface SiteRepository extends CrudRepository<Site, String> {
     Site findByHostname(String hostName);
+
+    Site findBySiteName(String siteName);
 }

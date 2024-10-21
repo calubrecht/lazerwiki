@@ -11,10 +11,8 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRequest;
 import us.calubrecht.lazerwiki.requests.SiteRequest;
-import us.calubrecht.lazerwiki.service.PageUpdateService;
-import us.calubrecht.lazerwiki.service.RegenCacheService;
-import us.calubrecht.lazerwiki.service.SiteService;
-import us.calubrecht.lazerwiki.service.UserService;
+import us.calubrecht.lazerwiki.service.*;
+import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.io.IOException;
@@ -35,6 +33,9 @@ public class AdminController {
 
     @Autowired
     SiteService siteService;
+
+    @Autowired
+    SiteDelService siteDelService;
 
     @Autowired
     PageUpdateService pageUpdateService;
@@ -152,5 +153,14 @@ public class AdminController {
         return ResponseEntity.ok(siteService.getAllSites(user));
     }
 
-
+    @DeleteMapping("site/{siteName}")
+    public ResponseEntity<List<Site>> deleteSite(Principal principal, @PathVariable("siteName") String siteName) throws PageWriteException, IOException, MediaWriteException {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        siteDelService.deleteSiteCompletely(siteName, principal.getName());
+        return ResponseEntity.ok(siteService.getAllSites(user));
+    }
 }

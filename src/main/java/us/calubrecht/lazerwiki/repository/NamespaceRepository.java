@@ -15,4 +15,6 @@ public interface NamespaceRepository extends CrudRepository<Namespace, Long> {
 
     @Query(value="SELECT namespace FROM known_namespaces where site = :site", nativeQuery = true)
     Set<String> getKnownNamespaces(@Param("site") String site);
+
+    void deleteBySite(String site);
 }

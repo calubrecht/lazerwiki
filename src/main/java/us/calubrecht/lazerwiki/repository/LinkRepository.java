@@ -12,4 +12,6 @@ public interface LinkRepository extends CrudRepository<Link, Long> {
     List<Link> findAllBySiteAndSourcePageNSAndSourcePageName(String site, String sourcePageNS, String sourcePageName);
     List<Link> findAllBySiteAndTargetPageNSAndTargetPageName(String site, String targetPageNS, String targetPageName);
     void deleteBySiteAndSourcePageNSAndSourcePageName(String site, String sourcePageNS, String sourcePageName);
+
+    void deleteBySite(String site);
 }

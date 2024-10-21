@@ -13,7 +13,8 @@ CREATE TABLE `sites` (
 	`settings` JSON NOT NULL DEFAULT '{}' COLLATE 'utf8mb4_bin',
 	PRIMARY KEY (`name`) USING BTREE,
 
-	UNIQUE INDEX `HostnameIdx` (`hostname`) USING BTREE
+	UNIQUE INDEX `HostnameIdx` (`hostname`) USING BTREE,
+	UNIQUE INDEX `SitenameIdx` (`siteName`) USING BTREE,
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
