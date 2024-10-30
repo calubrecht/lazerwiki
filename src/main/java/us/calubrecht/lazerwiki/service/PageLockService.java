@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
@@ -24,13 +25,16 @@ public class PageLockService {
     @Autowired
     SiteService siteService;
 
+    @Value("${page.lock.minutes:20}")
+    int pageLockMinutes;
+
     public synchronized PageLockResponse getPageLock(String host, String sPageDescriptor, String userName, boolean overrideLock) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
         PageLock lock = repository.findBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
         Long revision = pageRepository.getLastRevisionBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
         if (lock == null || lock.getLockTime().isBefore(LocalDateTime.now()) || overrideLock) {
-            LocalDateTime lockTime = LocalDateTime.now().plusMinutes(5);
+            LocalDateTime lockTime = LocalDateTime.now().plusMinutes(pageLockMinutes);
             lock = new PageLock(site, p.namespace(), p.pageName(), userName, lockTime, newLockId());
             repository.save(lock);
             return new PageLockResponse(p.namespace(), p.pageName(), revision, userName, lockTime, true, lock.getLockId());
