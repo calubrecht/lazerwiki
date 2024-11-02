@@ -1,11 +1,12 @@
 package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser.ImageContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TypedRenderer;
@@ -19,6 +20,10 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGE
 @Component
 public class ImageRenderer  extends TypedRenderer<ImageContext> {
     final Logger logger = LogManager.getLogger(getClass());
+
+    @Value("#{'${lazerwiki.unscalable-image.ext}'.split(',')}")
+    private Set<String> unscalableImageExts;
+
     @Override
     public List<Class<? extends ParseTree>> getTargets() {
         return List.of(ImageContext.class);
@@ -69,7 +74,7 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
         return outBuffer;
     }
 
-    static final Pattern SIZE_PATTERN= Pattern.compile("[0-9]+(x[0-9]+)?");
+    static final Pattern SIZE_PATTERN= Pattern.compile("([0-9]+)(x[0-9]+)?");
     String getSizeTok(String options) {
         if (options == null) {
             return "";
@@ -78,6 +83,28 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
         for (String tok : toks) {
             if (SIZE_PATTERN.matcher(tok).matches()) {
                 return "?" + tok;
+            }
+        }
+        return "";
+    }
+
+    String getSizeStyle(String options) {
+        if (options == null) {
+            return "";
+        }
+        String[] toks = options.split("&");
+        for (String tok : toks) {
+            Matcher m = SIZE_PATTERN.matcher(tok);
+            if (m.matches()) {
+                int width = Integer.parseInt(m.group(1));
+                if (m.group(2) != null) {
+                    int height = Integer.parseInt(m.group(2).substring(1));
+                    if (width == 0) {
+                        return "height:" + height+ "px";
+                    }
+                    return "width:" + width + "px; height:" + height + "px";
+                }
+                return "width:" + width + "px";
             }
         }
         return "";
@@ -138,10 +165,15 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
             className += " fullLink";
         }
         String fileName = innards.get(INNARD_TOKEN.FILE_NAME).trim();
+        String inlineStyle = "";
+        if (unscalableImageExts.contains(FilenameUtils.getExtension(fileName))) {
+            String style = getSizeStyle(innards.get(INNARD_TOKEN.OPTIONS));
+            inlineStyle = style.isBlank() ? "" : " style=\"" +style + "\"";
+        }
         sb.append("<img src=\"/_media/");
         sb.append(fileName).append(getSizeTok(innards.get(INNARD_TOKEN.OPTIONS)));
         String titleText = Strings.isBlank(innards.get(INNARD_TOKEN.TITLE)) ? "" : " title=\"" + innards.get(INNARD_TOKEN.TITLE).trim() + "\"";
-        sb.append("\" class=\"").append(className).append("\"").append(titleText).append(" loading=\"lazy\">");
+        sb.append("\" class=\"").append(className).append("\"").append(titleText).append(inlineStyle).append(" loading=\"lazy\">");
         ((Set<String>)renderContext.renderState().computeIfAbsent(IMAGES.name(), (k) -> new HashSet<>())).add(fileName);
         return sb;
     }
