@@ -1,7 +1,9 @@
 package us.calubrecht.lazerwiki.util;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -16,13 +18,20 @@ import java.util.Iterator;
 @Service
 public class ImageUtil {
 
-    public Pair<Integer, Integer> getImageDimension(InputStream is) throws IOException {
+    @Value("${imageutil.image.size.limit:4000000}")
+    // Limit to to image area, to avoid excessive memory use
+    int maxImgSize;
+
+    public Pair<Integer, Integer> getImageDimension(InputStream is) throws IOException, MediaWriteException {
         try (ImageInputStream in = ImageIO.createImageInputStream(is)) {
             final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
             if (readers.hasNext()) {
                 ImageReader reader = readers.next();
                 try {
                     reader.setInput(in);
+                    if (reader.getWidth(0) * reader.getHeight(0) > maxImgSize) {
+                        throw new MediaWriteException("Image is too large to upload");
+                    }
                     return Pair.of(reader.getWidth(0), reader.getHeight(0));
                 } finally {
                     reader.dispose();
