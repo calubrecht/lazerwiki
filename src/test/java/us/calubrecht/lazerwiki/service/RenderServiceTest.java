@@ -76,9 +76,9 @@ public class RenderServiceTest {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
                 new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title")));
-        underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
+        underTest.savePage("host", "pageName", "text", Collections.emptyList(), 10,false, "user");
 
-        verify(pageUpdateService).savePage("host", "pageName", "text",  Collections.emptyList(),  Collections.emptySet(), Collections.emptySet(),"The Title","user");
+        verify(pageUpdateService).savePage("host", "pageName", 10L, "text",  Collections.emptyList(),  Collections.emptySet(), Collections.emptySet(),"The Title","user", false);
     }
 
 
@@ -89,8 +89,8 @@ public class RenderServiceTest {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString())).thenReturn(
                 new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title", RenderResult.RENDER_STATE_KEYS.LINKS.name(), links)));
-        underTest.savePage("host", "pageName", "text", Collections.emptyList(), "user");
-        verify(pageUpdateService).savePage("host", "pageName", "text",  Collections.emptyList(),  links,Collections.emptySet(),"The Title","user");
+        underTest.savePage("host", "pageName", "text", Collections.emptyList(), 10,false, "user");
+        verify(pageUpdateService).savePage("host", "pageName", 10L, "text",  Collections.emptyList(),  links,Collections.emptySet(),"The Title","user", false);
 
     }
 

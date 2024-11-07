@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.model.PageTag;
 import us.calubrecht.lazerwiki.repository.*;
+import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.io.BufferedReader;
@@ -54,8 +55,9 @@ public class PageUpdateService {
     @Autowired
     PageLockService pageLockService;
 
+
     @Transactional
-    public void savePage(String host, String sPageDescriptor, String text, Collection<String> tags, Collection<String> links, Collection<String> images, String title, String userName) throws PageWriteException{
+    public void savePage(String host, String sPageDescriptor, long lastRevision, String text, Collection<String> tags, Collection<String> links, Collection<String> images, String title, String userName, boolean force) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
         // get Existing
         PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
@@ -64,6 +66,9 @@ public class PageUpdateService {
         }
         logger.info("Saving Page %s->%s".formatted(site, sPageDescriptor));
         Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+        if (p != null && p.getRevision() != lastRevision && !force) {
+            throw new PageRevisionException("Expected revision " + p.getRevision() + " but was " + lastRevision);
+        }
         long id = p == null ? getNewId() : p.getId();
         long revision = p == null ? 1 : p.getRevision() + 1;
         if (p != null ) {
@@ -143,7 +148,7 @@ public class PageUpdateService {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("defaultSiteHomepage.tmpl")))) {
             String template = br.lines().collect(Collectors.joining(("\n")));
-            savePage(siteService.getHostForSitename(siteName), "", template.replaceAll("%SITENAME%", displayName), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),"Home", userName);
+            savePage(siteService.getHostForSitename(siteName), "", 0L, template.replaceAll("%SITENAME%", displayName), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),"Home", userName, false);
         }
         return true;
     }

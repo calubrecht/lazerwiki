@@ -97,12 +97,12 @@ public class RenderService {
     }
 
     @SuppressWarnings("unchecked")
-    public void savePage(String host, String sPageDescriptor,String text, List<String> tags, String userName) throws PageWriteException {
+    public void savePage(String host, String sPageDescriptor,String text, List<String> tags, long revision, boolean force, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
         RenderResult res = renderer.renderWithInfo(text, host, site, userName);
         Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
         Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
-        pageUpdateService.savePage(host, sPageDescriptor, text, tags, links, images, res.getTitle(), userName);
+        pageUpdateService.savePage(host, sPageDescriptor, revision, text, tags, links, images, res.getTitle(), userName, force);
         pageService.saveCache(host, sPageDescriptor, res);
     }
 

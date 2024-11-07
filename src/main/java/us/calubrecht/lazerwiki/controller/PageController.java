@@ -20,6 +20,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
+import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.net.MalformedURLException;
@@ -84,8 +85,13 @@ public class PageController {
     public PageData savePage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody SavePageRequest body) throws MalformedURLException, PageWriteException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
-        renderService.savePage(url.getHost(), pageDescriptor.orElse(""), body.getText(), body.getTags(), userName);
-        return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
+        try {
+            renderService.savePage(url.getHost(), pageDescriptor.orElse(""), body.getText(), body.getTags(), body.getRevision(), body.isForce(), userName);
+            return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
+        }
+        catch (PageRevisionException pre) {
+            return new PageData(null, null, null, null, null, null, null, null, false, pre.getMessage());
+        }
     }
 
     @DeleteMapping("{pageDescriptor}")

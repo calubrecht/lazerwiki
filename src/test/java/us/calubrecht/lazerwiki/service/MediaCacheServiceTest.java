@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
+import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
@@ -36,9 +37,9 @@ public class MediaCacheServiceTest {
     @MockBean
     ImageUtil mockImageUtil;
 
-    final ImageUtil realImageUtil = new ImageUtil();
+    final ImageUtil realImageUtil = new ImageUtil(4000000);
 
-    String getFileDimensions(File f) throws IOException {
+    String getFileDimensions(File f) throws IOException, MediaWriteException {
         FileInputStream fis = new FileInputStream(f);
         byte[] bytesRead = fis.readAllBytes();
         fis.close();
@@ -53,7 +54,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFile() throws IOException {
+    public void testGetBinaryFile() throws IOException, MediaWriteException {
         when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
             return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
                     inv.getArgument(1, String.class),
@@ -91,7 +92,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileKeepAspectRatio() throws IOException {
+    public void testGetBinaryFileKeepAspectRatio() throws IOException, MediaWriteException {
         when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
             return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
                     inv.getArgument(1, String.class),
@@ -114,7 +115,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileCropToKeepAspectRatio() throws IOException {
+    public void testGetBinaryFileCropToKeepAspectRatio() throws IOException, MediaWriteException {
         when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
             return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
                     inv.getArgument(1, String.class),
@@ -137,7 +138,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileWithNS() throws IOException {
+    public void testGetBinaryFileWithNS() throws IOException, MediaWriteException {
         when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
             return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
                     inv.getArgument(1, String.class),

@@ -18,9 +18,12 @@ import java.util.Iterator;
 @Service
 public class ImageUtil {
 
-    @Value("${imageutil.image.size.limit:4000000}")
     // Limit to to image area, to avoid excessive memory use
     int maxImgSize;
+
+    public ImageUtil(@Value("${imageutil.image.size.limit:4000000}") int maxImgSize) {
+        this.maxImgSize = maxImgSize;
+    }
 
     public Pair<Integer, Integer> getImageDimension(InputStream is) throws IOException, MediaWriteException {
         try (ImageInputStream in = ImageIO.createImageInputStream(is)) {

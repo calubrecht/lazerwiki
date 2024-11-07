@@ -30,7 +30,6 @@ public class PageLock {
 
     private String owner;
 
-    @CreationTimestamp
     private LocalDateTime lockTime;
 
     private String lockId;

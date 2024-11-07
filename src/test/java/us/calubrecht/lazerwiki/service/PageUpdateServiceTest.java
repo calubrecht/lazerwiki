@@ -2,12 +2,14 @@ package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.repository.*;
+import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.io.IOException;
@@ -66,7 +68,7 @@ public class PageUpdateServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  Collections.emptyList(),Collections.emptyList(),"Title","someUser");
+        pageUpdateService.savePage("host1", "newPage", 0L, "Some text", Collections.emptyList(),  Collections.emptyList(),Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository).save(pageCaptor.capture());
         // new Page, should regen cache
@@ -95,7 +97,7 @@ public class PageUpdateServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
 
-        pageUpdateService.savePage("host1", "ns:realPage", "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
+        pageUpdateService.savePage("host1", "ns:realPage", 2L, "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService, never()).regenCachesForBacklinks(anyString(), anyString());
@@ -130,7 +132,7 @@ public class PageUpdateServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "deletedPage")).
                 thenReturn(p);
 
-        pageUpdateService.savePage("host1", "deletedPage", "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser");
+        pageUpdateService.savePage("host1", "deletedPage", 2L, "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService).regenCachesForBacklinks("site1", "deletedPage");
@@ -147,7 +149,7 @@ public class PageUpdateServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
         assertThrows(PageWriteException.class, () ->
-                pageUpdateService.savePage("host1", "newPage", "Some text", null,  Collections.emptyList(),Collections.emptyList(),"Title","Joe"));
+                pageUpdateService.savePage("host1", "newPage", 0L,"Some text", null,  Collections.emptyList(),Collections.emptyList(),"Title","Joe", false));
     }
 
     @Test
@@ -157,7 +159,7 @@ public class PageUpdateServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  List.of("page1", "page2"),Collections.emptyList(),"Title","someUser");
+        pageUpdateService.savePage("host1", "newPage", 0L, "Some text", Collections.emptyList(),  List.of("page1", "page2"),Collections.emptyList(),"Title","someUser", false);
 
         verify(linkService).setLinksFromPage("site1", "", "newPage",  List.of("page1", "page2"));
     }
@@ -169,9 +171,31 @@ public class PageUpdateServiceTest {
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
 
-        pageUpdateService.savePage("host1", "newPage", "Some text", Collections.emptyList(),  List.of("page1", "page2"), List.of("image1.jpg", "image2.jpg"),"Title","someUser");
+        pageUpdateService.savePage("host1", "newPage", 0L, "Some text", Collections.emptyList(),  List.of("page1", "page2"), List.of("image1.jpg", "image2.jpg"),"Title","someUser", false);
 
         verify(imageRefService).setImageRefsFromPage("site1", "", "newPage",  List.of("image1.jpg", "image2.jpg"));
+    }
+
+    @Test
+    public void testSavePageRevisionCheck() throws PageWriteException {
+        when(idRepository.getNewId()).thenReturn(55L);
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        Page p = new Page();
+        p.setId(10L);
+        p.setRevision(2L);
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "realPage")).
+                thenReturn(p);
+
+
+        assertThrows(PageRevisionException.class, () ->
+                pageUpdateService.savePage("host1", "ns:realPage", 1L, "Some text", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), "Title", "someUser", false));
+        verify(pageRepository, Mockito.never()).save(Mockito.any());
+
+        pageUpdateService.savePage("host1", "ns:realPage", 1L, "Some text", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), "Title", "someUser", true);
+        // pageRepository.save called twice, once for old revision, once for new
+        verify(pageRepository, Mockito.times(2)).save(Mockito.any());
     }
 
     @Test

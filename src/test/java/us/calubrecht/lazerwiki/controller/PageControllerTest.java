@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.controller;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,6 +16,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
 import us.calubrecht.lazerwiki.service.RenderService;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
+import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 
 import java.util.List;
 
@@ -114,14 +116,32 @@ public class PageControllerTest {
     @Test
     public void testSavePage() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
+        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\", \"revision\": 10, \"force\": false}";
         this.mockMvc.perform(post("/api/page/testPage/savePage").
                         content(data).
                         contentType(MediaType.APPLICATION_JSON).
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(renderService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), isNull(), eq("Bob"));
+        verify(renderService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), isNull(), eq(10L), eq(false), eq("Bob"));
+
+        data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\", \"revision\": 10, \"force\": true}";
+        this.mockMvc.perform(post("/api/page/testPage/savePage").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(renderService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), isNull(), eq(10L), eq(true), eq("Bob"));
+
+        Mockito.doThrow(new PageRevisionException("Bad")).when(renderService).savePage(eq("localhost"), eq("errorPage"), eq("This is some test"), isNull(), eq(12L), eq(false), eq("Bob") );
+
+        data = "{\"pageName\": \"errorPage\", \"text\": \"This is some test\", \"revision\": 12, \"force\": false}";
+        this.mockMvc.perform(post("/api/page/errorPage/savePage").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\":false, \"msg\":\"Bad\"}"));
     }
 
     @Test

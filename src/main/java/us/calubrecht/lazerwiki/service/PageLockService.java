@@ -1,5 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ import java.util.Random;
 @Service
 @Transactional
 public class PageLockService {
+
+    final Logger logger = LogManager.getLogger(getClass());
+
     @Autowired
     PageLockRepository repository;
 
@@ -33,9 +38,11 @@ public class PageLockService {
         PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
         PageLock lock = repository.findBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
         Long revision = pageRepository.getLastRevisionBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
+        logger.info("Get page lock for " + sPageDescriptor + "-" + userName + "-" + overrideLock + " existingLock=" + lock + " at " + LocalDateTime.now());
         if (lock == null || lock.getLockTime().isBefore(LocalDateTime.now()) || overrideLock) {
             LocalDateTime lockTime = LocalDateTime.now().plusMinutes(pageLockMinutes);
             lock = new PageLock(site, p.namespace(), p.pageName(), userName, lockTime, newLockId());
+            logger.info("Get get new Lock - " +lock);
             repository.save(lock);
             return new PageLockResponse(p.namespace(), p.pageName(), revision, userName, lockTime, true, lock.getLockId());
         }
