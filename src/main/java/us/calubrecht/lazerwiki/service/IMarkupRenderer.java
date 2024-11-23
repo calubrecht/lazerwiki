@@ -16,12 +16,12 @@ public interface IMarkupRenderer {
 
     String renderToPlainText(String markup, RenderContext renderContext);
 
-    default String  renderToString(String markup, String host, String site, String user) {
-        return renderToString(markup, new RenderContext(host, site, user));
+    default String  renderToString(String markup, String host, String site, String page, String user) {
+        return renderToString(markup, new RenderContext(host, site, page, user));
     }
 
-    default RenderResult  renderWithInfo(String markup, String host, String site, String user) {
-        return renderWithInfo(markup, new RenderContext(host, site, user));
+    default RenderResult  renderWithInfo(String markup, String host, String site, String page, String user) {
+        return renderWithInfo(markup, new RenderContext(host, site, page, user));
     }
 
 

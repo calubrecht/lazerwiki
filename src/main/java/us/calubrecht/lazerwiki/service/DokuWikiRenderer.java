@@ -44,7 +44,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         List<ParseTree> childrenToMerge = new ArrayList<>();
         String lastChildClass = null;
         Map<String, Object> renderState = context.renderState();
-        RenderContext renderContext = new RenderContext(context.host(), context.site(), context.user(), this, renderState);
+        RenderContext renderContext = new RenderContext(context.host(), context.site(), context.page(), context.user(), this, renderState);
         for(int i = 0; i < tree.getChildCount(); i++) {
             ParseTree child = tree.getChild(i);
             TreeRenderer renderer = renderers.getRenderer(child.getClass(), child);
@@ -75,7 +75,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
 
     @Override
     public String renderToPlainText(String markup, RenderContext renderContext) {
-        RenderContext plainTextContext = new RenderContext(renderContext.host(), renderContext.site(), renderContext.user(), renderContext.renderer(), new HashMap<>(renderContext.renderState()));
+        RenderContext plainTextContext = new RenderContext(renderContext.host(), renderContext.site(), renderContext.page(), renderContext.user(), renderContext.renderer(), new HashMap<>(renderContext.renderState()));
         plainTextContext.renderState().put("plainText", true);
         return renderToPlainText(parseMarkup(markup), renderContext);
     }

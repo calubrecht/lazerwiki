@@ -43,6 +43,9 @@ public class PageUpdateServiceTest {
     LinkService linkService;
 
     @MockBean
+    LinkOverrideService linkOverrideService;
+
+    @MockBean
     ImageRefService imageRefService;
     @MockBean
     PageCacheRepository pageCacheRepository;

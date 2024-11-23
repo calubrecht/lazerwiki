@@ -43,7 +43,8 @@ public class RegenCacheService {
         List<PageDesc> pages = pageRepository.getAllValid(site);
         pages.forEach(pd -> {
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.getNamespace(), pd.getPagename(), false);
-            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, UserService.SYS_USER);
+            PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
+            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, desc.toString(), UserService.SYS_USER);
             Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
             Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
             logger.info("Setting " + links.size() + " links for " + pd.getNamespace() + ":" + pd.getPagename());
@@ -61,7 +62,8 @@ public class RegenCacheService {
         List<PageDesc> pages = pageRepository.getAllValid(site);
         pages.forEach(pd -> {
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.getNamespace(), pd.getPagename(), false);
-            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, UserService.SYS_USER);
+            PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
+            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, desc.toString(), UserService.SYS_USER);
             PageCache newCache = new PageCache();
             newCache.site = site;
             newCache.namespace = pd.getNamespace();
@@ -82,7 +84,7 @@ public class RegenCacheService {
         backlinks.forEach(link -> {
             PageDescriptor pd = PageService.decodeDescriptor(link);
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
-            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, UserService.SYS_USER);
+            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, pd.toString(), UserService.SYS_USER);
             PageCache newCache = new PageCache();
             newCache.site = site;
             newCache.namespace = pd.namespace();

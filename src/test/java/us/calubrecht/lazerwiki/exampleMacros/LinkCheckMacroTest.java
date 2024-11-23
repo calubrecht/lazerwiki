@@ -43,9 +43,12 @@ public class LinkCheckMacroTest {
     @MockBean
     RandomService randomService;
 
+    @MockBean
+    LinkOverrideService linkOverrideService;
+
     @Test
     public void testChecklinks() {
-        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         when(pageService.getAllPagesFlat("localhost", "user")).thenReturn(List.of("", "page2", "page3"));
         when(linkService.getLinksOnPage("default","")).thenReturn(List.of("page2", "page5"));
         when(linkService.getLinksOnPage("default","page2")).thenReturn(List.of("ns:page8"));
@@ -75,7 +78,7 @@ public class LinkCheckMacroTest {
 
     @Test
     public void testChecklinks_Filering() {
-        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         when(pageService.getAllPagesFlat("localhost", "user")).thenReturn(List.of("_meta:metaPage", "ns1:nsPage", "ns2:ns2Page", "anyNS:_template", "_template","notOrphan:notorpahn","noPage10"));
         when(linkService.getLinksOnPage("default","_meta:metaPage")).thenReturn(List.of("noPage1"));
         when(linkService.getLinksOnPage("default","anyNS:_template")).thenReturn(List.of("noPage4"));

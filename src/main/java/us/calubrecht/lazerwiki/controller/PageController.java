@@ -9,12 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.RecentChangesResponse;
-import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.requests.MovePageRequest;
+import us.calubrecht.lazerwiki.responses.*;
 import us.calubrecht.lazerwiki.model.User;
-import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.requests.SavePageRequest;
-import us.calubrecht.lazerwiki.responses.PageLockResponse;
-import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.PageLockService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
@@ -147,5 +145,12 @@ public class PageController {
     public void releaseLock(@PathVariable Optional<String> pageDescriptor, @PathVariable String lock, HttpServletRequest request) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         pageLockService.releasePageLock(url.getHost(), pageDescriptor.orElse(""), lock);
+    }
+
+    @PostMapping(value = {"/{pageDescriptor}/movePage"})
+    public MoveStatus movePage(@PathVariable String pageDescriptor, Principal principal, HttpServletRequest request, @RequestBody MovePageRequest movePageRequest) throws MalformedURLException, PageWriteException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal.getName();
+        return pageUpdateService.movePage(url.getHost(), userName, movePageRequest.oldNS(), movePageRequest.oldPage(), movePageRequest.newNS(), movePageRequest.newPage());
     }
 }

@@ -37,6 +37,9 @@ public class ProblemPagesTest {
     @MockBean
     RandomService randomService;
 
+    @MockBean
+    LinkOverrideService linkOverrideService;
+
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
     public static class TestConfig {
@@ -58,7 +61,7 @@ public class ProblemPagesTest {
     @Test
     public void testAboutPage_wasFatal() {
         String s = loadPage("about.page") + '\n';
-        String rendered = underTest.renderToString(s,  "localhost","default", "");
+        String rendered = underTest.renderToString(s,  "localhost","default",  "page","");
 
         assertTrue(rendered != null);
 
@@ -67,7 +70,7 @@ public class ProblemPagesTest {
     @Test
     public void testWrapMacro_wasFatal() {
         String s = loadPage("wrapMacro.page") + '\n';
-        String rendered = underTest.renderToString(s,  "localhost","default", "");
+        String rendered = underTest.renderToString(s,  "localhost","default", "page", "");
 
         assertTrue(rendered != null);
 

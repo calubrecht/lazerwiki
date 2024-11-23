@@ -24,7 +24,7 @@ class ImageRendererTest {
     @Test
     void parseInnerAlignment() {
         String input1 = "img.jpg";
-        RenderContext renderContext = new RenderContext("host", "site", "user");
+        RenderContext renderContext = new RenderContext("host", "site", "page", "user");
         assertEquals(
                 "<img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\">",
                 renderer.parseInner(input1, renderContext).toString()
@@ -50,7 +50,7 @@ class ImageRendererTest {
     @Test
     void applyInlineStyles() {
         String justWidth = "img.avif?30";
-        RenderContext renderContext = new RenderContext("host", "site", "user");
+        RenderContext renderContext = new RenderContext("host", "site", "page", "user");
         assertEquals(
                 "<img src=\"/_media/img.avif?30\" class=\"media\" style=\"width:30px\" loading=\"lazy\">",
                 renderer.parseInner(justWidth, renderContext).toString()

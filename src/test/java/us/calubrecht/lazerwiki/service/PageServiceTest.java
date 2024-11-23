@@ -388,7 +388,7 @@ public class PageServiceTest {
         p.setPagename("TOCACHE");
         p.setNamespace("ns");
         when(pageRepository.getBySiteAndNamespaceAndPagename("default", "ns", "toCache")).thenReturn(p);
-        pageService.saveCache("localhost", "ns:toCache", rendered);
+        pageService.saveCache("localhost", "ns:toCache", "some source", rendered);
         PageCache cached = new PageCache();
         cached.site = "default";
         cached.namespace = "ns";
@@ -396,13 +396,14 @@ public class PageServiceTest {
         cached.renderedCache = "rendered";
         cached.plaintextCache = "notRendered";
         cached.useCache = false;
+        cached.source = "some source";
 
         verify(pageCacheRepository).save(cached);
 
         // Save and Cache
         RenderResult rendered2 = new RenderResult("rendered", "notRendered", new HashMap<>());
         when(pageRepository.getBySiteAndNamespaceAndPagename("default", "ns", "toCache")).thenReturn(p);
-        pageService.saveCache("localhost", "ns:toCache", rendered2);
+        pageService.saveCache("localhost", "ns:toCache", "source", rendered2);
         PageCache cached2 = new PageCache();
         cached2.site = "default";
         cached2.namespace = "ns";
@@ -410,6 +411,7 @@ public class PageServiceTest {
         cached2.renderedCache = "rendered";
         cached2.plaintextCache = "notRendered";
         cached2.useCache = true;
+        cached2.source = "source";
         verify(pageCacheRepository).save(cached2);
     }
 
@@ -555,6 +557,20 @@ public class PageServiceTest {
         RecentChangesResponse.RecentChangeRec rec3 = changes.changes().get(2);
         assertEquals("page4", rec3.pageDesc().getPagename());
         assertEquals("Deleted", rec3.action());
+    }
+
+    @Test
+    void adjustSource() {
+        RenderResult renderResult = new RenderResult("", "",new HashMap<>());
+        List<LinkOverrideInstance> overrides = List.of(
+          new LinkOverrideInstance("some", "moreText", 2, 6),
+          new LinkOverrideInstance("or other", "short", 17, 25)
+        );
+        renderResult.renderState().put("overrideStats", overrides);
+
+        String adjusted =
+                pageService.adjustSource("[[some|source]][[or other]]", renderResult);
+        assertEquals("[[moreText|source]][[short]]", adjusted);
     }
 
 

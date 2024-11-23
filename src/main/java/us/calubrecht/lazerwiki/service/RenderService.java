@@ -47,18 +47,19 @@ public class RenderService {
         long queryMillis = sw.getSplitTime();
         PageCache cachedPage = pageService.getCachedPage(host, sPageDescriptor);
         if (cachedPage != null && cachedPage.useCache) {
-            PageData pd = new PageData(cachedPage.renderedCache, d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            PageData pd = new PageData(cachedPage.renderedCache, cachedPage.source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,QueryCache)");
             return pd;
         }
         try {
-            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, userName);
-            PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, sPageDescriptor, userName);
+            String source = pageService.adjustSource(d.source(), rendered);
+            PageData pd = new PageData(rendered.renderedText(), source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
             sw.stop();
             long totalMillis = sw.getTime();
-            pageService.saveCache(host, sPageDescriptor, rendered);
+            pageService.saveCache(host, sPageDescriptor, d.source(), rendered);
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
             return pd;
         }
@@ -83,7 +84,7 @@ public class RenderService {
             return d;
         }
         try {
-            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, userName);
+            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, sPageDescriptor, userName);
             PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags());
             return pd;
         }
@@ -99,18 +100,18 @@ public class RenderService {
     @SuppressWarnings("unchecked")
     public void savePage(String host, String sPageDescriptor,String text, List<String> tags, long revision, boolean force, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
-        RenderResult res = renderer.renderWithInfo(text, host, site, userName);
+        RenderResult res = renderer.renderWithInfo(text, host, site, sPageDescriptor, userName);
         Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
         Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
         pageUpdateService.savePage(host, sPageDescriptor, revision, text, tags, links, images, res.getTitle(), userName, force);
-        pageService.saveCache(host, sPageDescriptor, res);
+        pageService.saveCache(host, sPageDescriptor, text, res);
     }
 
     public PageData previewPage(String host, String sPageDescriptor, String text, String userName) {
         StopWatch sw = StopWatch.createStarted();
         String site = siteService.getSiteForHostname(host);
         try {
-            PageData pd = new PageData(renderer.renderToString(text, host, site, userName), text, null, null, null);
+            PageData pd = new PageData(renderer.renderToString(text, host, site, sPageDescriptor+"<preview>", userName), text, null, null, null);
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render preview for " + sPageDescriptor + " took " + totalMillis + "ms");

@@ -12,11 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.*;
-import us.calubrecht.lazerwiki.responses.NsNode;
-import us.calubrecht.lazerwiki.responses.PageData;
+import us.calubrecht.lazerwiki.responses.*;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
-import us.calubrecht.lazerwiki.responses.PageListResponse;
-import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import us.calubrecht.lazerwiki.util.DbSupport;
@@ -165,7 +162,7 @@ public class PageService {
     }
 
     @Transactional
-    public void saveCache(String host, String sPageDescriptor, RenderResult rendered) {
+    public void saveCache(String host, String sPageDescriptor, String source, RenderResult rendered) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
         Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
@@ -176,7 +173,21 @@ public class PageService {
         newCache.renderedCache = rendered.renderedText();
         newCache.plaintextCache = rendered.plainText();
         newCache.useCache = !(Boolean)rendered.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
+        newCache.source = adjustSource(source, rendered);
         pageCacheRepository.save(newCache);
+    }
+
+    public String adjustSource(String source, RenderResult rendered) {
+        if (rendered.renderState().containsKey("overrideStats")) {
+            List<LinkOverrideInstance> overrides = new ArrayList<>((List<LinkOverrideInstance>)rendered.renderState().get("overrideStats"));
+            Collections.reverse(overrides);
+            StringBuilder sb = new StringBuilder(source);
+            overrides.forEach(over -> {
+                sb.replace(over.start(), over.stop(), over.override());
+            });
+            return sb.toString();
+        }
+        return source;
     }
 
     public static PageDescriptor decodeDescriptor(String pageDescriptor) {

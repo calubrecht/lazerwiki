@@ -35,8 +35,11 @@ public class DokuWikiRendererPlaintextTest {
     @MockBean
     RandomService randomService;
 
+    @MockBean
+    LinkOverrideService linkOverrideService;
+
     String doRender(String source) {
-        RenderContext context = new RenderContext("localhost", "default", "jack");
+        RenderContext context = new RenderContext("localhost", "default", "page", "jack");
         return underTest.renderToPlainText(source, context);
     }
 

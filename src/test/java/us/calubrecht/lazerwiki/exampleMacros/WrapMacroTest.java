@@ -41,21 +41,28 @@ class WrapMacroTest {
     @MockBean
     RandomService randomService;
 
+    @MockBean
+    LinkOverrideService linkOverrideService;
+
+    RenderContext context() {
+        return new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+    }
+
     @Test
     void render() {
-        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext renderContext = context();
         assertEquals("<div class=\"special\">This is some special text</div>", macroService.renderMacro("wrap:special:This is some special text", renderContext));
     }
 
     @Test
     void renderMultiline() {
-        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext renderContext = context();
         assertEquals("<div class=\"special\"><div>This is some special text</div>\n<div>OnMultiple lines</div></div>", macroService.renderMacro("wrap:special:This is some special text\n\nOnMultiple lines", renderContext));
     }
 
     @Test
     void renderSimple() {
-        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext renderContext = context();
         assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag", renderContext));
         assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag:", renderContext));
     }
@@ -63,12 +70,12 @@ class WrapMacroTest {
     @Test
     void renderWithLinks() {
         when(pageService.getTitle(anyString(), anyString())).thenReturn("title");
-        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext renderContext = context();
         macroService.renderMacro("wrap:withLink:[[aLink]]", renderContext);
 
         assertEquals(new HashSet<>(Arrays.asList("aLink")), renderContext.renderState().get(LINKS.name()));
 
-        renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        renderContext = context();
         renderContext.renderState().put(LINKS.name(), new HashSet<>(Arrays.asList("existingLink")));
         macroService.renderMacro("wrap:withLink:[[aLink]]", renderContext);
 

@@ -203,6 +203,24 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
+CREATE TABLE `linkOverrides` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`sourcePageNS` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`sourcePageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	`targetPageNS` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`targetPageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	`newTargetPageNS` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+    `newTargetPageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `linkOWSourceKey` (`site`, `sourcePageNS`, `sourcePageName`) USING BTREE,
+	INDEX `linkOWTargetKey` (`site`, `targetPageNS`, `targetPageName`) USING BTREE,
+	CONSTRAINT `linksOWSiteFK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
 CREATE TABLE `imageRefs` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
@@ -225,6 +243,7 @@ CREATE TABLE `pageCache` (
 	`title` VARCHAR(200) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`renderedCache` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
 	`plaintextCache` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`source` LONGTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`useCache` BIT(1) NOT NULL DEFAULT b'1',
 	PRIMARY KEY (`site`, `namespace`, `pageName`) USING BTREE,
 	FULLTEXT INDEX `PageCachePlaintextSearch` (`plaintextCache`),

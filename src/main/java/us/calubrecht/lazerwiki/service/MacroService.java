@@ -113,13 +113,13 @@ public class MacroService {
                 return new RenderOutputImpl(pageCache.renderedCache, renderState);
             }
 
-            return doRender(page);
+            return doRender(page, pageDescriptor);
 
         }
 
         @NotNull
-        private RenderOutput doRender(PageData page) {
-            RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(),
+        private RenderOutput doRender(PageData page, String pageDescriptor) {
+            RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(), pageDescriptor,
                     renderContext.user(), renderContext.renderer(), new HashMap<>());
             subrenderContext.renderState().putAll(renderContext.renderState());
             // Allow inner page render to generate its own title
@@ -147,7 +147,7 @@ public class MacroService {
                 logger.info("getCachedRender(" + pageDescriptor + ") total= " + (end - start) + " fetchPageData= " + (fetchedPageData - start) + " fetchCache= " + (fetchedCache - fetchedPageData) + " else=" + (end - fetchedCache));
                 return new RenderOutputImpl(pageCache.renderedCache, renderState);
             }
-            return doRender(page);
+            return doRender(page, pageDescriptor);
         }
 
         @Override
@@ -182,7 +182,7 @@ public class MacroService {
                             return;
                         }
                         long renderStart = System.currentTimeMillis();
-                        outputMap.put(pd, doRender(page));
+                        outputMap.put(pd, doRender(page, pd));
                         long renderEnd = System.currentTimeMillis();
                         numRenderedPages.addAndGet(1);
                         totalRenderTime.addAndGet(renderEnd - renderStart);
@@ -212,7 +212,7 @@ public class MacroService {
 
         @Override
         public RenderOutput renderMarkup(String markup) {
-            RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(),
+            RenderContext subrenderContext = new RenderContext(renderContext.host(), renderContext.site(), renderContext.page(),
                     renderContext.user(), renderContext.renderer(), new HashMap<>());
             subrenderContext.renderState().putAll(renderContext.renderState());
             // Allow inner page render to generate its own title

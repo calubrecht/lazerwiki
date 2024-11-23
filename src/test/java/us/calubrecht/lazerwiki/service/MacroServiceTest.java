@@ -51,6 +51,9 @@ class MacroServiceTest {
     @MockBean
     RandomService randomService;
 
+    @MockBean
+    LinkOverrideService linkOverrideService;
+
     @Test
     @Order(1)
     void registerMacros() {
@@ -61,21 +64,21 @@ class MacroServiceTest {
     @Test
     @Order(2)
     void renderMacro() {
-        RenderContext context = new RenderContext("localhost", "default", "user");
+        RenderContext context = new RenderContext("localhost", "default", "page", "user");
         assertEquals("Good Macro", underTest.renderMacro("Good", context));
 
         // Unknown Macros give warning, macro name is sanitized
         assertEquals("MACRO- Unknown Macro &lt;div&gt;hi&lt;/div&gt;", underTest.renderMacro("<div>hi</div>:other text", context));
 
         // Recursive Macro does not continue to render itself
-        context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         assertEquals("Start:<div></div>", underTest.renderMacro("Recursive", context));
     }
 
     @Test
     @Order(3)
     void testMacroContextImpl() {
-        RenderContext context = new RenderContext("localhost", "default", "user");
+        RenderContext context = new RenderContext("localhost", "default", "page", "user");
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
         assertEquals("&lt;div&gt;hi&lt;/div&gt;", macroContext.sanitize("<div>hi</div>"));
 
@@ -93,7 +96,7 @@ class MacroServiceTest {
     @Test
     @Order(4)
     void testMacroContextImplRenderPage() {
-        RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
         PageData page = new PageData(null, "**Hi**", null, null, PageData.ALL_RIGHTS);
         when(pageService.getPageData(anyString(), eq("existsPage"), anyString())).thenReturn(page);
@@ -127,7 +130,7 @@ class MacroServiceTest {
     @Test
     @Order(5)
     void testRenderPageBroken() {
-        RenderContext context = new RenderContext("localhost", "default", "user");
+        RenderContext context = new RenderContext("localhost", "default", "page", "user");
         assertThrows(RuntimeException.class, ()-> underTest.renderMacro("Broken", context));
     }
 
@@ -139,7 +142,7 @@ class MacroServiceTest {
         PageData forbidden = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true));
         when(pageService.getPageData(any(), eq("noPage"), any())).thenReturn(none);
         when(pageService.getPageData(any(), eq("forbiddenPage"), any())).thenReturn(forbidden);
-        RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
         assertEquals("", macroContext.getCachedRender("noPage").getHtml());
         assertEquals("", macroContext.getCachedRender("forbiddenPage").getHtml());
@@ -174,7 +177,7 @@ class MacroServiceTest {
                         new PageDescriptor("", "cannotRead"), cannotRead));
         when(pageService.getCachedPages(any(), any(List.class))).thenReturn(List.of(new PageCache("default", "", "cached", "cached Title", "rendered Cache", "plaintextCache", true)));
 
-        RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
         Map<String, Macro.MacroContext.RenderOutput> res = macroContext.getCachedRenders(List.of("cached", "notCached", "notExists", "cannotRead", "null"));
 
@@ -190,7 +193,7 @@ class MacroServiceTest {
     @Test
     @Order(7)
     void testSetPageDontCache() {
-        RenderContext context = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
         macroContext.setPageDontCache();
         assertEquals(true, context.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));

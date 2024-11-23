@@ -8,12 +8,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.LinkOverride;
+import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.doku.HiddenRenderer;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -44,9 +48,12 @@ public class DokuWikiRendererTest {
     @MockBean
     RandomService randomService;
 
+    @MockBean
+    LinkOverrideService linkOverrideService;
+
 
     String doRender(String source) {
-        return underTest.renderToString(source, "localhost", "default", "");
+        return underTest.renderToString(source, "localhost", "default", "page", "");
     }
 
     @Test
@@ -109,15 +116,42 @@ public class DokuWikiRendererTest {
     @Test
     public void testRenderLinkOtherSite() {
         when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
-        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.renderToString("[[exists|This link exists]]", "otherHost", "default", ""));
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.renderToString("[[exists|This link exists]]", "otherHost", "default", "",""));
     }
 
     @Test
     public void testRenderLinkRecordsLinks() {
         when(pageService.getTitle(anyString(), anyString())).thenReturn("");
-        RenderResult result = underTest.renderWithInfo("[[oneLink]]\n[[oneLinkWithText|The text]] [[http://external.link]] \n[[ns:ThirdLink]]", "host", "site","user");
+        RenderResult result = underTest.renderWithInfo("[[oneLink]]\n[[oneLinkWithText|The text]] [[http://external.link]] \n[[ns:ThirdLink]]", "host", "site","page","user");
         Set<String>  links = (Set<String>)result.renderState().get(RenderResult.RENDER_STATE_KEYS.LINKS.name());
         assertEquals(Set.of("oneLink", "oneLinkWithText", "ns:ThirdLink"), links);
+    }
+
+    @Test
+    public void testRenderLinkWithOverrides() {
+        when(pageService.getTitle(anyString(), eq("new"))).thenReturn("new");
+        when(pageService.getTitle(anyString(), eq("ns2:wns2"))).thenReturn("with ns");
+        when(pageService.exists(eq("otherHost"), eq("new"))).thenReturn(true);
+        when(pageService.exists(eq("otherHost"), eq("ns2:wns2"))).thenReturn(true);
+        List<LinkOverride> overrides = List.of(
+                new LinkOverride("default","", "source", "", "overridden", "", "old"),
+                new LinkOverride("default","", "source", "", "overridden", "", "new"),
+                new LinkOverride("default","", "source", "ns1", "wns", "ns2", "wns2")
+        );
+        when(linkOverrideService.getOverrides(anyString(), anyString())).thenReturn(overrides);
+        RenderContext context = new RenderContext("otherHost", "default", "page", "");
+        String source = "[[overridden]] [[ns1:wns|wtitle]]";
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>", underTest.renderToString(source, context));
+        List<LinkOverrideInstance> overrideInstances = (List<LinkOverrideInstance>)context.renderState().get("overrideStats");
+        assertEquals(2, overrideInstances.size());
+        LinkOverrideInstance o1 =overrideInstances.get(0);
+        LinkOverrideInstance o2 =overrideInstances.get(1);
+        StringBuilder sb = new StringBuilder(source);
+        sb.replace(o2.start(), o2.stop(), o2.override());
+        sb.replace(o1.start(), o1.stop(), o1.override());
+        String fixedSource = sb.toString();
+        assertEquals("[[new]] [[ns2:wns2|wtitle]]", fixedSource);
+
     }
 
     @Test
@@ -324,10 +358,10 @@ public class DokuWikiRendererTest {
     @Test
     public void testRenderImageRecordsRefs() {
         String imageInput = "{{image.jpg}}";
-        RenderResult renderRes = underTest.renderWithInfo(imageInput, "host", "site", "user");
+        RenderResult renderRes = underTest.renderWithInfo(imageInput, "host", "site", "page", "user");
         assertEquals(Set.of("image.jpg"), renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.IMAGES.name()));
         String linkOnlyInput = "{{image.jpg?linkonly}}";
-        renderRes = underTest.renderWithInfo(imageInput, "host", "site", "user");
+        renderRes = underTest.renderWithInfo(imageInput, "host", "site", "page", "user");
         assertEquals(Set.of("image.jpg"), renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.IMAGES.name()));
     }
 
@@ -443,30 +477,30 @@ public class DokuWikiRendererTest {
     @Test
     public void testUnusedMethods() {
         TreeRenderer rowRenderer = underTest.renderers.getRenderer(DokuwikiParser.RowContext.class, null);
-        assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("localhost", "default", "")));
+        assertThrows(RuntimeException.class, () -> rowRenderer.render(Mockito.mock(DokuwikiParser.RowContext.class), new RenderContext("localhost", "default", "page", "")));
         TreeRenderer codeBoxRenderer = underTest.renderers.getRenderer(DokuwikiParser.Code_boxContext.class, null);
-        assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("localhost","default", "")));
+        assertThrows(RuntimeException.class, () -> codeBoxRenderer.render(Mockito.mock(DokuwikiParser.Code_boxContext.class), new RenderContext("localhost","default", "page", "")));
     }
 
     @Test
     public void testRenderTitles() {
         String input1 = "=== Here's a title===\n";
-        RenderResult result = underTest.renderWithInfo(input1, "host", "site", "");
+        RenderResult result = underTest.renderWithInfo(input1, "host", "site", "page", "");
         assertEquals("Here's a title", result.getTitle());
         String input2 = "==== A title [[WithSomeLink|With Some Link]] ====\n";
-        result = underTest.renderWithInfo(input2, "host", "site", "");
+        result = underTest.renderWithInfo(input2, "host", "site", "page", "");
         assertEquals("A title With Some Link", result.getTitle());
 
         String input3 = "Title may not be on first line\n== But you'll find it==\n";
-        result = underTest.renderWithInfo(input3, "host", "site", "");
+        result = underTest.renderWithInfo(input3, "host", "site", "page", "");
         assertEquals("But you'll find it", result.getTitle());
 
         String input4 = "This has no title\n";
-        result = underTest.renderWithInfo(input4, "host", "site", "");
+        result = underTest.renderWithInfo(input4, "host", "site", "page", "");
         assertNull(result.getTitle());
 
         String input5 = "=== This is the title===\n==== This is just another header ====\n";
-        result = underTest.renderWithInfo(input5, "host", "site", "");
+        result = underTest.renderWithInfo(input5, "host", "site", "page", "");
         assertEquals("This is the title", result.getTitle());
     }
 
@@ -474,7 +508,7 @@ public class DokuWikiRendererTest {
     public void testRenderMacro() {
         String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
         when(macroService.renderMacro(eq("macro1: macro"), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
-        String render = underTest.renderToString(inputMacro, "", "", "");
+        String render = underTest.renderToString(inputMacro, "", "", "page", "");
         assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
     }
 
@@ -491,7 +525,7 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testRenderWithContext() {
-        RenderContext context = new RenderContext("site", "localhost", "user");
+        RenderContext context = new RenderContext("site", "localhost", "page", "user");
         context.renderState().put("rememberedState", "State");
         RenderResult res = underTest.renderWithInfo("===Some Header===", context);
         assertEquals("Some Header", res.renderState().get(RenderResult.RENDER_STATE_KEYS.TITLE.name()));

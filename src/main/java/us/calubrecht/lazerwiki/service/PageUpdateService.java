@@ -5,11 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import us.calubrecht.lazerwiki.model.Page;
-import us.calubrecht.lazerwiki.model.PageCache;
-import us.calubrecht.lazerwiki.model.PageDescriptor;
-import us.calubrecht.lazerwiki.model.PageTag;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.*;
+import us.calubrecht.lazerwiki.responses.MoveStatus;
+import us.calubrecht.lazerwiki.responses.PageLockResponse;
 import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
@@ -19,6 +18,7 @@ import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +42,9 @@ public class PageUpdateService {
 
     @Autowired
     LinkService linkService;
+
+    @Autowired
+    LinkOverrideService linkOverrideService;
 
     @Autowired
     ImageRefService imageRefService;
@@ -106,7 +109,7 @@ public class PageUpdateService {
     public void deletePage(String host, String sPageDescriptor, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
-        if (!namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) || sPageDescriptor.equals("")) {
+        if (!namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) || sPageDescriptor.isEmpty()) {
             throw new PageWriteException("You don't have permission to delete this page.");
         }
         logger.info("Deleting Page %s->%s".formatted(site, sPageDescriptor));
@@ -137,6 +140,42 @@ public class PageUpdateService {
         pageCacheRepository.deleteById(key);
         em.flush(); // Flush so regen can work?
         regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
+        linkOverrideService.deleteOverrides(host, sPageDescriptor);
+    }
+
+    @Transactional
+    public MoveStatus movePage(String host, String user, String oldPageNS, String oldPageName, String newPageNS, String newPageName) throws PageWriteException {
+        String site = siteService.getSiteForHostname(host);
+
+        if (!namespaceService.canWriteNamespace(site, oldPageNS, user)) {
+            return new MoveStatus(false, "You don't have permission to write in " + oldPageNS);
+        }
+        if (!namespaceService.canWriteNamespace(site, newPageNS, user)) {
+            return new MoveStatus(false, "You don't have permission to write in " + newPageNS);
+        }
+        Page existingPage = pageRepository.getBySiteAndNamespaceAndPagename(site, newPageNS, newPageName);
+        if (existingPage != null) {
+            return new MoveStatus(false, newPageName + " already exists, move cannot overwrite it");
+        }
+        String oldPageDescriptor = new PageDescriptor(oldPageNS, oldPageName).toString();
+        String newPageDescriptor = new PageDescriptor(newPageNS, newPageName).toString();
+        PageLockResponse oldPL = pageLockService.getPageLock(host, oldPageDescriptor, user, false);
+        PageLockResponse newPL = pageLockService.getPageLock(host, newPageDescriptor, user, false);
+        if (!oldPL.success() || !newPL.success()) {
+            pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId());
+            pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId());
+            return new MoveStatus(false, "Could not acquire page locks to move page");
+        }
+
+        linkOverrideService.createOverride(host, oldPageDescriptor, newPageDescriptor);
+        linkOverrideService.moveOverrides(host, oldPageDescriptor, newPageDescriptor);
+        Page oldPage = pageRepository.getBySiteAndNamespaceAndPagename(site, oldPageNS, oldPageName);
+        List<String> links = linkService.getLinksOnPage(site, oldPageDescriptor);
+        List<String> images = imageRefService.getImagesOnPage(site, oldPageDescriptor);
+        savePage(host, new PageDescriptor(newPageNS, newPageName).toString(), 0, oldPage.getText(), oldPage.getTags().stream().map(PageTag::getTag).toList(),
+                links, images, oldPage.getTitle(), user, false);
+        deletePage(host, oldPageDescriptor, user);
+        return new MoveStatus(true, oldPageDescriptor + " move to " + newPageDescriptor);
     }
 
 

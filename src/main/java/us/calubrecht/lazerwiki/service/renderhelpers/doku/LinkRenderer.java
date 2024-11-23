@@ -5,6 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.model.LinkOverride;
+import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
+import us.calubrecht.lazerwiki.service.LinkOverrideService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
@@ -14,9 +17,9 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TypedRenderer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
@@ -29,6 +32,9 @@ public class LinkRenderer extends TypedRenderer<LinkContext> {
 
     @Autowired
     private PageService pageService;
+
+    @Autowired
+    LinkOverrideService linkOverrideService;
 
     @Override
     public List<Class<? extends ParseTree>> getTargets() {
@@ -84,6 +90,7 @@ public class LinkRenderer extends TypedRenderer<LinkContext> {
     @Override
     public StringBuilder renderContext(LinkContext tree, RenderContext renderContext) {
         String linkTarget = getLinkTarget(tree);
+        linkTarget = doOverrides(linkTarget, tree, renderContext);
         String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
         if (isInternal(linkTarget)) {
             ((Set<String>)renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(linkTarget);
@@ -107,6 +114,25 @@ public class LinkRenderer extends TypedRenderer<LinkContext> {
             return new StringBuilder(pageService.getTitle(renderContext.host(), linkTarget));
         }
         return new StringBuilder(linkTarget);
+    }
+
+    String doOverrides(String page, LinkContext tree, RenderContext renderContext) {
+        Map<String, LinkOverride> overrides = (Map<String, LinkOverride>) renderContext.renderState().get("linkOverrides");
+        if (overrides == null) {
+            List<LinkOverride> overrideList = linkOverrideService.getOverrides(renderContext.host(), renderContext.page());
+            overrides = overrideList.stream().collect(
+                    Collectors.toMap(LinkOverride::getTarget, Function.identity(), (a,b) -> b)
+            );
+            renderContext.renderState().put("linkOverrides", overrides);
+            renderContext.renderState().put("overrideStats", new ArrayList<LinkOverrideInstance>());
+        }
+        if (overrides.containsKey(page)) {
+            String override = overrides.get(page).getNewTarget();
+            ((List<LinkOverrideInstance>)renderContext.renderState().get("overrideStats")).add(
+                    new LinkOverrideInstance(page, override, tree.link_target().getStart().getStartIndex(), tree.link_target().getStop().getStopIndex()+1));
+            return override;
+        }
+        return page;
     }
 
     @Override

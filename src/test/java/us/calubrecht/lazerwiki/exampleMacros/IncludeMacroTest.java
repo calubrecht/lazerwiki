@@ -43,9 +43,12 @@ class IncludeMacroTest {
     @MockBean
     RandomService randomService;
 
+    @MockBean
+    LinkOverrideService linkOverrideService;
+
     @Test
     public void testIncludeMacro() {
-        RenderContext renderContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>());
+        RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
         when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
         assertEquals("<div class=\"include\"><div>This Page</div><a href=\"/page/includedPage#Edit\" className=\"includePageLink\">Edit includedPage</a></div>", macroService.renderMacro("include:includedPage", renderContext));
@@ -61,7 +64,7 @@ class IncludeMacroTest {
         assertEquals("<div class=\"include\"></div>", macroService.renderMacro("include:nothingPage", renderContext));
         assertTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
 
-        RenderContext plaintextContext = new RenderContext("localhost", "default", "user", renderer, new HashMap<>(Map.of("plainText", true)));
+        RenderContext plaintextContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>(Map.of("plainText", true)));
         assertEquals("", macroService.renderMacro("include:includedPage", plaintextContext));
 
     }

@@ -35,6 +35,7 @@ public class PageCache implements PageDesc {
 
     public String renderedCache;
     public String plaintextCache;
+    public String source;
 
     public String title;
     public boolean useCache;
@@ -49,7 +50,7 @@ public class PageCache implements PageDesc {
 
     @Override
     public int hashCode() {
-        return Objects.hash(site, namespace, pageName, renderedCache, plaintextCache, useCache, title);
+        return Objects.hash(site, namespace, pageName, renderedCache, plaintextCache, source, useCache, title);
     }
 
     @JsonIgnore
