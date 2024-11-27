@@ -178,6 +178,10 @@ public class PageService {
     }
 
     public String adjustSource(String source, RenderResult rendered) {
+        return doAdjustSource(source, rendered);
+    }
+
+    public static String doAdjustSource(String source, RenderResult rendered) {
         if (rendered.renderState().containsKey("overrideStats")) {
             List<LinkOverrideInstance> overrides = new ArrayList<>((List<LinkOverrideInstance>)rendered.renderState().get("overrideStats"));
             Collections.reverse(overrides);
