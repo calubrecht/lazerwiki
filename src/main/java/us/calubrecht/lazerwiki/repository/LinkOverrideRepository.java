@@ -10,6 +10,7 @@ import java.util.List;
 public interface LinkOverrideRepository extends CrudRepository<LinkOverride, Long> {
 
     List<LinkOverride> findAllBySiteAndSourcePageNSAndSourcePageNameOrderById(String site, String sourcePageNS, String sourcePageName);
+    List<LinkOverride> findAllBySiteAndTargetPageNSAndTargetPageName(String any, String eq, String pageName);
     List<LinkOverride> findAllBySiteAndNewTargetPageNSAndNewTargetPageName(String any, String eq, String pageName);
     void deleteBySiteAndSourcePageNSAndSourcePageName(String site, String sourcePageNS, String sourcePageName);
     void deleteBySiteAndNewTargetPageNSAndNewTargetPageName(String site, String newTargetPageNS, String newTargetPageName);

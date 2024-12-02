@@ -54,12 +54,12 @@ class IncludeMacroTest {
         assertEquals("<div class=\"include\"><div>This Page</div><a href=\"/page/includedPage#Edit\" className=\"includePageLink\">Edit includedPage</a></div>", macroService.renderMacro("include:includedPage", renderContext));
         assertTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
         //without write  rights.
-        PageData roPage = new PageData(null, "RO Page", null, null, new PageFlags(true, false, true, false, false));
+        PageData roPage = new PageData(null, "RO Page", null, null, new PageFlags(true, false, true, false, false, false));
         when(pageService.getPageData(anyString(), eq("roPage"), anyString())).thenReturn(roPage);
         assertEquals("<div class=\"include\"><div>RO Page</div></div>", macroService.renderMacro("include:roPage", renderContext));
         assertTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
 
-        PageData notpage = new PageData(null, "", null, null,new PageFlags(false, false, true, false, false));
+        PageData notpage = new PageData(null, "", null, null,new PageFlags(false, false, true, false, false, false));
         when(pageService.getPageData(anyString(), eq("nothingPage"), anyString())).thenReturn(notpage);
         assertEquals("<div class=\"include\"></div>", macroService.renderMacro("include:nothingPage", renderContext));
         assertTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));

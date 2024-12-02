@@ -16,7 +16,7 @@ public record PageData(String rendered, String source, String title, List<String
     public PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags) {
         this(rendered, source, title, tags, backlinks, flags, null, null, true, null);
     }
-    public record PageFlags(boolean exists, boolean wasDeleted, boolean userCanRead, boolean userCanWrite, boolean userCanDelete) {
+    public record PageFlags(boolean exists, boolean wasDeleted, boolean userCanRead, boolean userCanWrite, boolean userCanDelete, boolean moved) {
 
         public Map<String, Boolean> toMap() {
             return Map.of("exists", exists, "wasDeleted", wasDeleted, "userCanRead", userCanRead, "userCanWrite", userCanWrite, "userCanDelete", userCanDelete);
@@ -28,6 +28,6 @@ public record PageData(String rendered, String source, String title, List<String
         this(rendered, source, title, tags, backlinks, flags, id, null, true, null);
     }
 
-    public static final PageFlags EMPTY_FLAGS = new PageFlags(false, false, false, false, false);
-    public static final PageFlags ALL_RIGHTS = new PageFlags(true, false, true, true, true);
+    public static final PageFlags EMPTY_FLAGS = new PageFlags(false, false, false, false, false, false);
+    public static final PageFlags ALL_RIGHTS = new PageFlags(true, false, true, true, true, false);
 }

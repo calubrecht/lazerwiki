@@ -37,10 +37,15 @@ public class RenderService {
         /*
           XXX:Could make these renderable templates;
          */
-        if (!d.flags().exists()) {
+        if (!d.flags().userCanRead()) {
             return d;
         }
-        if (!d.flags().userCanRead()) {
+        if (d.flags().moved()) {
+            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, sPageDescriptor, userName);
+            PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            return pd;
+        }
+        if (!d.flags().exists()) {
             return d;
         }
         sw.split();

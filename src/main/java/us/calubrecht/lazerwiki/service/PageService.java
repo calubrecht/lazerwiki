@@ -46,6 +46,9 @@ public class PageService {
     @Autowired
     PageCacheRepository pageCacheRepository;
 
+    @Autowired
+    LinkOverrideService linkOverrideService;
+
     public boolean exists(String host, String pageName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(pageName);
@@ -83,13 +86,18 @@ public class PageService {
 
         if (p == null ) {
             // Add support for namespace level templates. Need templating language for pageName/namespace/splitPageName
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, false, true, canWrite, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, false, true, canWrite, false, false));
         }
         if (p.isDeleted()) {
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, canWrite, false));
+            List<LinkOverride> overrideInstances = linkOverrideService.getOverridesForTargetPage(host, sPageDescriptor);
+            if (!overrideInstances.isEmpty()) {
+                String newPD = overrideInstances.get(0).getNewTarget();
+                return new PageData(null, "This page has been moved to [[" + newPD + "]]", sPageDescriptor,  Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, false, false, true));
+            }
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, canWrite, false, false));
         }
         String source = p.getText();
-        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), visibleBacklinks, new PageFlags(true, false, true, canWrite, canDelete), p.getId(), p.getRevision());
+        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), visibleBacklinks, new PageFlags(true, false, true, canWrite, canDelete, false), p.getId(), p.getRevision());
     }
 
     @Transactional
@@ -117,7 +125,7 @@ public class PageService {
             }
 
             String title = pageText.getTitle() != null ? pageText.getTitle() : pageText.getPagename();
-            return new PageData(null, pageText.getText(), title, Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, canWrite, canDelete));
+            return new PageData(null, pageText.getText(), title, Collections.emptyList(), Collections.emptyList(), new PageFlags(true, false, true, canWrite, canDelete, false));
         }));
     }
 
@@ -137,10 +145,10 @@ public class PageService {
             return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, PageData.EMPTY_FLAGS);
         }
         if (p.isDeleted()) {
-            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, new PageFlags(false, true, true, false, false));
+            return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), null, new PageFlags(false, true, true, false, false, false));
         }
         String source = p.getText();
-        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), null, new PageFlags(true, false, true, false, false));
+        return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), null, new PageFlags(true, false, true, false, false, false));
     }
 
 

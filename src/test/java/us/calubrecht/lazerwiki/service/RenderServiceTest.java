@@ -47,9 +47,9 @@ public class RenderServiceTest {
 
         assertEquals(new PageData("This is Rendered Text", "adjusted Source",   null,null,null, PageData.ALL_RIGHTS, 1L), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
-        PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false));
+        PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false, false));
         when(pageService.getPageData(any(), eq("ns:nonPage"), any())).thenReturn(noPageData);
-        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null, new PageFlags(false, false, true, true, false)), underTest.getRenderedPage("host1", "ns:nonPage", "Bob"));
+        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null, new PageFlags(false, false, true, true, false, false)), underTest.getRenderedPage("host1", "ns:nonPage", "Bob"));
     }
 
     @Test
@@ -65,10 +65,10 @@ public class RenderServiceTest {
 
     @Test
     public void testRenderCantREad() {
-        PageData pd = new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false));
+        PageData pd = new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false, false));
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
 
-        assertEquals(new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false)), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false, false)), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
     }
 
@@ -141,13 +141,13 @@ public class RenderServiceTest {
 
         assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getHistoricalRenderedPage("host1", "ns:realPage", 1L,"Bob"));
 
-        PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false));
+        PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false, false));
         when(pageService.getHistoricalPageData(any(), eq("ns:nonPage"), anyLong(), any())).thenReturn(noPageData);
-        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null, new PageFlags(false, false, true, true, false)), underTest.getHistoricalRenderedPage("host1", "ns:nonPage", 1L,"Bob"));
+        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null, new PageFlags(false, false, true, true, false, false)), underTest.getHistoricalRenderedPage("host1", "ns:nonPage", 1L,"Bob"));
 
-        PageData nonPermissioned = new PageData("Not for you", "This is raw page text",  null,null, new PageFlags(true, false, false, false, false));
+        PageData nonPermissioned = new PageData("Not for you", "This is raw page text",  null,null, new PageFlags(true, false, false, false, false, false));
         when(pageService.getHistoricalPageData(any(), eq("no"), anyLong(), any())).thenReturn(nonPermissioned);
-        assertEquals(new PageData("Not for you", "This is raw page text",   null,null, new PageFlags(true, false, false, false, false)), underTest.getHistoricalRenderedPage("host1", "no", 1L,"Bob"));
+        assertEquals(new PageData("Not for you", "This is raw page text",   null,null, new PageFlags(true, false, false, false, false, false)), underTest.getHistoricalRenderedPage("host1", "no", 1L,"Bob"));
 
         PageData badRender = new PageData(null, "BAD",  null,null, PageData.ALL_RIGHTS);
         when(pageService.getHistoricalPageData(any(), eq("badRender"), anyLong(), any())).thenReturn(badRender);

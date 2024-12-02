@@ -102,11 +102,11 @@ class MacroServiceTest {
         when(pageService.getPageData(anyString(), eq("existsPage"), anyString())).thenReturn(page);
         assertEquals("<div><span class=\"bold\">Hi</span></div>", macroContext.renderPage("existsPage").getHtml());
 
-        PageData notExists = new PageData("What is this?", null, null, null, new PageFlags(false, false, true, true, false));
+        PageData notExists = new PageData("What is this?", null, null, null, new PageFlags(false, false, true, true, false, false));
         when(pageService.getPageData(anyString(), eq("notExists"), anyString())).thenReturn(notExists);
         assertEquals("", macroContext.renderPage("notExists").getHtml());
 
-        PageData cantRead = new PageData("Not for you", null, null, null, new PageFlags(true, false, false, false, false));
+        PageData cantRead = new PageData("Not for you", null, null, null, new PageFlags(true, false, false, false, false, false));
         when(pageService.getPageData(anyString(), eq("cantRead"), anyString())).thenReturn(cantRead);
         assertEquals("", macroContext.renderPage("cantRead").getHtml());
 
@@ -138,15 +138,15 @@ class MacroServiceTest {
     @Order(6)
     void testMacroContextGetCachedRender() {
         //(boolean exists, boolean wasDeleted, boolean userCanRead, boolean userCanWrite, boolean userCanDelete) {
-        PageData none = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true));
-        PageData forbidden = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true));
+        PageData none = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true, false));
+        PageData forbidden = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true, false));
         when(pageService.getPageData(any(), eq("noPage"), any())).thenReturn(none);
         when(pageService.getPageData(any(), eq("forbiddenPage"), any())).thenReturn(forbidden);
         RenderContext context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
         assertEquals("", macroContext.getCachedRender("noPage").getHtml());
         assertEquals("", macroContext.getCachedRender("forbiddenPage").getHtml());
-        PageData ok = new PageData("", "OK page", null, null, new PageData.PageFlags(true, false, true, true, true));
+        PageData ok = new PageData("", "OK page", null, null, new PageData.PageFlags(true, false, true, true, true, false));
         when(pageService.getPageData(any(), eq("cachedPage"), any())).thenReturn(ok);
         PageCache cached = new PageCache();
         cached.useCache = true;
@@ -165,10 +165,10 @@ class MacroServiceTest {
 
     @Test
     void testMacroContextGetCachedRenders() {
-        PageData notExists = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true));
-        PageData cannotRead = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true));
-        PageData cached = new PageData("", "", null, null, new PageData.PageFlags(true, false, true, true, true));
-        PageData notCached = new PageData("", "**notCachedPage**", null, null, new PageData.PageFlags(true, false, true, true, true));
+        PageData notExists = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true, false));
+        PageData cannotRead = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true, false));
+        PageData cached = new PageData("", "", null, null, new PageData.PageFlags(true, false, true, true, true, false));
+        PageData notCached = new PageData("", "**notCachedPage**", null, null, new PageData.PageFlags(true, false, true, true, true, false));
         when(pageService.getPageData(any(), any(List.class), any())).thenReturn(
                 Map.of(
                         new PageDescriptor("","cached"), cached,
