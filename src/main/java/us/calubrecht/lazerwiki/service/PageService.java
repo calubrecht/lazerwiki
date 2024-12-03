@@ -92,7 +92,7 @@ public class PageService {
             List<LinkOverride> overrideInstances = linkOverrideService.getOverridesForTargetPage(host, sPageDescriptor);
             if (!overrideInstances.isEmpty()) {
                 String newPD = overrideInstances.get(0).getNewTarget();
-                return new PageData(null, "This page has been moved to [[" + newPD + "]]", sPageDescriptor,  Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, false, false, true));
+                return new PageData(null, "This page has been moved to [[" + newPD + "]] (" + newPD +")", sPageDescriptor,  Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, false, false, true));
             }
             return new PageData("This page doesn't exist", getTemplate(site, pageDescriptor),  getTitle(host, sPageDescriptor), Collections.emptyList(), visibleBacklinks, new PageFlags(false, true, true, canWrite, false, false));
         }

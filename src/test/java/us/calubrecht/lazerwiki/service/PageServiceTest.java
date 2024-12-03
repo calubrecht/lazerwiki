@@ -186,7 +186,7 @@ public class PageServiceTest {
         List<LinkOverride> overrides = List.of(new LinkOverride("host", "ns1", "page", "ns2", "page2", "ns3", "page3"));
         when(linkOverrideService.getOverridesForTargetPage("host1", "movedPage")).thenReturn(overrides);
 
-        assertEquals(new PageData(null, "This page has been moved to [[ns3:page3]]", "movedPage", Collections.emptyList(), Collections.emptyList(), new PageFlags(false, true, true, false, false, true)), pageService.getPageData("host1", "movedPage", "Bob"));
+        assertEquals(new PageData(null, "This page has been moved to [[ns3:page3]] (ns3:page3)", "movedPage", Collections.emptyList(), Collections.emptyList(), new PageFlags(false, true, true, false, false, true)), pageService.getPageData("host1", "movedPage", "Bob"));
 
 
     }
