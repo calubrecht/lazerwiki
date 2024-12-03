@@ -157,4 +157,15 @@ public class RenderServiceTest {
                 <div>There was an error rendering this page! Please contact an admin, or correct the markup</div>
                 <code>BAD</code>""", "BAD",   null,null,  PageData.ALL_RIGHTS), underTest.getHistoricalRenderedPage("host1", "badRender", 1L,"Bob"));
     }
+
+    @Test
+    public void testRenderMoved() {
+        PageData.PageFlags flags = new PageData.PageFlags(false, true, true, false, false, true);
+        PageData pd = new PageData(null, "This is raw page text",  null,null, null, flags, 1L);
+        when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), eq("ns:realPage"), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
+        when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+
+        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,null, flags, 1L), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+    }
 }
