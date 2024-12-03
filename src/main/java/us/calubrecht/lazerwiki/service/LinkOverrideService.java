@@ -34,6 +34,12 @@ public class LinkOverrideService {
         return repo.findAllBySiteAndTargetPageNSAndTargetPageName(site, pageDescriptor.namespace(), pageDescriptor.pageName());
     }
 
+    public List<LinkOverride> getOverridesForNewTargetPage(String host, String pageName) {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pageDescriptor = PageService.decodeDescriptor(pageName);
+        return repo.findAllBySiteAndNewTargetPageNSAndNewTargetPageName(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+    }
+
     @Transactional
     public void createOverride(String host, String pageName, String changedPage) {
         String site = siteService.getSiteForHostname(host);

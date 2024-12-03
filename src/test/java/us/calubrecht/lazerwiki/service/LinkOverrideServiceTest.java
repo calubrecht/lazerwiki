@@ -108,6 +108,21 @@ class LinkOverrideServiceTest {
     }
 
     @Test
+    void test_GetOverridesForNewTargetPage() {
+        when(siteService.getSiteForHostname(eq("host"))).thenReturn("default");
+        LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "page2");
+        LinkOverride lo2 = new LinkOverride("default", "", "p1", "", "pageName", "", "page3");
+        List<LinkOverride> links = List.of(lo1, lo2);
+        when(siteService.getSiteForHostname(eq("host"))).thenReturn("default");
+        when(repo.findAllBySiteAndNewTargetPageNSAndNewTargetPageName(any(), eq("ns"), eq("pageName"))).
+                thenReturn(links);
+
+        List<LinkOverride> over = underTest.getOverridesForNewTargetPage("host", "ns:pageName");
+        assertEquals(2, over.size());
+        assertEquals("page2", over.get(0).getNewTargetPageName());
+    }
+
+    @Test
     public void testMoveOverrides() {
         LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "page2");
         LinkOverride lo2 = new LinkOverride("default", "", "p1", "", "pageName", "", "page3");

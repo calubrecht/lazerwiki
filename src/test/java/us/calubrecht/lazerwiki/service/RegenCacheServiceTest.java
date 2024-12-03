@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import us.calubrecht.lazerwiki.model.Page;
-import us.calubrecht.lazerwiki.model.PageCache;
-import us.calubrecht.lazerwiki.model.PageDesc;
-import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 
@@ -36,6 +33,9 @@ class RegenCacheServiceTest {
 
     @MockBean
     LinkService linkService;
+
+    @MockBean
+    LinkOverrideService linkOverrideService;
 
     @MockBean
     ImageRefService imageRefService;
@@ -121,24 +121,33 @@ class RegenCacheServiceTest {
         Page page2 = new Page();
         page2.setPagename("page2");
         page2.setText("text2");
+        Page page3 = new Page();
+        page3.setPagename("page3");
+        page3.setText("text3");
+
+        LinkOverride lo = new LinkOverride("default", "", "page3", "", "oldlinkedPage", "", "linkedPage");
 
         when(linkService.getBacklinks(any(), any())).thenReturn(List.of("page1", "page2"));
+        when(linkOverrideService.getOverridesForNewTargetPage("host", "linkedPage")).thenReturn(List.of(lo));
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page2"), eq(false))).thenReturn(page2);
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page3"), eq(false))).thenReturn(page3);
         when(renderer.renderWithInfo(any(), any(), any(), any(), any())).thenAnswer(inv -> {
             List<String> links = new ArrayList<>();
             String text = inv.getArgument(0, String.class);
             return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links));
         });
+        when(siteService.getHostForSitename("default")).thenReturn("host");
 
         underTest.regenCachesForBacklinks("default", "linkedPage");
 
         ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
         verify(pageCacheRepository, never()).deleteBySite("default");
-        verify(pageCacheRepository,times(2)).save(argument.capture());
+        verify(pageCacheRepository,times(3)).save(argument.capture());
         assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
         assertEquals(true, argument.getAllValues().get(0).useCache);
         assertEquals("text2 rendered", argument.getAllValues().get(1).renderedCache);
+        assertEquals("text3 rendered", argument.getAllValues().get(2).renderedCache);
 
     }
 

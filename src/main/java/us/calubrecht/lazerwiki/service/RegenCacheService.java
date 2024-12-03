@@ -9,9 +9,7 @@ import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class RegenCacheService {
@@ -19,6 +17,9 @@ public class RegenCacheService {
 
     @Autowired
     LinkService linkService;
+
+    @Autowired
+    LinkOverrideService linkOverrideService;
 
     @Autowired
     ImageRefService imageRefService;
@@ -84,7 +85,13 @@ public class RegenCacheService {
         String host = siteService.getHostForSitename(site);
         logger.info("Regening cache for links to " +site + "-" + linkedPage);
         List<String> backlinks = linkService.getBacklinks(site, linkedPage);
-        backlinks.forEach(link -> {
+        List<String> overrideBacklinks = linkOverrideService.getOverridesForNewTargetPage(host, linkedPage).stream().map(
+                LinkOverride::getSource
+        ).toList();
+        List<String> allLinks = new ArrayList<>();
+        allLinks.addAll(backlinks);
+        allLinks.addAll(overrideBacklinks);
+        allLinks.stream().distinct().forEach(link -> {
             PageDescriptor pd = PageService.decodeDescriptor(link);
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
             RenderResult res = renderer.renderWithInfo(p.getText(), host, site, pd.toString(), UserService.SYS_USER);

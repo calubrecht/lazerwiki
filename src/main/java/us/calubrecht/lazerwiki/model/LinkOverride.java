@@ -112,6 +112,14 @@ public class LinkOverride {
         return newTargetPageNS + ":" + newTargetPageName;
     }
 
+    @Transient
+    public String getSource() {
+        if (sourcePageNS == null || sourcePageNS.isBlank()) {
+            return sourcePageName;
+        }
+        return sourcePageNS + ":" + sourcePageName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
