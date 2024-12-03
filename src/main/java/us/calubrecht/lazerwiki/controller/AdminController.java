@@ -147,8 +147,9 @@ public class AdminController {
         if (!roles.contains("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (siteService.addSite(siteRequest.name(), siteRequest.hostName(), siteRequest.siteName() )) {
-            pageUpdateService.createDefaultSiteHomepage(siteRequest.name(), siteRequest.siteName(), user.userName);
+        String siteKey = siteRequest.name().toLowerCase();
+        if (siteService.addSite(siteKey, siteRequest.hostName(), siteRequest.siteName() )) {
+            pageUpdateService.createDefaultSiteHomepage(siteKey, siteRequest.siteName(), user.userName);
         }
         return ResponseEntity.ok(siteService.getAllSites(user));
     }

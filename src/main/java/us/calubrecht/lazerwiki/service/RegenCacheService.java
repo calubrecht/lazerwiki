@@ -39,33 +39,35 @@ public class RegenCacheService {
     @SuppressWarnings("unchecked")
     @Transactional
     public void regenLinks(String site) {
-        logger.info("Regening link table for " +site);
-        List<PageDesc> pages = pageRepository.getAllValid(site);
+        String siteKey = site.toLowerCase();
+        logger.info("Regening link table for " +siteKey);
+        List<PageDesc> pages = pageRepository.getAllValid(siteKey);
         pages.forEach(pd -> {
-            Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.getNamespace(), pd.getPagename(), false);
+            Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(siteKey, pd.getNamespace(), pd.getPagename(), false);
             PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
-            RenderResult res = renderer.renderWithInfo(p.getText(), "", site, desc.toString(), UserService.SYS_USER);
+            RenderResult res = renderer.renderWithInfo(p.getText(), "", siteKey, desc.toString(), UserService.SYS_USER);
             Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
             Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
             logger.info("Setting " + links.size() + " links for " + pd.getNamespace() + ":" + pd.getPagename());
-            linkService.setLinksFromPage(site, pd.getNamespace(), pd.getPagename(), links);
+            linkService.setLinksFromPage(siteKey, pd.getNamespace(), pd.getPagename(), links);
             logger.info("Setting " + links.size() + " images for " + pd.getNamespace() + ":" + pd.getPagename());
-            imageRefService.setImageRefsFromPage(site, pd.getNamespace(), pd.getPagename(), images);
+            imageRefService.setImageRefsFromPage(siteKey, pd.getNamespace(), pd.getPagename(), images);
         });
     }
 
     @Transactional
     public void regenCache(String site) {
-        String host = siteService.getHostForSitename(site);
-        logger.info("Regening cache table for " +site + " " + host);
-        pageCacheRepository.deleteBySite(site);
-        List<PageDesc> pages = pageRepository.getAllValid(site);
+        String siteKey = site.toLowerCase();
+        String host = siteService.getHostForSitename(siteKey);
+        logger.info("Regening cache table for " +siteKey + " " + host);
+        pageCacheRepository.deleteBySite(siteKey);
+        List<PageDesc> pages = pageRepository.getAllValid(siteKey);
         pages.forEach(pd -> {
-            Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.getNamespace(), pd.getPagename(), false);
+            Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(siteKey, pd.getNamespace(), pd.getPagename(), false);
             PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
-            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, desc.toString(), UserService.SYS_USER);
+            RenderResult res = renderer.renderWithInfo(p.getText(), host, siteKey, desc.toString(), UserService.SYS_USER);
             PageCache newCache = new PageCache();
-            newCache.site = site;
+            newCache.site = siteKey;
             newCache.namespace = pd.getNamespace();
             newCache.pageName = pd.getPagename();
             newCache.renderedCache = res.renderedText();
