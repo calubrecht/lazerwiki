@@ -289,4 +289,17 @@ public class PageControllerTest {
 
         verify(pageLockService).releasePageLock(eq("localhost"), eq(""), eq("abcd"));
     }
+
+    @Test
+    public void testMovePage() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        String data = "{\"oldNS\": \"ns1\", \"oldPage\": \"abcPage\", \"newNS\": \"ns2\", \"newPage\": \"defPage\"}";
+        this.mockMvc.perform(post("/api/page/abcPage/movePage").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageUpdateService).movePage(eq("localhost"), eq("Bob"), eq("ns1"), eq("abcPage"), eq("ns2"), eq("defPage"));
+    }
 }

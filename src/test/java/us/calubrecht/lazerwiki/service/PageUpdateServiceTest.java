@@ -8,7 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Page;
+import us.calubrecht.lazerwiki.model.PageCache;
+import us.calubrecht.lazerwiki.model.PageKey;
 import us.calubrecht.lazerwiki.repository.*;
+import us.calubrecht.lazerwiki.responses.MoveStatus;
+import us.calubrecht.lazerwiki.responses.PageLockResponse;
 import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
@@ -256,5 +260,76 @@ public class PageUpdateServiceTest {
         assertEquals("newSite", captor.getValue().getSite());
         assertEquals("", captor.getValue().getPagename());
         assertEquals("======New Site======", captor.getValue().getText().split("\n")[0]);
+    }
+
+    @Test
+    void testMovePage() throws PageWriteException {
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("site1"), any(), any())).thenReturn(true);
+
+        PageLockResponse lockSuccess = new PageLockResponse("", "", null, "", null, true, "");
+        when(pageLockService.getPageLock(any(), any(), any(), anyBoolean())).thenReturn(lockSuccess);
+
+        Page p = new Page();
+        p.setPagename("page1");
+        p.setText("This is raw page text");
+        p.setTitle("Title");
+        p.setId(10L);
+        p.setRevision(2L);
+        p.setSite("site1");
+        p.setTags(Collections.emptyList());
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns1", "page1")).thenReturn(p);
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "ns1", "page1", false)).thenReturn(p);
+
+        pageUpdateService.movePage("host1", "someUser", "ns1", "page1", "ns2", "page2");
+
+        verify(linkOverrideService).createOverride("host1", "ns1:page1", "ns2:page2");
+        verify(linkOverrideService).moveOverrides("host1", "ns1:page1", "ns2:page2");
+
+        ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
+        verify(pageRepository, times(3)).save(captor.capture());
+
+        List<Page> pages = captor.getAllValues();
+        assertEquals("page2", pages.get(0).getPagename());
+        assertEquals("page1", pages.get(1).getPagename());
+        assertFalse(pages.get(1).isDeleted());
+        assertEquals("page1", pages.get(2).getPagename());
+        assertTrue(pages.get(2).isDeleted());
+    }
+
+    @Test
+    void testMovePageFails() throws PageWriteException {
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("user"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), eq("ns1"), eq("user2"))).thenReturn(true);
+        MoveStatus status = pageUpdateService.movePage("host1", "loser", "ns1", "page1", "ns2", "page2");
+
+        assertEquals(false, status.success());
+        assertEquals("You don't have permission to write in ns1", status.message());
+
+        status = pageUpdateService.movePage("host1", "user2", "ns1", "page1", "ns2", "page2");
+        assertEquals(false, status.success());
+        assertEquals("You don't have permission to write in ns2", status.message());
+
+
+        PageLockResponse lockSuccess = new PageLockResponse("", "", null, "", null, true, "");
+        PageLockResponse lockFail = new PageLockResponse("", "", null, "", null, false, "");
+        when(pageLockService.getPageLock(any(), eq("noLock:page1"), any(), anyBoolean())).thenReturn(lockFail);
+        when(pageLockService.getPageLock(any(), eq("lockable:page1"), any(), anyBoolean())).thenReturn(lockSuccess);
+
+        status = pageUpdateService.movePage("host1", "user", "noLock", "page1", "lockable", "page1");
+        assertEquals(false, status.success());
+        assertEquals("Could not acquire page locks to move page", status.message());
+
+        status = pageUpdateService.movePage("host1", "user", "lockable", "page1", "noLock", "page1");
+        assertEquals(false, status.success());
+        assertEquals("Could not acquire page locks to move page", status.message());
+
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "lockable", "page3")).thenReturn(new Page());
+        status = pageUpdateService.movePage("host1", "user", "lockable", "page2", "lockable", "page3");
+        assertEquals(false, status.success());
+        assertEquals("page3 already exists, move cannot overwrite it", status.message());
     }
 }

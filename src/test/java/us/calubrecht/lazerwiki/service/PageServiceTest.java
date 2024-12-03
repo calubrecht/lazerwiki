@@ -52,6 +52,9 @@ public class PageServiceTest {
     LinkService linkService;
 
     @MockBean
+    LinkOverrideService linkOverrideService;
+
+    @MockBean
     PageCacheRepository pageCacheRepository;
 
 
@@ -163,6 +166,27 @@ public class PageServiceTest {
                 thenReturn(p);
 
         assertEquals(new PageData("This page doesn't exist", "======Deleted Page======", "Deleted Page", Collections.emptyList(), Collections.emptyList(), new PageFlags(false, true, true, true, false, false)), pageService.getPageData("host1", "deletedPage", "Bob"));
+
+
+    }
+
+    @Test
+    public void testGetPageDataMoved() {
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+
+        Page p = new Page();
+        p.setDeleted(true);
+        p.setTags(Collections.emptyList());
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "movedPage")).
+                thenReturn(p);
+        List<LinkOverride> overrides = List.of(new LinkOverride("host", "ns1", "page", "ns2", "page2", "ns3", "page3"));
+        when(linkOverrideService.getOverridesForTargetPage("host1", "movedPage")).thenReturn(overrides);
+
+        assertEquals(new PageData(null, "This page has been moved to [[ns3:page3]]", "movedPage", Collections.emptyList(), Collections.emptyList(), new PageFlags(false, true, true, false, false, true)), pageService.getPageData("host1", "movedPage", "Bob"));
 
 
     }

@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -9,6 +10,7 @@ import us.calubrecht.lazerwiki.model.Link;
 import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.repository.LinkOverrideRepository;
 import us.calubrecht.lazerwiki.repository.LinkRepository;
+import us.calubrecht.lazerwiki.responses.PageLockResponse;
 
 import java.util.*;
 
@@ -88,5 +90,47 @@ class LinkOverrideServiceTest {
         underTest.createOverride("host", "page2", "page3");
         verify(repo).saveAll(List.of(lo2));
         verify(repo).deleteBySiteAndNewTargetPageNSAndNewTargetPageName("default", "", "page2");
+    }
+
+    @Test
+    void test_GetOverridesForTargetPage() {
+        when(siteService.getSiteForHostname(eq("host"))).thenReturn("default");
+        LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "page2");
+        LinkOverride lo2 = new LinkOverride("default", "", "p1", "", "pageName", "", "page3");
+        List<LinkOverride> links = List.of(lo1, lo2);
+        when(siteService.getSiteForHostname(eq("host"))).thenReturn("default");
+        when(repo.findAllBySiteAndTargetPageNSAndTargetPageName(any(), eq("ns"), eq("pageName"))).
+                thenReturn(links);
+
+        List<LinkOverride> over = underTest.getOverridesForTargetPage("host", "ns:pageName");
+        assertEquals(2, over.size());
+        assertEquals("page2", over.get(0).getNewTargetPageName());
+    }
+
+    @Test
+    public void testMoveOverrides() {
+        LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "page2");
+        LinkOverride lo2 = new LinkOverride("default", "", "p1", "", "pageName", "", "page3");
+        List<LinkOverride> links = List.of(lo1, lo2);
+        when(siteService.getSiteForHostname(eq("host"))).thenReturn("default");
+        when(repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById(any(), eq("ns1"), eq("page"))).thenReturn(links);
+        underTest.moveOverrides("host", "ns1:page", "ns2:page");
+
+        verify(repo).deleteBySiteAndNewTargetPageNSAndNewTargetPageName(any(), eq("ns1"), eq("page"));
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        verify(repo).saveAll(listCaptor.capture());
+
+        assertEquals(2, listCaptor.getValue().size());
+        LinkOverride over = (LinkOverride)listCaptor.getValue().get(0);
+        assertEquals("page", over.getSourcePageName());
+        assertEquals("ns2", over.getSourcePageNS());
+    }
+
+    @Test
+    public void testDeleteOverrides() {
+        when(siteService.getSiteForHostname(eq("host"))).thenReturn("default");
+        underTest.deleteOverrides("host", "ns1:page");
+
+        verify(repo).deleteBySiteAndSourcePageNSAndSourcePageName("default", "ns1", "page");
     }
 }
