@@ -154,7 +154,7 @@ public class PageUpdateService {
             return new MoveStatus(false, "You don't have permission to write in " + newPageNS);
         }
         Page existingPage = pageRepository.getBySiteAndNamespaceAndPagename(site, newPageNS, newPageName);
-        if (existingPage != null) {
+        if (existingPage != null && !existingPage.isDeleted()) {
             return new MoveStatus(false, newPageName + " already exists, move cannot overwrite it");
         }
         String oldPageDescriptor = new PageDescriptor(oldPageNS, oldPageName).toString();
@@ -173,8 +173,10 @@ public class PageUpdateService {
         List<String> links = linkService.getLinksOnPage(site, oldPageDescriptor);
         List<String> images = imageRefService.getImagesOnPage(site, oldPageDescriptor);
         savePage(host, new PageDescriptor(newPageNS, newPageName).toString(), 0, oldPage.getText(), oldPage.getTags().stream().map(PageTag::getTag).toList(),
-                links, images, oldPage.getTitle(), user, false);
+                links, images, oldPage.getTitle(), user, true);
         deletePage(host, oldPageDescriptor, user);
+        pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId());
+        pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId());
         return new MoveStatus(true, oldPageDescriptor + " move to " + newPageDescriptor);
     }
 

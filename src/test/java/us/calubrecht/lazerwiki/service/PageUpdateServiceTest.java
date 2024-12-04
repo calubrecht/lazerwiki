@@ -297,6 +297,21 @@ public class PageUpdateServiceTest {
         assertFalse(pages.get(1).isDeleted());
         assertEquals("page1", pages.get(2).getPagename());
         assertTrue(pages.get(2).isDeleted());
+
+
+        // Can mvoe to page if already deleted
+        Page deleted = new Page();
+        deleted.setDeleted(true);
+        deleted.setRevision(10L);
+        deleted.setId(5L);
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns1", "deleted")).thenReturn(deleted);
+        Page oldPage = new Page();
+        oldPage.setTags(Collections.emptyList());
+        oldPage.setRevision(1L);
+        oldPage.setId(11L);
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns1", "page2")).thenReturn(oldPage);
+        MoveStatus status = pageUpdateService.movePage("host1", "someUser", "ns1", "page2", "ns1", "deleted");
+        assertEquals(true, status.success());
     }
 
     @Test
