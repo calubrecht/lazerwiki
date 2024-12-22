@@ -11,9 +11,12 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRequest;
 import us.calubrecht.lazerwiki.requests.SiteRequest;
+import us.calubrecht.lazerwiki.requests.SiteSettingsRequest;
+import us.calubrecht.lazerwiki.responses.SiteSettingsResponse;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
+import us.calubrecht.lazerwiki.service.exception.SiteSettingsException;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -152,6 +155,22 @@ public class AdminController {
             pageUpdateService.createDefaultSiteHomepage(siteKey, siteRequest.siteName(), user.userName);
         }
         return ResponseEntity.ok(siteService.getAllSites(user));
+    }
+
+    @PostMapping("site/settings/{siteName}")
+    public ResponseEntity<SiteSettingsResponse> setSiteSettings(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteSettingsRequest siteRequest) throws PageWriteException, IOException {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + siteName)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        try {
+            Site site = siteService.setSiteSettings(siteName, siteRequest.hostName(), siteRequest.siteSettings(), user);
+            return ResponseEntity.ok(new SiteSettingsResponse(site, true, ""));
+        }
+        catch(SiteSettingsException e) {
+            return ResponseEntity.ok(new SiteSettingsResponse(null, false, e.getMessage()));
+        }
     }
 
     @DeleteMapping("site/{siteName}")
