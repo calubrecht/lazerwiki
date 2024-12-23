@@ -105,6 +105,9 @@ public class SiteService {
         if (!canAdminSite(u.getRolesString(), siteName)) {
             throw new SiteSettingsException("Cannot admin site " + siteName);
         }
+        if (!siteRepository.findById(siteName).isPresent()) {
+            throw new SiteSettingsException("Site \"" + siteName + "\" does not exist");
+        }
         try {
            // objectMapper.readTree(settings); // validate json
             Map<String, Object> settingsMap = objectMapper.readValue(settings, Map.class);

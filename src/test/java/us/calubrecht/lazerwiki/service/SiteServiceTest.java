@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
+import us.calubrecht.lazerwiki.service.exception.SiteSettingsException;
 
 import java.util.Collections;
 import java.util.List;
@@ -148,5 +149,31 @@ public class SiteServiceTest {
         assertEquals("newSite", captor.getValue().name);
         assertEquals("site.com", captor.getValue().hostname);
         assertEquals("New Site", captor.getValue().siteName);
+    }
+
+    @Test
+    void setSiteSettings() throws SiteSettingsException {
+        when(repository.findById("existingSite")).thenReturn(Optional.of(new Site("existingSite", "", "")));
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        User user = new User();
+        user.roles = List.of(new UserRole(user, "ROLE_USER"));
+
+        Site s = underTest.setSiteSettings("existingSite", "site", "{}", adminUser);
+        assertEquals("existingSite", s.name);
+        assertEquals("site", s.hostname);
+        ArgumentCaptor<Site> captor = ArgumentCaptor.forClass(Site.class);
+        verify(repository).save(captor.capture());
+        assertEquals(Collections.emptyMap(), captor.getValue().settings);
+
+        // non admin
+        assertThrows(SiteSettingsException.class, () -> underTest.setSiteSettings("existingSite", "site", "{}", user));
+        // non existent site
+        assertThrows(SiteSettingsException.class, () -> underTest.setSiteSettings("noneExistentSite", "site", "{}", adminUser));
+
+        // bad json
+        assertThrows(SiteSettingsException.class, () -> underTest.setSiteSettings("existingSite", "site", "{nonKey}", adminUser));
+        assertThrows(SiteSettingsException.class, () -> underTest.setSiteSettings("existingSite", "site", "{\"key\":\"value\"}trailing", adminUser));
+
     }
 }

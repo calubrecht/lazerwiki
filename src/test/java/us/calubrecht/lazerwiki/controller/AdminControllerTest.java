@@ -13,7 +13,9 @@ import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
+import us.calubrecht.lazerwiki.requests.SiteSettingsRequest;
 import us.calubrecht.lazerwiki.service.*;
+import us.calubrecht.lazerwiki.service.exception.SiteSettingsException;
 
 import java.util.Collections;
 import java.util.List;
@@ -286,5 +288,56 @@ class AdminControllerTest {
         this.mockMvc.perform(delete("/api/admin/site/site1").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk()).andExpect(content().json("[{\"name\":\"OneWiki\", \"hostname\":\"wiki.com\", \"siteName\":\"One Wiki\"},{\"name\":\"TwoWiki\"}]"));
         verify(siteDelService).deleteSiteCompletely("site1", "Bob");
+    }
+
+    @Test
+    void setSiteSettings() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User siteAdminUser = new User();
+        siteAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN:TestWiki"));
+        when(userService.getUser("Jake")).thenReturn(siteAdminUser);
+
+        Site site = new Site("TestWiki", "wiki.com", "Test Wiki");
+        when(siteService.setSiteSettings(eq("TestWiki"), eq("wiki.com"), eq("new settings"), any()))
+                .thenReturn(site);
+
+        this.mockMvc.perform(post("/api/admin/site/settings/TestWiki")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hostName\":\"wiki.com\", \"siteSettings\":\"new settings\"}")
+                        .principal(new UsernamePasswordAuthenticationToken("Bob", "")))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"site\":{\"name\":\"TestWiki\",\"hostname\":\"wiki.com\",\"siteName\":\"Test Wiki\"},\"success\":true,\"msg\":\"\"}"));
+
+        this.mockMvc.perform(post("/api/admin/site/settings/TestWiki")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hostName\":\"wiki.com\", \"siteSettings\":\"new settings\"}")
+                        .principal(new UsernamePasswordAuthenticationToken("Jake", "")))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"site\":{\"name\":\"TestWiki\",\"hostname\":\"wiki.com\",\"siteName\":\"Test Wiki\"},\"success\":true,\"msg\":\"\"}"));
+
+
+        // Test unauthorized access
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(regularUser, "ROLE_USER"));
+        when(userService.getUser("Frank")).thenReturn(regularUser);
+
+        this.mockMvc.perform(post("/api/admin/site/settings/TestWiki")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hostName\":\"wiki.com\", \"siteSettings\":\"new settings\"}")
+                        .principal(new UsernamePasswordAuthenticationToken("Frank", "")))
+                .andExpect(status().isUnauthorized());
+
+        // Test exception
+        when(siteService.setSiteSettings(eq("TestWiki"), eq("wiki.com"), eq("bad settings"), any()))
+                .thenThrow(new SiteSettingsException("This setting is bad"));
+        this.mockMvc.perform(post("/api/admin/site/settings/TestWiki")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hostName\":\"wiki.com\", \"siteSettings\":\"bad settings\"}")
+                        .principal(new UsernamePasswordAuthenticationToken("Bob", "")))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"success\":false,\"msg\":\"This setting is bad\"}"));
+
     }
 }
