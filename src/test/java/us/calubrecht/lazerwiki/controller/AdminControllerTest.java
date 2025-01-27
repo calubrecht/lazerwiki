@@ -9,16 +9,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import us.calubrecht.lazerwiki.model.Site;
-import us.calubrecht.lazerwiki.model.User;
-import us.calubrecht.lazerwiki.model.UserDTO;
-import us.calubrecht.lazerwiki.model.UserRole;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.requests.SiteSettingsRequest;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.SiteSettingsException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -46,6 +44,9 @@ class AdminControllerTest {
 
     @MockBean
     SiteDelService siteDelService;
+
+    @MockBean
+    GlobalSettingsService globalSettingsService;
 
     @Test
     void regenLinkTable() throws Exception {
@@ -339,5 +340,55 @@ class AdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"success\":false,\"msg\":\"This setting is bad\"}"));
 
+    }
+
+    @Test
+    void getGlobalSettings() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User siteAdminUser = new User();
+        siteAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN:TestWiki"));
+        when(userService.getUser("Jake")).thenReturn(siteAdminUser);
+
+        GlobalSettings settings = new GlobalSettings();
+        settings.settings = Map.of("Setting1", "value1");
+        when(globalSettingsService.getSettings()).thenReturn(settings);
+
+        this.mockMvc.perform(get("/api/admin/globalSettings")
+                        .principal(new UsernamePasswordAuthenticationToken("Bob", "")))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"settings\":{\"Setting1\":\"value1\"}}"));
+
+        this.mockMvc.perform(get("/api/admin/globalSettings")
+                        .principal(new UsernamePasswordAuthenticationToken("Jake", "")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void setGlobalSettings() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User siteAdminUser = new User();
+        siteAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN:TestWiki"));
+        when(userService.getUser("Jake")).thenReturn(siteAdminUser);
+        GlobalSettings settings = new GlobalSettings();
+        settings.settings = Map.of("Setting1", "value1");
+
+        this.mockMvc.perform(post("/api/admin/globalSettings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"settings\": {\"Setting1\":\"value1\"}}")
+                        .principal(new UsernamePasswordAuthenticationToken("Bob", "")))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"success\": true}"));
+
+        verify(globalSettingsService).setSettings(settings);
+
+        this.mockMvc.perform(post("/api/admin/globalSettings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"settings\": {\"Setting1\":\"value1\"}}")
+                        .principal(new UsernamePasswordAuthenticationToken("Jake", "")))
+                .andExpect(status().isUnauthorized());
     }
 }

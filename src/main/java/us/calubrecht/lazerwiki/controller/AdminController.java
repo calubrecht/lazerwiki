@@ -6,12 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
-import us.calubrecht.lazerwiki.model.Site;
-import us.calubrecht.lazerwiki.model.User;
-import us.calubrecht.lazerwiki.model.UserDTO;
-import us.calubrecht.lazerwiki.model.UserRequest;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.requests.SiteRequest;
 import us.calubrecht.lazerwiki.requests.SiteSettingsRequest;
+import us.calubrecht.lazerwiki.responses.CommonResponse;
 import us.calubrecht.lazerwiki.responses.SiteSettingsResponse;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
@@ -42,6 +40,9 @@ public class AdminController {
 
     @Autowired
     PageUpdateService pageUpdateService;
+
+    @Autowired
+    GlobalSettingsService globalSettingsService;
 
     @PostMapping("regenLinkTable/{site}")
     public ResponseEntity<Void> regenLinkTable(@PathVariable("site") String site, Principal principal) {
@@ -182,5 +183,26 @@ public class AdminController {
         }
         siteDelService.deleteSiteCompletely(siteName, principal.getName());
         return ResponseEntity.ok(siteService.getAllSites(user));
+    }
+
+    @GetMapping("globalSettings")
+    public ResponseEntity<GlobalSettings> getGlobalSettings(Principal principal) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(globalSettingsService.getSettings());
+    }
+
+    @PostMapping("globalSettings")
+    public ResponseEntity<CommonResponse> setGlobalSettings(Principal principal, @RequestBody GlobalSettings settings) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        globalSettingsService.setSettings(settings);
+        return ResponseEntity.ok(new CommonResponse(true, null));
     }
 }

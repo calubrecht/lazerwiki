@@ -127,3 +127,13 @@ insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) value
 insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 'Bob', 'Replaced');
 insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site2', 'ns3', 'img2.jpg', 'Bob', 'Uploaded');
 insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns4', 'img3.jpg', 'Bob', 'Uploaded');
+
+CREATE TABLE `globalSettings` (
+	`id` NUMBER(11) NOT NULL ,
+	`settings` VARCHAR(200) NOT NULL DEFAULT '{}',
+	PRIMARY KEY (`id`)
+)
+;
+
+
+INSERT INTO `globalSettings` (`id`, `settings`) VALUES (1, '{"Setting1": "Value1"}')

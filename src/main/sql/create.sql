@@ -256,3 +256,13 @@ ENGINE=InnoDB
 ;
 
 
+CREATE TABLE `globalSettings` (
+	`id` int NOT NULL ,
+	`settings` JSON NOT NULL DEFAULT '{}' COLLATE 'utf8mb4_bin',
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
+INSERT INTO `globalSettings` (`id`) VALUES (1);
