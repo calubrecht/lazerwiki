@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.controller;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
@@ -101,14 +102,22 @@ public class AdminController {
     }
 
     @PutMapping("user/{userName}")
-    public ResponseEntity<UserDTO> addUser(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
-        User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<?> addUser(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
+        if (principal == null) {
+            GlobalSettings settings = globalSettingsService.getSettings();
+            if (!BooleanUtils.isTrue((Boolean) settings.settings.get(GlobalSettings.ENABLE_SELF_REG))) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        }
+        else {
+            User user = userService.getUser(principal.getName());
+            Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+            if (!roles.contains("ROLE_ADMIN")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
         }
         if (userService.getUser(userName) != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User %s already exists".formatted(userName));
         }
         userService.addUser(userName, userRequest.password(), List.of(LazerWikiAuthenticationManager.USER));
         User u = userService.getUser(userName);
@@ -187,11 +196,6 @@ public class AdminController {
 
     @GetMapping("globalSettings")
     public ResponseEntity<GlobalSettings> getGlobalSettings(Principal principal) {
-        User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         return ResponseEntity.ok(globalSettingsService.getSettings());
     }
 

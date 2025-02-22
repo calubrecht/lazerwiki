@@ -181,6 +181,20 @@ class AdminControllerTest {
         // Cannot add user that already exists
         this.mockMvc.perform(put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isConflict());
+
+        // If enableSelfReg is on, can self register
+        when(userService.getUser(eq("NewerUser"))).thenReturn(null, u);
+        when(userService.getUser(eq("NewestUser"))).thenReturn(null, u);
+        GlobalSettings settings = new GlobalSettings();
+        settings.settings = Map.of(GlobalSettings.ENABLE_SELF_REG, true);
+        when(globalSettingsService.getSettings()).thenReturn(settings);
+        this.mockMvc.perform(put("/api/admin/user/NewerUser").content("{\"userName\": \"NewerUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isOk());
+
+        // if not, cannot
+        settings.settings = Map.of(GlobalSettings.ENABLE_SELF_REG, false);
+        this.mockMvc.perform(put("/api/admin/user/NewestUser").content("{\"userName\": \"NewestUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -347,9 +361,6 @@ class AdminControllerTest {
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         when(userService.getUser("Bob")).thenReturn(adminUser);
-        User siteAdminUser = new User();
-        siteAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN:TestWiki"));
-        when(userService.getUser("Jake")).thenReturn(siteAdminUser);
 
         GlobalSettings settings = new GlobalSettings();
         settings.settings = Map.of("Setting1", "value1");
@@ -359,10 +370,6 @@ class AdminControllerTest {
                         .principal(new UsernamePasswordAuthenticationToken("Bob", "")))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"settings\":{\"Setting1\":\"value1\"}}"));
-
-        this.mockMvc.perform(get("/api/admin/globalSettings")
-                        .principal(new UsernamePasswordAuthenticationToken("Jake", "")))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test

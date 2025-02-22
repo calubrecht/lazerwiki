@@ -11,6 +11,8 @@ import java.util.Objects;
 
 @Entity(name = "globalSettings")
 public class GlobalSettings {
+    public static final String ENABLE_SELF_REG = "enableSelfReg";
+
     public GlobalSettings() {
        settings = new HashMap<>();
     }
