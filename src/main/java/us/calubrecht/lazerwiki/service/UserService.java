@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,6 +27,15 @@ public class UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    SiteService siteService;
+
+    @Autowired
+    EmailService emailService;
+
+    @Autowired
+    TemplateService templateService;
 
     PasswordUtil passwordUtil = new PasswordUtil();
 
@@ -57,7 +67,7 @@ public class UserService {
     @Cacheable("UserService-getUsers")
     public List<UserDTO> getUsers() {
         return DbSupport.toStream(userRepository.findAll()).
-                map(user -> new UserDTO(user.userName, null, user.roles.stream().map(role -> role.role).toList()
+                map(user -> new UserDTO(user.userName, null, user.roles.stream().map(role -> role.role).toList(), user.getSettings()
                 )).toList();
     }
 
@@ -73,7 +83,7 @@ public class UserService {
             Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
             ur.ifPresent( role -> user.roles.remove(role));
             userRepository.save(user);
-            return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList());
+            return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList(), user.getSettings());
         }).orElse(null);
     }
 
@@ -88,7 +98,7 @@ public class UserService {
                 user.roles.add(new UserRole(user, userRole));
                 userRepository.save(user);
             }
-            return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList());
+            return new UserDTO(userName, "", user.roles.stream().map(uo-> uo.role).toList(), user.getSettings());
         }).orElse(null);
     }
 
@@ -100,6 +110,15 @@ public class UserService {
             user.passwordHash = passwordUtil.hashPassword(password);
             userRepository.save(user);
         });
+    }
+
+    @Transactional
+    public void requestSetEmail(String userName, String host, String email) throws MessagingException {
+        Optional<User> u = userRepository.findById(userName);
+        String site = siteService.getSiteForHostname(host);
+        String randomKey = "ABCD-EFGH";
+        String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
+        emailService.sendEmail(host, email, userName,"Verify Email", body);
     }
 
     @Transactional

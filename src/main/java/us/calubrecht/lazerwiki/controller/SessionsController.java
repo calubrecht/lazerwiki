@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.service.SiteService;
@@ -35,7 +36,8 @@ public class SessionsController {
         fakeCookie.setPath("/");
 
         response.addCookie(fakeCookie);
-        return new UserDTO(principal.getName(), siteService.getSiteForHostname(url.getHost()), userService.getUser(principal.getName()).roles.stream().map(ur -> ur.role).toList());
+        User user = userService.getUser(principal.getName());
+        return new UserDTO(principal.getName(), siteService.getSiteForHostname(url.getHost()), user.roles.stream().map(ur -> ur.role).toList(), user.getSettings());
     }
 
     @PostMapping("logout")

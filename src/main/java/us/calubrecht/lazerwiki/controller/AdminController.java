@@ -121,7 +121,7 @@ public class AdminController {
         }
         userService.addUser(userName, userRequest.password(), List.of(LazerWikiAuthenticationManager.USER));
         User u = userService.getUser(userName);
-        UserDTO dto = new UserDTO(u.userName, null, u.roles.stream().map(role -> role.role).toList());
+        UserDTO dto = new UserDTO(u.userName, null, u.roles.stream().map(role -> role.role).toList(), u.getSettings());
         return ResponseEntity.ok(dto);
     }
 

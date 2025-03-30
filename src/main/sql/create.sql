@@ -64,6 +64,7 @@ CREATE TABLE `pageLock` (
 CREATE TABLE `userRecord` (
 	`userName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
 	`passwordHash` VARCHAR(75) NOT NULL COLLATE 'latin1_swedish_ci',
+	`settings` JSON NOT NULL DEFAULT '{}',
 	PRIMARY KEY (`userName`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'

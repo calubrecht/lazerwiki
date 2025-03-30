@@ -12,4 +12,8 @@ public class RandomService {
     public int nextInt() {
         return random.nextInt();
     }
+
+    public String randomKey() {
+        return "ABC FFF";
+    }
 }

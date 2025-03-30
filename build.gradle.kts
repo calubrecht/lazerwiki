@@ -32,6 +32,7 @@ dependencies {
 	implementation("org.apache.commons:commons-text:1.10.0")
 	implementation("commons-io:commons-io:2.15.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("org.jsoup:jsoup:1.16.2")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 
