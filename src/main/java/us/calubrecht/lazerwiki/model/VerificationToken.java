@@ -12,10 +12,11 @@ public class VerificationToken {
 
     }
 
-    public VerificationToken(String user, String token, Purpose purpose) {
+    public VerificationToken(String user, String token, Purpose purpose, String data) {
         this.user = user;
         this.token = token;
         this.purpose = purpose;
+        this.data = data;
     }
 
     @Id
@@ -23,13 +24,11 @@ public class VerificationToken {
     private Long id;
     private String user;
     private String token;
+    private String data;
 
     @Column(columnDefinition = "ENUM('VERIFY_EMAIL', 'RESET_PASSWORD')")
     @Enumerated(EnumType.STRING)
     private Purpose purpose;
-
-    //@GeneratedValue(strategy = GenerationType.AUTO)
-//    private LocalDateTime expiry;
 
     public Long getId() {
         return id;
@@ -63,12 +62,11 @@ public class VerificationToken {
         this.purpose = purpose;
     }
 
-/*
-    public LocalDateTime getExpiry() {
-        return expiry;
+    public String getData() {
+        return data;
     }
 
-    public void setExpiry(LocalDateTime expiry) {
-        this.expiry = expiry;
-    }*/
+    public void setData(String data) {
+        this.data = data;
+    }
 }

@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.model.VerificationToken;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.repository.VerificationTokenRepository;
+import us.calubrecht.lazerwiki.service.exception.VerificationException;
 import us.calubrecht.lazerwiki.util.DbSupport;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,9 +127,20 @@ public class UserService {
         String site = siteService.getSiteForHostname(host);
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();
-        tokenRepository.save(new VerificationToken(userName, randomKey, VerificationToken.Purpose.VERIFY_EMAIL));
+        tokenRepository.save(new VerificationToken(userName, randomKey, VerificationToken.Purpose.VERIFY_EMAIL, email));
         String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
         emailService.sendEmail(host, email, userName,"Verify Email", body);
+    }
+
+    @Transactional
+    public void verifyEmailToken(String userName, String token) throws VerificationException {
+        VerificationToken savedToken = tokenRepository.findByUserAndTokenAndPurpose(userName, token, VerificationToken.Purpose.VERIFY_EMAIL);
+        if (savedToken == null) {
+            throw new VerificationException("Invalid token: Please check token and try again");
+        }
+        Optional<User> u = userRepository.findById(userName);
+        u.get().getSettings().put("email", savedToken.getData());
+        userRepository.save(u.get());
     }
 
     @Transactional

@@ -11,6 +11,7 @@ import us.calubrecht.lazerwiki.model.UserRequest;
 import us.calubrecht.lazerwiki.responses.SaveEmailResponse;
 import us.calubrecht.lazerwiki.responses.SetPasswordResponse;
 import us.calubrecht.lazerwiki.service.UserService;
+import us.calubrecht.lazerwiki.service.exception.VerificationException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,5 +45,16 @@ public class UserSettingsController {
         }
         userService.requestSetEmail(user.userName, url.getHost(), emailRequest.email());
         return ResponseEntity.ok(new SaveEmailResponse(true, ""));
+    }
+
+    @PostMapping("verifyEmailToken")
+    public ResponseEntity<SaveEmailResponse> verifyEmailToken(Principal principal, @RequestBody String token) {
+        User user = userService.getUser(principal.getName());
+        try {
+            userService.verifyEmailToken(user.userName, token);
+            return  ResponseEntity.ok(new SaveEmailResponse(true, ""));
+        } catch (VerificationException ve) {
+            return  ResponseEntity.ok(new SaveEmailResponse(false, ve.getMessage()));
+        }
     }
 }

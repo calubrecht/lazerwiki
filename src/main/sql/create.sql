@@ -273,6 +273,7 @@ CREATE TABLE `verificationToken` (
   `user` varchar(150) NOT NULL COLLATE 'latin1_swedish_ci',
   `token` varchar(10) NOT NULL COLLATE 'latin1_swedish_ci',
   `purpose` enum('VERIFY_EMAIL','RESET_PASSWORD') NOT NULL,
+  `data` varchar(100) DEFAULT NULL,
   `expiry` datetime NOT NULL DEFAULT (current_timestamp() + interval 15 minute),
   PRIMARY KEY (`id`),
   KEY `verificationToken_userRecord_FK` (`user`),
