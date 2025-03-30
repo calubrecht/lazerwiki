@@ -267,3 +267,14 @@ ENGINE=InnoDB
 ;
 
 INSERT INTO `globalSettings` (`id`) VALUES (1);
+
+CREATE TABLE `verificationToken` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user` varchar(150) NOT NULL COLLATE 'latin1_swedish_ci',
+  `token` varchar(10) NOT NULL COLLATE 'latin1_swedish_ci',
+  `purpose` enum('VERIFY_EMAIL','RESET_PASSWORD') NOT NULL,
+  `expiry` datetime NOT NULL DEFAULT (current_timestamp() + interval 15 minute),
+  PRIMARY KEY (`id`),
+  KEY `verificationToken_userRecord_FK` (`user`),
+  CONSTRAINT `verificationToken_userRecord_FK` FOREIGN KEY (`user`) REFERENCES `userRecord` (`userName`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;

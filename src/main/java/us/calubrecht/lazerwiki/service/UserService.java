@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
+import us.calubrecht.lazerwiki.model.VerificationToken;
 import us.calubrecht.lazerwiki.repository.UserRepository;
+import us.calubrecht.lazerwiki.repository.VerificationTokenRepository;
 import us.calubrecht.lazerwiki.util.DbSupport;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,12 @@ public class UserService {
 
     @Autowired
     TemplateService templateService;
+
+    @Autowired
+    RandomService randomService;
+
+    @Autowired
+    VerificationTokenRepository tokenRepository;
 
     PasswordUtil passwordUtil = new PasswordUtil();
 
@@ -116,7 +124,9 @@ public class UserService {
     public void requestSetEmail(String userName, String host, String email) throws MessagingException {
         Optional<User> u = userRepository.findById(userName);
         String site = siteService.getSiteForHostname(host);
-        String randomKey = "ABCD-EFGH";
+        String randomKey = randomService.randomKey(8);
+        tokenRepository.deleteExpired();
+        tokenRepository.save(new VerificationToken(userName, randomKey, VerificationToken.Purpose.VERIFY_EMAIL));
         String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
         emailService.sendEmail(host, email, userName,"Verify Email", body);
     }
