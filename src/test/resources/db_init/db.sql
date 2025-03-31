@@ -38,6 +38,7 @@ CREATE TABLE `page` (
 CREATE TABLE userRecord (
    userName VARCHAR(150) NOT NULL,
    passwordHash VARCHAR(50) NOT NULL,
+   `settings` VARCHAR(200) NOT NULL DEFAULT '{}',
    PRIMARY KEY (`userName`)
 );
 
@@ -136,4 +137,14 @@ CREATE TABLE `globalSettings` (
 ;
 
 
-INSERT INTO `globalSettings` (`id`, `settings`) VALUES (1, '{"Setting1": "Value1"}')
+INSERT INTO `globalSettings` (`id`, `settings`) VALUES (1, '{"Setting1": "Value1"}');
+
+CREATE TABLE `verificationToken` (
+  `id` NUMBER(10) NOT NULL ,
+  `user` varchar(150) NOT NULL,
+  `token` varchar(10) NOT NULL,
+  `purpose` varchar(10) NOT NULL,
+  `data` varchar(100) ,
+  `expiry` DATETIME ,
+  PRIMARY KEY (`id`)
+) ;

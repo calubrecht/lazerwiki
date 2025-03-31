@@ -94,7 +94,7 @@ class AdminControllerTest {
 
     @Test
     void getUsers() throws Exception {
-        when(userService.getUsers()).thenReturn(List.of(new UserDTO("Bob",null, List.of("ROLE_ADMIN","ROLE_USER")), new UserDTO("Frank", null, List.of("ROLE_USER"))));
+        when(userService.getUsers()).thenReturn(List.of(new UserDTO("Bob",null, List.of("ROLE_ADMIN","ROLE_USER"), Map.of()), new UserDTO("Frank", null, List.of("ROLE_USER"), Map.of())));
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         when(userService.getUser("bob")).thenReturn(adminUser);
@@ -111,8 +111,8 @@ class AdminControllerTest {
 
     @Test
     void deleteRole() throws Exception {
-        when(userService.deleteRole(eq("Frank"), eq("ROLE_ADMIN"))).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER")));
-        when(userService.deleteRole(eq("Bob"), eq("ROLE_EXTRA"))).thenReturn(new UserDTO("Bob",null, List.of("ROLE_ADMIN")));
+        when(userService.deleteRole(eq("Frank"), eq("ROLE_ADMIN"))).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
+        when(userService.deleteRole(eq("Bob"), eq("ROLE_EXTRA"))).thenReturn(new UserDTO("Bob",null, List.of("ROLE_ADMIN"), Map.of()));
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";
@@ -140,7 +140,7 @@ class AdminControllerTest {
 
     @Test
     void addRoles() throws Exception {
-        when(userService.addRole(eq("Frank"), eq("ROLE_ADMIN"))).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER")));
+        when(userService.addRole(eq("Frank"), eq("ROLE_ADMIN"))).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";

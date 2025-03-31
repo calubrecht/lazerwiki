@@ -13,12 +13,10 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.repository.UserRepository;
+import us.calubrecht.lazerwiki.repository.VerificationTokenRepository;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +31,21 @@ public class UserServiceTest {
 
     @MockBean
     UserRepository userRepository;
+
+    @MockBean
+    SiteService siteService;
+
+    @MockBean
+    VerificationTokenRepository tokenRepository;
+
+    @MockBean
+    EmailService emailService;
+
+    @MockBean
+    RandomService randomService;
+
+    @MockBean
+    TemplateService templateService;
 
     @BeforeEach
     public void setup() {
@@ -54,6 +67,7 @@ public class UserServiceTest {
         assertNotEquals("password", u.passwordHash);
         assertEquals(1, u.roles.size());
         assertEquals("ROLE_USER", u.roles.get(0).role);
+        assertEquals(Map.of(), u.settings);
     }
 
     @Test
@@ -85,11 +99,13 @@ public class UserServiceTest {
         List<User> users = List.of (new User("bob",""), new User("Joe", ""));
         users.get(0).roles = List.of(new UserRole(users.get(0), "ROLE_ADMIN"));
         users.get(1).roles = Collections.emptyList();
+        users.get(0).settings = Map.of();
+        users.get(1).settings = Map.of();
         when(userRepository.findAll()).thenReturn(users);
 
         assertEquals(List.of(
-                new UserDTO("bob", null, List.of("ROLE_ADMIN")),
-                new UserDTO("Joe", null, Collections.emptyList())), userService.getUsers());
+                new UserDTO("bob", null, List.of("ROLE_ADMIN"), Map.of()),
+                new UserDTO("Joe", null, Collections.emptyList(), Map.of())), userService.getUsers());
     }
 
     @Test

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -54,6 +55,7 @@ public class UserService {
 
         User newUser = new User(userName, passwordUtil.hashPassword(password));
         newUser.roles = roles.stream().map(role -> new UserRole(newUser, role.getAuthority())).collect(Collectors.toList());
+        newUser.settings = Map.of();
         userRepository.save(newUser);
     }
 
