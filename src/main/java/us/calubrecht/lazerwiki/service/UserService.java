@@ -134,6 +134,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
     public void verifyEmailToken(String userName, String token) throws VerificationException {
         VerificationToken savedToken = tokenRepository.findByUserAndTokenAndPurpose(userName, token, VerificationToken.Purpose.VERIFY_EMAIL);
         if (savedToken == null) {
