@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -12,8 +13,10 @@ import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.model.UserDTO;
 import us.calubrecht.lazerwiki.model.UserRole;
+import us.calubrecht.lazerwiki.model.VerificationToken;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.repository.VerificationTokenRepository;
+import us.calubrecht.lazerwiki.service.exception.VerificationException;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
 
 import java.util.*;
@@ -162,5 +165,33 @@ public class UserServiceTest {
     public void test_deleteUser() {
         userService.deleteUser("Frank");
         verify(userRepository).deleteById("Frank");
+    }
+
+    @Test
+    void requestSetEmail() throws MessagingException {
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
+        when(templateService.getVerifyEmailTemplate(eq("default"), eq("bob@super.com"), eq("Bob"), eq( "ABCD-EFGH"))).thenReturn("The template");
+        userService.requestSetEmail("Bob", "localhost", "bob@super.com");
+
+        verify(tokenRepository).deleteExpired();
+        verify(tokenRepository).save(new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
+        verify(emailService).sendEmail(eq("localhost"), eq("bob@super.com"), eq("Bob"), eq("Verify Email"), eq("The template"));
+    }
+
+    @Test
+    void verifyEmailToken() throws VerificationException {
+        when(tokenRepository.findByUserAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.VERIFY_EMAIL))).thenReturn(
+                new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
+        User user = new User("Bob", "hash");
+        user.setSettings(new HashMap<>());
+        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        userService.verifyEmailToken("Bob", "ABCD-EFGH");
+
+        User updateUser = new User("Bob", "hash");
+        updateUser.setSettings(Map.of("email", "bob@super.com"));
+        verify(userRepository).save(updateUser);
+
+        assertThrows(VerificationException.class, () ->  userService.verifyEmailToken("Bob", "ABCD-WXYZ"));
     }
 }

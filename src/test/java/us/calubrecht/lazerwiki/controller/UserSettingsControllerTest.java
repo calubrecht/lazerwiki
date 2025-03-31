@@ -11,9 +11,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.UserService;
+import us.calubrecht.lazerwiki.service.exception.VerificationException;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,5 +41,28 @@ public class UserSettingsControllerTest {
 
        mockMvc.perform(post("/api/users/setPassword").content("{\"userName\":\"jim\", \"password\":\"OK\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
                 andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void saveEmail() throws Exception {
+        when(userService.getUser("bob")).thenReturn(new User("Bob", null));
+        mockMvc.perform(post("/api/users/saveEmail").content("{\"userName\":\"Bob\", \"email\":\"bob@super.com\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\":true, \"message\": \"\"}"));
+        verify(userService).requestSetEmail("Bob", "localhost", "bob@super.com");
+
+        mockMvc.perform(post("/api/users/saveEmail").content("{\"userName\":\"jim\", \"email\":\"jimbo@super.com\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
+                andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void verifyEmailToken() throws Exception {
+        when(userService.getUser("bob")).thenReturn(new User("Bob", null));
+        mockMvc.perform(post("/api/users/verifyEmailToken").content("token1").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\":true, \"message\": \"\"}"));
+        verify(userService).verifyEmailToken("Bob", "token1");
+
+        doThrow(new VerificationException("Bad Token")).when(userService).verifyEmailToken("Bob", "token2");
+        mockMvc.perform(post("/api/users/verifyEmailToken").content("token2").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\":false, \"message\": \"Bad Token\"}"));
     }
 }

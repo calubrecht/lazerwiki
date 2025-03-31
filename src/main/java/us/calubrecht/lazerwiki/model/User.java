@@ -7,6 +7,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Entity(name = "userRecord")
 public class User {
@@ -46,5 +47,17 @@ public class User {
 
     public void setSettings(Map<String, Object> settings) {
         this.settings = settings;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(userName, user.userName) && Objects.equals(passwordHash, user.passwordHash) && Objects.equals(settings, user.settings) && Objects.equals(roles, user.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName, passwordHash, settings, roles);
     }
 }

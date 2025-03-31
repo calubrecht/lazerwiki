@@ -125,7 +125,6 @@ public class UserService {
 
     @Transactional
     public void requestSetEmail(String userName, String host, String email) throws MessagingException {
-        Optional<User> u = userRepository.findById(userName);
         String site = siteService.getSiteForHostname(host);
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();

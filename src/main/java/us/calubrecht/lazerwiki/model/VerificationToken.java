@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity(name = "verificationToken")
 public class VerificationToken {
@@ -68,5 +69,17 @@ public class VerificationToken {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        VerificationToken that = (VerificationToken) o;
+        return Objects.equals(user, that.user) && Objects.equals(token, that.token) && Objects.equals(data, that.data) && purpose == that.purpose;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(user, token, data, purpose);
     }
 }
