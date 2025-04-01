@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ class RegenCacheServiceTest {
 
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page2"), eq(false))).thenReturn(page2);
-        when(renderer.renderWithInfo(any(), any(), any(), any(), any())).thenAnswer(inv -> {
+        when(renderer.renderWithInfo(anyString(), any(RenderContext.class))).thenAnswer(inv -> {
             List<String> links = new ArrayList<>();
             String text = inv.getArgument(0, String.class);
             if (text.equals("text1")) {
@@ -95,7 +96,7 @@ class RegenCacheServiceTest {
 
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page2"), eq(false))).thenReturn(page2);
-        when(renderer.renderWithInfo(any(), any(), any(), any(), any())).thenAnswer(inv -> {
+        when(renderer.renderWithInfo(anyString(), any(RenderContext.class))).thenAnswer(inv -> {
             List<String> links = new ArrayList<>();
             String text = inv.getArgument(0, String.class);
             return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links));
@@ -132,7 +133,7 @@ class RegenCacheServiceTest {
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page2"), eq(false))).thenReturn(page2);
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page3"), eq(false))).thenReturn(page3);
-        when(renderer.renderWithInfo(any(), any(), any(), any(), any())).thenAnswer(inv -> {
+        when(renderer.renderWithInfo(anyString(), any(RenderContext.class))).thenAnswer(inv -> {
             List<String> links = new ArrayList<>();
             String text = inv.getArgument(0, String.class);
             return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links));
@@ -161,7 +162,7 @@ class RegenCacheServiceTest {
 
         when(linkService.getBacklinks(any(), any())).thenReturn(List.of("page1"));
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
-        when(renderer.renderWithInfo(any(), any(), any(), any(), any())).thenAnswer(inv -> {
+        when(renderer.renderWithInfo(anyString(), any(RenderContext.class))).thenAnswer(inv -> {
             List<String> links = new ArrayList<>();
             String text = inv.getArgument(0, String.class);
             return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links, RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), true));
@@ -185,7 +186,7 @@ class RegenCacheServiceTest {
         page1.setText("text1");
 
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(any(), any(), eq("page1"), eq(false))).thenReturn(page1);
-        when(renderer.renderWithInfo(any(), any(), any(), any(), any())).thenAnswer(inv -> {
+        when(renderer.renderWithInfo(anyString(), any(RenderContext.class))).thenAnswer(inv -> {
             List<String> links = new ArrayList<>();
             String text = inv.getArgument(0, String.class);
             return new RenderResult(text + " rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links, RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), true));

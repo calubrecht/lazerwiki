@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.annotation.PostConstruct;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,8 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
@@ -66,14 +69,20 @@ public class MacroService {
         return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
     }
 
-    public String renderMacro(String macroText, RenderContext renderContext) {
+    public String renderMacro(String macroText, String fullText, RenderContext renderContext) {
         String[] parts = macroText.split(":", 2);
         String macroName = parts[0];
         String macroArgs = parts.length > 1 ? parts[1] : "";
 
+        @SuppressWarnings("unchecked")
+        boolean forCache = BooleanUtils.isTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name()));
+
         Macro macro = macros.get(macroName);
         if (macro == null) {
             return "MACRO- Unknown Macro " + sanitize(macroName);
+        }
+        if (forCache && !macro.allowCache() ) {
+            return fullText;
         }
         String macroKey = "macroRunning:" + macroName;
         if (renderContext.renderState().containsKey(macroKey)) {
@@ -86,6 +95,15 @@ public class MacroService {
         } finally {
             renderContext.renderState().remove(macroKey);
         }
+    }
+
+    Pattern macroPattern = Pattern.compile("~~MACRO~~(.*?)~~/MACRO~~", Pattern.MULTILINE | Pattern.DOTALL);
+    public String postRender(String fullText, RenderContext context) {
+        Matcher matcher = macroPattern.matcher(fullText);
+        return matcher.replaceAll(matched -> {
+            String macroText = matched.group(1);
+            return renderMacro(macroText, matched.group(0), context);
+        });
     }
 
     class MacroContextImpl implements Macro.MacroContext {
@@ -110,7 +128,8 @@ public class MacroService {
             if (pageCache != null && pageCache.useCache) {
                 Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                 renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
-                return new RenderOutputImpl(pageCache.renderedCache, renderState);
+                String rendered = postRender(pageCache.renderedCache, renderContext);
+                return new RenderOutputImpl(rendered, renderState);
             }
 
             return doRender(page, pageDescriptor);
@@ -143,9 +162,10 @@ public class MacroService {
             if (pageCache != null) { // In this case, ignore useCache flag
                 Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                 renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
+                String rendered = postRender(pageCache.renderedCache, renderContext);
                 long end = System.currentTimeMillis();
                 logger.info("getCachedRender(" + pageDescriptor + ") total= " + (end - start) + " fetchPageData= " + (fetchedPageData - start) + " fetchCache= " + (fetchedCache - fetchedPageData) + " else=" + (end - fetchedCache));
-                return new RenderOutputImpl(pageCache.renderedCache, renderState);
+                return new RenderOutputImpl(rendered, renderState);
             }
             return doRender(page, pageDescriptor);
         }
@@ -157,7 +177,7 @@ public class MacroService {
             long gotPageData = System.currentTimeMillis();
             List<PageCache> pageCaches = pageService.getCachedPages(renderContext.host(), pageDescriptors);
             long gotCacheData = System.currentTimeMillis();
-            Map<String, PageData> pageMap = pages.entrySet().stream().collect(Collectors.toMap(pd -> pd.getKey().toString(), pd -> pd.getValue()));
+            Map<String, PageData> pageMap = pages.entrySet().stream().collect(Collectors.toMap(pd -> pd.getKey().toString(), Map.Entry::getValue));
             Map<String, PageCache> pageCacheMap = pageCaches.stream().collect(Collectors.toMap(pc -> new PageDescriptor(pc.namespace, pc.pageName).toString(), pc -> pc));
             Map<String, RenderOutput> outputMap = new HashMap<>();
             AtomicLong totalRenderTime = new AtomicLong(0);
@@ -178,7 +198,8 @@ public class MacroService {
                             numCachedPages.addAndGet(1);
                             Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
                             renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
-                            outputMap.put(pd, new RenderOutputImpl(pageCache.renderedCache, renderState));
+                            String rendered = postRender(pageCache.renderedCache, renderContext);
+                            outputMap.put(pd, new RenderOutputImpl(rendered, renderState));
                             return;
                         }
                         long renderStart = System.currentTimeMillis();
@@ -236,6 +257,7 @@ public class MacroService {
             if (newLinks == null) {
                 return;
             }
+            @SuppressWarnings("unchecked")
             Collection<String> existingLinks = (Collection<String>) renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>());
             existingLinks.addAll(newLinks);
         }

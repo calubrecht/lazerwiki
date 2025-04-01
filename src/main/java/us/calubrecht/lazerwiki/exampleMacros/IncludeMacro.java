@@ -43,6 +43,9 @@ public class IncludeMacro extends Macro {
     }
 
     @Override
+    public boolean allowCache() {return false;}
+
+    @Override
     public String render(MacroContext context, String macroArgs) {
         if (context.isPlaintextRender()) {
             return "";

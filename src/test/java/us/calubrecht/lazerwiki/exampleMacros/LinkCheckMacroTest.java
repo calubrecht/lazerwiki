@@ -16,8 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +53,7 @@ public class LinkCheckMacroTest {
         when(linkService.getLinksOnPage("default","page2")).thenReturn(List.of("ns:page8"));
         when(linkService.getLinksOnPage("default","page3")).thenReturn(List.of("page2"));
 
-        String rendered = macroService.renderMacro("linkCheck", renderContext);
+        String rendered = macroService.renderMacro("linkCheck", "", renderContext);
         String[] split = rendered.split("Orphaned Pages");
 
         // Broken links section. Split on 3trs will give 4 parts, so 2 broken links(page5,page8) + 1 header
@@ -87,47 +86,58 @@ public class LinkCheckMacroTest {
         when(linkService.getLinksOnPage("default","ns2:ns2Page")).thenReturn(List.of("noPage3"));
         when(linkService.getLinksOnPage("default", "notOrphan:notorpahn")).thenReturn(List.of("noPage10", "missingPage"));
 
-        String rendered = macroService.renderMacro("linkCheck", renderContext);
+        String rendered = macroService.renderMacro("linkCheck", "", renderContext);
         String[] split = rendered.split("Orphaned Pages");
         // Broken links section. Split on 4 trs will give 5 parts, so 3 broken link 1 header (_meta page is ignored)
         assertEquals(5, split[0].split("<tr>").length);
         // Orphans links section. Split on 4 trs will give 5 parts, so 3 orphans li1 header (_meta page is ignored)
         assertEquals(5, split[1].split("<tr>").length);
 
-        rendered = macroService.renderMacro("linkCheck:filterNS=ns1", renderContext);
+        rendered = macroService.renderMacro("linkCheck:filterNS=ns1", "", renderContext);
         split = rendered.split("Orphaned Pages");
         // 1 Broken link (_meta and ns1 are ignored);
         assertEquals(4, split[0].split("<tr>").length);
 
-        rendered = macroService.renderMacro("linkCheck:ns=ns2", renderContext);
+        rendered = macroService.renderMacro("linkCheck:ns=ns2",  "", renderContext);
         split = rendered.split("Orphaned Pages");
         // 1 Broken link (only ns2 is looked at)
         assertEquals(3, split[0].split("<tr>").length);
 
         // allow trailing :
-        rendered = macroService.renderMacro("linkCheck:filterNS=ns1:", renderContext);
+        rendered = macroService.renderMacro("linkCheck:filterNS=ns1:", "", renderContext);
         split = rendered.split("Orphaned Pages");
         // 1 Broken link (_meta and ns1 are ignored);
         assertEquals(4, split[0].split("<tr>").length);
 
-        rendered = macroService.renderMacro("linkCheck:ns=ns2:", renderContext);
+        rendered = macroService.renderMacro("linkCheck:ns=ns2:", "", renderContext);
         split = rendered.split("Orphaned Pages");
         // 1 Broken link (only ns2 is looked at)
         assertEquals(3, split[0].split("<tr>").length);
 
-        rendered = macroService.renderMacro("linkCheck:filterOrphanNS=notOrphan", renderContext);
+        rendered = macroService.renderMacro("linkCheck:filterOrphanNS=notOrphan", "", renderContext);
         split = rendered.split("Orphaned Pages");
         // Counts broken link on notOrphan page
         assertEquals(5, split[0].split("<tr>").length);
         // doesn't count notOrphan as orphan
         assertEquals(4, split[1].split("<tr>").length);
 
-        rendered = macroService.renderMacro("linkCheck:filterOrphanNS=notOrphan:", renderContext);
+        rendered = macroService.renderMacro("linkCheck:filterOrphanNS=notOrphan:", "", renderContext);
         split = rendered.split("Orphaned Pages");
         // Counts broken link on notOrphan page
         assertEquals(5, split[0].split("<tr>").length);
         // doesn't count notOrphan as orphan
         assertEquals(4, split[1].split("<tr>").length);
 
+    }
+
+    @Test
+        public void testLinkCheckMacroForCache() {
+        RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+        PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
+        when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
+        assertEquals("~~MACRO~~linkCheck:filterOrphanNS=notOrphan:~~/MACRO~~", macroService.renderMacro("linkCheck:filterOrphanNS=notOrphan:", "~~MACRO~~linkCheck:filterOrphanNS=notOrphan:~~/MACRO~~", renderContext));
+        // Did not render macro, safe to cache.
+        assertNull((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
     }
 }

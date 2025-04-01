@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
 
@@ -46,7 +47,9 @@ public class RegenCacheService {
         pages.forEach(pd -> {
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(siteKey, pd.getNamespace(), pd.getPagename(), false);
             PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
-            RenderResult res = renderer.renderWithInfo(p.getText(), "", siteKey, desc.toString(), UserService.SYS_USER);
+            RenderContext renderContext = new RenderContext("", siteKey, desc.toString(), UserService.SYS_USER);
+            renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+            RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
             Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
             Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
             logger.info("Setting " + links.size() + " links for " + pd.getNamespace() + ":" + pd.getPagename());
@@ -66,7 +69,9 @@ public class RegenCacheService {
         pages.forEach(pd -> {
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(siteKey, pd.getNamespace(), pd.getPagename(), false);
             PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
-            RenderResult res = renderer.renderWithInfo(p.getText(), host, siteKey, desc.toString(), UserService.SYS_USER);
+            RenderContext renderContext = new RenderContext(host, siteKey, desc.toString(), UserService.SYS_USER);
+            renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+            RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
             PageCache newCache = new PageCache();
             newCache.site = siteKey;
             newCache.namespace = pd.getNamespace();
@@ -94,7 +99,9 @@ public class RegenCacheService {
         allLinks.stream().distinct().forEach(link -> {
             PageDescriptor pd = PageService.decodeDescriptor(link);
             Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
-            RenderResult res = renderer.renderWithInfo(p.getText(), host, site, pd.toString(), UserService.SYS_USER);
+            RenderContext renderContext = new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
+            renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+            RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
             PageCache newCache = new PageCache();
             newCache.site = site;
             newCache.namespace = pd.namespace();

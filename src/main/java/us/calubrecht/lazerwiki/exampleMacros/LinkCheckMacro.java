@@ -54,6 +54,9 @@ public class LinkCheckMacro extends Macro{
     }
 
     @Override
+    public boolean allowCache() {return false;}
+
+    @Override
     public String render(Macro.MacroContext context, String macroArgs) {
         Map<String, String> argsMap = toArgsMap(macroArgs);
         Predicate<String> nsFilter = (page) -> !nsMatches(page, Set.of("_meta"));

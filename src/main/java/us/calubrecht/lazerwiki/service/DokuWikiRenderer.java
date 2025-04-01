@@ -26,7 +26,6 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     @Autowired
     RendererRegistrar renderers;
 
-
     @Override
     public String  renderToString(String markup, RenderContext context) {
         return renderToString(parseMarkup(markup), context);

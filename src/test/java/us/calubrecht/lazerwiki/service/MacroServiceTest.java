@@ -65,14 +65,14 @@ class MacroServiceTest {
     @Order(2)
     void renderMacro() {
         RenderContext context = new RenderContext("localhost", "default", "page", "user");
-        assertEquals("Good Macro", underTest.renderMacro("Good", context));
+        assertEquals("Good Macro", underTest.renderMacro("Good", "", context));
 
         // Unknown Macros give warning, macro name is sanitized
-        assertEquals("MACRO- Unknown Macro &lt;div&gt;hi&lt;/div&gt;", underTest.renderMacro("<div>hi</div>:other text", context));
+        assertEquals("MACRO- Unknown Macro &lt;div&gt;hi&lt;/div&gt;", underTest.renderMacro("<div>hi</div>:other text", "", context));
 
         // Recursive Macro does not continue to render itself
         context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
-        assertEquals("Start:<div></div>", underTest.renderMacro("Recursive", context));
+        assertEquals("Start:<div></div>", underTest.renderMacro("Recursive", "", context));
     }
 
     @Test
@@ -131,7 +131,7 @@ class MacroServiceTest {
     @Order(5)
     void testRenderPageBroken() {
         RenderContext context = new RenderContext("localhost", "default", "page", "user");
-        assertThrows(RuntimeException.class, ()-> underTest.renderMacro("Broken", context));
+        assertThrows(RuntimeException.class, ()-> underTest.renderMacro("Broken", "", context));
     }
 
     @Test
@@ -199,6 +199,33 @@ class MacroServiceTest {
         assertEquals(true, context.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
     }
 
+    @Test
+    @Order(2)
+    void renderMacroForCache() {
+        RenderContext context = new RenderContext("localhost", "default", "page", "user");
+        context.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+        // Renders as expected because macro is not no-cache
+        assertEquals("Good Macro", underTest.renderMacro("Good", "", context));
+    }
+
+    @Test
+    void testPostRender() {
+        RenderContext context = new RenderContext("localhost", "default", "page", "user");
+        String text = "THis has some ~~MACRO~~Good:very/n/ngood~~/MACRO~~ macro in it";
+        assertEquals("THis has some Good Macro macro in it", underTest.postRender(text, context));
+    }
+
+    @Test
+    void testNoCacheMacro() {
+        RenderContext context = new RenderContext("localhost", "default", "page", "user");
+        context.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+        String fullText = "~~MACRO~~NoCache~~/MACRO~~";
+        String cached = underTest.renderMacro("NoCache", fullText, context);
+        assertEquals(fullText, cached);
+        context.renderState().remove(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name());
+        assertEquals("Only render post cache", underTest.postRender(fullText, context));
+    }
+
 
     @CustomMacro
     public static class BrokenMacro extends Macro {
@@ -244,6 +271,24 @@ class MacroServiceTest {
         @Override
         public String render(MacroContext context, String macroArgs) {
             return "Start:" + context.renderMarkup("~~MACRO~~Recursive~~/MACRO~~").getHtml();
+        }
+    }
+
+    @CustomMacro
+    public static class NoCacheMAcro extends Macro {
+        @Override
+        public String getName() {
+            return "NoCache";
+        }
+
+        @Override
+        public boolean allowCache() {
+            return false;
+        }
+
+        @Override
+        public String render(MacroContext context, String macroArgs) {
+            return "Only render post cache";
         }
     }
 

@@ -507,7 +507,7 @@ public class DokuWikiRendererTest {
     @Test
     public void testRenderMacro() {
         String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
-        when(macroService.renderMacro(eq("macro1: macro"), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
+        when(macroService.renderMacro(eq("macro1: macro"), anyString(), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
         String render = underTest.renderToString(inputMacro, "", "", "page", "");
         assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
     }

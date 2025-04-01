@@ -51,33 +51,33 @@ class WrapMacroTest {
     @Test
     void render() {
         RenderContext renderContext = context();
-        assertEquals("<div class=\"special\">This is some special text</div>", macroService.renderMacro("wrap:special:This is some special text", renderContext));
+        assertEquals("<div class=\"special\">This is some special text</div>", macroService.renderMacro("wrap:special:This is some special text", "", renderContext));
     }
 
     @Test
     void renderMultiline() {
         RenderContext renderContext = context();
-        assertEquals("<div class=\"special\"><div>This is some special text</div>\n<div>OnMultiple lines</div></div>", macroService.renderMacro("wrap:special:This is some special text\n\nOnMultiple lines", renderContext));
+        assertEquals("<div class=\"special\"><div>This is some special text</div>\n<div>OnMultiple lines</div></div>", macroService.renderMacro("wrap:special:This is some special text\n\nOnMultiple lines", "", renderContext));
     }
 
     @Test
     void renderSimple() {
         RenderContext renderContext = context();
-        assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag", renderContext));
-        assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag:", renderContext));
+        assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag", "", renderContext));
+        assertEquals("<div class=\"justTag\"></div>", macroService.renderMacro("wrap:justTag:", "", renderContext));
     }
 
     @Test
     void renderWithLinks() {
         when(pageService.getTitle(anyString(), anyString())).thenReturn("title");
         RenderContext renderContext = context();
-        macroService.renderMacro("wrap:withLink:[[aLink]]", renderContext);
+        macroService.renderMacro("wrap:withLink:[[aLink]]", "", renderContext);
 
         assertEquals(new HashSet<>(Arrays.asList("aLink")), renderContext.renderState().get(LINKS.name()));
 
         renderContext = context();
         renderContext.renderState().put(LINKS.name(), new HashSet<>(Arrays.asList("existingLink")));
-        macroService.renderMacro("wrap:withLink:[[aLink]]", renderContext);
+        macroService.renderMacro("wrap:withLink:[[aLink]]", "", renderContext);
 
         assertEquals(new HashSet<>(Arrays.asList("aLink", "existingLink")), renderContext.renderState().get(LINKS.name()));
     }

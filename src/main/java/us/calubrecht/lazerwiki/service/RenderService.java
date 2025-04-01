@@ -11,6 +11,7 @@ import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
 
@@ -26,6 +27,9 @@ public class RenderService {
 
     @Autowired
     PageUpdateService pageUpdateService;
+
+    @Autowired
+    MacroService macroService;
 
     @Autowired
     SiteService siteService;
@@ -52,19 +56,25 @@ public class RenderService {
         long queryMillis = sw.getSplitTime();
         PageCache cachedPage = pageService.getCachedPage(host, sPageDescriptor);
         if (cachedPage != null && cachedPage.useCache) {
-            PageData pd = new PageData(cachedPage.renderedCache, cachedPage.source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            RenderContext macroRenderContext = new RenderContext(host, site, sPageDescriptor, userName, renderer, new HashMap<>());
+            String rendered = macroService.postRender(cachedPage.renderedCache, macroRenderContext);
+            PageData pd = new PageData(rendered, cachedPage.source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,QueryCache)");
             return pd;
         }
         try {
-            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, sPageDescriptor, userName);
-            String source = pageService.adjustSource(d.source(), rendered);
-            PageData pd = new PageData(rendered.renderedText(), source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            RenderContext renderContext = new RenderContext(host, site, sPageDescriptor, userName);
+            renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+            RenderResult cacheRender = renderer.renderWithInfo(d.source(), renderContext);
+            RenderContext macroRenderContext = new RenderContext(host, site, sPageDescriptor, userName, renderer, new HashMap<>());
+            String rendered = macroService.postRender(cacheRender.renderedText(), macroRenderContext);
+            String source = pageService.adjustSource(d.source(), cacheRender);
+            PageData pd = new PageData(rendered, source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
             sw.stop();
             long totalMillis = sw.getTime();
-            pageService.saveCache(host, sPageDescriptor, d.source(), rendered);
+            pageService.saveCache(host, sPageDescriptor, d.source(), cacheRender);
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
             return pd;
         }
@@ -105,7 +115,9 @@ public class RenderService {
     @SuppressWarnings("unchecked")
     public void savePage(String host, String sPageDescriptor,String text, List<String> tags, long revision, boolean force, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
-        RenderResult res = renderer.renderWithInfo(text, host, site, sPageDescriptor, userName);
+        RenderContext renderContext = new RenderContext(host, site, sPageDescriptor, userName);
+        renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+        RenderResult res = renderer.renderWithInfo(text, renderContext);
         Collection<String> links = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
         Collection<String> images = (Collection<String>)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
         pageUpdateService.savePage(host, sPageDescriptor, revision, text, tags, links, images, res.getTitle(), userName, force);

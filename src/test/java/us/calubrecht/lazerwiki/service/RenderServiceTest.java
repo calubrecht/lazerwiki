@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
 
@@ -37,13 +38,17 @@ public class RenderServiceTest {
     @MockBean
     SiteService siteService;
 
+    @MockBean
+    MacroService macroService;
+
     @Test
     public void testRender() {
         PageData pd = new PageData(null, "This is raw page text",  null,null, null, PageData.ALL_RIGHTS, 1L);
-        when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), eq("ns:realPage"), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
+        when(renderer.renderWithInfo(eq("This is raw page text"), any(RenderContext.class))).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(pageService.adjustSource(anyString(), any())).thenReturn("adjusted Source");
+        when(macroService.postRender(any(), any())).thenAnswer(inv -> inv.getArgument(0, String.class));
 
         assertEquals(new PageData("This is Rendered Text", "adjusted Source",   null,null,null, PageData.ALL_RIGHTS, 1L), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
 
@@ -75,8 +80,9 @@ public class RenderServiceTest {
     @Test
     public void testSavePage() throws PageWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString(), anyString())).thenReturn(
+        when(renderer.renderWithInfo(eq("text"), any(RenderContext.class))).thenReturn(
                 new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title")));
+        when(macroService.postRender(any(), any())).thenAnswer(inv -> inv.getArgument(0, String.class));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), 10,false, "user");
 
         verify(pageUpdateService).savePage("host", "pageName", 10L, "text",  Collections.emptyList(),  Collections.emptySet(), Collections.emptySet(),"The Title","user", false);
@@ -88,8 +94,9 @@ public class RenderServiceTest {
     public void testSavePageWithLinks() throws PageWriteException {
         List<String> links = List.of("page1", "page2");
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(renderer.renderWithInfo(eq("text"), eq("host"), eq("default"), anyString(), anyString())).thenReturn(
+        when(renderer.renderWithInfo(eq("text"), any(RenderContext.class))).thenReturn(
                 new RenderResult("rendered", "", Map.of(RenderResult.RENDER_STATE_KEYS.TITLE.name(),"The Title", RenderResult.RENDER_STATE_KEYS.LINKS.name(), links)));
+        when(macroService.postRender(any(), any())).thenAnswer(inv -> inv.getArgument(0, String.class));
         underTest.savePage("host", "pageName", "text", Collections.emptyList(), 10,false, "user");
         verify(pageUpdateService).savePage("host", "pageName", 10L, "text",  Collections.emptyList(),  links,Collections.emptySet(),"The Title","user", false);
 
@@ -112,10 +119,11 @@ public class RenderServiceTest {
     @Test
     public void testGetRendererdPAge_Cached() {
         PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
-        when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), anyString(), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
+        when(renderer.renderWithInfo(eq("This is raw page text"), any(RenderContext.class))).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(pageService.getPageData(any(), eq("ns:realPage2"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(macroService.postRender(any(), any())).thenAnswer(inv -> inv.getArgument(0, String.class));
         PageCache cached = new PageCache();
         cached.useCache = true;
         cached.renderedCache = "This is from rendered Cache";

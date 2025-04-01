@@ -25,7 +25,7 @@ public class MacroRenderer extends TreeRenderer {
     public StringBuilder render(ParseTree tree, RenderContext context) {
         String treeText = tree.getText();
         String innerText = treeText.substring("~~MACRO~~".length(), treeText.length() - "~~/MACRO~~".length());
-        return new StringBuilder(macroService.renderMacro(innerText, context));
+        return new StringBuilder(macroService.renderMacro(innerText, treeText, context));
     }
 
     @Override
