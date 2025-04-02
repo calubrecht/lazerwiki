@@ -1,9 +1,15 @@
 package us.calubrecht.lazerwiki.responses;
 
+import us.calubrecht.lazerwiki.model.PerfTracker;
+
 import java.util.List;
 import java.util.Map;
 
-public record PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id, Long revision, boolean success, String msg) {
+public record PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id, Long revision, boolean success, String msg, PerfTracker perfTracker) {
+
+    public PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id, Long revision, boolean success, String msg) {
+       this(rendered, source, title, tags, backlinks, flags, id, revision, success, msg, null);
+  ;  }
 
     public PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id, Long revision) {
         this(rendered, source, title, tags, backlinks, flags, id, revision, true, null);
