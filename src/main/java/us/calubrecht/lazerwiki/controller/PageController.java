@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import us.calubrecht.lazerwiki.model.PageDesc;
+import us.calubrecht.lazerwiki.model.PerfTracker;
 import us.calubrecht.lazerwiki.model.RecentChangesResponse;
 import us.calubrecht.lazerwiki.requests.MovePageRequest;
 import us.calubrecht.lazerwiki.responses.*;
@@ -47,7 +48,10 @@ public class PageController {
     public PageData getPage(@PathVariable Optional<String> pageDescriptor, Principal principal, HttpServletRequest request ) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? "Guest" : principal.getName();
-        return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
+        PerfTracker tracker = new PerfTracker();
+        PageData pd = renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName, tracker);
+        tracker.stopAll();
+        return pd;
     }
 
     @RequestMapping(value = {"/history/{pageDescriptor}", "/history/"})
@@ -84,8 +88,11 @@ public class PageController {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
         try {
+            PerfTracker tracker = new PerfTracker();
             renderService.savePage(url.getHost(), pageDescriptor.orElse(""), body.getText(), body.getTags(), body.getRevision(), body.isForce(), userName);
-            return renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName);
+            PageData pd = renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName, tracker);
+            tracker.stopAll();
+            return pd;
         }
         catch (PageRevisionException pre) {
             return new PageData(null, null, null, null, null, null, null, null, false, pre.getMessage());

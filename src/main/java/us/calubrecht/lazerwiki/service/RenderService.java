@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDesc;
+import us.calubrecht.lazerwiki.model.PerfTracker;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
@@ -34,10 +35,13 @@ public class RenderService {
     @Autowired
     SiteService siteService;
 
-    public PageData getRenderedPage(String host, String sPageDescriptor, String userName) {
+    public PageData getRenderedPage(String host, String sPageDescriptor, String userName, PerfTracker perfTracker) {
         StopWatch sw = StopWatch.createStarted();
+        perfTracker.startTimer("All");
+        perfTracker.startTimer("FetchPage");
         String site = siteService.getSiteForHostname(host);
         PageData d = pageService.getPageData(host, sPageDescriptor, userName);
+        perfTracker.stopTimer("FetchPage");
         /*
           XXX:Could make these renderable templates;
          */
@@ -45,8 +49,10 @@ public class RenderService {
             return d;
         }
         if (d.flags().moved()) {
+            perfTracker.startTimer("Render");
             RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, sPageDescriptor, userName);
-            PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            perfTracker.stopTimer("Render");
+            PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision(), false, "", perfTracker);
             return pd;
         }
         if (!d.flags().exists()) {
@@ -54,11 +60,15 @@ public class RenderService {
         }
         sw.split();
         long queryMillis = sw.getSplitTime();
+        perfTracker.startTimer("GetCache");
         PageCache cachedPage = pageService.getCachedPage(host, sPageDescriptor);
+        perfTracker.stopTimer("GetCache");
         if (cachedPage != null && cachedPage.useCache) {
             RenderContext macroRenderContext = new RenderContext(host, site, sPageDescriptor, userName, renderer, new HashMap<>());
+            perfTracker.startTimer("PostRender");
             String rendered = macroService.postRender(cachedPage.renderedCache, macroRenderContext);
-            PageData pd = new PageData(rendered, cachedPage.source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            perfTracker.stopTimer("PostRender");
+            PageData pd = new PageData(rendered, cachedPage.source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision(), true, "", perfTracker);
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,QueryCache)");
@@ -67,14 +77,22 @@ public class RenderService {
         try {
             RenderContext renderContext = new RenderContext(host, site, sPageDescriptor, userName);
             renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+            perfTracker.startTimer("Render");
             RenderResult cacheRender = renderer.renderWithInfo(d.source(), renderContext);
+            perfTracker.stopTimer("Render");
             RenderContext macroRenderContext = new RenderContext(host, site, sPageDescriptor, userName, renderer, new HashMap<>());
+            perfTracker.startTimer("PostRender");
             String rendered = macroService.postRender(cacheRender.renderedText(), macroRenderContext);
+            perfTracker.stopTimer("PostRender");
+            perfTracker.startTimer("AdjustSource");
             String source = pageService.adjustSource(d.source(), cacheRender);
-            PageData pd = new PageData(rendered, source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision());
+            perfTracker.stopTimer("AdjustSource");
+            PageData pd = new PageData(rendered, source, d.title(), d.tags(), d.backlinks(), d.flags(), d.id(), d.revision(), true, "", perfTracker);
             sw.stop();
             long totalMillis = sw.getTime();
+            perfTracker.startTimer("SaveCache");
             pageService.saveCache(host, sPageDescriptor, d.source(), cacheRender);
+            perfTracker.stopTimer("SaveCache");
             logger.info("Render " + sPageDescriptor + " took (" + totalMillis + "," + queryMillis + "," + (totalMillis-queryMillis) + ")ms (Total,Query,Render)");
             return pd;
         }
