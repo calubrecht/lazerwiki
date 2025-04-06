@@ -19,7 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -155,6 +155,41 @@ public class MediaCacheServiceTest {
         byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 10);
         assertEquals("(10,10)", getFileDimensions(f));
         verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
+        assertTrue(f.exists());
+    }
+
+    @Test
+    public void testClearCache() throws IOException {
+        when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
+            return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
+                    inv.getArgument(1, String.class),
+                    inv.getArgument(2, Integer.class),
+                    inv.getArgument(3, Integer.class));
+        });
+
+        // Create cached file
+        Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
+        Path originalLocation = Paths.get(staticFileRoot, "default", "media", "ns");
+        MediaRecord mediaRecord = new MediaRecord("circleWdot.png", "default",  "ns","Bob", 7, 20, 20);
+        File f = Paths.get(cacheLocation.toString(),"circleWdot.png-10x10").toFile();
+        File origFile = Paths.get(originalLocation.toString(),"circleWdot.png").toFile();
+        Files.deleteIfExists(Path.of(f.getPath()));
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 10);
+
+        underTest.clearCache("default", mediaRecord);
+        assertFalse(f.exists());
+
+        // Create cached file, no ns
+        cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
+        originalLocation = Paths.get(staticFileRoot, "default", "media");
+        mediaRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 20, 20);
+        f = Paths.get(cacheLocation.toString(),"circle.png-10x10").toFile();
+        File origFile2 = Paths.get(originalLocation.toString(),"circle.png").toFile();
+        Files.deleteIfExists(Path.of(f.getPath()));
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile2),10, 10);
+
+        underTest.clearCache("default", mediaRecord);
+        assertFalse(f.exists());
     }
 
 }

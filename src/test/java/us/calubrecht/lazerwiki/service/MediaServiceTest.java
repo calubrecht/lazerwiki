@@ -136,6 +136,7 @@ class MediaServiceTest {
         verify(mediaRecordRepository).save(eq(newRecord));
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", "Bob", "Uploaded");
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
+        verify(cacheService).clearCache(eq("default"), eq(newRecord));
 
         FileInputStream fis = new FileInputStream(f);
         byte[] bytesRead = fis.readAllBytes();

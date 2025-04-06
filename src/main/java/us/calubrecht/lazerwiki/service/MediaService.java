@@ -140,6 +140,7 @@ public class MediaService {
         mediaRecordRepository.save(newRecord);
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, userName, action);
         mediaHistoryRepository.save(historyRecord);
+        mediaCacheService.clearCache(site, newRecord);
         File f = nsPath.isBlank() ?
                 new File(String.join("/", staticFileRoot, site, "media", fileName)):
                 new File(String.join("/", staticFileRoot, site, "media", nsPath, fileName));

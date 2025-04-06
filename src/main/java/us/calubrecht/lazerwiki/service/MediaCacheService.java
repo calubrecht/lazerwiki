@@ -66,4 +66,17 @@ public class MediaCacheService {
         logger.info("Scaled image " + record.getFileName() + " and wrote " + cachedFile + " elapsed " + sw.getTotalTimeMillis() + "ms");
         return scaledFile;
     }
+
+    public void clearCache(String site, MediaRecord record) throws IOException {
+        String nsPath = record.getNamespace().replaceAll(":", "/");
+        ensureDir(site, nsPath);
+        Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
+        File cacheDir = record.getNamespace().isBlank() ? new File(Paths.get(cacheLocation.toString()).toString())
+                : new File(Paths.get(cacheLocation.toString(), record.getNamespace()).toString());
+        String nameMatch = record.getFileName() + "-.*";
+        File[] files = cacheDir.listFiles( (dir, name) -> name.matches(nameMatch));
+        for (File file: files) {
+            file.delete();
+        }
+    }
 }
