@@ -3,10 +3,12 @@ package us.calubrecht.lazerwiki.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.*;
+import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +20,9 @@ public class NamespaceService {
 
     @Autowired
     PageRepository pageRepository;
+
+    @Autowired
+    MediaRecordRepository mediaRecordRepository;
 
     @Autowired
     UserService userService;
@@ -123,7 +128,10 @@ public class NamespaceService {
     }
 
     public List<String> getReadableNamespaces(String site, String userName) {
-        List<String> allNS = pageRepository.getAllNamespaces(site);
+        List<String> allPageNS = pageRepository.getAllNamespaces(site);
+        List<String> allMediaNS = mediaRecordRepository.getAllNamespaces(site);
+        Set<String> allNS = new LinkedHashSet<>(allPageNS);
+        allNS.addAll(allMediaNS);
         return allNS.stream().filter(ns -> canReadNamespace(site, ns, userName)).toList();
     }
 }

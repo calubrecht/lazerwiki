@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.*;
+import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 
@@ -30,6 +31,9 @@ public class NamespaceServiceTest {
 
     @MockBean
     PageRepository pageRepository;
+
+    @MockBean
+    MediaRecordRepository mediaRecordRepository;
 
     @Test
     public void testCanReadNamespace() {
