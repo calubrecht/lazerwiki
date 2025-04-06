@@ -43,7 +43,10 @@ public class IncludeMacro extends Macro {
     }
 
     @Override
-    public boolean allowCache() {return false;}
+    public boolean allowCache(MacroContext context, String macroArgs) {
+        String includePath = macroArgs.trim();
+        context.addLinks(List.of(includePath));
+        return false;}
 
     @Override
     public String render(MacroContext context, String macroArgs) {

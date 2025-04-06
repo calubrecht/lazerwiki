@@ -54,7 +54,7 @@ public class LinkCheckMacro extends Macro{
     }
 
     @Override
-    public boolean allowCache() {return false;}
+    public boolean allowCache(MacroContext context, String macroArgs) {return false;}
 
     @Override
     public String render(Macro.MacroContext context, String macroArgs) {

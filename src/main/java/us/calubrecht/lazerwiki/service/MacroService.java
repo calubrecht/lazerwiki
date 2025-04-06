@@ -81,7 +81,7 @@ public class MacroService {
         if (macro == null) {
             return "MACRO- Unknown Macro " + sanitize(macroName);
         }
-        if (forCache && !macro.allowCache() ) {
+        if (forCache && !macro.allowCache(new MacroContextImpl(renderContext), macroArgs)) {
             return fullText;
         }
         String macroKey = "macroRunning:" + macroName;

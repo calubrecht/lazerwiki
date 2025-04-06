@@ -282,7 +282,7 @@ class MacroServiceTest {
         }
 
         @Override
-        public boolean allowCache() {
+        public boolean allowCache(MacroContext context, String macroArgs) {
             return false;
         }
 

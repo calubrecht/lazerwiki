@@ -14,7 +14,7 @@ public abstract class Macro {
 
     public abstract String render(MacroContext context, String macroArgs);
 
-    public boolean allowCache() { return true;}
+    public boolean allowCache(MacroContext context, String macroArgs) { return true;}
 
     /**
      * If macroArgs is of the format "key1=val1&key2=val2", will split the argument into a Map<String, String>
