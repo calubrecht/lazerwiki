@@ -63,6 +63,8 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/api/plugin/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/admin/globalSettings", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/admin/user/*", HttpMethod.PUT.toString()),
+                                            new AntPathRequestMatcher("/*", HttpMethod.GET.toString()),
+                                            new AntPathRequestMatcher("/assets/*", HttpMethod.GET.toString()),
                                             // Ignore for CORS requests
                                             new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                             createAdminMatcher).permitAll().
