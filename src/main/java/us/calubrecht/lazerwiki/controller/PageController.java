@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("api/page/")
+@RequestMapping(value={"api/page/", "app/api/page/"})
 public class PageController {
     @Autowired
     PageService pageService;

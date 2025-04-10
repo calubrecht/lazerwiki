@@ -46,8 +46,18 @@ public class WarfileController {
         }
     }
 
-    @RequestMapping(value = {"", "{filename}"})
-    public ResponseEntity<byte[]> getIndexFile(@PathVariable("filename") Optional<String>  oFilename, HttpServletRequest request) {
-        return getResponseEntity(oFilename.orElse("index.html"), request);
+    @RequestMapping("")
+    public ResponseEntity<byte[]> getIndexFile(HttpServletRequest request) {
+        return getResponseEntity("index.html", request);
+    }
+
+    @RequestMapping("page/{filename}")
+    public ResponseEntity<byte[]> getPageFile(HttpServletRequest request) {
+        return getResponseEntity("index.html", request);
+    }
+
+    @RequestMapping("{filename}")
+    public ResponseEntity<byte[]> getRootFile(@PathVariable("filename") String filename, HttpServletRequest request) {
+        return getResponseEntity(filename, request);
     }
 }
