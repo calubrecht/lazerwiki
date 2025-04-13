@@ -44,6 +44,8 @@ public abstract class Macro {
         List<String> getPagesByNSAndTag(String ns, String tag);
         List<String> getAllPages();
 
+        boolean isReadable(String pageDescriptor);
+
         List<String> getLinksOnPage(String page);
 
         RenderOutput renderMarkup(String markup);

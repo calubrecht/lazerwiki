@@ -227,6 +227,11 @@ public class MacroService {
         }
 
         @Override
+        public boolean isReadable(String pageDescriptor) {
+            return pageService.isReadable(renderContext.host(), pageDescriptor, renderContext.user());
+        }
+
+        @Override
         public List<String> getLinksOnPage(String page) {
             return linkService.getLinksOnPage(renderContext.site(), page);
         }

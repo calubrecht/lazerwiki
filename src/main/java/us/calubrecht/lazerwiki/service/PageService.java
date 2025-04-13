@@ -255,6 +255,12 @@ public class PageService {
         return pages.stream().map(PageDesc::getDescriptor).toList();
     }
 
+    public boolean isReadable(String host, String pageDescriptor, String userName) {
+        String site = siteService.getSiteForHostname(host);
+        PageDescriptor pd = PageDescriptor.fromFullName(pageDescriptor);
+        return namespaceService.canReadNamespace(site, pd.namespace(), userName);
+    }
+
     public List<String> getAllTags(String host, String userName) {
         String site = siteService.getSiteForHostname(host);
         return tagRepository.getAllActiveTags(site);

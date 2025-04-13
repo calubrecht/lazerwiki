@@ -45,10 +45,12 @@ public class LinkCheckMacroTest {
     @MockBean
     LinkOverrideService linkOverrideService;
 
+
     @Test
     public void testChecklinks() {
         RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
         when(pageService.getAllPagesFlat("localhost", "user")).thenReturn(List.of("", "page2", "page3"));
+        when(pageService.isReadable(eq("localhost"), anyString(), anyString())).thenReturn(true);
         when(linkService.getLinksOnPage("default","")).thenReturn(List.of("page2", "page5"));
         when(linkService.getLinksOnPage("default","page2")).thenReturn(List.of("ns:page8"));
         when(linkService.getLinksOnPage("default","page3")).thenReturn(List.of("page2"));
@@ -85,6 +87,7 @@ public class LinkCheckMacroTest {
         when(linkService.getLinksOnPage("default","ns1:nsPage")).thenReturn(List.of("noPage2","noPage3"));
         when(linkService.getLinksOnPage("default","ns2:ns2Page")).thenReturn(List.of("noPage3"));
         when(linkService.getLinksOnPage("default", "notOrphan:notorpahn")).thenReturn(List.of("noPage10", "missingPage"));
+        when(pageService.isReadable(eq("localhost"), anyString(), anyString())).thenReturn(true);
 
         String rendered = macroService.renderMacro("linkCheck", "", renderContext);
         String[] split = rendered.split("Orphaned Pages");
@@ -139,5 +142,22 @@ public class LinkCheckMacroTest {
         assertEquals("~~MACRO~~linkCheck:filterOrphanNS=notOrphan:~~/MACRO~~", macroService.renderMacro("linkCheck:filterOrphanNS=notOrphan:", "~~MACRO~~linkCheck:filterOrphanNS=notOrphan:~~/MACRO~~", renderContext));
         // Did not render macro, safe to cache.
         assertNull((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
+    }
+
+    @Test
+    public void testChecklinksForReadable() {
+        RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        when(pageService.getAllPagesFlat("localhost", "user")).thenReturn(List.of("", "page2", "page3"));
+        when(pageService.isReadable(eq("localhost"), eq("page5"), anyString())).thenReturn(true);
+        when(linkService.getLinksOnPage("default","")).thenReturn(List.of("page2", "page5"));
+        when(linkService.getLinksOnPage("default","page2")).thenReturn(List.of("ns:page8"));
+        when(linkService.getLinksOnPage("default","page3")).thenReturn(List.of("page2"));
+
+        String rendered = macroService.renderMacro("linkCheck", "", renderContext);
+        String[] split = rendered.split("Orphaned Pages");
+
+        // Broken links section. Split gives 3 parts = 2 rows, so 1 broken links(page5) + 1 header
+        assertEquals(3, split[0].split("<tr>").length);
+        assertTrue(split[0].indexOf("HOME") != -1);
     }
 }

@@ -597,6 +597,14 @@ public class PageServiceTest {
         assertEquals("[[moreText|source]][[short]]", adjusted);
     }
 
+    @Test
+    void testIsReadable() {
+        when(namespaceService.canReadNamespace("default", "ns", "Bob")).thenReturn(true);
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        assertTrue(pageService.isReadable("localhost", "ns:page1", "Bob"));
+        assertFalse(pageService.isReadable("localhost", "ns2:page1", "Bob"));
+    }
+
 
     public static class PageDescImpl implements PageDesc {
         final String namespace;
