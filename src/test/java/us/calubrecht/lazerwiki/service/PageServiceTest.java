@@ -304,7 +304,7 @@ public class PageServiceTest {
         PageDesc page1 = new PageDescImpl("", "page1", "Page 1", "Bob" );
         PageDesc page2 = new PageDescImpl("ns1:ns2", "page3", "Page 1","Francis");
         List<PageDesc> pages = List.of(page1, page2);
-        when(pageRepository.getByTagname("site1", "tag1")).thenReturn(pages);
+        when(pageRepository.getByTagname("mysql","site1", "tag1")).thenReturn(pages);
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pages);
         when(namespaceService.filterReadablePages(any(), eq("site1"), eq("joe"))).thenReturn(List.of(page1));
@@ -356,7 +356,7 @@ public class PageServiceTest {
         Map<String, List<SearchResult>> results = pageService.searchPages("host1", "bob",searchTerms);
         assertEquals(0, results.size());
 
-         verify(pageRepository, never()).getByTagname(anyString(), anyString());
+         verify(pageRepository, never()).getByTagname(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -537,7 +537,7 @@ public class PageServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
         ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
-        when(pageRepository.getAllBySiteAndNamespaceAndPagename(eq("site1"), captor.capture())).
+        when(pageRepository.getAllBySiteAndNamespaceAndPagename(anyString(), eq("site1"), captor.capture())).
                 thenReturn(List.of(pt1, pt2, pt3));
 
         Map<PageDescriptor, PageData> res = pageService.getPageData("localhost", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Bob");

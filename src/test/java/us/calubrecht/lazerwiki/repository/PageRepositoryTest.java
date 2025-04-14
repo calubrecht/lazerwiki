@@ -83,7 +83,7 @@ class PageRepositoryTest {
 
     @Test
     void getAllBySiteAndNamespaceAndPagename() {
-        List<PageText> pages = pageRepository.getAllBySiteAndNamespaceAndPagename("site1", List.of("ns:page1", "ns:page2"));
+        List<PageText> pages = pageRepository.getAllBySiteAndNamespaceAndPagename("mysql","site1", List.of("ns:page1", "ns:page2"));
         assertEquals(2, pages.size());
         assertEquals("page1", pages.get(0).getPagename());
         assertEquals("some text", pages.get(0).getText());

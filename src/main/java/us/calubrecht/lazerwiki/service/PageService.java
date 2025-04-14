@@ -115,7 +115,7 @@ public class PageService {
             PageDescriptor pageDescriptor = decodeDescriptor(desc);
             return pageDescriptor.namespace() + ":" + pageDescriptor.pageName();
         }).toList();
-        List<PageText> pageTexts = pageRepository.getAllBySiteAndNamespaceAndPagename(site, keys);
+        List<PageText> pageTexts = pageRepository.getAllBySiteAndNamespaceAndPagename(dbEngine, site, keys);
         return pageTexts.stream().collect(Collectors.toMap(
                 pageText -> new PageDescriptor(pageText.getNamespace(), pageText.getPagename()),
                 pageText -> {
@@ -275,7 +275,7 @@ public class PageService {
         if (searchTerms.containsKey("tag")) {
             String tagName = searchTerms.get("tag");
             List<SearchResult> tagPages = namespaceService.
-                    filterReadablePages(pageRepository.getByTagname(site, tagName), site, userName).stream().
+                    filterReadablePages(pageRepository.getByTagname(dbEngine, site, tagName), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
                     map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
