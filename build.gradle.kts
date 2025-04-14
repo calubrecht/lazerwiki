@@ -35,6 +35,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("org.jsoup:jsoup:1.16.2")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.12")
+	implementation("org.xerial:sqlite-jdbc:3.49.1.0")
+	implementation("org.hibernate.orm:hibernate-community-dialects")
 
 
 	providedRuntime("mysql:mysql-connector-java:8.0.33")

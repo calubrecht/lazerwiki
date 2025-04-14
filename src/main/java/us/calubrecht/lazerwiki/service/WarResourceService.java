@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -12,6 +13,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 @Service
+@ConditionalOnProperty("lazerwiki.standalone.ui.warfile")
 public class WarResourceService {
 
     @Value("${lazerwiki.standalone.ui.warfile}")

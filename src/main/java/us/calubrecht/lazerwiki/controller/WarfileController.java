@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("")
-// standalone mode only...
+@ConditionalOnProperty("lazerwiki.standalone.ui.warfile")
 public class WarfileController {
     @Autowired
     WarResourceService resourceService;  /// Seperate version that only loads from external ui war
