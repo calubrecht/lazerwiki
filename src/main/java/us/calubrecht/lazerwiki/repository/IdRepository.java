@@ -17,7 +17,7 @@ public class IdRepository {
     JdbcTemplate jdbcTemplate;
 
     public long getNewId() {
-        final String generateIdSQL = "INSERT INTO page_ids () VALUES ()";
+        final String generateIdSQL = "INSERT INTO page_ids VALUES (NULL)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(

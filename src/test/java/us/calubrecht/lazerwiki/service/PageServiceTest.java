@@ -326,8 +326,8 @@ public class PageServiceTest {
         PageCache page2 = new PageCache("site1", "ns", "page2", "Page2", "", "All your bananas\nbelong to me\nThe banana thief", false);
         List<PageCache> pages = List.of(page1, page2);
         List<PageDesc> pagesDesc = List.of(page1, page2);
-        when(pageCacheRepository.searchByTitle(eq("site1"), eq("banana*"))).thenReturn(List.of(page1, page2));
-        when(pageCacheRepository.searchByText(eq("site1"), eq("banana*"))).thenReturn(List.of(page1, page2));
+        when(pageCacheRepository.searchByTitle(any(), eq("site1"), eq("banana*"))).thenReturn(List.of(page1, page2));
+        when(pageCacheRepository.searchByText(any(),eq("site1"), eq("banana*"))).thenReturn(List.of(page1, page2));
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pagesDesc);
 

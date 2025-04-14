@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.util.Pair;
 import org.apache.commons.text.StringEscapeUtils;
@@ -48,6 +49,9 @@ public class PageService {
 
     @Autowired
     LinkOverrideService linkOverrideService;
+
+    @Value("${lazerwiki.db.engine:mysql}")
+    String dbEngine;
 
     public boolean exists(String host, String pageName) {
         String site = siteService.getSiteForHostname(host);
@@ -182,6 +186,7 @@ public class PageService {
         newCache.plaintextCache = rendered.plainText();
         newCache.useCache = !(Boolean)rendered.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
         newCache.source = adjustSource(source, rendered);
+        newCache.title = (String)rendered.renderState().get(RenderResult.RENDER_STATE_KEYS.TITLE.name());
         pageCacheRepository.save(newCache);
     }
 
@@ -283,11 +288,11 @@ public class PageService {
             String searchTerm = prepareSearchTerm(searchTerms.get("text"));
             String searchLower = searchTerms.get("text").toLowerCase();
             List<SearchResult> titlePages = namespaceService.
-                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(site, searchTerm)), site, userName).stream().
+                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(dbEngine, site, searchTerm)), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
                     map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
             List<SearchResult> textPages = namespaceService.
-                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(site, searchTerm)), site, userName).stream().
+                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(dbEngine, site, searchTerm)), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
                     map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchLower.split(" ")))).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
