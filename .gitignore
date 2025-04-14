@@ -48,3 +48,5 @@ out/
 /src/test/resources/static/default/media/ns2/
 /src/test/resources/static/default/media-cache/
 /src/main/java/localMacros
+
+lazerwiki.db
