@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "0.1.13.9"
+version = "0.1.14"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -137,6 +137,7 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/util/ImageUtil.class",
 							"us/calubrecht/lazerwiki/util/IOSupplier.class",
 							"us/calubrecht/lazerwiki/examplePlugins/ClearFloats.class",
+						    "us/calubrecht/lazerwiki/config/LazerwikiDataSourceConfiguration.class",
 							"localMacros/*")
 				}
 			})

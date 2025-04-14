@@ -148,3 +148,15 @@ CREATE TABLE `verificationToken` (
   `expiry` DATETIME ,
   PRIMARY KEY (`id`)
 ) ;
+
+
+
+CREATE TABLE `tag` (
+	`id` NUMBER(11) NOT NULL,
+	`pageId` NUMBER(11) NOT NULL DEFAULT '0',
+	`revision` NUMBER(11) NOT NULL DEFAULT '0',
+	`tag` VARCHAR(50) NOT NULL,
+	PRIMARY KEY (`id`)
+);
+
+insert into tag (id, pageId, revision, tag) VALUES(1, 6, 1, 'bigTag');

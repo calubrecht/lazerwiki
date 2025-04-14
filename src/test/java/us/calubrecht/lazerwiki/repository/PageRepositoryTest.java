@@ -110,4 +110,19 @@ class PageRepositoryTest {
         assertEquals(2, namespaces.size());
         assertEquals(Set.of("ns2", "ns5"), new HashSet<>(namespaces));
     }
+
+    @Test
+    void test_getByTagname() {
+        List<PageDesc> tags = pageRepository.getByTagname("mysql", "site2", "bigTag");
+
+        assertEquals(1, tags.size());
+        assertEquals("pagens2a", tags.get(0).getPagename());
+
+    }
+
+    @Test
+    void testGetMaxTS() {
+        assertEquals("9999-12-31 00:00:00", pageRepository.getMaxTS("mysql"));
+        assertEquals("253402232400000", pageRepository.getMaxTS("sqlite"));
+    }
 }
