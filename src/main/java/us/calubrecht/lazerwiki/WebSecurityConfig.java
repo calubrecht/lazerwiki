@@ -63,6 +63,9 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/api/plugin/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/admin/globalSettings", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/admin/user/*", HttpMethod.PUT.toString()),
+                                            new AntPathRequestMatcher("/*", HttpMethod.GET.toString()),
+                                            new AntPathRequestMatcher("/assets/*", HttpMethod.GET.toString()),
+                                            new AntPathRequestMatcher("/page/*", HttpMethod.GET.toString()),
                                             // Ignore for CORS requests
                                             new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                             createAdminMatcher).permitAll().
@@ -74,4 +77,6 @@ public class WebSecurityConfig {
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
+    // APIPathRequestMatcher... do an or between 2 antsPathrequestmatchers with or without app
 }

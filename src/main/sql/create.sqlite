@@ -1,0 +1,247 @@
+CREATE TABLE "page_ids" (
+	"id"	INTEGER NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+CREATE TABLE "sites" (
+	"name"	TEXT NOT NULL,
+	"hostname"	TEXT NOT NULL UNIQUE,
+	"siteName"	TEXT UNIQUE,
+	"settings"	TEXT NOT NULL DEFAULT '{}',
+	PRIMARY KEY("name")
+);
+
+INSERT INTO `sites` (`name`, `hostname`) VALUES ('default', '*');
+
+CREATE TABLE "userRecord" (
+	"userName"	TEXT NOT NULL,
+	"passwordHash"	TEXT NOT NULL,
+	"settings"	INTEGER NOT NULL DEFAULT '{}',
+	PRIMARY KEY("userName")
+);
+
+CREATE TABLE "page" (
+	"id"	INTEGER NOT NULL,
+	"revision"	INTEGER NOT NULL,
+	"site"	TEXT NOT NULL,
+	"namespace"	TEXT NOT NULL DEFAULT '',
+	"pagename"	TEXT NOT NULL,
+	"text"	TEXT,
+	"title"	TEXT,
+	"modified"	DATETIME DEFAULT 'current_timestamp()',
+	"validTS"	DATETIME DEFAULT '9999-12-31 00:00:00',
+	"modifiedBy"	TEXT,
+	"deleted"	INTEGER NOT NULL DEFAULT 0,
+	FOREIGN KEY("id") REFERENCES "page_ids"("id") ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT "UNIQENESS" UNIQUE("site","namespace","pagename","validTS"),
+	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT,
+	FOREIGN KEY("modifiedBy") REFERENCES "userRecord"("userName") ON UPDATE RESTRICT ON DELETE SET NULL,
+	PRIMARY KEY("id","revision")
+);
+
+CREATE TABLE "pageLock" (
+	"site"	TEXT NOT NULL,
+	"namespace"	TEXT NOT NULL DEFAULT '',
+	"pagename"	TEXT NOT NULL,
+	"lockTime"	DATETIME NOT NULL,
+	"owner"	TEXT,
+	"lockId"	TEXT,
+	FOREIGN KEY("owner") REFERENCES "userRecord"("userName") ON UPDATE CASCADE ON DELETE CASCADE,
+	PRIMARY KEY("site","namespace","pagename")
+);
+CREATE INDEX "PAGELOCK_ID_IDX" ON "pageLock" (
+	"lockId"
+)
+
+
+
+CREATE TABLE "userRole" (
+	"id"	INTEGER NOT NULL,
+	"userName"	TEXT NOT NULL,
+	"role"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY("userName") REFERENCES "userRecord"("userName") ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+CREATE INDEX "USERROLE_USER_IDX" ON "userRole" (
+	"userName"
+);
+
+CREATE TABLE "mediaRecord" (
+	"id"	INTEGER NOT NULL,
+	"fileName"	TEXT NOT NULL,
+	"namespace"	TEXT NOT NULL DEFAULT '',
+	"site"	TEXT NOT NULL,
+	"uploadedBy"	TEXT NOT NULL,
+	"fileSize"	INTEGER NOT NULL DEFAULT 0,
+	"height"	INTEGER NOT NULL DEFAULT 0,
+	"width"	INTEGER NOT NULL DEFAULT 0,
+	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	CONSTRAINT "UNQ_mr" UNIQUE("fileName","site"),
+	FOREIGN KEY("uploadedBy") REFERENCES "userRecord"("userName") ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+CREATE INDEX "MEDIA_RECORD_SITE_IDX" ON "mediaRecord" (
+	"site"
+);
+CREATE INDEX "MEDIA_RECORD_UPLOADED_IDX" ON "mediaRecord" (
+	"uploadedBy"
+);
+
+CREATE TABLE "enumAction" (
+	"Action"	TEXT NOT NULL,
+	PRIMARY KEY("Action")
+);
+
+INSERT INTO enumAction (Action) values ('Created');
+INSERT INTO enumAction (Action) values ('Modified');
+INSERT INTO enumAction (Action) values ('Uploaded');
+INSERT INTO enumAction (Action) values ('Replaced');
+INSERT INTO enumAction (Action) values ('Deleted');
+
+
+CREATE TABLE "mediaHistory" (
+	"id"	INTEGER NOT NULL,
+	"site"	TEXT NOT NULL,
+	"namespace"	TEXT NOT NULL,
+	"fileName"	TEXT NOT NULL,
+	"uploadedBy"	TEXT NOT NULL,
+	"action"	TEXT NOT NULL,
+	"ts"	DATETIME NOT NULL DEFAULT 'current_timestamp()',
+	FOREIGN KEY("site") REFERENCES "sites"("name") ON DELETE RESTRICT ON UPDATE RESTRICT,
+	FOREIGN KEY("action") REFERENCES "enumAction"("Action") ON DELETE RESTRICT ON UPDATE RESTRICT,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+
+CREATE TABLE "ns_restriction_types" (
+	"type"	TEXT NOT NULL,
+	PRIMARY KEY("type")
+);
+
+INSERT INTO `ns_restriction_types` (`type`) VALUES
+	('OPEN'),
+	('READ_RESTRICTED'),
+	('WRITE_RESTRICTED');
+
+
+CREATE TABLE "namespace" (
+	"id"	INTEGER NOT NULL,
+	"site"	TEXT NOT NULL,
+	"namespace"	TEXT NOT NULL,
+	"restriction_type"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY("restriction_type") REFERENCES "ns_restriction_types"("type")  ON UPDATE RESTRICT ON DELETE RESTRICT,
+	FOREIGN KEY("site") REFERENCES "sites"("name")  ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT "NS_UNIQUE" UNIQUE("site","namespace")
+);
+CREATE INDEX "NS_RESTRICTION_RS_TYPE_IDX" ON "namespace" (
+	"restriction_type"
+);
+
+CREATE VIEW knownNamespaces as select distinct site, namespace from `page` union select distinct site, namespace from `mediarecord` union select distinct site, namespace AS `namespace` from `namespace`;
+
+CREATE TABLE "tag" (
+	"id"	INTEGER NOT NULL,
+	"pageId"	INTEGER NOT NULL DEFAULT 0,
+	"revision"	INTEGER NOT NULL DEFAULT 0,
+	"tag"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+CREATE INDEX "TAG_ID_REVISION_IDX" ON "tag" (
+	"pageId",
+	"revision"
+);
+CREATE INDEX "TAG_TAG_IDX" ON "tag" (
+	"tag"
+);
+
+CREATE VIEW activeTags as select distinct `p`.`site` AS `site`,`t`.`tag` AS `tag` from (`tag` `t` join `page` `p` on(`p`.`id` = `t`.`pageId` and `p`.`revision` = `t`.`revision`)) where `p`.`deleted` = 0 and `p`.`validTS` = '9999-12-31 00:00:00';
+
+CREATE TABLE "links" (
+	"id"	INTEGER NOT NULL,
+	"site"	TEXT NOT NULL,
+	"sourcePageNS"	TEXT NOT NULL,
+	"sourcePageName"	TEXT NOT NULL,
+	"targetPageNS"	TEXT NOT NULL,
+	"targetPageName"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+CREATE INDEX "LINK_SOURCE_IDX" ON "links" (
+	"site",
+	"sourcePageNS",
+	"sourcePageName"
+);
+CREATE INDEX "LINK_TARGET_IDX" ON "links" (
+	"site",
+	"targetPageNS",
+	"targetPageName"
+);
+
+CREATE TABLE "linkOverrides" (
+	"id"	INTEGER NOT NULL,
+	"site"	TEXT NOT NULL,
+	"sourcePageNS"	TEXT NOT NULL,
+	"sourcePageName"	TEXT NOT NULL,
+	"targetPageNS"	TEXT NOT NULL,
+	"targetPageName"	TEXT NOT NULL,
+	"newTargetPageNS"	TEXT NOT NULL,
+	"newTargetPageName"	TEXT NOT NULL,
+	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+CREATE INDEX "LINKOR_SOURCE_IDX" ON "linkOverrides" (
+	"site",
+	"sourcePageNS",
+	"sourcePageName"
+);
+CREATE INDEX "LINKOR_TARGET_IDX" ON "linkOverrides" (
+	"site",
+	"targetPageNS",
+	"targetPageName"
+);
+CREATE INDEX "LINKOR_NEW_IDX" ON "linkOverrides" (
+	"site",
+	"newTargetPageNS",
+	"newTargetPageName"
+);
+
+CREATE TABLE "imageRefs" (
+	"id"	INTEGER NOT NULL,
+	"site"	TEXT NOT NULL,
+	"sourcePageNS"	TEXT NOT NULL,
+	"sourcePageName"	TEXT NOT NULL,
+	"imageNS"	TEXT NOT NULL,
+	"imageRef"	TEXT NOT NULL,
+	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+CREATE INDEX "IMAGEREF_SOURCE_IDX" ON "imageRefs" (
+	"site",
+	"sourcePageNS",
+	"sourcePageName"
+);
+
+CREATE VIRTUAL TABLE pageCache USING fts5("site", "namespace", "pageName", "title", "renderedCache", "plaintextCache", "source", "useCache")
+
+
+
+CREATE TABLE "globalSettings" (
+	"id"	INTEGER NOT NULL,
+	"settings"	TEXT NOT NULL DEFAULT '{}',
+	PRIMARY KEY("id")
+);
+
+INSERT INTO `globalSettings` (`id`) VALUES (1);
+
+CREATE TABLE "verificationToken" (
+	"id"	INTEGER NOT NULL,
+	"user"	TEXT NOT NULL,
+	"token"	TEXT NOT NULL,
+	"purpose"	TEXT NOT NULL,
+	"data"	TEXT NOT NULL,
+	"expiry"	DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, '+15 minutes')),
+	FOREIGN KEY("user") REFERENCES "userRecord"("userName") ON DELETE CASCADE ON UPDATE CASCADE,
+	PRIMARY KEY("id" AUTOINCREMENT)
+)
