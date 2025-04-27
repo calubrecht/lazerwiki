@@ -11,6 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.requests.SiteSettingsRequest;
+import us.calubrecht.lazerwiki.responses.NsNode;
+import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.SiteSettingsException;
 
@@ -360,6 +362,49 @@ class AdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"success\":false,\"msg\":\"This setting is bad\"}"));
 
+    }
+
+    @Test
+    void setNamespaceRestrictionType() throws Exception {
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User siteAdminUser = new User();
+        siteAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN:site1"));
+        when(userService.getUser("Jake")).thenReturn(siteAdminUser);
+
+        NsNode namespaces = new NsNode("", true);
+        PageListResponse response = new PageListResponse(null, namespaces);
+        when(pageService.getAllNamespaces(eq("site1"), any()))
+                .thenReturn(response);
+
+        this.mockMvc.perform(post("/api/admin/namespace/restrictionType")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"site\":\"site1\", \"namespace\":\"ns\", \"restrictionType\": \"OPEN\"}")
+                        .principal(new UsernamePasswordAuthenticationToken("Bob", "")))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"namespaces\":{\"children\":[],\"namespace\":\"\",\"fullNamespace\":\"\"}}"));
+
+        verify(namespaceService).setNSRestriction("site1", "ns", Namespace.RESTRICTION_TYPE.OPEN);
+
+        this.mockMvc.perform(post("/api/admin/namespace/restrictionType")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"site\":\"site1\", \"namespace\":\"ns\", \"restrictionType\": \"OPEN\"}")
+                        .principal(new UsernamePasswordAuthenticationToken("Jake", "")))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"namespaces\":{\"children\":[],\"namespace\":\"\",\"fullNamespace\":\"\"}}"));
+
+
+        // Test unauthorized access
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(regularUser, "ROLE_USER"));
+        when(userService.getUser("Frank")).thenReturn(regularUser);
+
+        this.mockMvc.perform(post("/api/admin/namespace/restrictionType")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"site\":\"site1\", \"namespace\":\"ns\", \"restrictionType\": \"OPEN\"}")
+                        .principal(new UsernamePasswordAuthenticationToken("Frank", "")))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

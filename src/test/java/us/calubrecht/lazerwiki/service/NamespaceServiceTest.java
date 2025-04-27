@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = {NamespaceService.class})
 @ActiveProfiles("test")
@@ -289,5 +290,45 @@ public class NamespaceServiceTest {
         List<String> namespaces = underTest.getReadableNamespaces("site1", "Bob");
 
         assertEquals(List.of("ns1", "ns2"), namespaces);
+    }
+
+    @Test
+    public void testGetNSRestriction() {
+        Namespace nsObj = new Namespace();
+        nsObj.site = "site1";
+        nsObj.namespace ="ns1";
+        nsObj.restriction_type = Namespace.RESTRICTION_TYPE.READ_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(nsObj);
+
+        assertEquals(Namespace.RESTRICTION_TYPE.READ_RESTRICTED, underTest.getNSRestriction("site1", "ns1"));
+        assertEquals(Namespace.RESTRICTION_TYPE.OPEN, underTest.getNSRestriction("site1", "ns2"));
+    }
+
+    @Test
+    public void testSetNSRestriction() {
+        Namespace nsObj = new Namespace();
+        nsObj.id = 1L;
+        nsObj.site = "site1";
+        nsObj.namespace ="ns1";
+        nsObj.restriction_type = Namespace.RESTRICTION_TYPE.READ_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(nsObj);
+
+        underTest.setNSRestriction("site1", "ns1", Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED);
+        underTest.setNSRestriction("site1", "ns2", Namespace.RESTRICTION_TYPE.READ_RESTRICTED);
+
+        ArgumentCaptor<Namespace> nsCaptor = ArgumentCaptor.forClass(Namespace.class);
+        verify(namespaceRepository, times(2)).save(nsCaptor.capture());
+
+        assertEquals(1L, nsCaptor.getAllValues().get(0).id);
+        assertEquals("ns1", nsCaptor.getAllValues().get(0).namespace);
+        assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, nsCaptor.getAllValues().get(0).restriction_type);
+        assertEquals("ns2", nsCaptor.getAllValues().get(1).namespace);
+        assertEquals(Namespace.RESTRICTION_TYPE.READ_RESTRICTED, nsCaptor.getAllValues().get(1).restriction_type);
+    }
+
+    @Test
+    public void testJoinNS() {
+        assertEquals("singleNS", underTest.joinNS("", "singleNS"));
+        assertEquals("ns:nestedNS", underTest.joinNS("ns", "nestedNS"));
     }
 }

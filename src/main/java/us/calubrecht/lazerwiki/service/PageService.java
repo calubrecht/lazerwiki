@@ -244,9 +244,6 @@ public class PageService {
         Optional<NsNode> existingChild = root.getChildren().stream().
                 filter(child -> child.getNamespace().equals(nsParts.get(0))).findFirst();
         if (existingChild.isPresent()) {
-            if (nsParts.size() == 1) {
-                return;
-            }
             buildNsNodeFromTree(existingChild.get(), nsParts.subList(1, nsParts.size()), site);
             return;
         }
@@ -286,12 +283,6 @@ public class PageService {
         List<String> nsList = namespaceService.getReadableNamespaces(site, userName);
         NsNode node = getNsNodeFromNS(nsList.stream().sorted().toList(), site);
         return new PageListResponse(null, node);
-    }
-
-    @Transactional
-    public PageListResponse setNSRestriction(String site, String namespace, Namespace.RESTRICTION_TYPE restrictionType, String userName) {
-        namespaceService.setNSRestriction(site, namespace, restrictionType);
-        return getAllNamespaces(site, userName);
     }
 
     public RecentChangesResponse recentChanges(String host, String userName) {

@@ -161,6 +161,21 @@ public class PageControllerTest {
     }
 
     @Test
+    public void testListNamespaces() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        this.mockMvc.perform(get("/api/page/listNamespaces/site1").
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(pageService).getAllNamespaces(eq("site1"), eq("Bob"));
+
+        this.mockMvc.perform(get("/api/page/listNamespaces/site1")).
+                andExpect(status().isOk());
+
+        verify(pageService).getAllNamespaces(eq("site1"), eq("Guest"));
+    }
+
+    @Test
     public void testListTags() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         when(pageService.getAllTags(any(), any())).thenReturn(List.of("tag1","tag2"));

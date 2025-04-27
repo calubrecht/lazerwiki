@@ -198,7 +198,8 @@ public class AdminController {
         if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + restrictionRequest.site())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(pageService.setNSRestriction(restrictionRequest.site(), restrictionRequest.namespace(), restrictionRequest.restrictionType(), user.userName));
+        namespaceService.setNSRestriction(restrictionRequest.site(), restrictionRequest.namespace(), restrictionRequest.restrictionType());
+        return ResponseEntity.ok(pageService.getAllNamespaces(restrictionRequest.site(), user.userName));
     }
 
     @DeleteMapping("site/{siteName}")
