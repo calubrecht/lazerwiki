@@ -106,6 +106,12 @@ public class PageController {
         return pageService.getAllPages(url.getHost(), userName);
     }
 
+    @RequestMapping(value = "/listNamespaces/{site}")
+    public PageListResponse listNamespaces(Principal principal, @PathVariable("site") String site, HttpServletRequest request) throws MalformedURLException {
+        String userName = principal == null ? User.GUEST : principal.getName();
+        return pageService.getAllNamespaces(site, userName);
+    }
+
     @RequestMapping(value = "/recentChanges")
     public RecentChangesResponse recentChanges(Principal principal, HttpServletRequest request) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());

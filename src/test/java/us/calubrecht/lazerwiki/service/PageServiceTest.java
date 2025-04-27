@@ -605,6 +605,35 @@ public class PageServiceTest {
         assertFalse(pageService.isReadable("localhost", "ns2:page1", "Bob"));
     }
 
+    @Test
+    void test_getAllNamespaces() {
+        when(namespaceService.getReadableNamespaces(any(), any())).thenReturn(
+                List.of("", "a:c", "a:b", "a", "d:a", "a:b:c", "a:d")
+        );
+
+        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        when(namespaceService.joinNS(any(), any())).thenAnswer(inv -> {
+            String root = inv.getArgument(0).toString();
+            String ns = inv.getArgument(1).toString();
+            if (root.isEmpty()) {
+                return ns;
+            }
+            return root + ":" + ns;
+        });
+        PageListResponse res = pageService.getAllNamespaces("localhost", "bob");
+
+        assertEquals(2, res.namespaces.getChildren().size());
+        assertEquals("a", res.namespaces.getChildren().get(0).getNamespace());
+        assertEquals("d", res.namespaces.getChildren().get(1).getNamespace());
+
+        NsNode aTree = res.namespaces.getChildren().get(0);
+        assertEquals(3, aTree.getChildren().size());
+        assertEquals("b", aTree.getChildren().get(0).getNamespace());
+        assertEquals("a:b", aTree.getChildren().get(0).getFullNamespace());
+        assertEquals("c", aTree.getChildren().get(1).getNamespace());
+        assertEquals("d", aTree.getChildren().get(2).getNamespace());
+    }
+
 
     public static class PageDescImpl implements PageDesc {
         final String namespace;

@@ -1,8 +1,13 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.*;
+import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
@@ -26,6 +31,8 @@ public class NamespaceService {
 
     @Autowired
     UserService userService;
+
+    final Logger logger = LogManager.getLogger(getClass());
 
     public String parentNamespace(String namespace) {
         if (!namespace.contains(":"))
@@ -133,5 +140,33 @@ public class NamespaceService {
         Set<String> allNS = new LinkedHashSet<>(allPageNS);
         allNS.addAll(allMediaNS);
         return allNS.stream().filter(ns -> canReadNamespace(site, ns, userName)).toList();
+    }
+
+    public Namespace.RESTRICTION_TYPE getNSRestriction(String site, String namespace) {
+        Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
+        if (nsObj == null) {
+            return Namespace.RESTRICTION_TYPE.OPEN;
+        }
+        return nsObj.restriction_type;
+    }
+
+    @Transactional
+    @CacheEvict(value = "FindBySiteAndNamespace", allEntries = true)
+    public void setNSRestriction(String site, String namespace, Namespace.RESTRICTION_TYPE restrictionType) {
+        Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
+        if (nsObj == null) {
+            nsObj = new Namespace();
+            nsObj.site = site;
+            nsObj.namespace = namespace;
+        }
+        nsObj.restriction_type = restrictionType;
+        namespaceRepository.save(nsObj);
+    }
+
+    public String joinNS(String rootNS, String newNS) {
+        if (rootNS.isEmpty()) {
+            return newNS;
+        }
+        return rootNS + ":" + newNS;
     }
 }

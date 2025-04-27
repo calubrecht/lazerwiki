@@ -8,7 +8,7 @@
 
 
 	<springProfile name="!test &amp; !local">
-		<property name="LOG_FILE" value="/var/log/spring/lazerwiki.log}" />
+		<property name="LOG_FILE" value="${LOG_DIR:-/var/log/spring}/lazerwiki.log}" />
 			<include
 		resource="org/springframework/boot/logging/logback/file-appender.xml" />
 		<root level="INFO">

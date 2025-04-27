@@ -240,11 +240,58 @@ public class PageService {
 
     }
 
+    void buildNsNodeFromTree(NsNode root, List<String> nsParts, String site) {
+        Optional<NsNode> existingChild = root.getChildren().stream().
+                filter(child -> child.getNamespace().equals(nsParts.get(0))).findFirst();
+        if (existingChild.isPresent()) {
+            if (nsParts.size() == 1) {
+                return;
+            }
+            buildNsNodeFromTree(existingChild.get(), nsParts.subList(1, nsParts.size()), site);
+            return;
+        }
+        List<String> buildParts = nsParts;
+        while (!buildParts.isEmpty()) {
+            NsNode newChild = new NsNode(namespaceService.joinNS(root.getFullNamespace(), buildParts.get(0)), true);
+            newChild.setRestriction_type(namespaceService.getNSRestriction(site, newChild.getFullNamespace()));
+            List<NsNode> children = root.getChildren();
+            children.add(newChild);
+            root.setChildren(children);
+            buildParts = buildParts.subList(1, buildParts.size());
+            root = newChild;
+        }
+        return;
+    }
+
+    NsNode getNsNodeFromNS(List<String> namespaces, String site) {
+        NsNode root = new NsNode("", true);
+        root.setRestriction_type(namespaceService.getNSRestriction(site, ""));
+        namespaces.forEach(ns -> {
+            if (!ns.isEmpty()) {
+              List<String> nsParts = Arrays.asList(ns.split(":"));
+              buildNsNodeFromTree(root, nsParts, site);
+            }
+        });
+        return root;
+    }
+
     public PageListResponse getAllPages(String host, String userName) {
         String site = siteService.getSiteForHostname(host);
         List<PageDesc> pages = namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
         NsNode node = getNsNode("", pages);
         return new PageListResponse(pages.stream().sorted(Comparator.comparing(p -> p.getPagename().toLowerCase())).collect(Collectors.groupingBy(PageDesc::getNamespace)), node);
+    }
+
+    public PageListResponse getAllNamespaces(String site, String userName) {
+        List<String> nsList = namespaceService.getReadableNamespaces(site, userName);
+        NsNode node = getNsNodeFromNS(nsList.stream().sorted().toList(), site);
+        return new PageListResponse(null, node);
+    }
+
+    @Transactional
+    public PageListResponse setNSRestriction(String site, String namespace, Namespace.RESTRICTION_TYPE restrictionType, String userName) {
+        namespaceService.setNSRestriction(site, namespace, restrictionType);
+        return getAllNamespaces(site, userName);
     }
 
     public RecentChangesResponse recentChanges(String host, String userName) {

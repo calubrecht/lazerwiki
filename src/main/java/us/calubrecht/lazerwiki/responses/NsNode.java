@@ -1,5 +1,7 @@
 package us.calubrecht.lazerwiki.responses;
 
+import us.calubrecht.lazerwiki.model.Namespace;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +12,8 @@ public class NsNode {
     final String fullNamespace;
 
     final boolean writable;
+
+    private Namespace.RESTRICTION_TYPE restriction_type;
 
     public NsNode(String namespace, boolean writable) {
         String[] namespaces = namespace.split(":");
@@ -35,5 +39,13 @@ public class NsNode {
 
     public boolean isWritable() {
         return writable;
+    }
+
+    public Namespace.RESTRICTION_TYPE getRestriction_type() {
+        return restriction_type;
+    }
+
+    public void setRestriction_type(Namespace.RESTRICTION_TYPE restriction_type) {
+        this.restriction_type = restriction_type;
     }
 }

@@ -8,9 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.*;
+import us.calubrecht.lazerwiki.requests.NamespaceRestrictionRequest;
 import us.calubrecht.lazerwiki.requests.SiteRequest;
 import us.calubrecht.lazerwiki.requests.SiteSettingsRequest;
 import us.calubrecht.lazerwiki.responses.CommonResponse;
+import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.responses.SiteSettingsResponse;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
@@ -41,6 +43,12 @@ public class AdminController {
 
     @Autowired
     PageUpdateService pageUpdateService;
+
+    @Autowired
+    NamespaceService namespaceService;
+
+    @Autowired
+    PageService pageService;
 
     @Autowired
     GlobalSettingsService globalSettingsService;
@@ -181,6 +189,16 @@ public class AdminController {
         catch(SiteSettingsException e) {
             return ResponseEntity.ok(new SiteSettingsResponse(null, false, e.getMessage()));
         }
+    }
+
+    @PostMapping("namespace/restrictionType")
+    public ResponseEntity<PageListResponse> setNamespaceRestrictionType(Principal principal, @RequestBody NamespaceRestrictionRequest restrictionRequest) throws PageWriteException, IOException {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + restrictionRequest.site())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(pageService.setNSRestriction(restrictionRequest.site(), restrictionRequest.namespace(), restrictionRequest.restrictionType(), user.userName));
     }
 
     @DeleteMapping("site/{siteName}")

@@ -46,6 +46,12 @@ class AdminControllerTest {
     SiteDelService siteDelService;
 
     @MockBean
+    NamespaceService namespaceService;
+
+    @MockBean
+    PageService pageService;
+
+    @MockBean
     GlobalSettingsService globalSettingsService;
 
     @Test
