@@ -240,22 +240,24 @@ public class PageService {
 
     }
 
-    void buildNsNodeFromTree(NsNode root, List<String> nsParts, String site) {
+    void buildNsNodeFromTree(NsNode root, List<String> nsParts, String site, Namespace.RESTRICTION_TYPE inheritedRestrictionType) {
         Optional<NsNode> existingChild = root.getChildren().stream().
                 filter(child -> child.getNamespace().equals(nsParts.get(0))).findFirst();
         if (existingChild.isPresent()) {
-            buildNsNodeFromTree(existingChild.get(), nsParts.subList(1, nsParts.size()), site);
+            buildNsNodeFromTree(existingChild.get(), nsParts.subList(1, nsParts.size()), site, existingChild.get().getRestrictionTypeToPass());
             return;
         }
         List<String> buildParts = nsParts;
         while (!buildParts.isEmpty()) {
             NsNode newChild = new NsNode(namespaceService.joinNS(root.getFullNamespace(), buildParts.get(0)), true);
             newChild.setRestriction_type(namespaceService.getNSRestriction(site, newChild.getFullNamespace()));
+            newChild.setInherited_restriction_type(inheritedRestrictionType);
             List<NsNode> children = root.getChildren();
             children.add(newChild);
             root.setChildren(children);
             buildParts = buildParts.subList(1, buildParts.size());
             root = newChild;
+            inheritedRestrictionType = newChild.getRestrictionTypeToPass();
         }
         return;
     }
@@ -263,10 +265,11 @@ public class PageService {
     NsNode getNsNodeFromNS(List<String> namespaces, String site) {
         NsNode root = new NsNode("", true);
         root.setRestriction_type(namespaceService.getNSRestriction(site, ""));
+        root.setInherited_restriction_type(Namespace.RESTRICTION_TYPE.OPEN);
         namespaces.forEach(ns -> {
             if (!ns.isEmpty()) {
               List<String> nsParts = Arrays.asList(ns.split(":"));
-              buildNsNodeFromTree(root, nsParts, site);
+              buildNsNodeFromTree(root, nsParts, site, root.getRestrictionTypeToPass());
             }
         });
         return root;

@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import us.calubrecht.lazerwiki.model.Namespace;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ public class NsNode {
     final boolean writable;
 
     private Namespace.RESTRICTION_TYPE restriction_type;
+    private Namespace.RESTRICTION_TYPE inherited_restriction_type;
 
     public NsNode(String namespace, boolean writable) {
         String[] namespaces = namespace.split(":");
@@ -47,5 +49,26 @@ public class NsNode {
 
     public void setRestriction_type(Namespace.RESTRICTION_TYPE restriction_type) {
         this.restriction_type = restriction_type;
+    }
+
+    public Namespace.RESTRICTION_TYPE getInherited_restriction_type() {
+        return inherited_restriction_type;
+    }
+
+    public void setInherited_restriction_type(Namespace.RESTRICTION_TYPE inherited_restriction_type) {
+        this.inherited_restriction_type = inherited_restriction_type;
+    }
+
+    @JsonIgnore
+    public Namespace.RESTRICTION_TYPE getRestrictionTypeToPass() {
+        if (shouldInherit()) {
+            return inherited_restriction_type;
+        }
+        return restriction_type;
+    }
+
+    @JsonIgnore
+    public boolean shouldInherit() {
+        return restriction_type == null || restriction_type == Namespace.RESTRICTION_TYPE.INHERIT;
     }
 }

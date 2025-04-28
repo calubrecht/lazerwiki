@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 
+import javax.naming.Name;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -145,7 +146,7 @@ public class NamespaceService {
     public Namespace.RESTRICTION_TYPE getNSRestriction(String site, String namespace) {
         Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
         if (nsObj == null) {
-            return Namespace.RESTRICTION_TYPE.OPEN;
+            return Namespace.RESTRICTION_TYPE.INHERIT;
         }
         return nsObj.restriction_type;
     }
@@ -154,6 +155,12 @@ public class NamespaceService {
     @CacheEvict(value = "FindBySiteAndNamespace", allEntries = true)
     public void setNSRestriction(String site, String namespace, Namespace.RESTRICTION_TYPE restrictionType) {
         Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
+        if (restrictionType == Namespace.RESTRICTION_TYPE.INHERIT) {
+            if (nsObj != null) {
+                namespaceRepository.delete(nsObj);
+            }
+            return;
+        }
         if (nsObj == null) {
             nsObj = new Namespace();
             nsObj.site = site;

@@ -301,7 +301,7 @@ public class NamespaceServiceTest {
         when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(nsObj);
 
         assertEquals(Namespace.RESTRICTION_TYPE.READ_RESTRICTED, underTest.getNSRestriction("site1", "ns1"));
-        assertEquals(Namespace.RESTRICTION_TYPE.OPEN, underTest.getNSRestriction("site1", "ns2"));
+        assertEquals(Namespace.RESTRICTION_TYPE.INHERIT, underTest.getNSRestriction("site1", "ns2"));
     }
 
     @Test
@@ -324,6 +324,20 @@ public class NamespaceServiceTest {
         assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, nsCaptor.getAllValues().get(0).restriction_type);
         assertEquals("ns2", nsCaptor.getAllValues().get(1).namespace);
         assertEquals(Namespace.RESTRICTION_TYPE.READ_RESTRICTED, nsCaptor.getAllValues().get(1).restriction_type);
+
+        Namespace nsObj3 = new Namespace();
+        nsObj3.id = 5L;
+        nsObj3.site = "site1";
+        nsObj3.namespace ="ns3";
+        nsObj3.restriction_type = Namespace.RESTRICTION_TYPE.READ_RESTRICTED;
+        when(namespaceRepository.findBySiteAndNamespace("site1", "ns3")).thenReturn(nsObj3);
+
+        underTest.setNSRestriction("site1", "ns3", Namespace.RESTRICTION_TYPE.INHERIT);
+        verify(namespaceRepository).delete(nsObj3);
+
+        underTest.setNSRestriction("site1", "ns4", Namespace.RESTRICTION_TYPE.INHERIT);
+        // Delete not called for ns4
+        verify(namespaceRepository, times(1)).delete(any());
     }
 
     @Test

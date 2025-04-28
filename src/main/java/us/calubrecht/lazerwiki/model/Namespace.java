@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity(name = "namespace")
 public class Namespace {
-  public enum RESTRICTION_TYPE { OPEN, WRITE_RESTRICTED, READ_RESTRICTED}
+  public enum RESTRICTION_TYPE { OPEN, WRITE_RESTRICTED, READ_RESTRICTED, INHERIT}
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

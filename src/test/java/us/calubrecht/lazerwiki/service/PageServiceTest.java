@@ -21,6 +21,7 @@ import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
+import javax.naming.Name;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -611,7 +612,8 @@ public class PageServiceTest {
                 List.of("", "a:c", "a:b", "a", "d:a", "a:b:c", "a:d")
         );
 
-        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        when(namespaceService.getNSRestriction("default", "d")).thenReturn(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED);
+
         when(namespaceService.joinNS(any(), any())).thenAnswer(inv -> {
             String root = inv.getArgument(0).toString();
             String ns = inv.getArgument(1).toString();
@@ -620,7 +622,7 @@ public class PageServiceTest {
             }
             return root + ":" + ns;
         });
-        PageListResponse res = pageService.getAllNamespaces("localhost", "bob");
+        PageListResponse res = pageService.getAllNamespaces("default", "bob");
 
         assertEquals(2, res.namespaces.getChildren().size());
         assertEquals("a", res.namespaces.getChildren().get(0).getNamespace());
@@ -632,6 +634,11 @@ public class PageServiceTest {
         assertEquals("a:b", aTree.getChildren().get(0).getFullNamespace());
         assertEquals("c", aTree.getChildren().get(1).getNamespace());
         assertEquals("d", aTree.getChildren().get(2).getNamespace());
+        NsNode dTree = res.namespaces.getChildren().get(1);
+        assertEquals("a", dTree.getChildren().get(0).getNamespace());
+        assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, dTree.getRestriction_type());
+        assertNull(dTree.getChildren().get(0).getRestriction_type());
+        assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, dTree.getChildren().get(0).getInherited_restriction_type());
     }
 
 
