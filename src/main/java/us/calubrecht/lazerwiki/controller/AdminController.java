@@ -109,6 +109,22 @@ public class AdminController {
         return ResponseEntity.ok(userService.addRole(userName, userRole));
     }
 
+    @PutMapping("roles/{userName}/site/{site}")
+    public ResponseEntity<UserDTO> setSiteRoles(Principal principal, @PathVariable("userName") String userName, @PathVariable("site") String site, @RequestBody List<String> siteRoles) {
+        User user = userService.getUser(principal.getName());
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + site)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (siteRoles.stream().anyMatch(role -> {
+            String[] parts = role.split(":");
+            return parts.length != 3 || !parts[1].equals(site);
+        })) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(userService.setSiteRoles(userName, site, siteRoles));
+    }
+
     @PutMapping("user/{userName}")
     public ResponseEntity<?> addUser(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
         if (principal == null) {

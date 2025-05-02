@@ -609,10 +609,11 @@ public class PageServiceTest {
     @Test
     void test_getAllNamespaces() {
         when(namespaceService.getReadableNamespaces(any(), any())).thenReturn(
-                List.of("", "a:c", "a:b", "a", "d:a", "a:b:c", "a:d")
+                List.of("", "a:c", "a:b", "a", "d:a", "d:b", "a:b:c", "a:d")
         );
 
         when(namespaceService.getNSRestriction("default", "d")).thenReturn(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED);
+        when(namespaceService.getNSRestriction("default", "d:b")).thenReturn(Namespace.RESTRICTION_TYPE.INHERIT);
 
         when(namespaceService.joinNS(any(), any())).thenAnswer(inv -> {
             String root = inv.getArgument(0).toString();
@@ -639,6 +640,9 @@ public class PageServiceTest {
         assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, dTree.getRestriction_type());
         assertNull(dTree.getChildren().get(0).getRestriction_type());
         assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, dTree.getChildren().get(0).getInherited_restriction_type());
+
+        assertEquals("b", dTree.getChildren().get(1).getNamespace());
+        assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, dTree.getChildren().get(1).getInherited_restriction_type());
     }
 
 

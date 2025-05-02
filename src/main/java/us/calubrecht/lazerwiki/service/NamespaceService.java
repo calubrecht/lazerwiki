@@ -97,7 +97,7 @@ public class NamespaceService {
         }
         User user = userService.getUser(userName);
         List<String> roles = user.roles.stream().map(role -> role.role).toList();
-        List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_DELETE:" + site);
+        List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_DELETE:" + site, "ROLE_DELETE:" + site+ ":" + namespace);
         List<String> intersection = new ArrayList<>(roles);
         intersection.retainAll(necessaryRoles);
 
@@ -110,7 +110,7 @@ public class NamespaceService {
         }
         User user = userService.getUser(userName);
         List<String> roles = user.roles.stream().map(role -> role.role).toList();
-        List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_UPLOAD:" + site);
+        List<String> necessaryRoles = List.of("ROLE_ADMIN", "ROLE_ADMIN:" + site, "ROLE_UPLOAD:" + site, "ROLE_UPLOAD:" + site+ ":" + namespace);
         List<String> intersection = new ArrayList<>(roles);
         intersection.retainAll(necessaryRoles);
 

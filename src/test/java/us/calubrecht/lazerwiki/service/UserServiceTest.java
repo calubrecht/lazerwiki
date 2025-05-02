@@ -194,4 +194,19 @@ public class UserServiceTest {
 
         assertThrows(VerificationException.class, () ->  userService.verifyEmailToken("Bob", "ABCD-WXYZ"));
     }
+
+    @Test
+    void setSiteRoles() {
+        User user = new User("Bob", "hash");
+        user.roles = new ArrayList<>(List.of("ROLE_READ:site1:ns2", "ROLE_ADMIN", "ROLE_WRITE:site2:ns3").stream().
+                map(roleName -> new UserRole(user, roleName)).toList());
+        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        UserDTO dto = userService.setSiteRoles("Bob", "site1", List.of("ROLE_READ:site1:ns1", "ROLE_WRITE:site1:ns2"));
+
+        User savedUser = new User("Bob", "hash");
+        savedUser.roles = List.of("ROLE_READ:site1:ns1", "ROLE_WRITE:site1:ns2", "ROLE_ADMIN", "ROLE_WRITE:site2:ns3").stream().
+                map(roleName -> new UserRole(user, roleName)).toList();
+        verify(userRepository).save(savedUser);
+        assertEquals(List.of("ROLE_READ:site1:ns1", "ROLE_WRITE:site1:ns2", "ROLE_ADMIN", "ROLE_WRITE:site2:ns3"), dto.userRoles());
+    }
 }

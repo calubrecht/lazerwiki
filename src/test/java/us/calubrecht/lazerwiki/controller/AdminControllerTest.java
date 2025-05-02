@@ -167,6 +167,56 @@ class AdminControllerTest {
     }
 
     @Test
+    void setRoles() throws Exception {
+        when(userService.setSiteRoles(eq("Frank"), eq("site1"), anyList())).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
+        User adminUser = new User();
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        adminUser.userName = "Bob";
+        when(userService.getUser("Bob")).thenReturn(adminUser);
+        User regularUser = new User();
+        regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
+        regularUser.userName = "Frank";
+        when(userService.getUser("Frank")).thenReturn(regularUser);
+        User siteAdmin = new User();
+        siteAdmin.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN:site1"));
+        siteAdmin.userName = "Joey";
+        when(userService.getUser("Joey")).thenReturn(siteAdmin);
+        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Bob", "")).content(
+                "[\"ROLE_READ:site1:bo\"]"
+                ).contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
+        verify(userService).setSiteRoles("Frank", "site1", List.of("ROLE_READ:site1:bo"));
+
+        // Only Admin can add role
+        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Frank", "")).content(
+                "[\"ROLE_READ:site1:bo\"]"
+                ).contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isUnauthorized());
+
+        // Site admin can add for site, but not other site
+        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
+                        "[\"ROLE_READ:site1:bo\"]"
+                ).contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
+        verify(userService, times(2)).setSiteRoles("Frank", "site1", List.of("ROLE_READ:site1:bo"));
+
+        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site2").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
+                        "[\"ROLE_READ:site2:bo\"]"
+                ).contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isUnauthorized());
+
+        // And flag invalid roles
+        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
+                        "[\"ROLE_READ:site2:bo\"]"
+                ).contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isUnauthorized());
+        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
+                        "[\"ROLE_ADMIN\"]"
+                ).contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void addUser() throws Exception {
         User u =  new User("NewUser", null);
         u.roles = List.of(new UserRole(u, "ROLE_USER"));

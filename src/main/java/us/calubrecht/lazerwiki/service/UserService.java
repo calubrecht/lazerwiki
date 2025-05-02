@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -149,5 +150,23 @@ public class UserService {
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public void deleteUser(String userName) {
        userRepository.deleteById(userName);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
+    public UserDTO setSiteRoles(String user, String site, List<String> newRoles) {
+        Optional<User> u = userRepository.findById(user);
+        Optional<UserDTO> dto = u.map(user1 -> {
+            List<UserRole> userRoles = new ArrayList<>(newRoles.stream().map(role -> new UserRole(user1, role)).toList());
+            user1.roles.stream().filter(role -> {
+                String[] parts = role.role.split(":");
+                return parts.length !=3 || !parts[1].equals(site);}).forEach(role ->
+                    userRoles.add(role));
+            user1.roles.clear();
+            user1.roles.addAll(userRoles);
+           userRepository.save(user1);
+           return new UserDTO (user, site, userRoles.stream().map(role -> role.role).toList(), user1.getSettings());
+        });
+        return dto.orElseGet(null);
     }
 }
