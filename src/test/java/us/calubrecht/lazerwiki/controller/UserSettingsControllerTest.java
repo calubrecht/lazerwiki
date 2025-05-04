@@ -55,6 +55,13 @@ public class UserSettingsControllerTest {
     }
 
     @Test
+    void resetForgottenPassword() throws Exception {
+        mockMvc.perform(post("/api/users/resetForgottenPassword").content("{\"userName\":\"Bob\", \"email\":\"bob@super.com\", \"password\":\"pass1\"}").contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\":true, \"message\": \"\"}"));
+        verify(userService).requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass1");
+    }
+
+    @Test
     void verifyEmailToken() throws Exception {
         when(userService.getUser("bob")).thenReturn(new User("Bob", null));
         mockMvc.perform(post("/api/users/verifyEmailToken").content("token1").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
@@ -63,6 +70,17 @@ public class UserSettingsControllerTest {
 
         doThrow(new VerificationException("Bad Token")).when(userService).verifyEmailToken("Bob", "token2");
         mockMvc.perform(post("/api/users/verifyEmailToken").content("token2").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\":false, \"message\": \"Bad Token\"}"));
+    }
+
+    @Test
+    void verifyPasswordToken() throws Exception {
+        mockMvc.perform(post("/api/users/verifyPasswordToken").content("{\"username\":\"Bob\", \"token\":\"token1\"}").contentType(MediaType.APPLICATION_JSON)).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\":true, \"message\": \"\"}"));
+        verify(userService).verifyPasswordToken("Bob", "token1");
+
+        doThrow(new VerificationException("Bad Token")).when(userService).verifyPasswordToken("Bob", "token2");
+        mockMvc.perform(post("/api/users/verifyPasswordToken").content("{\"username\":\"Bob\", \"token\":\"token2\"}").contentType(MediaType.APPLICATION_JSON)).
                 andExpect(status().isOk()).andExpect(content().json("{\"success\":false, \"message\": \"Bad Token\"}"));
     }
 }

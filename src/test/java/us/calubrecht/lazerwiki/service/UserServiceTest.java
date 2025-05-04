@@ -169,14 +169,42 @@ public class UserServiceTest {
 
     @Test
     void requestSetEmail() throws MessagingException {
-        when(siteService.getSiteForHostname("localhost")).thenReturn("default");
+        when(siteService.getSiteNameForHostname("localhost")).thenReturn("Lazerwiki");
         when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
-        when(templateService.getVerifyEmailTemplate(eq("default"), eq("bob@super.com"), eq("Bob"), eq( "ABCD-EFGH"))).thenReturn("The template");
+        when(templateService.getVerifyEmailTemplate(eq("Lazerwiki"), eq("bob@super.com"), eq("Bob"), eq( "ABCD-EFGH"))).thenReturn("The template");
         userService.requestSetEmail("Bob", "localhost", "bob@super.com");
 
         verify(tokenRepository).deleteExpired();
         verify(tokenRepository).save(new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
         verify(emailService).sendEmail(eq("localhost"), eq("bob@super.com"), eq("Bob"), eq("Verify Email"), eq("The template"));
+    }
+
+    @Test
+    void requestResetForgottenPassword() throws MessagingException {
+        when(siteService.getSiteNameForHostname("localhost")).thenReturn("Lazerwiki");
+        when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
+        when(templateService.getVerifyEmailTemplate(eq("Lazerwiki"), eq("bob@super.com"), eq("Bob"), eq( "ABCD-EFGH"))).thenReturn("The template");
+        when(userService.passwordUtil.hashPassword(eq("pass"))).thenReturn("newHash");
+        User user = new User("Bob", "hash");
+        user.setSettings(Map.of("email", "bob@super.com"));
+        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        userService.requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass");
+
+        verify(tokenRepository).deleteExpired();
+        verify(tokenRepository).save(new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newHash"));
+        verify(emailService).sendEmail(eq("localhost"), eq("bob@super.com"), eq("Bob"), eq("Reset Forgotten Password"), eq("The template"));
+
+        userService.requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass");
+
+        Mockito.reset(tokenRepository);
+        Mockito.reset(emailService);
+        userService.requestResetForgottenPassword("Bob", "localhost", "joe@super.com", "pass");
+        verify(tokenRepository, Mockito.never()).save(any());
+        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any(), any());
+
+        userService.requestResetForgottenPassword("Jeff", "localhost", "bob@super.com", "pass");
+        verify(tokenRepository, Mockito.never()).save(any());
+        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -193,6 +221,20 @@ public class UserServiceTest {
         verify(userRepository).save(updateUser);
 
         assertThrows(VerificationException.class, () ->  userService.verifyEmailToken("Bob", "ABCD-WXYZ"));
+    }
+
+    @Test
+    void verifyPasswordToken() throws VerificationException {
+        when(tokenRepository.findByUserAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.RESET_PASSWORD))).thenReturn(
+                new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newPasswordHash"));
+        User user = new User("Bob", "hash");
+        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        userService.verifyPasswordToken("Bob", "ABCD-EFGH");
+
+        User updateUser = new User("Bob", "newPasswordHash");
+        verify(userRepository).save(updateUser);
+
+        assertThrows(VerificationException.class, () ->  userService.verifyPasswordToken("Bob", "ABCD-WXYZ"));
     }
 
     @Test

@@ -16,6 +16,7 @@ import us.calubrecht.lazerwiki.service.exception.VerificationException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/users/")
@@ -32,6 +33,13 @@ public class UserSettingsController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         userService.resetPassword(user.userName, passwordRequest.password());
+        return ResponseEntity.ok(new SetPasswordResponse(true, ""));
+    }
+
+    @PostMapping("resetForgottenPassword")
+    public ResponseEntity<SetPasswordResponse> setPassword(@RequestBody UserRequest passwordRequest,  HttpServletRequest request) throws MalformedURLException, MessagingException {
+        URL url = new URL(request.getRequestURL().toString());
+        userService.requestResetForgottenPassword(passwordRequest.userName(), url.getHost(),  passwordRequest.email(), passwordRequest.password());
         return ResponseEntity.ok(new SetPasswordResponse(true, ""));
     }
 
@@ -52,6 +60,16 @@ public class UserSettingsController {
         User user = userService.getUser(principal.getName());
         try {
             userService.verifyEmailToken(user.userName, token);
+            return  ResponseEntity.ok(new SaveEmailResponse(true, ""));
+        } catch (VerificationException ve) {
+            return  ResponseEntity.ok(new SaveEmailResponse(false, ve.getMessage()));
+        }
+    }
+
+    @PostMapping("verifyPasswordToken")
+    public ResponseEntity<SaveEmailResponse> verifyPasswordToken(@RequestBody Map<String,String> request) {
+        try {
+            userService.verifyPasswordToken(request.get("username"), request.get("token"));
             return  ResponseEntity.ok(new SaveEmailResponse(true, ""));
         } catch (VerificationException ve) {
             return  ResponseEntity.ok(new SaveEmailResponse(false, ve.getMessage()));

@@ -126,12 +126,27 @@ public class UserService {
 
     @Transactional
     public void requestSetEmail(String userName, String host, String email) throws MessagingException {
-        String site = siteService.getSiteForHostname(host);
+        String site = siteService.getSiteNameForHostname(host);
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();
         tokenRepository.save(new VerificationToken(userName, randomKey, VerificationToken.Purpose.VERIFY_EMAIL, email));
         String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
         emailService.sendEmail(host, email, userName,"Verify Email", body);
+    }
+
+    @Transactional
+    public void requestResetForgottenPassword(String userName, String host, String email, String password) throws MessagingException {
+        Optional<User> u = userRepository.findById(userName);
+        if (!u.isPresent() || !email.equals(u.get().getSettings().get("email"))) {
+            return;
+        }
+        String site = siteService.getSiteNameForHostname(host);
+        String randomKey = randomService.randomKey(8);
+        tokenRepository.deleteExpired();
+        String passwordHash = passwordUtil.hashPassword(password);
+        tokenRepository.save(new VerificationToken(userName, randomKey, VerificationToken.Purpose.RESET_PASSWORD, passwordHash));
+        String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
+        emailService.sendEmail(host, email, userName,"Reset Forgotten Password", body);
     }
 
     @Transactional
@@ -144,6 +159,20 @@ public class UserService {
         Optional<User> u = userRepository.findById(userName);
         u.get().getSettings().put("email", savedToken.getData());
         userRepository.save(u.get());
+    }
+
+    @Transactional
+    @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
+    public void verifyPasswordToken(String userName, String token) throws VerificationException {
+        VerificationToken savedToken = tokenRepository.findByUserAndTokenAndPurpose(userName, token, VerificationToken.Purpose.RESET_PASSWORD);
+        if (savedToken == null) {
+            throw new VerificationException("Invalid token: Please check token and try again");
+        }
+        Optional<User> u = userRepository.findById(userName);
+        u.ifPresent((user) -> {
+            user.passwordHash = savedToken.getData();
+            userRepository.save(user);
+        });
     }
 
     @Transactional

@@ -63,6 +63,8 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/api/plugin/**", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/admin/globalSettings", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/api/admin/user/*", HttpMethod.PUT.toString()),
+                                            new AntPathRequestMatcher("/api/users/resetForgottenPassword", HttpMethod.POST.toString()),
+                                            new AntPathRequestMatcher("/api/users/verifyPasswordToken", HttpMethod.POST.toString()),
                                             new AntPathRequestMatcher("/*", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/assets/*", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/page/*", HttpMethod.GET.toString()),
