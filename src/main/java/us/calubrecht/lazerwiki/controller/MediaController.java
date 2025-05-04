@@ -1,6 +1,8 @@
 package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("_media/")
 public class MediaController {
+    Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     MediaService mediaService;
@@ -57,6 +60,7 @@ public class MediaController {
             mediaService.saveFile(url.getHost(), userName, file, namespace);
             return ResponseEntity.ok("Upload successful");
         } catch (MediaWriteException e) {
+            logger.error("Upload failed because: " +e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
