@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "1.0.0"
+version = "1.0.1"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -138,6 +138,7 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/util/IOSupplier.class",
 							"us/calubrecht/lazerwiki/examplePlugins/ClearFloats.class",
 						    "us/calubrecht/lazerwiki/config/LazerwikiDataSourceConfiguration.class",
+						    "us/calubrecht/lazerwiki/adminCommandLine/AdminCommandLine.class",
 							"localMacros/*")
 				}
 			})
