@@ -280,3 +280,24 @@ CREATE TABLE `verificationToken` (
   KEY `verificationToken_userRecord_FK` (`user`),
   CONSTRAINT verificationToken_userRecord_FK FOREIGN KEY (`user`) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `activityType` (
+  `activityTypeId` int(11) NOT NULL,
+  `activityName` varchar(100) NOT NULL,
+  PRIMARY KEY (`activityTypeId`),
+  UNIQUE KEY `activityType_unique` (`activityName`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+INSERT INTO lazerwiki.activityType (activityTypeId, activityName) VALUES (10, 'createPage'), (20, 'modifyPage'), (30, 'deletePage'), (40,'movePage'),
+  (50, 'uploadMedia'), (60, 'overwriteMedia'), (70, 'deleteMedia'), (80, 'moveMedia'), (90, 'createUser'), (100, 'deleteUser'), (110, 'changeRoles'), (120, 'changeSettings');
+
+CREATE TABLE `activityLog` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `activityType` int(11) NOT NULL,
+  `target` varchar(100) NOT NULL,
+  `user` varchar(100) DEFAULT NULL,
+  `timestamp` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `activityLog_activityType_FK` (`activityType`),
+  CONSTRAINT `activityLog_activityType_FK` FOREIGN KEY (`activityType`) REFERENCES `activityType` (`activityTypeId`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
