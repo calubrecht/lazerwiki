@@ -105,19 +105,28 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
-CREATE TABLE enumAction (
-	`Action` varchar(100) NOT NULL,
-	CONSTRAINT enumAction_pk PRIMARY KEY (`Action`)
-)
-ENGINE=InnoDB
-DEFAULT CHARSET=latin1
-COLLATE=latin1_swedish_ci;
-
-INSERT INTO enumAction (Action) values ('Created');
-INSERT INTO enumAction (Action) values ('Modified');
-INSERT INTO enumAction (Action) values ('Uploaded');
-INSERT INTO enumAction (Action) values ('Replaced');
-INSERT INTO enumAction (Action) values ('Deleted');
+CREATE TABLE `activityType` (
+  `activityTypeId` int(11) NOT NULL,
+  `activityName` varchar(100) NOT NULL,
+  `simpleName` varchar(100) DEFAULT NULL,
+  `fullDesc` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`activityTypeId`),
+  UNIQUE KEY `activityType_unique` (`activityName`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+INSERT INTO activityType (activityTypeId,activityName,simpleName,fullDesc) VALUES
+	 (10,'createPage','Created','Create Page'),
+	 (20,'modifyPage','Modified','Modify Page'),
+	 (30,'deletePage','Deleted','Delete Page'),
+	 (40,'movePage','Moved','Move Page'),
+	 (50,'uploadMedia','Uploaded','Upload Media'),
+	 (60,'replaceMedia','Replaced','Replace Media'),
+	 (70,'deleteMedia','Deleted','Delete Media'),
+	 (80,'moveMedia','Moved','Move Media'),
+	 (90,'createUser','Created','Create User'),
+	 (100,'deleteUser','Deleted','Delete User');
+INSERT INTO activityType (activityTypeId,activityName,simpleName,fullDesc) VALUES
+	 (110,'changeRoles','Changed','Change Roles'),
+	 (120,'changeSettings','Changed','Change Settings');
 
 
 CREATE TABLE mediaHistory (
@@ -126,12 +135,12 @@ CREATE TABLE mediaHistory (
 	namespace VARCHAR(50) NOT NULL,
 	fileName varchar(150) NOT NULL,
 	uploadedBy INT(11) NULL,
-	`action` varchar(100) NOT NULL,
+	`action` INT NOT NULL,
 	ts DATETIME DEFAULT current_timestamp() NOT NULL,
 	INDEX mediaHistory_site_IDX (site,ts) USING BTREE,
 	CONSTRAINT mediaHistory_pk PRIMARY KEY (id),
 	CONSTRAINT mediaHistory_sites_FK FOREIGN KEY (site) REFERENCES sites(hostname) ON DELETE RESTRICT ON UPDATE RESTRICT,
-	CONSTRAINT mediaHistory_enumAction_FK FOREIGN KEY (`action`) REFERENCES enumAction(`Action`) ON DELETE RESTRICT ON UPDATE RESTRICT
+	CONSTRAINT mediaHistory_activityType_FK FOREIGN KEY (`action`) REFERENCES activityType(activityTypeId) ON DELETE RESTRICT ON UPDATE CASCADE
   CONSTRAINT mediaHistory_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE
 )
 ENGINE=InnoDB

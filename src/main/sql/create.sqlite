@@ -94,16 +94,26 @@ CREATE INDEX "MEDIA_RECORD_UPLOADED_IDX" ON "mediaRecord" (
 	"uploadedBy"
 );
 
-CREATE TABLE "enumAction" (
-	"Action"	TEXT NOT NULL,
-	PRIMARY KEY("Action")
-);
-
-INSERT INTO enumAction (Action) values ('Created');
-INSERT INTO enumAction (Action) values ('Modified');
-INSERT INTO enumAction (Action) values ('Uploaded');
-INSERT INTO enumAction (Action) values ('Replaced');
-INSERT INTO enumAction (Action) values ('Deleted');
+CREATE TABLE `activityType` (
+  `activityTypeId` INTEGER NOT NULL,
+  `activityName` TEXT NOT NULL,
+  `simpleName` TEXT DEFAULT NULL,
+  `fullDesc` TEXT DEFAULT NULL
+  );
+INSERT INTO activityType (activityTypeId,activityName,simpleName,fullDesc) VALUES
+	 (10,'createPage','Created','Create Page'),
+	 (20,'modifyPage','Modified','Modify Page'),
+	 (30,'deletePage','Deleted','Delete Page'),
+	 (40,'movePage','Moved','Move Page'),
+	 (50,'uploadMedia','Uploaded','Upload Media'),
+	 (60,'replaceMedia','Replaced','Replace Media'),
+	 (70,'deleteMedia','Deleted','Delete Media'),
+	 (80,'moveMedia','Moved','Move Media'),
+	 (90,'createUser','Created','Create User'),
+	 (100,'deleteUser','Deleted','Delete User');
+INSERT INTO activityType (activityTypeId,activityName,simpleName,fullDesc) VALUES
+	 (110,'changeRoles','Changed','Change Roles'),
+	 (120,'changeSettings','Changed','Change Settings');
 
 
 CREATE TABLE "mediaHistory" (
@@ -112,10 +122,10 @@ CREATE TABLE "mediaHistory" (
 	"namespace"	TEXT NOT NULL,
 	"fileName"	TEXT NOT NULL,
 	"uploadedBy"	INTEGER NOT NULL,
-	"action"	TEXT NOT NULL,
+	"action"	INTEGER NOT NULL,
 	"ts"	DATETIME NOT NULL DEFAULT 'current_timestamp()',
 	FOREIGN KEY("site") REFERENCES "sites"("name") ON DELETE RESTRICT ON UPDATE RESTRICT,
-	FOREIGN KEY("action") REFERENCES "enumAction"("Action") ON DELETE RESTRICT ON UPDATE RESTRICT,
+	FOREIGN KEY("action") REFERENCES "activityType"("activityTypeId") ON DELETE RESTRICT ON UPDATE RESTRICT,
 	FOREIGN KEY("uploadedBy") REFERENCES "userRecord"("userId") ON DELETE RESTRICT ON UPDATE RESTRICT,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );

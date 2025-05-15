@@ -73,7 +73,7 @@ CREATE TABLE `activityType` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 INSERT INTO activityType (activityTypeId,activityName,simpleName,fullDesc) VALUES
 	 (10,'createPage','Created','Create Page'),
-	 (20,'modifyPage','Modifed','Modify Page'),
+	 (20,'modifyPage','Modified','Modify Page'),
 	 (30,'deletePage','Deleted','Delete Page'),
 	 (40,'movePage','Moved','Move Page'),
 	 (50,'uploadMedia','Uploaded','Upload Media'),
