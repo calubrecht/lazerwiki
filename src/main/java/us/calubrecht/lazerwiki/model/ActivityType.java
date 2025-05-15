@@ -4,21 +4,36 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
-@Entity(name = "activityLog")
+@Entity(name = "activityType")
 public class ActivityType {
+    public static ActivityType ACTIVITY_PROTO_UPLOAD_MEDIA = new ActivityType(50L);
+    public static ActivityType ACTIVITY_PROTO_REPLACE_MEDIA = new ActivityType(60L);
+    public static ActivityType ACTIVITY_PROTO_DELETE_MEDIA = new ActivityType(70L);
 
     public ActivityType() {
 
     }
 
-    public ActivityType(Long id, String activityName) {
-        this.id = id;
+    public ActivityType(Long activityTypeId) {
+        this.activityTypeId = activityTypeId;
+    }
+
+    public ActivityType(Long activityTypeId, String activityName, String simpleName, String fullDesc) {
+        this.activityTypeId = activityTypeId;
         this.activityName = activityName;
+        this.simpleName = simpleName;
+        this.fullDesc = fullDesc;
     }
 
     @Id
-    Long id;
+    Long activityTypeId;
 
     @Column
     String activityName;
+
+    @Column
+    String simpleName;
+
+    @Column
+    String fullDesc;
 }

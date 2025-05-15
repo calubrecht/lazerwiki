@@ -24,7 +24,10 @@ public class MediaHistoryRecord {
     @JsonIgnore
     public User uploadedByUser;
 
-    private String action;
+    @ManyToOne()
+    @JoinColumn(name="action", referencedColumnName = "activityTypeId")
+    @JsonIgnore
+    private ActivityType activity;
 
     @CreationTimestamp
     private LocalDateTime ts;
@@ -32,12 +35,12 @@ public class MediaHistoryRecord {
     public MediaHistoryRecord() {
     }
 
-    public MediaHistoryRecord(String fileName, String site, String namespace, User uploadedBy, String action) {
+    public MediaHistoryRecord(String fileName, String site, String namespace, User uploadedBy, ActivityType activity) {
         this.fileName = fileName;
         this.site = site;
         this.namespace = namespace;
         this.uploadedByUser = uploadedBy;
-        this.action = action;
+        this.activity = activity;
     }
 
     public Long getId() {
@@ -83,11 +86,7 @@ public class MediaHistoryRecord {
     public String getUploadedBy() { return uploadedByUser == null ? "<unknown>" : uploadedByUser.userName;}
 
     public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
+        return activity.simpleName;
     }
 
     public LocalDateTime getTs() {
@@ -103,12 +102,12 @@ public class MediaHistoryRecord {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MediaHistoryRecord that = (MediaHistoryRecord) o;
-        return Objects.equals(id, that.id) && Objects.equals(fileName, that.fileName) && Objects.equals(site, that.site) && Objects.equals(namespace, that.namespace) && Objects.equals(uploadedByUser, that.uploadedByUser) && Objects.equals(action, that.action);
+        return Objects.equals(id, that.id) && Objects.equals(fileName, that.fileName) && Objects.equals(site, that.site) && Objects.equals(namespace, that.namespace) && Objects.equals(uploadedByUser, that.uploadedByUser) && Objects.equals(activity, that.activity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fileName, site, namespace, uploadedByUser, action);
+        return Objects.hash(id, fileName, site, namespace, uploadedByUser, activity);
     }
 
     @Override
@@ -118,7 +117,7 @@ public class MediaHistoryRecord {
                 ", site='" + site + '\'' +
                 ", namespace='" + namespace + '\'' +
                 ", uploadedBy='" + uploadedByUser + '\'' +
-                ", action='" + action + '\'' +
+                ", action='" + activity + '\'' +
                 ", ts=" + ts +
                 '}';
     }

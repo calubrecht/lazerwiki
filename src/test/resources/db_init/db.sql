@@ -114,23 +114,32 @@ insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) va
 insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) values ('site1', 'ns1', 'page3', '', 'image3.jpg');
 insert into imageRefs (site, sourcePageNS, sourcePageName, imageNS, imageRef) values ('site1', 'ns1', 'page4', '', 'image3.jpg');
 
+CREATE TABLE `activityType` (
+  `activityTypeId` NUMBER(11) NOT NULL,
+  `activityName` varchar(100) NOT NULL,
+  `simpleName` varchar(100) DEFAULT NULL,
+  `fullDesc` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`activityTypeId`),
+  UNIQUE KEY `activityType_unique` (`activityName`)
+);
+
 CREATE TABLE mediaHistory (
 	id NUMBER(11) NOT NULL AUTO_INCREMENT,
 	site varchar(50) NOT NULL,
 	namespace VARCHAR(50) NOT NULL,
 	fileName varchar(150) NOT NULL,
 	uploadedBy NUMBER(11) NOT NULL,
-	`action` varchar(100) NOT NULL,
+	`action` int(11) NOT NULL,
 	ts DATETIME DEFAULT current_timestamp(),
 	PRIMARY KEY (`id`),
 	INDEX (site,ts)
 )
 ;
 
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 1, 'Uploaded');
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 1, 'Replaced');
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site2', 'ns3', 'img2.jpg', 1, 'Uploaded');
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns4', 'img3.jpg', 1, 'Uploaded');
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 1, 50);
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 1, 60);
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site2', 'ns3', 'img2.jpg', 1, 50);
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns4', 'img3.jpg', 1, 50);
 
 CREATE TABLE `globalSettings` (
 	`id` NUMBER(11) NOT NULL ,

@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Limit;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.ActivityType;
 import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
@@ -142,7 +143,7 @@ class MediaServiceTest {
         // Not real image so dimensions recorded as 0, 0
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         verify(mediaRecordRepository).save(eq(newRecord));
-        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, "Uploaded");
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
         verify(cacheService).clearCache(eq("default"), eq(newRecord));
 
@@ -232,7 +233,7 @@ class MediaServiceTest {
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         newRecord.setId(10L);
         verify(mediaRecordRepository).save(eq(newRecord));
-        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, "Replaced");
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user,  ActivityType.ACTIVITY_PROTO_REPLACE_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
     }
 
@@ -300,7 +301,7 @@ class MediaServiceTest {
         underTest.deleteFile("host", "test.write", "bob");
 
         verify(mediaRecordRepository).deleteBySiteAndFilenameAndNamespace("default","test.write", "");
-        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("test.write", "default", "", user, "Deleted");
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("test.write", "default", "", user,  ActivityType.ACTIVITY_PROTO_DELETE_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
         assertFalse(f.exists());
 
@@ -335,8 +336,8 @@ class MediaServiceTest {
     void getRecentChanges() {
         User user = new User ("Bob", "hash");
         when(mediaHistoryRepository.findAllBySiteAndNamespaceInOrderByTsDesc(any(), any(), eq(List.of("ns1","ns2")))).thenReturn(
-                List.of(new MediaHistoryRecord("img1.jpg", "site1", "ns1", user, "Uploaded"),
-                        new MediaHistoryRecord("img2.jpg", "site1", "ns1", user, "Uploaded")
+                List.of(new MediaHistoryRecord("img1.jpg", "site1", "ns1", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA),
+                        new MediaHistoryRecord("img2.jpg", "site1", "ns1", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA)
                         )
         );
         when(siteService.getSiteForHostname("defaultHost")).thenReturn("site1");

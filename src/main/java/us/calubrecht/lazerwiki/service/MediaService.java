@@ -10,6 +10,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import us.calubrecht.lazerwiki.model.ActivityType;
 import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
@@ -128,13 +129,13 @@ public class MediaService {
         String fileName = mfile.getOriginalFilename();
         MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, namespace, fileName);
         Long id = null;
-        String action = "Uploaded";
+        ActivityType action = ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA;
         if (oldRecord != null){
             if (!namespaceService.canDeleteInNamespace(site, namespace, userName)) {
                 throw new MediaWriteException("Not permissioned to overwrite existing file");
             }
             id = oldRecord.getId();
-            action = "Replaced";
+            action = ActivityType.ACTIVITY_PROTO_REPLACE_MEDIA;
         }
         byte[] fileBytes = mfile.getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
@@ -209,7 +210,7 @@ public class MediaService {
         logger.info("Deleting file " + f.getAbsoluteFile());
         User user = userService.getUser(userName);
         mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, splitFile.getRight(), splitFile.getLeft());
-        MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, splitFile.getLeft(), user, "Deleted");
+        MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, splitFile.getLeft(), user,  ActivityType.ACTIVITY_PROTO_DELETE_MEDIA);
         mediaHistoryRepository.save(historyRecord);
         Files.delete(f.toPath());
         // XXX: Delete scaled images if exist

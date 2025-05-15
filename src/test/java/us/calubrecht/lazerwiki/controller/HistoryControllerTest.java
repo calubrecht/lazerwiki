@@ -10,10 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
-import us.calubrecht.lazerwiki.model.PageDesc;
-import us.calubrecht.lazerwiki.model.RecentChangesResponse;
-import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.service.MediaService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageServiceTest;
@@ -54,9 +51,9 @@ class HistoryControllerTest {
 
         List<MediaHistoryRecord> medias = new ArrayList<>();
         User user = new User("Bob", "hash");
-        medias.add(new MediaHistoryRecord("img1.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img1.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(0).setTs(LocalDateTime.of(2022,01,01,10,10,0));
-        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(1).setTs(LocalDateTime.of(2021,06,01,10,10,0));
         List<PageDesc> pages = new ArrayList<>();
         pages.add(new PageServiceTest.PageDescImpl("ns", "page1", 2L));
@@ -88,9 +85,9 @@ class HistoryControllerTest {
         // Simple Merge
         List<MediaHistoryRecord> medias = new ArrayList<>();
         User user = new User("Bob", "hash");
-        medias.add(new MediaHistoryRecord("img1.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img1.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(0).setTs(LocalDateTime.of(2022,01,01,10,10,0));
-        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(1).setTs(LocalDateTime.of(2021,06,01,10,10,0));
         List<PageDesc> pages = new ArrayList<>();
         pages.add(new PageServiceTest.PageDescImpl("ns", "page1", 2L));
@@ -137,13 +134,13 @@ class HistoryControllerTest {
         assertInstanceOf(RecentChangesResponse.RecentChangeRec.class, merged.get(7));
 
         // More than 10 total.
-        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(2).setTs(LocalDateTime.of(2020,06,01,10,10,0));
-        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(3).setTs(LocalDateTime.of(2019,06,01,10,10,0));
-        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(4).setTs(LocalDateTime.of(2018,06,01,10,10,0));
-        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user, "Uploaed"));
+        medias.add(new MediaHistoryRecord("img2.jpg", "site1", "ns", user,  ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA));
         medias.get(5).setTs(LocalDateTime.of(2017,06,01,10,10,0));
         pages.add(new PageServiceTest.PageDescImpl("ns", "page2", 1L));
         ((PageServiceTest.PageDescImpl)pages.get(2)).setModified(LocalDateTime.of(2020,10,01,10,10,0));
