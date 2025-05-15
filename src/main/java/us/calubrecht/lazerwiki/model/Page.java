@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -25,7 +26,10 @@ public class Page {
     String pagename;
     String title;
 
-    String modifiedBy;
+    @ManyToOne
+    @JoinColumn(name="modifiedBy", referencedColumnName = "userId")
+    @JsonIgnore
+    User modifiedBy;
 
     @CreationTimestamp
     LocalDateTime modified;
@@ -114,11 +118,12 @@ public class Page {
         this.validts = validts;
     }
 
+    @JsonIgnore
     public String getModifiedBy() {
-        return modifiedBy;
+        return modifiedBy.userName;
     }
 
-    public void setModifiedBy(String modifiedBy) {
+    public void setModifiedBy(User modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 

@@ -19,7 +19,7 @@ public class UserRole {
     public Long id;
 
     @ManyToOne()
-    @JoinColumn(name="userName", referencedColumnName = "userName")
+    @JoinColumn(name="userId", referencedColumnName = "userId")
     public User user;
 
     @Column(nullable = false)

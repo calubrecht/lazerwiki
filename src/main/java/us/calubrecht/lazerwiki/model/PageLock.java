@@ -12,7 +12,7 @@ public class PageLock {
     public PageLock() {
     }
 
-    public PageLock(String site, String namespace, String pagename, String owner, LocalDateTime lockTime, String lockId) {
+    public PageLock(String site, String namespace, String pagename, User owner, LocalDateTime lockTime, String lockId) {
         this.site = site;
         this.namespace = namespace;
         this.pagename = pagename;
@@ -28,7 +28,9 @@ public class PageLock {
     @Id
     private String pagename;
 
-    private String owner;
+    @ManyToOne
+    @JoinColumn(name="owner", referencedColumnName = "userId")
+    private User owner;
 
     private LocalDateTime lockTime;
 
@@ -58,11 +60,11 @@ public class PageLock {
         this.pagename = pagename;
     }
 
-    public String getOwner() {
+    public User getOwner() {
         return owner;
     }
 
-    public void setOwner(String owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 

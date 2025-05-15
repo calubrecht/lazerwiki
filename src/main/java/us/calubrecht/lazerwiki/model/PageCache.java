@@ -73,7 +73,7 @@ public class PageCache implements PageDesc {
             }
 
             @Override
-            public String getModifiedBy() {
+            public String getModifiedByUserName() {
                 return null;
             }
 
@@ -110,7 +110,7 @@ public class PageCache implements PageDesc {
 
     @Override
     @JsonIgnore
-    public String getModifiedBy() {
+    public String getModifiedByUserName() {
         return null;
     }
 

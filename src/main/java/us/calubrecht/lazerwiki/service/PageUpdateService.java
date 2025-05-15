@@ -58,13 +58,17 @@ public class PageUpdateService {
     @Autowired
     PageLockService pageLockService;
 
+    @Autowired
+    UserService userService;
+
 
     @Transactional
     public void savePage(String host, String sPageDescriptor, long lastRevision, String text, Collection<String> tags, Collection<String> links, Collection<String> images, String title, String userName, boolean force) throws PageWriteException{
         String site = siteService.getSiteForHostname(host);
+        User user = userService.getUser(userName);
         // get Existing
         PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
-        if (!namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName)) {
+        if (!namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), user.userName)) {
             throw new PageWriteException("You don't have permission to write this page.");
         }
         logger.info("Saving Page %s->%s".formatted(site, sPageDescriptor));
@@ -88,7 +92,7 @@ public class PageUpdateService {
         newP.setId(id);
         newP.setRevision(revision);
         newP.setValidts(PageRepository.MAX_DATE);
-        newP.setModifiedBy(userName);
+        newP.setModifiedBy(user);
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
         pageLockService.releaseAnyPageLock(host, sPageDescriptor);
@@ -108,6 +112,7 @@ public class PageUpdateService {
     @Transactional
     public void deletePage(String host, String sPageDescriptor, String userName) throws PageWriteException {
         String site = siteService.getSiteForHostname(host);
+        User user = userService.getUser(userName);
         PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
         if (!namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName) || sPageDescriptor.isEmpty()) {
             throw new PageWriteException("You don't have permission to delete this page.");
@@ -131,7 +136,7 @@ public class PageUpdateService {
         newP.setId(p.getId());
         newP.setRevision(revision);
         newP.setValidts(PageRepository.MAX_DATE);
-        newP.setModifiedBy(userName);
+        newP.setModifiedBy(user);
         newP.setTags(Collections.emptyList());
         newP.setDeleted(true);
         pageRepository.save(newP);

@@ -696,7 +696,7 @@ public class PageServiceTest {
         }
 
         @Override
-        public String getModifiedBy() {
+        public String getModifiedByUserName() {
             return modifiedBy;
         }
 

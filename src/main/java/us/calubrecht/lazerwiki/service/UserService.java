@@ -69,7 +69,7 @@ public class UserService {
             u.roles = List.of(new UserRole(u, "ROLE_ADMIN"));
             return u;
         }
-        User u = userRepository.findById(userName).orElse(null);
+        User u = userRepository.findByUserName(userName).orElse(null);
         if (u != null) {
             u.roles.size();
         }
@@ -90,7 +90,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public UserDTO deleteRole(String userName, String userRole) {
-        Optional<User> u = userRepository.findById(userName);
+        Optional<User> u = userRepository.findByUserName(userName);
         return u.map(user -> {
             Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
             ur.ifPresent( role -> user.roles.remove(role));
@@ -102,7 +102,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public UserDTO addRole(String userName, String userRole) {
-        Optional<User> u = userRepository.findById(userName);
+        Optional<User> u = userRepository.findByUserName(userName);
         return u.map(user -> {
             // List<UserRole> modifiedRoles = new ArrayList<>(user.roles.stream().filter(ur -> !ur.role.equals(userRole)).toList());
             Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
@@ -117,7 +117,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public void resetPassword(String userName, String password) {
-        Optional<User> u = userRepository.findById(userName);
+        Optional<User> u = userRepository.findByUserName(userName);
         u.ifPresent((user) -> {
             user.passwordHash = passwordUtil.hashPassword(password);
             userRepository.save(user);
@@ -136,7 +136,7 @@ public class UserService {
 
     @Transactional
     public void requestResetForgottenPassword(String userName, String host, String email, String password) throws MessagingException {
-        Optional<User> u = userRepository.findById(userName);
+        Optional<User> u = userRepository.findByUserName(userName);
         if (!u.isPresent() || !email.equals(u.get().getSettings().get("email"))) {
             return;
         }
@@ -156,7 +156,7 @@ public class UserService {
         if (savedToken == null) {
             throw new VerificationException("Invalid token: Please check token and try again");
         }
-        Optional<User> u = userRepository.findById(userName);
+        Optional<User> u = userRepository.findByUserName(userName);
         u.get().getSettings().put("email", savedToken.getData());
         userRepository.save(u.get());
     }
@@ -168,7 +168,7 @@ public class UserService {
         if (savedToken == null) {
             throw new VerificationException("Invalid token: Please check token and try again");
         }
-        Optional<User> u = userRepository.findById(userName);
+        Optional<User> u = userRepository.findByUserName(userName);
         u.ifPresent((user) -> {
             user.passwordHash = savedToken.getData();
             userRepository.save(user);
@@ -178,13 +178,13 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public void deleteUser(String userName) {
-       userRepository.deleteById(userName);
+       userRepository.deleteByUserName(userName);
     }
 
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
     public UserDTO setSiteRoles(String user, String site, List<String> newRoles) {
-        Optional<User> u = userRepository.findById(user);
+        Optional<User> u = userRepository.findByUserName(user);
         Optional<UserDTO> dto = u.map(user1 -> {
             List<UserRole> userRoles = new ArrayList<>(newRoles.stream().map(role -> new UserRole(user1, role)).toList());
             user1.roles.stream().filter(role -> {

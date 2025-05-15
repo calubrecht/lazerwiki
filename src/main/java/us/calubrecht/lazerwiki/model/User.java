@@ -19,6 +19,10 @@ public class User {
         this.passwordHash = passwordHash;
     }
     @Id
+    @Column(name = "userId")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int userId;
+
     @Column(name = "userName")
     public String userName;
 
@@ -29,7 +33,7 @@ public class User {
     public Map<String, Object> settings;
 
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
-    @JoinColumn(name = "userName")
+    @JoinColumn(name = "userId")
     public List<UserRole> roles; // Should roles be site specific?
 
     @JsonIgnore
