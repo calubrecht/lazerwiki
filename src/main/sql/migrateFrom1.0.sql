@@ -16,7 +16,6 @@ ALTER TABLE mediaRecord CHANGE uploadedBy uploadedByBack varchar(150) CHARACTER 
 ALTER TABLE mediaRecord ADD uploadedBy INT NULL AFTER site;
 
 UPDATE mediaRecord mr INNER JOIN userRecord ur ON mr.uploadedByBack = ur.userName SET uploadedBy = ur.userId;
-ALTER TABLE mediaRecord DROP INDEX FKmr_uploadedBy;
 ALTER TABLE mediaRecord DROP COLUMN uploadedByBack;
 ALTER TABLE mediaRecord ADD CONSTRAINT mediaRecord_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -24,7 +23,7 @@ ALTER TABLE mediaRecord ADD CONSTRAINT mediaRecord_userRecord_FK FOREIGN KEY (up
 ALTER TABLE page CHANGE modifiedBy modifiedByBack varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL NULL;
 ALTER TABLE page ADD modifiedBy INT NULL  AFTER modifiedByBack;
 
-UPDATE page p INNER JOIN userRecord ur ON p.modifiedByBack = ur.userName SET modifiedBy = ur.userId, validTS=validTS
+UPDATE page p INNER JOIN userRecord ur ON p.modifiedByBack = ur.userName SET modifiedBy = ur.userId, validTS=validTS;
 
 ALTER TABLE page DROP COLUMN modifiedByBack;
 ALTER TABLE page ADD CONSTRAINT page_userRecord_FK FOREIGN KEY (modifiedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE;
@@ -32,7 +31,7 @@ ALTER TABLE page ADD CONSTRAINT page_userRecord_FK FOREIGN KEY (modifiedBy) REFE
 -- Reestablish keys for userRole
 ALTER TABLE userRole ADD userId INT NULL AFTER id;
 
-UPDATE userRole r INNER JOIN userRecord ur ON r.userName = ur.userName SET r.userId = ur.userId
+UPDATE userRole r INNER JOIN userRecord ur ON r.userName = ur.userName SET r.userId = ur.userId;
 
 ALTER TABLE userRole DROP INDEX FK_USER;
 ALTER TABLE userRole DROP COLUMN userName;
@@ -48,7 +47,7 @@ ALTER TABLE pageLock ADD CONSTRAINT pageLock_userRecord_FK FOREIGN KEY (owner) R
 
 
 -- Reestablish keys for verificationToken
-DELETE FROM verificationToken
+DELETE FROM verificationToken;
 ALTER TABLE verificationToken DROP COLUMN `user`;
 ALTER TABLE verificationToken ADD `user` INT NULL AFTER id;
 ALTER TABLE verificationToken ADD CONSTRAINT verificationToken_userRecord_FK FOREIGN KEY (`user`) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
