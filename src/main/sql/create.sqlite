@@ -14,10 +14,15 @@ CREATE TABLE "sites" (
 INSERT INTO `sites` (`name`, `hostname`) VALUES ('default', '*');
 
 CREATE TABLE "userRecord" (
+	"userId"	INTEGER NOT NULL,
 	"userName"	TEXT NOT NULL,
 	"passwordHash"	TEXT NOT NULL,
 	"settings"	INTEGER NOT NULL DEFAULT '{}',
-	PRIMARY KEY("userName")
+	PRIMARY KEY("userId" AUTOINCREMENT)
+);
+
+CREATE UNIQUE INDEX "USERRECORD_USERNAME" ON "userRecord" (
+	"userName"
 );
 
 CREATE TABLE "page" (
@@ -30,12 +35,12 @@ CREATE TABLE "page" (
 	"title"	TEXT,
 	"modified"	DATETIME DEFAULT 'current_timestamp()',
 	"validTS"	DATETIME DEFAULT '9999-12-31 00:00:00',
-	"modifiedBy"	TEXT,
+	"modifiedBy"	INTEGER,
 	"deleted"	INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY("id") REFERENCES "page_ids"("id") ON UPDATE RESTRICT ON DELETE RESTRICT,
 	CONSTRAINT "UNIQENESS" UNIQUE("site","namespace","pagename","validTS"),
 	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY("modifiedBy") REFERENCES "userRecord"("userName") ON UPDATE RESTRICT ON DELETE SET NULL,
+	FOREIGN KEY("modifiedBy") REFERENCES "userRecord"("userId") ON UPDATE RESTRICT ON DELETE SET NULL,
 	PRIMARY KEY("id","revision")
 );
 
@@ -44,23 +49,24 @@ CREATE TABLE "pageLock" (
 	"namespace"	TEXT NOT NULL DEFAULT '',
 	"pagename"	TEXT NOT NULL,
 	"lockTime"	DATETIME NOT NULL,
-	"owner"	TEXT,
+	"owner"	NUMBER,
 	"lockId"	TEXT,
-	FOREIGN KEY("owner") REFERENCES "userRecord"("userName") ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY("owner") REFERENCES "userRecord"("userId") ON UPDATE CASCADE ON DELETE CASCADE,
 	PRIMARY KEY("site","namespace","pagename")
 );
+
 CREATE INDEX "PAGELOCK_ID_IDX" ON "pageLock" (
 	"lockId"
-)
+);
 
 
 
 CREATE TABLE "userRole" (
 	"id"	INTEGER NOT NULL,
-	"userName"	TEXT NOT NULL,
+	"userId"	INTEGER NOT NULL,
 	"role"	TEXT NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("userName") REFERENCES "userRecord"("userName") ON UPDATE RESTRICT ON DELETE RESTRICT
+	FOREIGN KEY("userId") REFERENCES "userRecord"("userId") ON UPDATE RESTRICT ON DELETE CASCADE
 );
 CREATE INDEX "USERROLE_USER_IDX" ON "userRole" (
 	"userName"
@@ -71,14 +77,14 @@ CREATE TABLE "mediaRecord" (
 	"fileName"	TEXT NOT NULL,
 	"namespace"	TEXT NOT NULL DEFAULT '',
 	"site"	TEXT NOT NULL,
-	"uploadedBy"	TEXT NOT NULL,
+	"uploadedBy"	INTEGER NOT NULL,
 	"fileSize"	INTEGER NOT NULL DEFAULT 0,
 	"height"	INTEGER NOT NULL DEFAULT 0,
 	"width"	INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT,
 	PRIMARY KEY("id" AUTOINCREMENT),
 	CONSTRAINT "UNQ_mr" UNIQUE("fileName","site"),
-	FOREIGN KEY("uploadedBy") REFERENCES "userRecord"("userName") ON UPDATE RESTRICT ON DELETE RESTRICT
+	FOREIGN KEY("uploadedBy") REFERENCES "userRecord"("userId") ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 CREATE INDEX "MEDIA_RECORD_SITE_IDX" ON "mediaRecord" (
@@ -223,7 +229,7 @@ CREATE INDEX "IMAGEREF_SOURCE_IDX" ON "imageRefs" (
 	"sourcePageName"
 );
 
-CREATE VIRTUAL TABLE pageCache USING fts5("site", "namespace", "pageName", "title", "renderedCache", "plaintextCache", "source", "useCache")
+CREATE VIRTUAL TABLE pageCache USING fts5("site", "namespace", "pageName", "title", "renderedCache", "plaintextCache", "source", "useCache");
 
 
 
@@ -237,11 +243,11 @@ INSERT INTO `globalSettings` (`id`) VALUES (1);
 
 CREATE TABLE "verificationToken" (
 	"id"	INTEGER NOT NULL,
-	"user"	TEXT NOT NULL,
+	"user"	INTEGER NOT NULL,
 	"token"	TEXT NOT NULL,
 	"purpose"	TEXT NOT NULL,
 	"data"	TEXT NOT NULL,
 	"expiry"	DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, '+15 minutes')),
-	FOREIGN KEY("user") REFERENCES "userRecord"("userName") ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY("user") REFERENCES "userRecord"("userId") ON DELETE CASCADE ON UPDATE CASCADE,
 	PRIMARY KEY("id" AUTOINCREMENT)
 )
