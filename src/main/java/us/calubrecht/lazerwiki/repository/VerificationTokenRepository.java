@@ -9,7 +9,7 @@ import us.calubrecht.lazerwiki.model.VerificationToken;
 @Repository
 public interface VerificationTokenRepository  extends CrudRepository<VerificationToken, Integer> {
 
-    VerificationToken findByUserAndTokenAndPurpose(String userName, String token, VerificationToken.Purpose purpose);
+    VerificationToken findByUserUserNameAndTokenAndPurpose(String userName, String token, VerificationToken.Purpose purpose);
 
     @Modifying
     @Query(value="delete from verificationToken  where expiry < CURRENT_TIMESTAMP", nativeQuery=true)

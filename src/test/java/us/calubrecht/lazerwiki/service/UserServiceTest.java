@@ -209,7 +209,7 @@ public class UserServiceTest {
 
     @Test
     void verifyEmailToken() throws VerificationException {
-        when(tokenRepository.findByUserAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.VERIFY_EMAIL))).thenReturn(
+        when(tokenRepository.findByUserUserNameAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.VERIFY_EMAIL))).thenReturn(
                 new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
         User user = new User("Bob", "hash");
         user.setSettings(new HashMap<>());
@@ -225,7 +225,7 @@ public class UserServiceTest {
 
     @Test
     void verifyPasswordToken() throws VerificationException {
-        when(tokenRepository.findByUserAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.RESET_PASSWORD))).thenReturn(
+        when(tokenRepository.findByUserUserNameAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.RESET_PASSWORD))).thenReturn(
                 new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newPasswordHash"));
         User user = new User("Bob", "hash");
         when(userRepository.findById("Bob")).thenReturn(Optional.of(user));

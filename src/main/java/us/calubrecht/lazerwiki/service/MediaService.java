@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
@@ -45,6 +46,9 @@ public class MediaService {
 
     @Autowired
     MediaHistoryRepository mediaHistoryRepository;
+
+    @Autowired
+    UserService userService;
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
@@ -135,7 +139,8 @@ public class MediaService {
         byte[] fileBytes = mfile.getBytes();
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
         Pair<Integer, Integer> imageDimension = imageUtil.getImageDimension(bis);
-        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, userName, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
+        User user = userService.getUser(userName);
+        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
         newRecord.setId(id);
         mediaRecordRepository.save(newRecord);
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, userName, action);

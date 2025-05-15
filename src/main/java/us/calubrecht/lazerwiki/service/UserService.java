@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.service;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class UserService {
@@ -129,7 +127,11 @@ public class UserService {
         String site = siteService.getSiteNameForHostname(host);
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();
-        tokenRepository.save(new VerificationToken(userName, randomKey, VerificationToken.Purpose.VERIFY_EMAIL, email));
+        Optional<User> u = userRepository.findByUserName(userName);
+        if (u.isEmpty()) {
+            return;
+        }
+        tokenRepository.save(new VerificationToken(u.get(), randomKey, VerificationToken.Purpose.VERIFY_EMAIL, email));
         String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
         emailService.sendEmail(host, email, userName,"Verify Email", body);
     }
@@ -137,14 +139,14 @@ public class UserService {
     @Transactional
     public void requestResetForgottenPassword(String userName, String host, String email, String password) throws MessagingException {
         Optional<User> u = userRepository.findByUserName(userName);
-        if (!u.isPresent() || !email.equals(u.get().getSettings().get("email"))) {
+        if (u.isEmpty() || !email.equals(u.get().getSettings().get("email"))) {
             return;
         }
         String site = siteService.getSiteNameForHostname(host);
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();
         String passwordHash = passwordUtil.hashPassword(password);
-        tokenRepository.save(new VerificationToken(userName, randomKey, VerificationToken.Purpose.RESET_PASSWORD, passwordHash));
+        tokenRepository.save(new VerificationToken(u.get(), randomKey, VerificationToken.Purpose.RESET_PASSWORD, passwordHash));
         String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
         emailService.sendEmail(host, email, userName,"Reset Forgotten Password", body);
     }
@@ -152,7 +154,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
     public void verifyEmailToken(String userName, String token) throws VerificationException {
-        VerificationToken savedToken = tokenRepository.findByUserAndTokenAndPurpose(userName, token, VerificationToken.Purpose.VERIFY_EMAIL);
+        VerificationToken savedToken = tokenRepository.findByUserUserNameAndTokenAndPurpose(userName, token, VerificationToken.Purpose.VERIFY_EMAIL);
         if (savedToken == null) {
             throw new VerificationException("Invalid token: Please check token and try again");
         }
@@ -164,7 +166,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
     public void verifyPasswordToken(String userName, String token) throws VerificationException {
-        VerificationToken savedToken = tokenRepository.findByUserAndTokenAndPurpose(userName, token, VerificationToken.Purpose.RESET_PASSWORD);
+        VerificationToken savedToken = tokenRepository.findByUserUserNameAndTokenAndPurpose(userName, token, VerificationToken.Purpose.RESET_PASSWORD);
         if (savedToken == null) {
             throw new VerificationException("Invalid token: Please check token and try again");
         }

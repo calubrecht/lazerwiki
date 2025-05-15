@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ public class VerificationToken {
 
     }
 
-    public VerificationToken(String user, String token, Purpose purpose, String data) {
+    public VerificationToken(User user, String token, Purpose purpose, String data) {
         this.user = user;
         this.token = token;
         this.purpose = purpose;
@@ -23,7 +24,9 @@ public class VerificationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String user;
+    @ManyToOne
+    @JoinColumn(name="user", referencedColumnName = "userId")
+    private User user;
     private String token;
     private String data;
 
@@ -39,11 +42,11 @@ public class VerificationToken {
         this.id = id;
     }
 
-    public String getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(String user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

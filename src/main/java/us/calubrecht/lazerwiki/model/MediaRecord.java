@@ -1,9 +1,7 @@
 package us.calubrecht.lazerwiki.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
 import java.util.Objects;
 
@@ -14,11 +12,11 @@ public class MediaRecord {
 
     }
 
-    public MediaRecord(String fileName, String site, String namespace, String uploadedBy, long fileSize, int height, int width) {
+    public MediaRecord(String fileName, String site, String namespace, User uploadedBy, long fileSize, int height, int width) {
         this.fileName = fileName;
         this.site = site;
         this.namespace = namespace;
-        this.uploadedBy = uploadedBy;
+        this.uploadedByUser = uploadedBy;
         this.fileSize = fileSize;
         this.height = height;
         this.width = width;
@@ -34,7 +32,10 @@ public class MediaRecord {
 
     private String namespace;
 
-    private String uploadedBy;
+    @ManyToOne
+    @JoinColumn(name="uploadedBy", referencedColumnName = "userId")
+    @JsonIgnore
+    private User uploadedByUser;
 
     private long fileSize;
 
@@ -67,11 +68,11 @@ public class MediaRecord {
     }
 
     public String getUploadedBy() {
-        return uploadedBy;
+        return uploadedByUser.userName;
     }
 
-    public void setUploadedBy(String uploadedBy) {
-        this.uploadedBy = uploadedBy;
+    public void setUploadedBy(User uploadedBy) {
+        this.uploadedByUser = uploadedBy;
     }
 
     public long getFileSize() {
@@ -111,12 +112,12 @@ public class MediaRecord {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MediaRecord that = (MediaRecord) o;
-        return fileSize == that.fileSize && height == that.height && width == that.width && Objects.equals(id, that.id) && Objects.equals(fileName, that.fileName) && Objects.equals(site, that.site) && Objects.equals(namespace, that.namespace) && Objects.equals(uploadedBy, that.uploadedBy);
+        return fileSize == that.fileSize && height == that.height && width == that.width && Objects.equals(id, that.id) && Objects.equals(fileName, that.fileName) && Objects.equals(site, that.site) && Objects.equals(namespace, that.namespace) && Objects.equals(uploadedByUser, that.uploadedByUser);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fileName, site, namespace, uploadedBy, fileSize, height, width);
+        return Objects.hash(id, fileName, site, namespace, uploadedByUser, fileSize, height, width);
     }
 
     @Override
@@ -126,7 +127,7 @@ public class MediaRecord {
                 ", fileName='" + fileName + '\'' +
                 ", site='" + site + '\'' +
                 ", namespace='" + namespace + '\'' +
-                ", uploadedBy='" + uploadedBy + '\'' +
+                ", uploadedBy='" + uploadedByUser + '\'' +
                 ", fileSize=" + fileSize +
                 ", height=" + height +
                 ", width=" + width +
