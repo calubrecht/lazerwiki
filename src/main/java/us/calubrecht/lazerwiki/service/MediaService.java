@@ -51,6 +51,9 @@ public class MediaService {
     @Autowired
     UserService userService;
 
+    @Autowired
+    ActivityLogService activityLogService;
+
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
 
@@ -146,6 +149,7 @@ public class MediaService {
         mediaRecordRepository.save(newRecord);
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, user, action);
         mediaHistoryRepository.save(historyRecord);
+        activityLogService.log(action, user, namespaceService.joinNS(namespace, fileName));
         mediaCacheService.clearCache(site, newRecord);
         File f = nsPath.isBlank() ?
                 new File(String.join("/", staticFileRoot, site, "media", fileName)):
@@ -212,6 +216,7 @@ public class MediaService {
         mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, splitFile.getRight(), splitFile.getLeft());
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, splitFile.getLeft(), user,  ActivityType.ACTIVITY_PROTO_DELETE_MEDIA);
         mediaHistoryRepository.save(historyRecord);
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_MEDIA, user, fileName);
         Files.delete(f.toPath());
         // XXX: Delete scaled images if exist
     }

@@ -1,16 +1,18 @@
 package us.calubrecht.lazerwiki.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.swing.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(name = "activityLog")
 public class ActivityLog {
 
-    public ActivityLog(ActivityType activityType, String target, String user) {
+    public ActivityLog(ActivityType activityType, String target, User user) {
         this.activityType = activityType;
         this.target = target;
         this.user = user;
@@ -24,15 +26,17 @@ public class ActivityLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "activityTypeId")
+    @ManyToOne
+    @JoinColumn(name = "activityType", referencedColumnName = "activityTypeId")
     public ActivityType activityType;
 
     @Column
     String target;
 
-    @Column
-    String user;
+    @ManyToOne
+    @JoinColumn(name="user", referencedColumnName = "userId")
+    @JsonIgnore
+    private User user;
 
     @CreationTimestamp
     LocalDateTime timestamp;
@@ -61,11 +65,11 @@ public class ActivityLog {
         this.target = target;
     }
 
-    public String getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(String user) {
+    public void setUser(User user) {
         this.user = user;
     }
 
@@ -75,5 +79,17 @@ public class ActivityLog {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ActivityLog that = (ActivityLog) o;
+        return Objects.equals(id, that.id) && Objects.equals(activityType, that.activityType) && Objects.equals(target, that.target) && Objects.equals(user, that.user) && Objects.equals(timestamp, that.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, activityType, target, user, timestamp);
     }
 }

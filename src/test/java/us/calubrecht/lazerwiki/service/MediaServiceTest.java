@@ -8,12 +8,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Limit;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import us.calubrecht.lazerwiki.model.ActivityType;
-import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
-import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
-import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
@@ -63,6 +60,9 @@ class MediaServiceTest {
 
     @MockBean
     UserService userService;
+
+    @MockBean
+    ActivityLogService activityLogService;
 
     @Test
     void getBinaryFile() throws IOException, MediaReadException {
@@ -133,6 +133,7 @@ class MediaServiceTest {
     void saveFile() throws IOException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.joinNS("", "small.bin")).thenReturn("small.bin");
         byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
         MockMultipartFile file = new MockMultipartFile("file", "small.bin", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "small.bin").toFile();
@@ -146,6 +147,7 @@ class MediaServiceTest {
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
         verify(cacheService).clearCache(eq("default"), eq(newRecord));
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA, user, "small.bin");
 
         FileInputStream fis = new FileInputStream(f);
         byte[] bytesRead = fis.readAllBytes();
@@ -303,6 +305,7 @@ class MediaServiceTest {
         verify(mediaRecordRepository).deleteBySiteAndFilenameAndNamespace("default","test.write", "");
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("test.write", "default", "", user,  ActivityType.ACTIVITY_PROTO_DELETE_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_MEDIA, user, "test.write");
         assertFalse(f.exists());
 
         f = Paths.get(staticFileRoot, "default", "media", "ns", "test.write2").toFile();

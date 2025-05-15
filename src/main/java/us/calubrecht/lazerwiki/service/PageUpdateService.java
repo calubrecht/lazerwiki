@@ -61,6 +61,9 @@ public class PageUpdateService {
     @Autowired
     UserService userService;
 
+    @Autowired
+    ActivityLogService activityLogService;
+
 
     @Transactional
     public void savePage(String host, String sPageDescriptor, long lastRevision, String text, Collection<String> tags, Collection<String> links, Collection<String> images, String title, String userName, boolean force) throws PageWriteException{
@@ -78,10 +81,12 @@ public class PageUpdateService {
         }
         long id = p == null ? getNewId() : p.getId();
         long revision = p == null ? 1 : p.getRevision() + 1;
+        ActivityType action = ActivityType.ACTIVITY_PROTO_CREATE_PAGE;
         if (p != null ) {
             p.setValidts(LocalDateTime.now());
             pageRepository.save(p);
             em.flush(); // Flush update to DB so we can do insert afterward
+            action = p.isDeleted() ? ActivityType.ACTIVITY_PROTO_CREATE_PAGE : ActivityType.ACTIVITY_PROTO_MODIFY_PAGE;
         }
         Page newP = new Page();
         newP.setSite(site);
@@ -95,6 +100,7 @@ public class PageUpdateService {
         newP.setModifiedBy(user);
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
+        activityLogService.log(action, user, sPageDescriptor);
         pageLockService.releaseAnyPageLock(host, sPageDescriptor);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
         imageRefService.setImageRefsFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), images);
@@ -143,6 +149,7 @@ public class PageUpdateService {
         linkService.deleteLinks(site, sPageDescriptor);
         PageCache.PageCacheKey key = new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         pageCacheRepository.deleteById(key);
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, user, sPageDescriptor);
         em.flush(); // Flush so regen can work?
         regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
         linkOverrideService.deleteOverrides(host, sPageDescriptor);
@@ -180,6 +187,7 @@ public class PageUpdateService {
         savePage(host, new PageDescriptor(newPageNS, newPageName).toString(), 0, oldPage.getText(), oldPage.getTags().stream().map(PageTag::getTag).toList(),
                 links, images, oldPage.getTitle(), user, true);
         deletePage(host, oldPageDescriptor, user);
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_MOVE_PAGE, userService.getUser(user), new PageDescriptor(oldPageNS, oldPageName) + "->" + new PageDescriptor(newPageNS, newPageName));
         pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId());
         pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId());
         return new MoveStatus(true, oldPageDescriptor + " move to " + newPageDescriptor);

@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import us.calubrecht.lazerwiki.model.Page;
-import us.calubrecht.lazerwiki.model.PageCache;
-import us.calubrecht.lazerwiki.model.PageKey;
-import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.responses.MoveStatus;
 import us.calubrecht.lazerwiki.responses.PageLockResponse;
@@ -71,6 +68,9 @@ public class PageUpdateServiceTest {
     @MockBean
     UserService userService;
 
+    @MockBean
+    ActivityLogService activityLogService;
+
 
     @Test
     public void testSavePage() throws PageWriteException {
@@ -78,7 +78,8 @@ public class PageUpdateServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
-        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
+        User user =new User("someUser", "hash");
+        when(userService.getUser("someUser")).thenReturn(user);
 
         pageUpdateService.savePage("host1", "newPage", 0L, "Some text", Collections.emptyList(),  Collections.emptyList(),Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
@@ -86,6 +87,7 @@ public class PageUpdateServiceTest {
         // new Page, should regen cache
         verify(regenCacheService).regenCachesForBacklinks("site1", "newPage");
         verify(pageLockService).releaseAnyPageLock("host1", "newPage");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, user, "newPage");
         Page p = pageCaptor.getValue();
         assertEquals("Some text", p.getText());
         assertEquals(55L, p.getId());
@@ -108,12 +110,14 @@ public class PageUpdateServiceTest {
         p.setTags(Collections.emptyList());
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
-        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
+        User user =new User("someUser", "hash");
+        when(userService.getUser("someUser")).thenReturn(user);
 
         pageUpdateService.savePage("host1", "ns:realPage", 2L, "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService, never()).regenCachesForBacklinks(anyString(), anyString());
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_MODIFY_PAGE, user, "ns:realPage");
 
         assertEquals(2, pageCaptor.getAllValues().size());
         Page invalidatedPage = pageCaptor.getAllValues().get(0);
@@ -144,12 +148,14 @@ public class PageUpdateServiceTest {
         p.setDeleted(true);
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "deletedPage")).
                 thenReturn(p);
-        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
+        User user =new User("someUser", "hash");
+        when(userService.getUser("someUser")).thenReturn(user);
 
         pageUpdateService.savePage("host1", "deletedPage", 2L, "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService).regenCachesForBacklinks("site1", "deletedPage");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, user, "deletedPage");
         Page pSaved = pageCaptor.getAllValues().get(1);  // Second saved page is restore page.
         assertEquals("Some text", pSaved.getText());
         assertEquals(10L, pSaved.getId());  // Id from deleted page is reused
@@ -220,6 +226,8 @@ public class PageUpdateServiceTest {
     public void testDeletePage() throws PageWriteException {
         when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("default");
         when(namespaceService.canDeleteInNamespace(eq("default"), eq(""), eq("bob"))).thenReturn(true);
+        User user = new User("bob", "hash");
+        when(userService.getUser("bob")).thenReturn(user);
         Page p = new Page();
         p.setId(1000L);
         p.setPagename("testPage");
@@ -242,6 +250,7 @@ public class PageUpdateServiceTest {
         verify(regenCacheService).regenCachesForBacklinks("default", "testPage");
         ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(captor.capture());
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, user, "testPage");
 
         assertEquals(2, captor.getAllValues().size());
         Page invalidatedPage = captor.getAllValues().get(0);
@@ -294,7 +303,8 @@ public class PageUpdateServiceTest {
         p.setTags(Collections.emptyList());
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns1", "page1")).thenReturn(p);
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "ns1", "page1", false)).thenReturn(p);
-        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
+        User user = new User("someUser", "hash");
+        when(userService.getUser("someUser")).thenReturn(user);
 
         pageUpdateService.movePage("host1", "someUser", "ns1", "page1", "ns2", "page2");
 
@@ -303,6 +313,9 @@ public class PageUpdateServiceTest {
 
         ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(3)).save(captor.capture());
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, user, "ns1:page1");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, user, "ns2:page2");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_MOVE_PAGE, user, "ns1:page1->ns2:page2");
 
         List<Page> pages = captor.getAllValues();
         assertEquals("page2", pages.get(0).getPagename());
