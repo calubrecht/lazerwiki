@@ -1,9 +1,7 @@
 package us.calubrecht.lazerwiki.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -21,7 +19,10 @@ public class MediaHistoryRecord {
 
     private String namespace;
 
-    private String uploadedBy;
+    @ManyToOne()
+    @JoinColumn(name="uploadedBy", referencedColumnName = "userId")
+    @JsonIgnore
+    public User uploadedByUser;
 
     private String action;
 
@@ -31,11 +32,11 @@ public class MediaHistoryRecord {
     public MediaHistoryRecord() {
     }
 
-    public MediaHistoryRecord(String fileName, String site, String namespace, String uploadedBy, String action) {
+    public MediaHistoryRecord(String fileName, String site, String namespace, User uploadedBy, String action) {
         this.fileName = fileName;
         this.site = site;
         this.namespace = namespace;
-        this.uploadedBy = uploadedBy;
+        this.uploadedByUser = uploadedBy;
         this.action = action;
     }
 
@@ -71,13 +72,15 @@ public class MediaHistoryRecord {
         this.namespace = namespace;
     }
 
-    public String getUploadedBy() {
-        return uploadedBy;
+    public User getUploadedByUser() {
+        return uploadedByUser;
     }
 
-    public void setUploadedBy(String uploadedBy) {
-        this.uploadedBy = uploadedBy;
+    public void setUploadedByUser(User uploadedByUser) {
+        this.uploadedByUser = uploadedByUser;
     }
+
+    public String getUploadedBy() { return uploadedByUser == null ? "<unknown>" : uploadedByUser.userName;}
 
     public String getAction() {
         return action;
@@ -100,12 +103,12 @@ public class MediaHistoryRecord {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MediaHistoryRecord that = (MediaHistoryRecord) o;
-        return Objects.equals(id, that.id) && Objects.equals(fileName, that.fileName) && Objects.equals(site, that.site) && Objects.equals(namespace, that.namespace) && Objects.equals(uploadedBy, that.uploadedBy) && Objects.equals(action, that.action);
+        return Objects.equals(id, that.id) && Objects.equals(fileName, that.fileName) && Objects.equals(site, that.site) && Objects.equals(namespace, that.namespace) && Objects.equals(uploadedByUser, that.uploadedByUser) && Objects.equals(action, that.action);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fileName, site, namespace, uploadedBy, action);
+        return Objects.hash(id, fileName, site, namespace, uploadedByUser, action);
     }
 
     @Override
@@ -114,7 +117,7 @@ public class MediaHistoryRecord {
                 "fileName='" + fileName + '\'' +
                 ", site='" + site + '\'' +
                 ", namespace='" + namespace + '\'' +
-                ", uploadedBy='" + uploadedBy + '\'' +
+                ", uploadedBy='" + uploadedByUser + '\'' +
                 ", action='" + action + '\'' +
                 ", ts=" + ts +
                 '}';

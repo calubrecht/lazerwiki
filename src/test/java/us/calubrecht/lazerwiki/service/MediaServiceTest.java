@@ -142,7 +142,7 @@ class MediaServiceTest {
         // Not real image so dimensions recorded as 0, 0
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         verify(mediaRecordRepository).save(eq(newRecord));
-        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", "Bob", "Uploaded");
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, "Uploaded");
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
         verify(cacheService).clearCache(eq("default"), eq(newRecord));
 
@@ -232,7 +232,7 @@ class MediaServiceTest {
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         newRecord.setId(10L);
         verify(mediaRecordRepository).save(eq(newRecord));
-        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", "Bob", "Replaced");
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, "Replaced");
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
     }
 
@@ -290,6 +290,8 @@ class MediaServiceTest {
     void testDeleteFile() throws IOException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
+        User user = new User("bob", "hash");
+        when(userService.getUser("bob")).thenReturn(user);
         File f = Paths.get(staticFileRoot, "default", "media", "test.write").toFile();
         try (FileOutputStream fos = new FileOutputStream(f)) {
             fos.write(1);
@@ -298,7 +300,7 @@ class MediaServiceTest {
         underTest.deleteFile("host", "test.write", "bob");
 
         verify(mediaRecordRepository).deleteBySiteAndFilenameAndNamespace("default","test.write", "");
-        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("test.write", "default", "", "bob", "Deleted");
+        MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("test.write", "default", "", user, "Deleted");
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
         assertFalse(f.exists());
 
@@ -331,9 +333,10 @@ class MediaServiceTest {
 
     @Test
     void getRecentChanges() {
+        User user = new User ("Bob", "hash");
         when(mediaHistoryRepository.findAllBySiteAndNamespaceInOrderByTsDesc(any(), any(), eq(List.of("ns1","ns2")))).thenReturn(
-                List.of(new MediaHistoryRecord("img1.jpg", "site1", "ns1", "Bob", "Uploaded"),
-                        new MediaHistoryRecord("img2.jpg", "site1", "ns1", "Bob", "Uploaded")
+                List.of(new MediaHistoryRecord("img1.jpg", "site1", "ns1", user, "Uploaded"),
+                        new MediaHistoryRecord("img2.jpg", "site1", "ns1", user, "Uploaded")
                         )
         );
         when(siteService.getSiteForHostname("defaultHost")).thenReturn("site1");

@@ -51,3 +51,12 @@ DELETE FROM verificationToken;
 ALTER TABLE verificationToken DROP COLUMN `user`;
 ALTER TABLE verificationToken ADD `user` INT NULL AFTER id;
 ALTER TABLE verificationToken ADD CONSTRAINT verificationToken_userRecord_FK FOREIGN KEY (`user`) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--Set keys for mediaHistory
+ALTER TABLE mediaHistory CHANGE uploadedBy uploadedByBack varchar(150) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
+ALTER TABLE mediaHistory ADD uploadedBy INT NULL AFTER fileName;
+
+UPDATE mediaHistory mh INNER JOIN userRecord ur ON mh.uploadedByBack = ur.userName SET mh.uploadedBy = ur.userId;
+
+ALTER TABLE mediaHistory ADD CONSTRAINT mediaHistory_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE mediaHistory DROP COLUMN uploadedByBack;

@@ -119,7 +119,7 @@ CREATE TABLE mediaHistory (
 	site varchar(50) NOT NULL,
 	namespace VARCHAR(50) NOT NULL,
 	fileName varchar(150) NOT NULL,
-	uploadedBy varchar(150) NOT NULL,
+	uploadedBy NUMBER(11) NOT NULL,
 	`action` varchar(100) NOT NULL,
 	ts DATETIME DEFAULT current_timestamp(),
 	PRIMARY KEY (`id`),
@@ -127,10 +127,10 @@ CREATE TABLE mediaHistory (
 )
 ;
 
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 'Bob', 'Uploaded');
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 'Bob', 'Replaced');
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site2', 'ns3', 'img2.jpg', 'Bob', 'Uploaded');
-insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns4', 'img3.jpg', 'Bob', 'Uploaded');
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 1, 'Uploaded');
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns1', 'img1.jpg', 1, 'Replaced');
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site2', 'ns3', 'img2.jpg', 1, 'Uploaded');
+insert into mediaHistory (site, namespace, fileName, uploadedBy, `action`) values ('site1', 'ns4', 'img3.jpg', 1, 'Uploaded');
 
 CREATE TABLE `globalSettings` (
 	`id` NUMBER(11) NOT NULL ,

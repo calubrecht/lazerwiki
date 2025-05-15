@@ -32,7 +32,6 @@ public class HistoryController {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal == null ? User.GUEST : principal.getName();
         RecentChangesResponse pageChanges = pageService.recentChanges(url.getHost(), userName);
-        List<PageDesc> desc = pageChanges.changes().stream().map(rcr -> rcr.pageDesc()).toList();
         List<MediaHistoryRecord> mediaChanges = mediaService.getRecentChanges(url.getHost(), userName);
         List<Object> merged = mergePageAndMedia(pageChanges.changes(), mediaChanges);
         return new RecentChangesResponse(pageChanges.changes(), mediaChanges, merged);

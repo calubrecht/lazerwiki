@@ -125,14 +125,14 @@ CREATE TABLE mediaHistory (
 	site varchar(50) NOT NULL,
 	namespace VARCHAR(50) NOT NULL,
 	fileName varchar(150) NOT NULL,
-	uploadedBy varchar(150) NOT NULL,
+	uploadedBy INT(11) NULL,
 	`action` varchar(100) NOT NULL,
 	ts DATETIME DEFAULT current_timestamp() NOT NULL,
 	INDEX mediaHistory_site_IDX (site,ts) USING BTREE,
 	CONSTRAINT mediaHistory_pk PRIMARY KEY (id),
 	CONSTRAINT mediaHistory_sites_FK FOREIGN KEY (site) REFERENCES sites(hostname) ON DELETE RESTRICT ON UPDATE RESTRICT,
 	CONSTRAINT mediaHistory_enumAction_FK FOREIGN KEY (`action`) REFERENCES enumAction(`Action`) ON DELETE RESTRICT ON UPDATE RESTRICT
-
+  CONSTRAINT mediaHistory_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE
 )
 ENGINE=InnoDB
 DEFAULT CHARSET=latin1

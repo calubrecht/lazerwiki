@@ -111,11 +111,12 @@ CREATE TABLE "mediaHistory" (
 	"site"	TEXT NOT NULL,
 	"namespace"	TEXT NOT NULL,
 	"fileName"	TEXT NOT NULL,
-	"uploadedBy"	TEXT NOT NULL,
+	"uploadedBy"	INTEGER NOT NULL,
 	"action"	TEXT NOT NULL,
 	"ts"	DATETIME NOT NULL DEFAULT 'current_timestamp()',
 	FOREIGN KEY("site") REFERENCES "sites"("name") ON DELETE RESTRICT ON UPDATE RESTRICT,
 	FOREIGN KEY("action") REFERENCES "enumAction"("Action") ON DELETE RESTRICT ON UPDATE RESTRICT,
+	FOREIGN KEY("uploadedBy") REFERENCES "userRecord"("userId") ON DELETE RESTRICT ON UPDATE RESTRICT,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 

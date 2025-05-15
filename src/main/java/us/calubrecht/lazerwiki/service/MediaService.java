@@ -143,7 +143,7 @@ public class MediaService {
         MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
         newRecord.setId(id);
         mediaRecordRepository.save(newRecord);
-        MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, userName, action);
+        MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, user, action);
         mediaHistoryRepository.save(historyRecord);
         mediaCacheService.clearCache(site, newRecord);
         File f = nsPath.isBlank() ?
@@ -194,11 +194,11 @@ public class MediaService {
     }
 
     @Transactional
-    public void deleteFile(String host, String fileName, String user) throws IOException, MediaWriteException {
+    public void deleteFile(String host, String fileName, String userName) throws IOException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         String nsPath = splitFile.getLeft().replaceAll(":", "/");
-        if (!namespaceService.canDeleteInNamespace(site, splitFile.getLeft(), user)) {
+        if (!namespaceService.canDeleteInNamespace(site, splitFile.getLeft(), userName)) {
             throw new MediaWriteException("Not permissioned to delete this file");
         }
 
@@ -207,6 +207,7 @@ public class MediaService {
                 new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())):
                 new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
         logger.info("Deleting file " + f.getAbsoluteFile());
+        User user = userService.getUser(userName);
         mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, splitFile.getRight(), splitFile.getLeft());
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, splitFile.getLeft(), user, "Deleted");
         mediaHistoryRepository.save(historyRecord);
