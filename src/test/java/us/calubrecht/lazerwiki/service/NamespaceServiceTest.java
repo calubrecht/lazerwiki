@@ -217,8 +217,8 @@ public class NamespaceServiceTest {
         globalAdmin.roles = List.of(new UserRole(globalAdmin, "ROLE_ADMIN"));
         when(userService.getUser("bob")).thenReturn(globalAdmin);
 
-        MediaRecord m1 = new MediaRecord("file1", "site1", "ns1", "bob", 0, 0 ,0);
-        MediaRecord m2 = new MediaRecord("file2", "site1", "closed", "bob", 0, 0 ,0);
+        MediaRecord m1 = new MediaRecord("file1", "site1", "ns1", globalAdmin, 0, 0 ,0);
+        MediaRecord m2 = new MediaRecord("file2", "site1", "closed", globalAdmin, 0, 0 ,0);
         List<MediaRecord> allMedia = List.of(m1, m2);
 
         List<MediaRecord> filtered = underTest.filterReadableMedia(

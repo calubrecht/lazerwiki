@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.responses.NsNode;
@@ -94,8 +95,9 @@ class MediaControllerTest {
     @Test
     void listFiles() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        MediaRecord file1 = new MediaRecord("file1.png", "default", "","bob", 0, 0, 0);
-        MediaRecord file2 = new MediaRecord("file2.jpg", "default", "", "bob", 0, 0, 0);
+        User user = new User("Bob", "hash");
+        MediaRecord file1 = new MediaRecord("file1.png", "default", "",user, 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("file2.jpg", "default", "", user, 0, 0, 0);
         MediaListResponse resp = new MediaListResponse(Map.of("", List.of(file1, file2)), new NsNode("", true));
         when(mediaService.getAllFiles(any(), any())).thenReturn(resp);
 

@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.MediaRecord;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
@@ -64,7 +65,8 @@ public class MediaCacheServiceTest {
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media");
-        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 20, 20);
+        User user = new User("Bob", "hash");
+        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         File f = Paths.get(cacheLocation.toString(),"circle.png-10x15").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
@@ -80,7 +82,8 @@ public class MediaCacheServiceTest {
 
     @Test
     public void testGetBinaryFileDontUpscale() throws IOException {
-        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 20, 20);
+        User user = new User("Bob", "hash");
+        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         IOSupplier supplier = () -> new byte[] {1,2,3,4};
 
         assertEquals(4, underTest.getBinaryFile("default", mediaRecord, supplier ,20, 25)[3]);
@@ -102,7 +105,8 @@ public class MediaCacheServiceTest {
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media");
-        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 20, 20);
+        User user = new User("Bob", "hash");
+        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         File f = Paths.get(cacheLocation.toString(),"circle.png-10x0").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
@@ -125,7 +129,8 @@ public class MediaCacheServiceTest {
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media");
-        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 20, 20);
+        User user = new User("Bob", "hash");
+        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         File f = Paths.get(cacheLocation.toString(),"circle.png-10x5").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
@@ -148,7 +153,8 @@ public class MediaCacheServiceTest {
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media", "ns");
-        MediaRecord mediaRecord = new MediaRecord("circleWdot.png", "default",  "ns","Bob", 7, 20, 20);
+        User user = new User("Bob", "hash");
+        MediaRecord mediaRecord = new MediaRecord("circleWdot.png", "default",  "ns",user, 7, 20, 20);
         File f = Paths.get(cacheLocation.toString(),"circleWdot.png-10x10").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circleWdot.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
@@ -170,7 +176,8 @@ public class MediaCacheServiceTest {
         // Create cached file
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media", "ns");
-        MediaRecord mediaRecord = new MediaRecord("circleWdot.png", "default",  "ns","Bob", 7, 20, 20);
+        User user = new User("Bob", "hash");
+        MediaRecord mediaRecord = new MediaRecord("circleWdot.png", "default",  "ns",user, 7, 20, 20);
         File f = Paths.get(cacheLocation.toString(),"circleWdot.png-10x10").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circleWdot.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
@@ -182,7 +189,7 @@ public class MediaCacheServiceTest {
         // Create cached file, no ns
         cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         originalLocation = Paths.get(staticFileRoot, "default", "media");
-        mediaRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 20, 20);
+        mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         f = Paths.get(cacheLocation.toString(),"circle.png-10x10").toFile();
         File origFile2 = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));

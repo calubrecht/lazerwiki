@@ -9,6 +9,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.model.MediaRecord;
@@ -59,6 +60,9 @@ class MediaServiceTest {
     @MockBean
     NamespaceService namespaceService;
 
+    @MockBean
+    UserService userService;
+
     @Test
     void getBinaryFile() throws IOException, MediaReadException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
@@ -79,7 +83,9 @@ class MediaServiceTest {
 
     @Test
     void getBinaryFileWrongSize() throws IOException, MediaReadException {
-        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "","Bob", 7, 10, 10);
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
+        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10);
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "circle.png")).thenReturn(newRecord);
@@ -130,9 +136,11 @@ class MediaServiceTest {
         MockMultipartFile file = new MockMultipartFile("file", "small.bin", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "small.bin").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
         underTest.saveFile("localhost", "Bob", file, "");
         // Not real image so dimensions recorded as 0, 0
-        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "","Bob", 7, 0, 0);
+        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         verify(mediaRecordRepository).save(eq(newRecord));
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", "Bob", "Uploaded");
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
@@ -155,13 +163,15 @@ class MediaServiceTest {
     void saveFile_wNS() throws IOException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
         byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
         MockMultipartFile file = new MockMultipartFile("file", "other.bin", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "ns1", "other.bin").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
         underTest.saveFile("localhost", "Bob", file, "ns1");
         // Not real image so dimensions recorded as 0, 0
-        MediaRecord newRecord = new MediaRecord("other.bin", "default",  "ns1","Bob", 7, 0, 0);
+        MediaRecord newRecord = new MediaRecord("other.bin", "default",  "ns1",user, 7, 0, 0);
         verify(mediaRecordRepository).save(eq(newRecord));
 
         FileInputStream fis = new FileInputStream(f);
@@ -188,12 +198,14 @@ class MediaServiceTest {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
         byte[] bytesToSave = underTest.getBinaryFile("localhost", "Bob", "circle.png", null);
         MockMultipartFile file = new MockMultipartFile("file", "circle2.png", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "circle2.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
         underTest.saveFile("localhost", "Bob", file, "");
-        MediaRecord newRecord = new MediaRecord("circle2.png", "default", "", "Bob", 768, 20, 20);
+        MediaRecord newRecord = new MediaRecord("circle2.png", "default", "", user, 768, 20, 20);
         verify(mediaRecordRepository).save(eq(newRecord));
     }
 
@@ -203,11 +215,13 @@ class MediaServiceTest {
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Frank"))).thenReturn(true);
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
         byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
         MockMultipartFile file = new MockMultipartFile("file", "small.bin", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "small.bin").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        MediaRecord existingRecord = new MediaRecord("small.bin", "default",  "","Bob", 7, 0, 0);
+        MediaRecord existingRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         existingRecord.setId(10L);
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "small.bin")).thenReturn(existingRecord);
         // Frank cannot delete, so cannot overwrite.
@@ -215,7 +229,7 @@ class MediaServiceTest {
 
         underTest.saveFile("localhost", "Bob", file, "");
 
-        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "","Bob", 7, 0, 0);
+        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         newRecord.setId(10L);
         verify(mediaRecordRepository).save(eq(newRecord));
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", "Bob", "Replaced");
@@ -227,8 +241,10 @@ class MediaServiceTest {
     void testListFiles() {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canReadNamespace(any(), any(), eq("user1"))).thenReturn(true);
-        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "","bob", 0, 0, 0);
-        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "", "bob", 0, 0, 0);
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
+        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "",user, 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "", user, 0, 0, 0);
         when(mediaRecordRepository.findAllBySiteOrderByFileName("default")).thenReturn(List.of(file1, file2));
         when(namespaceService.filterReadableMedia(any(), eq("default"), eq("user1"))).thenReturn(List.of(file1, file2));
 
@@ -241,8 +257,10 @@ class MediaServiceTest {
     @Test
     void testListFilesNestedNSes() {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "ns1","bob", 0, 0, 0);
-        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "ns2:ns4", "bob", 0, 0, 0);
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
+        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "ns1",user, 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "ns2:ns4", user, 0, 0, 0);
         when(namespaceService.canReadNamespace(any(), any(), eq("user1"))).thenReturn(true);
         when(mediaRecordRepository.findAllBySiteOrderByFileName("default")).thenReturn(List.of(file1, file2));
         when(namespaceService.filterReadableMedia(any(), eq("default"), eq("user1"))).thenReturn(List.of(file1, file2));

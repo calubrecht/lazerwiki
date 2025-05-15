@@ -27,7 +27,7 @@ public class UserRepositoryTest
     @Test
     @Transactional
     public void testQueryUser() {
-        User bob = userRepository.findById("Bob").get();
+        User bob = userRepository.findByUserName("Bob").get();
 
         assertNotNull(bob);
         assertEquals(2, bob.roles.size());
@@ -41,7 +41,7 @@ public class UserRepositoryTest
         newUser.setSettings(Map.of());
         userRepository.save(newUser);
 
-        User loser = userRepository.findById("Loser").get();
+        User loser = userRepository.findByUserName("Loser").get();
 
         assertNotNull(loser);
         assertEquals(2, loser.roles.size());

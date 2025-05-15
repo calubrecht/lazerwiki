@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageKey;
+import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.responses.MoveStatus;
 import us.calubrecht.lazerwiki.responses.PageLockResponse;
@@ -67,6 +68,9 @@ public class PageUpdateServiceTest {
     @MockBean
     TagRepository tagRepository;
 
+    @MockBean
+    UserService userService;
+
 
     @Test
     public void testSavePage() throws PageWriteException {
@@ -74,6 +78,7 @@ public class PageUpdateServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
         pageUpdateService.savePage("host1", "newPage", 0L, "Some text", Collections.emptyList(),  Collections.emptyList(),Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
@@ -103,6 +108,7 @@ public class PageUpdateServiceTest {
         p.setTags(Collections.emptyList());
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
                 thenReturn(p);
+        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
         pageUpdateService.savePage("host1", "ns:realPage", 2L, "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
@@ -138,6 +144,7 @@ public class PageUpdateServiceTest {
         p.setDeleted(true);
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1","", "deletedPage")).
                 thenReturn(p);
+        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
         pageUpdateService.savePage("host1", "deletedPage", 2L, "Some text", Collections.emptyList(),Collections.emptyList(),  Collections.emptyList(),"Title","someUser", false);
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
@@ -154,6 +161,7 @@ public class PageUpdateServiceTest {
     public void testSavePage_unauthorized()  {
         when(idRepository.getNewId()).thenReturn(55L);
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(userService.getUser("Joe")).thenReturn(new User("someUser", "hash"));
 
         assertThrows(PageWriteException.class, () ->
                 pageUpdateService.savePage("host1", "newPage", 0L,"Some text", null,  Collections.emptyList(),Collections.emptyList(),"Title","Joe", false));
@@ -165,6 +173,7 @@ public class PageUpdateServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
         pageUpdateService.savePage("host1", "newPage", 0L, "Some text", Collections.emptyList(),  List.of("page1", "page2"),Collections.emptyList(),"Title","someUser", false);
 
@@ -177,6 +186,7 @@ public class PageUpdateServiceTest {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
+        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
         pageUpdateService.savePage("host1", "newPage", 0L, "Some text", Collections.emptyList(),  List.of("page1", "page2"), List.of("image1.jpg", "image2.jpg"),"Title","someUser", false);
 
@@ -194,6 +204,7 @@ public class PageUpdateServiceTest {
         p.setRevision(2L);
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "realPage")).
                 thenReturn(p);
+        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
 
         assertThrows(PageRevisionException.class, () ->
@@ -250,6 +261,7 @@ public class PageUpdateServiceTest {
         when(namespaceService.canWriteNamespace(eq("newSite"), any(), eq("Bob"))).thenReturn(true);
         when(siteService.getSiteForHostname("site.com")).thenReturn("newSite");
         when(siteService.getHostForSitename("newSite")).thenReturn("site.com");
+        when(userService.getUser("Bob")).thenReturn(new User("Bob", "hash"));
 
         assertFalse(pageUpdateService.createDefaultSiteHomepage("existingSite", "New Site", "Bob"));
         assertTrue(pageUpdateService.createDefaultSiteHomepage("newSite", "New Site", "Bob"));
@@ -282,6 +294,7 @@ public class PageUpdateServiceTest {
         p.setTags(Collections.emptyList());
         when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns1", "page1")).thenReturn(p);
         when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "ns1", "page1", false)).thenReturn(p);
+        when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
         pageUpdateService.movePage("host1", "someUser", "ns1", "page1", "ns2", "page2");
 

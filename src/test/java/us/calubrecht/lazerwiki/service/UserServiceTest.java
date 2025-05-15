@@ -77,7 +77,7 @@ public class UserServiceTest {
     public void testGetUser() {
         User u = new User("Bob", "pass");
         u.roles = Collections.emptyList();
-        when(userRepository.findById("realUser")).thenReturn(Optional.of(u));
+        when(userRepository.findByUserName("realUser")).thenReturn(Optional.of(u));
 
         assertEquals("Bob", userService.getUser("realUser").userName);
         assertEquals(null, userService.getUser("MissingUser"));
@@ -115,7 +115,7 @@ public class UserServiceTest {
     public void testDeleteRoles() {
         User u = new User("Frank", "pass");
         u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
-        when(userRepository.findById("Frank")).thenReturn(Optional.of(u));
+        when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
         UserDTO changedUser = userService.deleteRole("Frank", "ROLE_ADMIN");
 
         assertEquals(List.of("ROLE_USER"), changedUser.userRoles());
@@ -128,7 +128,7 @@ public class UserServiceTest {
     public void testAddRoles() {
         User u = new User("Frank", "pass");
         u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
-        when(userRepository.findById("Frank")).thenReturn(Optional.of(u));
+        when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
         UserDTO changedUser = userService.addRole("Frank", "ROLE_ADMIN:oneSite");
 
         assertEquals(List.of("ROLE_ADMIN", "ROLE_USER", "ROLE_ADMIN:oneSite"), changedUser.userRoles());
@@ -147,7 +147,7 @@ public class UserServiceTest {
     void testResetPassword() {
         User u = new User("Frank", "pass");
         when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
-        when(userRepository.findById("Frank")).thenReturn(Optional.of(u));
+        when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
 
         userService.resetPassword("Frank", "password");
 
@@ -164,7 +164,7 @@ public class UserServiceTest {
     @Test
     public void test_deleteUser() {
         userService.deleteUser("Frank");
-        verify(userRepository).deleteById("Frank");
+        verify(userRepository).deleteByUserName("Frank");
     }
 
     @Test
@@ -172,11 +172,19 @@ public class UserServiceTest {
         when(siteService.getSiteNameForHostname("localhost")).thenReturn("Lazerwiki");
         when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
         when(templateService.getVerifyEmailTemplate(eq("Lazerwiki"), eq("bob@super.com"), eq("Bob"), eq( "ABCD-EFGH"))).thenReturn("The template");
+        User user = new User ("Bob", "hash");
+        when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
         userService.requestSetEmail("Bob", "localhost", "bob@super.com");
 
         verify(tokenRepository).deleteExpired();
-        verify(tokenRepository).save(new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
+        verify(tokenRepository).save(new VerificationToken(user, "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
         verify(emailService).sendEmail(eq("localhost"), eq("bob@super.com"), eq("Bob"), eq("Verify Email"), eq("The template"));
+
+        Mockito.reset(tokenRepository);
+        Mockito.reset(emailService);
+        userService.requestSetEmail("Jeff", "localhost", "bob@super.com");
+        verify(tokenRepository, Mockito.never()).save(any());
+        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -187,11 +195,11 @@ public class UserServiceTest {
         when(userService.passwordUtil.hashPassword(eq("pass"))).thenReturn("newHash");
         User user = new User("Bob", "hash");
         user.setSettings(Map.of("email", "bob@super.com"));
-        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
         userService.requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass");
 
         verify(tokenRepository).deleteExpired();
-        verify(tokenRepository).save(new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newHash"));
+        verify(tokenRepository).save(new VerificationToken(user, "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newHash"));
         verify(emailService).sendEmail(eq("localhost"), eq("bob@super.com"), eq("Bob"), eq("Reset Forgotten Password"), eq("The template"));
 
         userService.requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass");
@@ -209,11 +217,11 @@ public class UserServiceTest {
 
     @Test
     void verifyEmailToken() throws VerificationException {
-        when(tokenRepository.findByUserUserNameAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.VERIFY_EMAIL))).thenReturn(
-                new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
         User user = new User("Bob", "hash");
         user.setSettings(new HashMap<>());
-        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        when(tokenRepository.findByUserUserNameAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.VERIFY_EMAIL))).thenReturn(
+                new VerificationToken(user, "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
+        when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
         userService.verifyEmailToken("Bob", "ABCD-EFGH");
 
         User updateUser = new User("Bob", "hash");
@@ -225,10 +233,10 @@ public class UserServiceTest {
 
     @Test
     void verifyPasswordToken() throws VerificationException {
-        when(tokenRepository.findByUserUserNameAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.RESET_PASSWORD))).thenReturn(
-                new VerificationToken("Bob", "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newPasswordHash"));
         User user = new User("Bob", "hash");
-        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        when(tokenRepository.findByUserUserNameAndTokenAndPurpose(eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.RESET_PASSWORD))).thenReturn(
+                new VerificationToken(user, "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newPasswordHash"));
+        when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
         userService.verifyPasswordToken("Bob", "ABCD-EFGH");
 
         User updateUser = new User("Bob", "newPasswordHash");
@@ -242,7 +250,7 @@ public class UserServiceTest {
         User user = new User("Bob", "hash");
         user.roles = new ArrayList<>(List.of("ROLE_READ:site1:ns2", "ROLE_ADMIN", "ROLE_WRITE:site2:ns3").stream().
                 map(roleName -> new UserRole(user, roleName)).toList());
-        when(userRepository.findById("Bob")).thenReturn(Optional.of(user));
+        when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
         UserDTO dto = userService.setSiteRoles("Bob", "site1", List.of("ROLE_READ:site1:ns1", "ROLE_WRITE:site1:ns2"));
 
         User savedUser = new User("Bob", "hash");
