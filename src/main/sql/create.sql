@@ -22,6 +22,30 @@ ENGINE=InnoDB
 
 INSERT INTO `sites` (`name`, `hostname`) VALUES ('default', '*');
 
+CREATE TABLE `userRecord` (
+	`userId` INT(11) NOT NULL AUTO_INCREMENT,
+	`userName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	`passwordHash` VARCHAR(75) NOT NULL COLLATE 'latin1_swedish_ci',
+	`settings` JSON NOT NULL DEFAULT '{}',
+	PRIMARY KEY (`userId`) USING BTREE,
+  UNIQUE KEY `userRecord_userName_IDX` (`userName`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
+CREATE TABLE `userRole` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+  `userId` INT(11),
+	`role` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `FK_USER` (`userName`) USING BTREE,
+  CONSTRAINT userRole_userRecord_FK FOREIGN KEY (userId) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
 CREATE TABLE `page` (
 	`id` INT(11) NOT NULL,
 	`revision` INT(11) NOT NULL,
@@ -32,13 +56,13 @@ CREATE TABLE `page` (
 	`title` VARCHAR(200) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`modified` DATETIME NULL DEFAULT current_timestamp(),
 	`validTS` DATETIME NULL DEFAULT '9999-12-31 00:00:00' ON UPDATE current_timestamp(),
-	`modifiedBy` VARCHAR(255) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+  `modifiedBy` INT NULL,
 	`deleted` INT(11) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`, `revision`) USING BTREE,
 	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`, `validTS`) USING BTREE,
-	CONSTRAINT `FK_ID` FOREIGN KEY (`id`) REFERENCES `lazerwiki`.`page_ids` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-   	CONSTRAINT `FK_MODIFIEDBY` FOREIGN KEY (`modifiedBy`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  	CONSTRAINT `FK_SITE` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `FK_ID` FOREIGN KEY (`id`) REFERENCES `page_ids` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  CONSTRAINT page_userRecord_FK FOREIGN KEY (modifiedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE;
+  CONSTRAINT `FK_SITE` FOREIGN KEY (`site`) REFERENCES sites (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -49,48 +73,24 @@ CREATE TABLE `pageLock` (
  	`namespace` VARCHAR(50) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
  	`pagename` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
  	`lockTime` DATETIME NOT NULL,
- 	`owner` VARCHAR(255) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+ 	`owner` INT(11) NOT NULL,
  	`lockId` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
  	PRIMARY KEY (`site`, `namespace`, `pagename`) USING BTREE,
  	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`) USING BTREE,
  	INDEX `pageLockId` (`lockId`) USING BTREE,
-    	CONSTRAINT `FK_LOCK_OWNER` FOREIGN KEY (`owner`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-   	CONSTRAINT `FK_LOCK_SITE` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+  CONSTRAINT pageLock_userRecord_FK FOREIGN KEY (owner) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
+  CONSTRAINT `FK_LOCK_SITE` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
  )
  COLLATE='latin1_swedish_ci'
  ENGINE=InnoDB
  ;
-
-CREATE TABLE `userRecord` (
-	`userName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
-	`passwordHash` VARCHAR(75) NOT NULL COLLATE 'latin1_swedish_ci',
-	`settings` JSON NOT NULL DEFAULT '{}',
-	PRIMARY KEY (`userName`) USING BTREE
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB
-;
-
-
-CREATE TABLE `userRole` (
-	`id` INT(11) NOT NULL AUTO_INCREMENT,
-	`userName` VARCHAR(150) COLLATE 'latin1_swedish_ci',
-	`role` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
-	PRIMARY KEY (`id`) USING BTREE,
-	INDEX `FK_USER` (`userName`) USING BTREE,
-	CONSTRAINT `FK_USER` FOREIGN KEY (`userName`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB
-;
-
 
 CREATE TABLE `mediaRecord` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`fileName` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
     `namespace` varchar(50) NOT NULL DEFAULT '',
 	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`uploadedBy` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
+	`uploadedBy` INT(11) NULL,
 	`fileSize` INT(11) NOT NULL DEFAULT '0',
 	`height` INT(11) NOT NULL DEFAULT '0',
 	`width` INT(11) NOT NULL DEFAULT '0',
@@ -98,8 +98,8 @@ CREATE TABLE `mediaRecord` (
 	UNIQUE INDEX `UNQ_mr` (`fileName`, `site`,`namespace`) USING BTREE,
 	INDEX `FKmr_site` (`site`) USING BTREE,
 	INDEX `FKmr_uploadedBy` (`uploadedBy`) USING BTREE,
-	CONSTRAINT `FKmr_site` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	CONSTRAINT `FKmr_uploadedBy` FOREIGN KEY (`uploadedBy`) REFERENCES `lazerwiki`.`userRecord` (`userName`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `FKmr_site` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  CONSTRAINT mediaRecord_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE;
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -162,8 +162,8 @@ CREATE TABLE `namespace` (
 	PRIMARY KEY (`id`) USING BTREE,
 	UNIQUE INDEX `NS_UNIQUE` (`site`, `namespace`) USING BTREE,
 	INDEX `NS_RESTRICTION_FK` (`restriction_type`) USING BTREE,
-	CONSTRAINT `NS_RESTRICTION_FK` FOREIGN KEY (`restriction_type`) REFERENCES `lazerwiki`.`ns_restriction_types` (`type`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	CONSTRAINT `NS_SITE_FK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `NS_RESTRICTION_FK` FOREIGN KEY (`restriction_type`) REFERENCES `ns_restriction_types` (`type`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT `NS_SITE_FK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -179,7 +179,7 @@ CREATE TABLE `tag` (
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `tag_id` (`tag`) USING BTREE,
 	INDEX `tag_id_revision_FK` (`pageId`, `revision`) USING BTREE,
-	CONSTRAINT `tag_pageid_revision_FK` FOREIGN KEY (`pageId`, `revision`) REFERENCES `lazerwiki`.`page` (`id`, `revision`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `tag_pageid_revision_FK` FOREIGN KEY (`pageId`, `revision`) REFERENCES `page` (`id`, `revision`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -199,7 +199,7 @@ CREATE TABLE `links` (
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `linkSourceKey` (`site`, `sourcePageNS`, `sourcePageName`) USING BTREE,
 	INDEX `linkTargetKey` (`site`, `targetPageNS`, `targetPageName`) USING BTREE,
-	CONSTRAINT `linksSiteFK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `linksSiteFK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -217,7 +217,7 @@ CREATE TABLE `linkOverrides` (
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `linkOWSourceKey` (`site`, `sourcePageNS`, `sourcePageName`) USING BTREE,
 	INDEX `linkOWTargetKey` (`site`, `targetPageNS`, `targetPageName`) USING BTREE,
-	CONSTRAINT `linksOWSiteFK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `linksOWSiteFK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -232,7 +232,7 @@ CREATE TABLE `imageRefs` (
 	`imageRef` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `imageRefSourceKey` (`site`, `sourcePageNS`, `sourcePageName`) USING BTREE,
-	CONSTRAINT `imageRefSiteFK` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `imageRefSiteFK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -250,8 +250,8 @@ CREATE TABLE `pageCache` (
 	PRIMARY KEY (`site`, `namespace`, `pageName`) USING BTREE,
 	FULLTEXT INDEX `PageCachePlaintextSearch` (`plaintextCache`),
 	FULLTEXT INDEX `PageCachePageNameSearch` (`title`, `pageName`),
-	CONSTRAINT `FK_pageCacheSite` FOREIGN KEY (`site`) REFERENCES `lazerwiki`.`sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	CONSTRAINT `FK_pageCache_page` FOREIGN KEY (`site`, `namespace`, `pageName`) REFERENCES `lazerwiki`.`page` (`site`, `namespace`, `pagename`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `FK_pageCacheSite` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT `FK_pageCache_page` FOREIGN KEY (`site`, `namespace`, `pageName`) REFERENCES `page` (`site`, `namespace`, `pagename`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -271,12 +271,12 @@ INSERT INTO `globalSettings` (`id`) VALUES (1);
 
 CREATE TABLE `verificationToken` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `user` varchar(150) NOT NULL COLLATE 'latin1_swedish_ci',
+  `user` INT NULL,
   `token` varchar(10) NOT NULL COLLATE 'latin1_swedish_ci',
   `purpose` enum('VERIFY_EMAIL','RESET_PASSWORD') NOT NULL,
   `data` varchar(100) DEFAULT NULL,
   `expiry` datetime NOT NULL DEFAULT (current_timestamp() + interval 15 minute),
   PRIMARY KEY (`id`),
   KEY `verificationToken_userRecord_FK` (`user`),
-  CONSTRAINT `verificationToken_userRecord_FK` FOREIGN KEY (`user`) REFERENCES `userRecord` (`userName`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT verificationToken_userRecord_FK FOREIGN KEY (`user`) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
