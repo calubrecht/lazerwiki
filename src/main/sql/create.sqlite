@@ -11,7 +11,7 @@ CREATE TABLE "sites" (
 	PRIMARY KEY("name")
 );
 
-INSERT INTO `sites` (`name`, `hostname`) VALUES ('default', '*');
+INSERT INTO `sites` (`name`, `hostname`, `siteName`,) VALUES ('default', '*', 'Default Site');
 
 CREATE TABLE "userRecord" (
 	"userId"	INTEGER NOT NULL,

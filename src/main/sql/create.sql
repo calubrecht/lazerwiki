@@ -20,7 +20,7 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
-INSERT INTO `sites` (`name`, `hostname`) VALUES ('default', '*');
+INSERT INTO `sites` (`name`, `hostname`, `siteName`) VALUES ('default', '*', 'Default Site');
 
 CREATE TABLE `userRecord` (
 	`userId` INT(11) NOT NULL AUTO_INCREMENT,
