@@ -100,7 +100,7 @@ public class PageUpdateService {
         newP.setModifiedBy(user);
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
-        activityLogService.log(action, user, sPageDescriptor);
+        activityLogService.log(action, site, user, sPageDescriptor);
         pageLockService.releaseAnyPageLock(host, sPageDescriptor);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
         imageRefService.setImageRefsFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), images);
@@ -149,7 +149,7 @@ public class PageUpdateService {
         linkService.deleteLinks(site, sPageDescriptor);
         PageCache.PageCacheKey key = new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         pageCacheRepository.deleteById(key);
-        activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, user, sPageDescriptor);
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, site, user, sPageDescriptor);
         em.flush(); // Flush so regen can work?
         regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
         linkOverrideService.deleteOverrides(host, sPageDescriptor);
@@ -187,7 +187,7 @@ public class PageUpdateService {
         savePage(host, new PageDescriptor(newPageNS, newPageName).toString(), 0, oldPage.getText(), oldPage.getTags().stream().map(PageTag::getTag).toList(),
                 links, images, oldPage.getTitle(), user, true);
         deletePage(host, oldPageDescriptor, user);
-        activityLogService.log(ActivityType.ACTIVITY_PROTO_MOVE_PAGE, userService.getUser(user), new PageDescriptor(oldPageNS, oldPageName) + "->" + new PageDescriptor(newPageNS, newPageName));
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_MOVE_PAGE, site, userService.getUser(user), new PageDescriptor(oldPageNS, oldPageName) + "->" + new PageDescriptor(newPageNS, newPageName));
         pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId());
         pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId());
         return new MoveStatus(true, oldPageDescriptor + " move to " + newPageDescriptor);

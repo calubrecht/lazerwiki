@@ -12,8 +12,9 @@ import java.util.Objects;
 @Entity(name = "activityLog")
 public class ActivityLog {
 
-    public ActivityLog(ActivityType activityType, String target, User user) {
+    public ActivityLog(ActivityType activityType, String site, String target, User user) {
         this.activityType = activityType;
+        this.site = site;
         this.target = target;
         this.user = user;
     }
@@ -32,6 +33,9 @@ public class ActivityLog {
 
     @Column
     String target;
+
+    @Column
+    String site;
 
     @ManyToOne
     @JoinColumn(name="user", referencedColumnName = "userId")
@@ -85,11 +89,11 @@ public class ActivityLog {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ActivityLog that = (ActivityLog) o;
-        return Objects.equals(id, that.id) && Objects.equals(activityType, that.activityType) && Objects.equals(target, that.target) && Objects.equals(user, that.user) && Objects.equals(timestamp, that.timestamp);
+        return Objects.equals(id, that.id) && Objects.equals(activityType, that.activityType) && Objects.equals(site, that.site) && Objects.equals(target, that.target) && Objects.equals(user, that.user) && Objects.equals(timestamp, that.timestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, activityType, target, user, timestamp);
+        return Objects.hash(id, activityType, site, target, user, timestamp);
     }
 }

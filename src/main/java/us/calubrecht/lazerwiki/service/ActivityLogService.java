@@ -13,7 +13,7 @@ public class ActivityLogService {
     @Autowired
     ActivityLogRepository repo;
 
-    public void log(ActivityType activity, User user, String target) {
-        repo.save(new ActivityLog(activity, target, user));
+    public void log(ActivityType activity, String site, User user, String target) {
+        repo.save(new ActivityLog(activity, site, target, user));
     }
 }

@@ -147,7 +147,7 @@ class MediaServiceTest {
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
         verify(cacheService).clearCache(eq("default"), eq(newRecord));
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA, user, "small.bin");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA, "default", user, "small.bin");
 
         FileInputStream fis = new FileInputStream(f);
         byte[] bytesRead = fis.readAllBytes();
@@ -305,7 +305,7 @@ class MediaServiceTest {
         verify(mediaRecordRepository).deleteBySiteAndFilenameAndNamespace("default","test.write", "");
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("test.write", "default", "", user,  ActivityType.ACTIVITY_PROTO_DELETE_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_MEDIA, user, "test.write");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_MEDIA, "default", user, "test.write");
         assertFalse(f.exists());
 
         f = Paths.get(staticFileRoot, "default", "media", "ns", "test.write2").toFile();

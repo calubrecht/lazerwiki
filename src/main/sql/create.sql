@@ -293,12 +293,15 @@ CREATE TABLE `verificationToken` (
 CREATE TABLE `activityLog` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `activityType` int(11) NOT NULL,
+  `site` varchar(50) DEFAULT NULL,
   `target` varchar(100) NOT NULL,
   `user` int(11) DEFAULT NULL,
   `timestamp` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `activityLog_activityType_FK` (`activityType`),
   KEY `activityLog_userRecord_FK` (`user`),
+  KEY `activityLog_sites_FK` (`site`),
   CONSTRAINT `activityLog_activityType_FK` FOREIGN KEY (`activityType`) REFERENCES `activityType` (`activityTypeId`) ON UPDATE CASCADE,
+  CONSTRAINT `activityLog_sites_FK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `activityLog_userRecord_FK` FOREIGN KEY (`user`) REFERENCES `userRecord` (`userId`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;

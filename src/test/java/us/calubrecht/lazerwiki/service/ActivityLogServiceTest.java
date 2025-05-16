@@ -26,8 +26,8 @@ class ActivityLogServiceTest {
     @Test
     void log() {
         User user = new User("Bob", "hash");
-        service.log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, user, "newPage");
+        service.log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, "default", user, "newPage");
 
-        verify(repo).save(new ActivityLog(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, "newPage", user));
+        verify(repo).save(new ActivityLog(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, "default", "newPage", user));
     }
 }

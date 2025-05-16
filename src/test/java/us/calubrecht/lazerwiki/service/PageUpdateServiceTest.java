@@ -87,7 +87,7 @@ public class PageUpdateServiceTest {
         // new Page, should regen cache
         verify(regenCacheService).regenCachesForBacklinks("site1", "newPage");
         verify(pageLockService).releaseAnyPageLock("host1", "newPage");
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, user, "newPage");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, "site1",user, "newPage");
         Page p = pageCaptor.getValue();
         assertEquals("Some text", p.getText());
         assertEquals(55L, p.getId());
@@ -117,7 +117,7 @@ public class PageUpdateServiceTest {
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService, never()).regenCachesForBacklinks(anyString(), anyString());
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_MODIFY_PAGE, user, "ns:realPage");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_MODIFY_PAGE,  "site1",user, "ns:realPage");
 
         assertEquals(2, pageCaptor.getAllValues().size());
         Page invalidatedPage = pageCaptor.getAllValues().get(0);
@@ -155,7 +155,7 @@ public class PageUpdateServiceTest {
         ArgumentCaptor<Page> pageCaptor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(pageCaptor.capture());
         verify(regenCacheService).regenCachesForBacklinks("site1", "deletedPage");
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, user, "deletedPage");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE,  "site1",user, "deletedPage");
         Page pSaved = pageCaptor.getAllValues().get(1);  // Second saved page is restore page.
         assertEquals("Some text", pSaved.getText());
         assertEquals(10L, pSaved.getId());  // Id from deleted page is reused
@@ -250,7 +250,7 @@ public class PageUpdateServiceTest {
         verify(regenCacheService).regenCachesForBacklinks("default", "testPage");
         ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(2)).save(captor.capture());
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, user, "testPage");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE,  "default",user, "testPage");
 
         assertEquals(2, captor.getAllValues().size());
         Page invalidatedPage = captor.getAllValues().get(0);
@@ -313,9 +313,9 @@ public class PageUpdateServiceTest {
 
         ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
         verify(pageRepository, times(3)).save(captor.capture());
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, user, "ns1:page1");
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, user, "ns2:page2");
-        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_MOVE_PAGE, user, "ns1:page1->ns2:page2");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, "site1", user, "ns1:page1");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, "site1",user, "ns2:page2");
+        verify(activityLogService).log(ActivityType.ACTIVITY_PROTO_MOVE_PAGE, "site1",user, "ns1:page1->ns2:page2");
 
         List<Page> pages = captor.getAllValues();
         assertEquals("page2", pages.get(0).getPagename());
