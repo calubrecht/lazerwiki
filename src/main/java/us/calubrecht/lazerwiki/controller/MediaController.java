@@ -70,10 +70,14 @@ public class MediaController {
     }
 
     @PostMapping(value = "moveFile")
-    public MoveStatus moveFile(Principal principal, HttpServletRequest request, @RequestBody MoveFileRequest moveFileRequest) throws IOException, MediaWriteException {
+    public ResponseEntity<MoveStatus> moveFile(Principal principal, HttpServletRequest request, @RequestBody MoveFileRequest moveFileRequest) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = principal.getName();
-        return mediaService.moveImage(url.getHost(), userName, moveFileRequest.oldNS(), moveFileRequest.oldFile(), moveFileRequest.newNS(), moveFileRequest.newFile());
+        try {
+            return ResponseEntity.ok(mediaService.moveImage(url.getHost(), userName, moveFileRequest.oldNS(), moveFileRequest.oldFile(), moveFileRequest.newNS(), moveFileRequest.newFile()));
+        } catch (MediaWriteException | IOException e) {
+            return ResponseEntity.ok(new MoveStatus(false, e.getMessage()));
+        }
     }
 
     @GetMapping("list")

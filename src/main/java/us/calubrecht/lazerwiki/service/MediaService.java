@@ -191,6 +191,10 @@ public class MediaService {
         if (existingRecord != null) {
             return new MoveStatus(false, newFileName + " already exists, move cannot overwrite it");
         }
+        MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, oldFileNS, oldFileName);
+        if (oldRecord == null) {
+            return new MoveStatus(false, oldFileName + " does not exist");
+        }
         mediaOverrideService.createOverride(host, oldFileNS, oldFileName, newFileNS, newFileName);
         // Do move file
         String oldNsPath = oldFileNS.replaceAll(":", "/");
@@ -200,8 +204,6 @@ public class MediaService {
         ensureDir(site, newNsPath);
         String oldPageDescriptor = new PageDescriptor(oldFileNS, oldFileName).toString();
         String newPageDescriptor = new PageDescriptor(newFileNS, newFileName).toString();
-        mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, oldFileNS, oldFileName);
-        MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, oldFileNS, oldFileName);
         User user = userService.getUser(userName);
         MediaRecord newRecord = new MediaRecord(newFileName, site, newFileNS, user, oldRecord.getFileSize(), oldRecord.getHeight(), oldRecord.getWidth());
         mediaCacheService.clearCache(site, oldRecord);

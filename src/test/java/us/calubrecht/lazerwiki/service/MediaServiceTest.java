@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
+import us.calubrecht.lazerwiki.responses.MoveStatus;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
@@ -245,6 +246,19 @@ class MediaServiceTest {
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
     }
 
+    @Test
+    void saveFile_PathTraversal() {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
+        byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
+        MockMultipartFile file = new MockMultipartFile("file", "../../small.bin", null, bytesToSave);
+        // Refuse to save file if outside sandbox
+        assertThrows(MediaWriteException.class, () ->underTest.saveFile("localhost", "Bob", file, ""));
+    }
+
 
     @Test
     void testListFiles() {
@@ -356,5 +370,73 @@ class MediaServiceTest {
 
         assertEquals(2, changes.size());
         assertEquals("img1.jpg", changes.get(0).getFileName());
+    }
+
+    @Test
+    void testMoveImage() throws MediaWriteException, IOException {
+        User oldUser = new User("Charlie", "");
+        User newUser = new User("Bob", "");
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(namespaceService.canUploadInNamespace(any(), eq("ns1"), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canUploadInNamespace(any(), eq("ns2"), eq("Bob"))).thenReturn(true);
+        when(userService.getUser("Bob")).thenReturn(newUser);
+        MediaRecord oldRecord = new MediaRecord("img1.jpg", "default", "ns1", oldUser, 10000L, 10, 10);
+        oldRecord.setId(12L);
+        when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "ns1", "img1.jpg")).
+                thenReturn(oldRecord);
+        File oldFile = Paths.get(staticFileRoot, "default", "media", "ns1", "img1.jpg").toFile();
+        File newFile = Paths.get(staticFileRoot, "default", "media", "ns2", "img2.jpg").toFile();
+        Files.deleteIfExists(Path.of(oldFile.getPath()));
+        Files.deleteIfExists(Path.of(newFile.getPath()));
+        try (FileOutputStream fos = new FileOutputStream(oldFile)) {
+            fos.write(1);
+        }
+
+
+        MoveStatus status = underTest.moveImage("localhost", "Bob", "ns1", "img1.jpg", "ns2", "img2.jpg");
+        assertTrue(status.success());
+
+        verify(mediaOverrideService).createOverride("localhost", "ns1", "img1.jpg", "ns2", "img2.jpg");
+        MediaRecord newRecord = new MediaRecord("img2.jpg", "default", "ns2", newUser, 10000L, 10, 10);
+        verify(mediaRecordRepository).save(newRecord);
+        verify(mediaRecordRepository).deleteById(12L);
+        verify(cacheService).clearCache("default", oldRecord);
+        verify(cacheService).clearCache("default", newRecord);
+        verify(regenCacheService).regenCachesForImageRefs("default", "ns1:img1.jpg", "ns2:img2.jpg");
+
+        assertFalse(oldFile.exists());
+        assertTrue(newFile.exists());
+        FileInputStream fis = new FileInputStream(newFile);
+        byte[] bytesRead = fis.readAllBytes();
+        fis.close();
+
+        assertEquals(1, bytesRead[0]);
+
+
+        // User can't write in ns1
+        status = underTest.moveImage("localhost", "Joe", "ns1", "img1.jpg", "ns2", "img2.jpg");
+        assertFalse(status.success());
+        assertEquals("You don't have permission to upload in ns1", status.message());
+        verify(mediaOverrideService, times(1)).createOverride(any(), any(), any(), any(), any());
+        // User can't write in ns2
+        when(namespaceService.canUploadInNamespace(any(), eq("ns1"), eq("Frank"))).thenReturn(true);
+        status = underTest.moveImage("localhost", "Frank", "ns1", "img1.jpg", "ns2", "img2.jpg");
+        assertFalse(status.success());
+        assertEquals("You don't have permission to upload in ns2", status.message());
+        verify(mediaOverrideService, times(1)).createOverride(any(), any(), any(), any(), any());
+        // File doesn't exist
+        when(namespaceService.canUploadInNamespace(any(), eq("ns1"), eq("Frank"))).thenReturn(true);
+        status = underTest.moveImage("localhost", "Bob", "ns1", "noImg.jpg", "ns2", "img2.jpg");
+        assertFalse(status.success());
+        assertEquals("noImg.jpg does not exist", status.message());
+        verify(mediaOverrideService, times(1)).createOverride(any(), any(), any(), any(), any());
+
+        // Target file already exists
+        when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "ns2", "img3.jpg")).
+                thenReturn(new MediaRecord("img3.jpg", "default", "ns2", newUser, 10000L, 10, 10));
+        status = underTest.moveImage("localhost", "Bob", "ns1", "img1.jpg", "ns2", "img3.jpg");
+        assertFalse(status.success());
+        assertEquals("img3.jpg already exists, move cannot overwrite it", status.message());
+        verify(mediaOverrideService, times(1)).createOverride(any(), any(), any(), any(), any());
     }
 }

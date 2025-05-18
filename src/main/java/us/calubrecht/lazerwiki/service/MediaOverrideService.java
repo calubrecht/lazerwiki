@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.ImageRef;
-import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.MediaOverride;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.repository.ImageRefRepository;
@@ -55,7 +54,7 @@ public class MediaOverrideService {
         PageDescriptor newPageDescriptor = PageService.decodeDescriptor(newPage);
         List<MediaOverride> linkOverridesToCopy = repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         List<MediaOverride> replacedLinkOverrides = linkOverridesToCopy.stream().map(lo -> new MediaOverride(lo.getSite(), newPageDescriptor.namespace(), newPageDescriptor.pageName(), lo.getTargetFileNS(), lo.getTargetFileName(), lo.getNewTargetFileNS(), lo.getNewTargetFileName())).toList();
-        repo.deleteBySiteAndNewTargetFileNSAndNewTargetFileName(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+        repo.deleteBySiteAndSourcePageNSAndSourcePageName(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         repo.saveAll(replacedLinkOverrides);
     }
 

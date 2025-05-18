@@ -134,4 +134,27 @@ class MediaControllerTest {
                 andExpect(status().isOk());
         verify(mediaService).getRecentChanges(eq("localhost"), eq("Guest"));
     }
+
+    @Test
+    void testMoveFile() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        String data = "{\"oldNS\": \"ns1\", \"oldFile\": \"img.jpg\", \"newNS\": \"ns2\", \"newFile\": \"img2.jpg\"}";
+        this.mockMvc.perform(post("/_media/moveFile").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(mediaService).moveImage("localhost", "Bob", "ns1", "img.jpg", "ns2", "img2.jpg");
+
+        // Check error.
+        when(mediaService.moveImage("localhost", "Bob", "ns1", "img.jpg", "ns2", "img3.jpg")).thenThrow(
+                new MediaWriteException("File already exists"));
+        String data2 = "{\"oldNS\": \"ns1\", \"oldFile\": \"img.jpg\", \"newNS\": \"ns2\", \"newFile\": \"img3.jpg\"}";
+        this.mockMvc.perform(post("/_media/moveFile").
+                        content(data2).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk()).andExpect(content().json("{\"success\": false, \"message\": \"File already exists\"}"));
+    }
 }
