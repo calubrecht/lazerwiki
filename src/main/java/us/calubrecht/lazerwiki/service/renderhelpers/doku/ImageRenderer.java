@@ -56,9 +56,11 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
         if (overrides.containsKey(file)) {
             String override = overrides.get(file).getNewTarget();
             int startIndex = tree.inner_text(0).getStart().getStartIndex();
+            String linkText = tree.inner_text(0).getText();
+            startIndex += linkText.indexOf(file);
             ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent("overrideStats",
                     (k) -> new ArrayList<>())).add(
-                    new LinkOverrideInstance(file, override, startIndex, startIndex + file.length()+1));
+                    new LinkOverrideInstance(file, override, startIndex, startIndex + file.length()));
             return override;
         }
         return file;

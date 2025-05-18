@@ -65,7 +65,7 @@ class MediaServiceTest {
     ActivityLogService activityLogService;
 
     @Test
-    void getBinaryFile() throws IOException, MediaReadException {
+    void getBinaryFile() throws IOException, MediaReadException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", null);
@@ -83,7 +83,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void getBinaryFileWrongSize() throws IOException, MediaReadException {
+    void getBinaryFileWrongSize() throws IOException, MediaReadException, MediaWriteException {
         User user = new User("Bob", "hash");
         when(userService.getUser("Bob")).thenReturn(user);
         MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10);
@@ -118,7 +118,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void getBinaryFileNoRecord() throws IOException, MediaReadException {
+    void getBinaryFileNoRecord() throws IOException, MediaReadException, MediaWriteException {
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         assertThrows(IOException.class, () -> underTest.getBinaryFile("localhost", "Bob", "nothere.png", "10x10"));
@@ -324,7 +324,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void getFileLastModified() throws IOException {
+    void getFileLastModified() throws IOException, MediaWriteException {
         long modifiedtime = underTest.getFileLastModified("localhost",  "circle.png");
 
         File f = Paths.get(staticFileRoot, "circle.png").toFile();

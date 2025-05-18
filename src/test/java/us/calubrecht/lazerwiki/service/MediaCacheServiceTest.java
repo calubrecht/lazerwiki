@@ -81,7 +81,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileDontUpscale() throws IOException {
+    public void testGetBinaryFileDontUpscale() throws IOException, MediaWriteException {
         User user = new User("Bob", "hash");
         MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         IOSupplier supplier = () -> new byte[] {1,2,3,4};
@@ -165,7 +165,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testClearCache() throws IOException {
+    public void testClearCache() throws IOException, MediaWriteException {
         when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
             return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
                     inv.getArgument(1, String.class),
