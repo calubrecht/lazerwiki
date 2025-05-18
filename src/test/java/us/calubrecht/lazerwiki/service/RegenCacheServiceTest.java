@@ -47,6 +47,9 @@ class RegenCacheServiceTest {
     @MockBean
     SiteService siteService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
 
     @Test
     void regenLinks() {

@@ -44,6 +44,9 @@ class WrapMacroTest {
     @MockBean
     LinkOverrideService linkOverrideService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
     RenderContext context() {
         return new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     }

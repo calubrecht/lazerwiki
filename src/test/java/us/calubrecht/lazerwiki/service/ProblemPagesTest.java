@@ -40,6 +40,9 @@ public class ProblemPagesTest {
     @MockBean
     LinkOverrideService linkOverrideService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
     public static class TestConfig {

@@ -64,6 +64,12 @@ class MediaServiceTest {
     @MockBean
     ActivityLogService activityLogService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
+    @MockBean
+    RegenCacheService regenCacheService;
+
     @Test
     void getBinaryFile() throws IOException, MediaReadException, MediaWriteException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
@@ -325,13 +331,14 @@ class MediaServiceTest {
 
     @Test
     void getFileLastModified() throws IOException, MediaWriteException {
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
         long modifiedtime = underTest.getFileLastModified("localhost",  "circle.png");
 
-        File f = Paths.get(staticFileRoot, "circle.png").toFile();
+        File f = Paths.get(staticFileRoot, "default", "media", "circle.png").toFile();
         assertEquals(f.lastModified(), modifiedtime);
 
         modifiedtime = underTest.getFileLastModified("localhost",  "ns:circleWdot.png");
-        f = Paths.get(staticFileRoot, "ns","circleWdot.png").toFile();
+        f = Paths.get(staticFileRoot, "default", "media","ns","circleWdot.png").toFile();
         assertEquals(f.lastModified(), modifiedtime);
     }
 

@@ -54,6 +54,9 @@ class MacroServiceTest {
     @MockBean
     LinkOverrideService linkOverrideService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
     @Test
     @Order(1)
     void registerMacros() {

@@ -51,6 +51,9 @@ public class DokuWikiRendererTest {
     @MockBean
     LinkOverrideService linkOverrideService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
 
     String doRender(String source) {
         return underTest.renderToString(source, "localhost", "default", "page", "");

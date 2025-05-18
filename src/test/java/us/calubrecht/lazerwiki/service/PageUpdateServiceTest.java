@@ -71,6 +71,9 @@ public class PageUpdateServiceTest {
     @MockBean
     ActivityLogService activityLogService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
 
     @Test
     public void testSavePage() throws PageWriteException {

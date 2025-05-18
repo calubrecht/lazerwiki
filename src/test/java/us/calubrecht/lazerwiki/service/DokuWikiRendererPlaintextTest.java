@@ -38,6 +38,9 @@ public class DokuWikiRendererPlaintextTest {
     @MockBean
     LinkOverrideService linkOverrideService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
     String doRender(String source) {
         RenderContext context = new RenderContext("localhost", "default", "page", "jack");
         return underTest.renderToPlainText(source, context);

@@ -45,6 +45,9 @@ public class LinkCheckMacroTest {
     @MockBean
     LinkOverrideService linkOverrideService;
 
+    @MockBean
+    MediaOverrideService mediaOverrideService;
+
 
     @Test
     public void testChecklinks() {
