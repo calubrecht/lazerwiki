@@ -114,3 +114,17 @@ CREATE TABLE `activityLog` (
   CONSTRAINT `activityLog_sites_FK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `activityLog_userRecord_FK` FOREIGN KEY (`user`) REFERENCES `userRecord` (`userId`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `mediaOverrides` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `site` varchar(50) NOT NULL,
+  `sourcePageNS` varchar(50) NOT NULL,
+  `sourcePageName` varchar(200) NOT NULL,
+  `targetFileNS` varchar(50) NOT NULL,
+  `targetFileName` varchar(200) NOT NULL,
+  `newTargetFileNS` varchar(50) NOT NULL,
+  `newTargetFileName` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `mediaOverrides_sites_FK` (`site`),
+  CONSTRAINT `mediaOverrides_sites_FK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;

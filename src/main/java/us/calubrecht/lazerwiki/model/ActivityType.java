@@ -13,6 +13,7 @@ public class ActivityType {
     public static ActivityType ACTIVITY_PROTO_UPLOAD_MEDIA = new ActivityType(50L);
     public static ActivityType ACTIVITY_PROTO_REPLACE_MEDIA = new ActivityType(60L);
     public static ActivityType ACTIVITY_PROTO_DELETE_MEDIA = new ActivityType(70L);
+    public static ActivityType ACTIVITY_PROTO_MOVE_MEDIA = new ActivityType(80L);
 
     public ActivityType() {
 
@@ -40,14 +41,4 @@ public class ActivityType {
 
     @Column
     String fullDesc;
-
-    @Override
-    public String toString() {
-        return "ActivityType{" +
-                "activityTypeId=" + activityTypeId +
-                ", activityName='" + activityName + '\'' +
-                ", simpleName='" + simpleName + '\'' +
-                ", fullDesc='" + fullDesc + '\'' +
-                '}';
-    }
 }

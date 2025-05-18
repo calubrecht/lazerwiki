@@ -23,6 +23,9 @@ public class RegenCacheService {
     LinkOverrideService linkOverrideService;
 
     @Autowired
+    MediaOverrideService mediaOverrideService;
+
+    @Autowired
     ImageRefService imageRefService;
 
     @Autowired
@@ -92,6 +95,36 @@ public class RegenCacheService {
         List<String> backlinks = linkService.getBacklinks(site, linkedPage);
         List<String> overrideBacklinks = linkOverrideService.getOverridesForNewTargetPage(host, linkedPage).stream().map(
                 LinkOverride::getSource
+        ).toList();
+        List<String> allLinks = new ArrayList<>();
+        allLinks.addAll(backlinks);
+        allLinks.addAll(overrideBacklinks);
+        allLinks.stream().distinct().forEach(link -> {
+            PageDescriptor pd = PageService.decodeDescriptor(link);
+            Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
+            RenderContext renderContext = new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
+            renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+            RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
+            PageCache newCache = new PageCache();
+            newCache.site = site;
+            newCache.namespace = pd.namespace();
+            newCache.pageName = pd.pageName();
+            newCache.renderedCache = res.renderedText();
+            newCache.plaintextCache = res.plainText();
+            newCache.title = PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
+            newCache.source = PageService.doAdjustSource(p.getText(), res);
+            newCache.useCache = !(Boolean)res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
+            logger.info("Caching rendered page for " + pd.namespace() + ":" + pd.pageName() + " useCache=" + newCache.useCache);
+            pageCacheRepository.save(newCache);
+        });
+    }
+
+    public void regenCachesForImageRefs(String site, String oldImageRef, String newImageRef) {
+        String host = siteService.getHostForSitename(site);
+        logger.info("Regening cache for media links to " +site + "-" + oldImageRef);
+        List<String> backlinks = imageRefService.getRefsForImage(site, oldImageRef);
+        List<String> overrideBacklinks = mediaOverrideService.getOverridesForImage(host, newImageRef).stream().map(
+                MediaOverride::getSource
         ).toList();
         List<String> allLinks = new ArrayList<>();
         allLinks.addAll(backlinks);

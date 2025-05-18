@@ -12,10 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
 import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.requests.MoveFileRequest;
+import us.calubrecht.lazerwiki.requests.MovePageRequest;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
+import us.calubrecht.lazerwiki.responses.MoveStatus;
 import us.calubrecht.lazerwiki.service.MediaService;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
+import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -47,7 +51,7 @@ public class MediaController {
                     .body(mediaService.getBinaryFile(url.getHost(), userName, fileName, size));
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
-        } catch (MediaReadException e) {
+        } catch (MediaReadException | MediaWriteException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
@@ -63,6 +67,13 @@ public class MediaController {
             logger.error("Upload failed because: " +e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @PostMapping(value = "moveFile")
+    public MoveStatus moveFile(Principal principal, HttpServletRequest request, @RequestBody MoveFileRequest moveFileRequest) throws IOException, MediaWriteException {
+        URL url = new URL(request.getRequestURL().toString());
+        String userName = principal.getName();
+        return mediaService.moveImage(url.getHost(), userName, moveFileRequest.oldNS(), moveFileRequest.oldFile(), moveFileRequest.newNS(), moveFileRequest.newFile());
     }
 
     @GetMapping("list")

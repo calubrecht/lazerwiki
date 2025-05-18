@@ -47,6 +47,9 @@ public class PageUpdateService {
     LinkOverrideService linkOverrideService;
 
     @Autowired
+    MediaOverrideService mediaOverrideService;
+
+    @Autowired
     ImageRefService imageRefService;
 
     @Autowired
@@ -100,6 +103,8 @@ public class PageUpdateService {
         newP.setModifiedBy(user);
         newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
         pageRepository.save(newP);
+        linkOverrideService.deleteOverrides(host, sPageDescriptor);
+        mediaOverrideService.deleteOverrides(host, sPageDescriptor);
         activityLogService.log(action, site, user, sPageDescriptor);
         pageLockService.releaseAnyPageLock(host, sPageDescriptor);
         linkService.setLinksFromPage(site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
@@ -153,6 +158,7 @@ public class PageUpdateService {
         em.flush(); // Flush so regen can work?
         regenCacheService.regenCachesForBacklinks(site,sPageDescriptor);
         linkOverrideService.deleteOverrides(host, sPageDescriptor);
+        mediaOverrideService.deleteOverrides(host, sPageDescriptor);
     }
 
     @Transactional
@@ -181,6 +187,7 @@ public class PageUpdateService {
 
         linkOverrideService.createOverride(host, oldPageDescriptor, newPageDescriptor);
         linkOverrideService.moveOverrides(host, oldPageDescriptor, newPageDescriptor);
+        mediaOverrideService.moveOverrides(host, oldPageDescriptor, newPageDescriptor);
         Page oldPage = pageRepository.getBySiteAndNamespaceAndPagename(site, oldPageNS, oldPageName);
         List<String> links = linkService.getLinksOnPage(site, oldPageDescriptor);
         List<String> images = imageRefService.getImagesOnPage(site, oldPageDescriptor);

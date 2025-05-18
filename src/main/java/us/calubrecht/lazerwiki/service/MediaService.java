@@ -4,22 +4,23 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import us.calubrecht.lazerwiki.model.ActivityType;
-import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
-import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.MediaHistoryRepository;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
-import us.calubrecht.lazerwiki.model.MediaRecord;
+import us.calubrecht.lazerwiki.responses.MoveStatus;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
+import us.calubrecht.lazerwiki.responses.PageLockResponse;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
+import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
@@ -49,10 +50,16 @@ public class MediaService {
     MediaHistoryRepository mediaHistoryRepository;
 
     @Autowired
+    MediaOverrideService mediaOverrideService;
+
+    @Autowired
     UserService userService;
 
     @Autowired
     ActivityLogService activityLogService;
+
+    @Autowired
+    RegenCacheService regenCacheService;
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
@@ -90,7 +97,7 @@ public class MediaService {
     }
 
 
-    public byte[] getBinaryFile(String host, String userName, String fileName, String size) throws IOException, MediaReadException {
+    public byte[] getBinaryFile(String host, String userName, String fileName, String size) throws IOException, MediaReadException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         if (!namespaceService.canReadNamespace(site, splitFile.getLeft(), userName)) {
@@ -98,11 +105,9 @@ public class MediaService {
         }
         IOSupplier<byte[]> byteReader = () -> {
                 String nsPath = splitFile.getLeft().replaceAll(":", "/");
-                ensureDir(site, nsPath);
-                File f = nsPath.isBlank() ?
-                        new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())) :
-                        new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
-                logger.info("Reading file " + f.getAbsoluteFile());
+            File f = getFileInNS(site, nsPath, splitFile.getRight());
+            ensureDir(site, nsPath);
+            logger.info("Reading file " + f.getAbsoluteFile());
                 return Files.readAllBytes(f.toPath());
             };
         if (size != null) {
@@ -128,7 +133,6 @@ public class MediaService {
             throw new MediaWriteException("Not permissioned to write this file");
         }
         String nsPath = namespace.replaceAll(":", "/");
-        ensureDir(site, nsPath);
         String fileName = mfile.getOriginalFilename();
         MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, namespace, fileName);
         Long id = null;
@@ -151,14 +155,67 @@ public class MediaService {
         mediaHistoryRepository.save(historyRecord);
         activityLogService.log(action, site, user, namespaceService.joinNS(namespace, fileName));
         mediaCacheService.clearCache(site, newRecord);
-        File f = nsPath.isBlank() ?
-                new File(String.join("/", staticFileRoot, site, "media", fileName)):
-                new File(String.join("/", staticFileRoot, site, "media", nsPath, fileName));
+        File f = getFileInNS(site, nsPath, fileName);
+        ensureDir(site, nsPath);
         logger.info("Writing file " + f.getAbsoluteFile());
         try (FileOutputStream fos = new FileOutputStream(f)) {
             IOUtils.copy(mfile.getInputStream(), fos);
         }
         // XXX: Delete scaled images if exist
+    }
+
+    @NotNull
+    private File getFileInNS(String site, String nsPath, String fileName) throws MediaWriteException, IOException {
+        File f = nsPath.isBlank() ?
+                new File(String.join("/", staticFileRoot, site, "media", fileName)):
+                new File(String.join("/", staticFileRoot, site, "media", nsPath, fileName));
+        File rootFile = new File(staticFileRoot);
+        if (!f.getCanonicalPath().startsWith(Paths.get(rootFile.getCanonicalPath(), site, "media").toString())) {
+            // Path traversal attempt
+            throw new MediaWriteException("Invalid path");
+        }
+        return f;
+    }
+
+    @Transactional
+    public MoveStatus moveImage(String host, String userName, String oldFileNS, String oldFileName, String newFileNS, String newFileName) throws MediaWriteException, IOException {
+        String site = siteService.getSiteForHostname(host);
+
+        if (!namespaceService.canUploadInNamespace(site, oldFileNS, userName)) {
+            return new MoveStatus(false, "You don't have permission to upload in " + oldFileNS);
+        }
+        if (!namespaceService.canUploadInNamespace(site, newFileNS, userName)) {
+            return new MoveStatus(false, "You don't have permission to upload in " + newFileNS);
+        }
+        MediaRecord existingRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, newFileNS, newFileName);
+        if (existingRecord != null) {
+            return new MoveStatus(false, newFileName + " already exists, move cannot overwrite it");
+        }
+        mediaOverrideService.createOverride(host, oldFileNS, oldFileName, newFileNS, newFileName);
+        // Do move file
+        String oldNsPath = oldFileNS.replaceAll(":", "/");
+        String newNsPath = newFileNS.replaceAll(":", "/");
+        File oldF = getFileInNS(site, oldNsPath, oldFileName);
+        File newF = getFileInNS(site, newNsPath, newFileName);
+        ensureDir(site, newNsPath);
+        String oldPageDescriptor = new PageDescriptor(oldFileNS, oldFileName).toString();
+        String newPageDescriptor = new PageDescriptor(newFileNS, newFileName).toString();
+        mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, oldFileNS, oldFileName);
+        MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, oldFileNS, oldFileName);
+        User user = userService.getUser(userName);
+        MediaRecord newRecord = new MediaRecord(newFileName, site, newFileNS, user, oldRecord.getFileSize(), oldRecord.getHeight(), oldRecord.getWidth());
+        mediaCacheService.clearCache(site, oldRecord);
+        mediaCacheService.clearCache(site, newRecord);
+        regenCacheService.regenCachesForImageRefs(site, oldPageDescriptor, newPageDescriptor);
+        mediaRecordRepository.save(newRecord);
+        mediaRecordRepository.deleteById(oldRecord.getId());
+        ActivityType action = ActivityType.ACTIVITY_PROTO_MOVE_MEDIA;
+        MediaHistoryRecord historyRecord = new MediaHistoryRecord(newFileName, site, newFileNS, user, action);
+        mediaHistoryRepository.save(historyRecord);
+        logger.info("Moving file " + oldF.getAbsoluteFile() + " -> " + newF.getAbsoluteFile());
+        Files.move(oldF.toPath(), newF.toPath());
+        activityLogService.log(action, site, user, oldPageDescriptor+ "->" + newPageDescriptor);
+        return new MoveStatus(true, oldPageDescriptor + " move to " + newPageDescriptor);
     }
 
     List<String> getNamespaces(String rootNS, List<MediaRecord> mediaRecords) {
@@ -207,10 +264,8 @@ public class MediaService {
             throw new MediaWriteException("Not permissioned to delete this file");
         }
 
+        File f = getFileInNS(site, nsPath, splitFile.getRight());
         ensureDir(site, nsPath);
-        File f = nsPath.isBlank() ?
-                new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())):
-                new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
         logger.info("Deleting file " + f.getAbsoluteFile());
         User user = userService.getUser(userName);
         mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(site, splitFile.getRight(), splitFile.getLeft());
@@ -221,14 +276,12 @@ public class MediaService {
         // XXX: Delete scaled images if exist
     }
 
-    public long getFileLastModified(String host, String fileName) throws IOException {
+    public long getFileLastModified(String host, String fileName) throws IOException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         String nsPath = splitFile.getLeft().replaceAll(":", "/");
+        File f = getFileInNS(site, nsPath, splitFile.getRight());
         ensureDir(site, nsPath);
-        File f = nsPath.isBlank() ?
-                new File(String.join("/", staticFileRoot, site, "media", splitFile.getRight())) :
-                new File(String.join("/", staticFileRoot, site, "media", nsPath, splitFile.getRight()));
         return f.lastModified();
     }
 

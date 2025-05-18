@@ -124,11 +124,11 @@ public class LinkRenderer extends TypedRenderer<LinkContext> {
                     Collectors.toMap(LinkOverride::getTarget, Function.identity(), (a,b) -> b)
             );
             renderContext.renderState().put("linkOverrides", overrides);
-            renderContext.renderState().put("overrideStats", new ArrayList<LinkOverrideInstance>());
         }
         if (overrides.containsKey(page)) {
             String override = overrides.get(page).getNewTarget();
-            ((List<LinkOverrideInstance>)renderContext.renderState().get("overrideStats")).add(
+            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent("overrideStats",
+                    (k) -> new ArrayList<>())).add(
                     new LinkOverrideInstance(page, override, tree.link_target().getStart().getStartIndex(), tree.link_target().getStop().getStopIndex()+1));
             return override;
         }

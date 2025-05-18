@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
+import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
@@ -39,7 +40,7 @@ public class MediaCacheService {
     }
 
 
-    public byte[] getBinaryFile(String site, MediaRecord record, IOSupplier<byte[]> fileLoad, int width, int height) throws IOException {
+    public byte[] getBinaryFile(String site, MediaRecord record, IOSupplier<byte[]> fileLoad, int width, int height) throws IOException, MediaWriteException {
         StopWatch sw = new StopWatch();
         sw.start();
         Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");

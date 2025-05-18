@@ -5,21 +5,30 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
+import us.calubrecht.lazerwiki.model.MediaOverride;
+import us.calubrecht.lazerwiki.service.MediaOverrideService;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser.ImageContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TypedRenderer;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGES;
 
 @Component
 public class ImageRenderer  extends TypedRenderer<ImageContext> {
     final Logger logger = LogManager.getLogger(getClass());
+
+    @Autowired
+    MediaOverrideService mediaOverrideService;
 
     @Value("#{'${lazerwiki.unscalable-image.ext}'.split(',')}")
     private Set<String> unscalableImageExts;
@@ -32,7 +41,27 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
     @Override
     public StringBuilder renderContext(ImageContext tree, RenderContext renderContext) {
         String inner = renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext).toString();
-        return parseInner(inner, renderContext);
+        return parseInner(inner, tree, renderContext);
+    }
+
+    String doOverrides(String file, ImageContext tree, RenderContext renderContext) {
+        Map<String, MediaOverride> overrides = (Map<String, MediaOverride>) renderContext.renderState().get("mediaOverrides");
+        if (overrides == null) {
+            List<MediaOverride> mediaOverrideList = mediaOverrideService.getOverrides(renderContext.host(), renderContext.page());
+            overrides = mediaOverrideList.stream().collect(
+                    Collectors.toMap(MediaOverride::getTarget, Function.identity(), (a, b) -> b)
+            );
+            renderContext.renderState().put("mediaOverrides", overrides);
+        }
+        if (overrides.containsKey(file)) {
+            String override = overrides.get(file).getNewTarget();
+            int startIndex = tree.inner_text(0).getStart().getStartIndex();
+            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent("overrideStats",
+                    (k) -> new ArrayList<>())).add(
+                    new LinkOverrideInstance(file, override, startIndex, startIndex + file.length()+1));
+            return override;
+        }
+        return file;
     }
 
     @Override
@@ -136,14 +165,14 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
         return false;
     }
 
-    StringBuilder parseInner(String inner, RenderContext renderContext) {
+    StringBuilder parseInner(String inner, ImageContext tree, RenderContext renderContext) {
         StringBuilder sb = new StringBuilder();
         Map<INNARD_TOKEN, String> innards = splitInnards(inner);
         String className = "media";
         String imageTok = innards.get(INNARD_TOKEN.FILE_TOK);
+        String fileName= doOverrides(innards.get(INNARD_TOKEN.FILE_NAME), tree, renderContext).trim();
         if (isLinkOnly(innards.get(INNARD_TOKEN.OPTIONS))) {
             sb.append("<a href=\"/_media/");
-            String fileName= innards.get(INNARD_TOKEN.FILE_NAME).trim();
             sb.append(fileName);
             sb.append("\" class=\"media linkOnly\" target=\"_blank\">");
             String titleText = Strings.isBlank(innards.get(INNARD_TOKEN.TITLE)) ? fileName : innards.get(INNARD_TOKEN.TITLE).trim();
@@ -164,7 +193,6 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
         if (getIsLink(innards.get(INNARD_TOKEN.OPTIONS))) {
             className += " fullLink";
         }
-        String fileName = innards.get(INNARD_TOKEN.FILE_NAME).trim();
         String inlineStyle = "";
         if (unscalableImageExts.contains(FilenameUtils.getExtension(fileName))) {
             String style = getSizeStyle(innards.get(INNARD_TOKEN.OPTIONS));
