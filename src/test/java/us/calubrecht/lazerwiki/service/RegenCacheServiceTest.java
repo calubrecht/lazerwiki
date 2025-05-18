@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -202,6 +203,53 @@ class RegenCacheServiceTest {
         verify(pageCacheRepository,times(1)).save(argument.capture());
         assertEquals("text1 rendered", argument.getAllValues().get(0).renderedCache);
         assertEquals(false, argument.getAllValues().get(0).useCache);
+
+    }
+
+    @Test
+    void regenCachesForImageRefs() {
+        List<String> irs = List.of("page2", "ns1:page5");
+        when(imageRefService.getRefsForImage("default", "ns1:img1.jpg")).thenReturn(irs);
+        List<MediaOverride> overrides = List.of(new MediaOverride("default", "ns1", "page33", "", "img1.jpg", "ns2","img2.jpg"));
+        when(mediaOverrideService.getOverridesForImage("host", "ns2:img2.jpg")).thenReturn(overrides);
+        Page page2 = new Page();
+        page2.setPagename("page2");
+        page2.setText("text2");
+        Page page5 = new Page();
+        page5.setPagename("page5");
+        page5.setText("text5");
+        Page page33 = new Page();
+        page33.setPagename("page33");
+        page33.setText("text33");
+
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("default", "", "page2", false)).
+                thenReturn(page2);
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("default", "ns1", "page5", false)).
+                thenReturn(page5);
+        when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("default", "ns1", "page33", false)).
+                thenReturn(page33);
+        when(renderer.renderWithInfo(anyString(), any(RenderContext.class))).thenAnswer(inv -> {
+            List<String> links = new ArrayList<>();
+            String text = inv.getArgument(0, String.class);
+            Map<String, Object> renderState = new HashMap<>();
+            renderState.put(RenderResult.RENDER_STATE_KEYS.LINKS.name(), links);
+            if (text.equals("text5")) {
+                renderState.put(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), true);
+            }
+            return new RenderResult(text + " rendered", "", renderState);
+        });
+        when(siteService.getHostForSitename("default")).thenReturn("host");
+
+        underTest.regenCachesForImageRefs("default", "ns1:img1.jpg", "ns2:img2.jpg");
+
+        ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
+        verify(pageCacheRepository, never()).deleteBySite("default");
+        verify(pageCacheRepository,times(3)).save(argument.capture());
+        assertEquals("text2 rendered", argument.getAllValues().get(0).renderedCache);
+        assertEquals(true, argument.getAllValues().get(0).useCache);
+        assertEquals("text5 rendered", argument.getAllValues().get(1).renderedCache);
+        assertEquals(false, argument.getAllValues().get(1).useCache);
+        assertEquals("text33 rendered", argument.getAllValues().get(2).renderedCache);
 
     }
 }
