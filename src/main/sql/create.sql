@@ -319,3 +319,8 @@ CREATE TABLE `mediaOverrides` (
   KEY `mediaOverrides_sites_FK` (`site`),
   CONSTRAINT `mediaOverrides_sites_FK` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE VIEW activityLogView as
+  SELECT al.timestamp, t.fullDesc, al.site, al.target, u.userName FROM `activityLog` al
+  inner join `activityType` t on al.activityType = t.activityTypeId
+  inner join userRecord u on al.user = u.userId order by al.timestamp DESC;
