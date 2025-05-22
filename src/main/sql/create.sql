@@ -294,7 +294,7 @@ CREATE TABLE `activityLog` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `activityType` int(11) NOT NULL,
   `site` varchar(50) DEFAULT NULL,
-  `target` varchar(100) NOT NULL,
+  `target` varchar(500) NOT NULL,
   `user` int(11) DEFAULT NULL,
   `timestamp` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
