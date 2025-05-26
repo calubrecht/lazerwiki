@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import us.calubrecht.lazerwiki.service.UserService;
 
 import java.util.Objects;
 
@@ -68,7 +69,7 @@ public class MediaRecord {
     }
 
     public String getUploadedBy() {
-        return uploadedByUser.userName;
+        return uploadedByUser == null ? UserService.MISSING_USER : uploadedByUser.userName;
     }
 
     public void setUploadedBy(User uploadedBy) {
