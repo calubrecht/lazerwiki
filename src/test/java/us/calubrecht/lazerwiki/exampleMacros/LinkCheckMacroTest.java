@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.responses.PageData;
@@ -162,5 +163,25 @@ public class LinkCheckMacroTest {
         // Broken links section. Split gives 3 parts = 2 rows, so 1 broken links(page5) + 1 header
         assertEquals(3, split[0].split("<tr>").length);
         assertTrue(split[0].indexOf("HOME") != -1);
+    }
+
+    @Test
+    public void testChecklinksWoverrides() {
+        RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        when(pageService.getAllPagesFlat("localhost", "user")).thenReturn(List.of("", "ns1:movePage2", "page3"));
+        when(pageService.isReadable(eq("localhost"), anyString(), anyString())).thenReturn(true);
+        when(linkService.getLinksOnPage("default","")).thenReturn(List.of("page2", "page5"));
+        when(linkOverrideService.getOverrides("localhost", "")).thenReturn(List.of(
+                new LinkOverride("default", "", "", "", "page2", "ns1", "MovePage2")
+                ));
+
+        String rendered = macroService.renderMacro("linkCheck", "", renderContext);
+        String[] split = rendered.split("Orphaned Pages");
+
+        //Orphan pages section. Split on 2 trs will give 3 parts so 1 orphaned pages(page3) + 1 header
+        assertEquals(3, split[1].split("<tr>").length);
+        assertTrue(split[1].split("<tr>")[2].contains("page3"));
+
+        assertTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name()));
     }
 }

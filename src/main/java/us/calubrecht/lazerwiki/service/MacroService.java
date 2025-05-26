@@ -12,6 +12,7 @@ import org.springframework.data.util.AnnotatedTypeScanner;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
+import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.model.RenderResult;
@@ -21,6 +22,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -41,6 +43,9 @@ public class MacroService {
     @Autowired
     LinkService linkService;
 
+    @Autowired
+    LinkOverrideService linkOverrideService;
+
     @Value("#{'${lazerwiki.plugin.scan.packages}'.split(',')}")
     private List<String> macroPackages;
 
@@ -60,7 +65,7 @@ public class MacroService {
                 registerMacro(macro);
 
             } catch (Exception e) {
-                logger.error("Failed to instantiate a macro of type " + cl + ".", e);
+                logger.error("Failed to instantiate a macro of type {}.", cl, e);
             }
         });
     }
@@ -233,7 +238,19 @@ public class MacroService {
 
         @Override
         public List<String> getLinksOnPage(String page) {
-            return linkService.getLinksOnPage(renderContext.site(), page);
+            List<String> links = linkService.getLinksOnPage(renderContext.site(), page);
+            Map<String,LinkOverride> overrides = linkOverrideService.getOverrides(renderContext.host(), page).
+                    stream().collect(Collectors.toMap(link -> link.getTarget(), Function.identity()));
+            List<String> realLinks = new ArrayList<>();
+            for (String link : links ) {
+                if (overrides.containsKey(link)) {
+                    realLinks.add(overrides.get(link).getNewTarget());
+                }
+                else {
+                    realLinks.add(link);
+                }
+            }
+            return realLinks;
         }
 
         @Override
