@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
+import us.calubrecht.lazerwiki.service.UserService;
 
 import java.time.LocalDateTime;
 
@@ -34,6 +35,6 @@ public interface PageDesc {
     }
 
     default String getModifiedBy() {
-        return getModifiedByUserName();
+        return getModifiedByUserName() == null ? UserService.MISSING_USER : getModifiedByUserName();
     }
 }

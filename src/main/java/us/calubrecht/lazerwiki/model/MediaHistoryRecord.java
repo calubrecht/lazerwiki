@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import us.calubrecht.lazerwiki.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -83,7 +84,7 @@ public class MediaHistoryRecord {
         this.uploadedByUser = uploadedByUser;
     }
 
-    public String getUploadedBy() { return uploadedByUser == null ? "<unknown>" : uploadedByUser.userName;}
+    public String getUploadedBy() { return uploadedByUser == null ? UserService.MISSING_USER : uploadedByUser.userName;}
 
     public String getAction() {
         return activity.simpleName;

@@ -28,6 +28,8 @@ public class UserService {
 
     public static final String SYS_USER="<SYS_USER>";
 
+    public static final String MISSING_USER = "<Deleted User>";
+
     @Autowired
     UserRepository userRepository;
 
