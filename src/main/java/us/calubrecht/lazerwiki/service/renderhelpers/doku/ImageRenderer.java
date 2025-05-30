@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGES;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.MEDIA_OVERRIDES;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
 @Component
 public class ImageRenderer  extends TypedRenderer<ImageContext> {
@@ -45,20 +47,20 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
     }
 
     String doOverrides(String file, ImageContext tree, RenderContext renderContext) {
-        Map<String, MediaOverride> overrides = (Map<String, MediaOverride>) renderContext.renderState().get("mediaOverrides");
+        Map<String, MediaOverride> overrides = (Map<String, MediaOverride>) renderContext.renderState().get(MEDIA_OVERRIDES.name());
         if (overrides == null) {
             List<MediaOverride> mediaOverrideList = mediaOverrideService.getOverrides(renderContext.host(), renderContext.page());
             overrides = mediaOverrideList.stream().collect(
                     Collectors.toMap(MediaOverride::getTarget, Function.identity(), (a, b) -> b)
             );
-            renderContext.renderState().put("mediaOverrides", overrides);
+            renderContext.renderState().put(MEDIA_OVERRIDES.name(), overrides);
         }
         if (overrides.containsKey(file)) {
             String override = overrides.get(file).getNewTarget();
             int startIndex = tree.inner_text(0).getStart().getStartIndex();
             String linkText = tree.inner_text(0).getText();
             startIndex += linkText.indexOf(file);
-            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent("overrideStats",
+            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent(OVERRIDE_STATS.name(),
                     (k) -> new ArrayList<>())).add(
                     new LinkOverrideInstance(file, override, startIndex, startIndex + file.length()));
             return override;

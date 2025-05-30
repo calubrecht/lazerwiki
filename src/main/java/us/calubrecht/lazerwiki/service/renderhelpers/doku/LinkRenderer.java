@@ -22,6 +22,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINK_OVERRIDES;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
 @Component
 public class LinkRenderer extends TypedRenderer<LinkContext> {
@@ -117,17 +119,17 @@ public class LinkRenderer extends TypedRenderer<LinkContext> {
     }
 
     String doOverrides(String page, LinkContext tree, RenderContext renderContext) {
-        Map<String, LinkOverride> overrides = (Map<String, LinkOverride>) renderContext.renderState().get("linkOverrides");
+        Map<String, LinkOverride> overrides = (Map<String, LinkOverride>) renderContext.renderState().get(LINK_OVERRIDES.name());
         if (overrides == null) {
             List<LinkOverride> overrideList = linkOverrideService.getOverrides(renderContext.host(), renderContext.page());
             overrides = overrideList.stream().collect(
                     Collectors.toMap(LinkOverride::getTarget, Function.identity(), (a,b) -> b)
             );
-            renderContext.renderState().put("linkOverrides", overrides);
+            renderContext.renderState().put(LINK_OVERRIDES.name(), overrides);
         }
         if (overrides.containsKey(page)) {
             String override = overrides.get(page).getNewTarget();
-            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent("overrideStats",
+            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent(OVERRIDE_STATS.name(),
                     (k) -> new ArrayList<>())).add(
                     new LinkOverrideInstance(page, override, tree.link_target().getStart().getStartIndex(), tree.link_target().getStop().getStopIndex()+1));
             return override;

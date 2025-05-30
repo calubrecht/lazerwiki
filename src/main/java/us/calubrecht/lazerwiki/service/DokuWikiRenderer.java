@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import us.calubrecht.lazerwiki.model.HeaderRef;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiLexer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
@@ -12,10 +13,9 @@ import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.HEADERS;
 
 /**
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
@@ -25,6 +25,9 @@ public class DokuWikiRenderer implements IMarkupRenderer {
 
     @Autowired
     RendererRegistrar renderers;
+
+    @Autowired
+    TOCRenderService tocRenderService;
 
     @Override
     public String  renderToString(String markup, RenderContext context) {
@@ -61,7 +64,18 @@ public class DokuWikiRenderer implements IMarkupRenderer {
             }
             outBuffer.append(renderer.render(child, renderContext));
         }
+        renderToC(outBuffer, renderContext);
         return outBuffer.toString().strip();
+    }
+
+    private void renderToC(StringBuilder outBuffer, RenderContext renderContext) {
+        List<HeaderRef> headers = (List<HeaderRef>)renderContext.renderState().getOrDefault(HEADERS.name(), Collections.emptyList());
+        if (headers.size() < 3) {
+            return;
+        }
+        String toc = tocRenderService.renderTOC(headers);
+
+        outBuffer.insert(0, toc);
     }
 
     @Override

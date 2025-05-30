@@ -18,6 +18,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
 class ImageRendererTest {
 
@@ -124,7 +125,7 @@ class ImageRendererTest {
                 "<img src=\"/_media/ns2:img5.jpg\" class=\"media\" loading=\"lazy\">",
                 renderer.parseInner(input1, tree, renderContext).toString()
         );
-        List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get("overrideStats");
+        List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
         assertEquals(1, overrideStats.size());
         LinkOverrideInstance override = overrideStats.get(0);
         assertEquals("img.jpg", override.src());
@@ -154,7 +155,7 @@ class ImageRendererTest {
                 "<img src=\"/_media/ns2:img5.jpg\" class=\"mediaright\" loading=\"lazy\">",
                 renderer.parseInner(input1, tree, renderContext).toString()
         );
-        List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get("overrideStats");
+        List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
         assertEquals(1, overrideStats.size());
         LinkOverrideInstance override = overrideStats.get(0);
         assertEquals("img.jpg", override.src());

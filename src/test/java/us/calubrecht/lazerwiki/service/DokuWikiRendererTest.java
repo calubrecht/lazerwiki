@@ -24,12 +24,16 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
 @SuppressWarnings("unchecked")
 @SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 public class DokuWikiRendererTest {
+
+    @MockBean
+    TOCRenderService tocRenderService;
 
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
@@ -145,7 +149,7 @@ public class DokuWikiRendererTest {
         RenderContext context = new RenderContext("otherHost", "default", "page", "");
         String source = "[[overridden]] [[ns1:wns|wtitle]]";
         assertEquals("<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>", underTest.renderToString(source, context));
-        List<LinkOverrideInstance> overrideInstances = (List<LinkOverrideInstance>)context.renderState().get("overrideStats");
+        List<LinkOverrideInstance> overrideInstances = (List<LinkOverrideInstance>)context.renderState().get(OVERRIDE_STATS.name());
         assertEquals(2, overrideInstances.size());
         LinkOverrideInstance o1 =overrideInstances.get(0);
         LinkOverrideInstance o2 =overrideInstances.get(1);
@@ -582,5 +586,17 @@ public class DokuWikiRendererTest {
 
         assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle8\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle8\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><div>line1</div>\n<div>line2<img src=\"/_media/animage\" class=\"media\" loading=\"lazy\"></div></div></div>",
                 doRender("<hidden>line1\n\nline2{{animage}}</hidden>"));
+    }
+
+    @Test
+    public void testRenderTOC() {
+        String source = "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n";
+        String headerRender = """
+                <div id="lw_TOC"></div>
+                """;
+
+        when(tocRenderService.renderTOC(any())).thenReturn(headerRender);
+
+        assertEquals(headerRender + "<h1 id=\"header_Header_1\">Header 1</h1>\n<h3 id=\"header_Header_2\">Header 2</h3>\n<h1 id=\"header_Header_3\">Header 3</h1>\n<h2 id=\"header_Header_2_1\">Header 2</h2>", doRender(source));
     }
 }

@@ -27,7 +27,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
 
 @SpringBootTest(classes = {PageService.class})
@@ -591,7 +591,7 @@ public class PageServiceTest {
           new LinkOverrideInstance("some", "moreText", 2, 6),
           new LinkOverrideInstance("or other", "short", 17, 25)
         );
-        renderResult.renderState().put("overrideStats", overrides);
+        renderResult.renderState().put(OVERRIDE_STATS.name(), overrides);
 
         String adjusted =
                 pageService.adjustSource("[[some|source]][[or other]]", renderResult);

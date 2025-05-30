@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
+
 @Service
 @Transactional(rollbackFor = PageWriteException.class )
 public class PageService {
@@ -195,8 +197,8 @@ public class PageService {
     }
 
     public static String doAdjustSource(String source, RenderResult rendered) {
-        if (rendered.renderState().containsKey("overrideStats")) {
-            List<LinkOverrideInstance> overrides = new ArrayList<>((List<LinkOverrideInstance>)rendered.renderState().get("overrideStats"));
+        if (rendered.renderState().containsKey(OVERRIDE_STATS.name())) {
+            List<LinkOverrideInstance> overrides = new ArrayList<>((List<LinkOverrideInstance>)rendered.renderState().get(OVERRIDE_STATS.name()));
             Collections.reverse(overrides);
             StringBuilder sb = new StringBuilder(source);
             overrides.forEach(over -> {

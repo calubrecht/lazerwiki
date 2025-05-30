@@ -17,6 +17,8 @@ import static org.mockito.Mockito.when;
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 public class DokuWikiRendererPlaintextTest {
+    @MockBean
+    TOCRenderService tocRenderService;
 
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
