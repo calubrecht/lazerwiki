@@ -49,6 +49,9 @@ class IncludeMacroTest {
     @MockBean
     MediaOverrideService mediaOverrideService;
 
+    @MockBean
+    TOCRenderService tocRenderService;
+
     @Test
     public void testIncludeMacro() {
         RenderContext renderContext = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());

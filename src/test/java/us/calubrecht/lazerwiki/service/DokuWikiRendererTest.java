@@ -67,9 +67,9 @@ public class DokuWikiRendererTest {
     void testRenderHeader() {
         String source = "====== Big header ======\n ==== Smaller Header ====";
 
-        assertEquals("<h1>Big header</h1>\n<h3>Smaller Header</h3>", doRender(source));
+        assertEquals("<h1 id=\"header_Big_header\">Big header</h1>\n<h3 id=\"header_Smaller_Header\">Smaller Header</h3>", doRender(source));
 
-        assertEquals("<h2>Header with space.</h2>", doRender("=====Header with space.===== "));
+        assertEquals("<h2 id=\"header_Header_with_space.\">Header with space.</h2>", doRender("=====Header with space.===== "));
 
         assertEquals("<div>===Doesn't parse as header=== with trailing</div>", doRender("===Doesn't parse as header=== with trailing"));
     }
@@ -89,10 +89,10 @@ public class DokuWikiRendererTest {
         assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://somewhere.com\">http://somewhere.com</a></div>", doRender("[[http://somewhere.com]]"));
 
         // Nested in header
-        assertEquals("<h1>Some text in <a class=\"wikiLinkMissing\" href=\"/page/headerLink\">a header</a></h1>", doRender("======Some text in [[ headerLink |a header]]======"));
+        assertEquals("<h1 id=\"header_Some_text_in_a_header\">Some text in <a class=\"wikiLinkMissing\" href=\"/page/headerLink\">a header</a></h1>", doRender("======Some text in [[ headerLink |a header]]======"));
 
         // Link with dash in URL
-        assertEquals("<h1>Some text in <a class=\"wikiLinkMissing\" href=\"/page/headerLink\">a header</a></h1>", doRender("======Some text in [[ headerLink |a header]]======"));
+        assertEquals("<h1 id=\"header_Some_text_in_a_header\">Some text in <a class=\"wikiLinkMissing\" href=\"/page/headerLink\">a header</a></h1>", doRender("======Some text in [[ headerLink |a header]]======"));
         assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://domain.example/a-page\">http://domain.example/a-page</a></div>", doRender("[[http://domain.example/a-page]]"));
 
         // Link with blank link text (use title instead)
@@ -524,7 +524,7 @@ public class DokuWikiRendererTest {
         String input = "This is a line \\\\ with a linebreak";
         assertEquals("<div>This is a line<br> with a linebreak</div>", doRender(input));
         String inputBreakSymbolInHeader = "====This is \\\\ a header====";
-        assertEquals("<h3>This is<br> a header</h3>", doRender(inputBreakSymbolInHeader));
+        assertEquals("<h3 id=\"header_This_is__a_header\">This is<br> a header</h3>", doRender(inputBreakSymbolInHeader));
 
         String inputRequireWS = "This is a line\\\\with a linebreak but no spaces";
         assertEquals("<div>This is a line\\\\with a linebreak but no spaces</div>", doRender(inputRequireWS));

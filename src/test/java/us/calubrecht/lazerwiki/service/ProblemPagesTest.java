@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +43,9 @@ public class ProblemPagesTest {
 
     @MockBean
     MediaOverrideService mediaOverrideService;
+
+    @MockBean
+    TOCRenderService rocRenderService;
 
     @Configuration
     @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
