@@ -64,12 +64,15 @@ IMG_END_TOKEN: '}}';
 MACRO_START_TOKEN: '~~MACRO~~' ;
 MACRO_END_TOKEN: '~~/MACRO~~' ;
 
+NO_TOC_TOKEN: '~~NOTOC~~' ;
+YES_TOC_TOKEN: '~~YESTOC~~' ;
+
 //parser grammar DokuParser;
 
 //options { tokenVocab=DokuLexer; }
 
 page
-    : ( header | row | just_newline | code_box | blockquote | hidden)* EOF
+    : ( header | row | just_newline | code_box | blockquote | hidden | control_row )* EOF
     ;
 
 code_box:
@@ -231,6 +234,10 @@ ulist_item
 
 row:
   ( line  ) NEWLINE?
+  ;
+
+control_row:
+  ( NO_TOC_TOKEN | YES_TOC_TOKEN |  WS+  )* NEWLINE
   ;
 
 blockquote:

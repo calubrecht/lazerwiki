@@ -16,6 +16,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import java.util.*;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.HEADERS;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.TOC;
 
 /**
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
@@ -70,7 +71,8 @@ public class DokuWikiRenderer implements IMarkupRenderer {
 
     private void renderToC(StringBuilder outBuffer, RenderContext renderContext) {
         List<HeaderRef> headers = (List<HeaderRef>)renderContext.renderState().getOrDefault(HEADERS.name(), Collections.emptyList());
-        if (headers.size() < 3) {
+        Object forceTOC = renderContext.renderState().get(TOC.name());
+        if (Boolean.FALSE.equals(forceTOC) || (headers.size() < 3) && !Boolean.TRUE.equals(forceTOC)) {
             return;
         }
         String toc = tocRenderService.renderTOC(headers);
