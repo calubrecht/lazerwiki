@@ -21,7 +21,8 @@ public class ControlRowRenderer extends TypedRenderer<DokuwikiParser.Control_row
     public StringBuilder renderContext(DokuwikiParser.Control_rowContext context, RenderContext renderContext) {
         if (!context.YES_TOC_TOKEN().isEmpty()) {
             renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.TOC.name(), true);
-        } else if (!context.NO_TOC_TOKEN().isEmpty()) {
+        } else //if (!context.NO_TOC_TOKEN().isEmpty()) {
+        {
             renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.TOC.name(), false);
         }
         return new StringBuilder();

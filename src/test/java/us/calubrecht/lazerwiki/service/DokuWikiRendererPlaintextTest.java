@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -133,5 +134,17 @@ public class DokuWikiRendererPlaintextTest {
 
         assertEquals("line1\n\nline2with some title text",
                 doRender("<hidden>line1\n\nline2{{animage|with some title text}}</hidden>"));
+    }
+
+    @Test
+    public void testRenderNoTOC() {
+        String source = "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n  ~~NOTOC~~";
+        String headerRender = """
+                <div id="lw_TOC"></div>
+                """;
+
+        when(tocRenderService.renderTOC(any())).thenReturn(headerRender);
+
+        assertEquals(" Header 1 \n Header 2 \n Header 3 \n Header 2 ", doRender(source));
     }
 }
