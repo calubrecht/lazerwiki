@@ -143,7 +143,7 @@ unformat_span
   ;
 
 all_char
-   : WORD | NUM | CHARACTER | WS  | DASH | STAR | BLOCKQUOTE_START | header_tok
+   : WORD | NUM | CHARACTER | WS  | DASH | STAR | BLOCKQUOTE_START | header_tok | NO_TOC_TOKEN | YES_TOC_TOKEN
    ;
 
 all_char_nows
