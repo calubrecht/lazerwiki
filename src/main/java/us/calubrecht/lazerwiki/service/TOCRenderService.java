@@ -44,11 +44,4 @@ public class TOCRenderService {
     public String fmtHeader(HeaderRef ref) {
         return String.format("<li><a href=\"#%s\">%s</a></li>", ref.id(), ref.header());
     }
-
-    public static record HeaderNode(HeaderRef header, List<HeaderRef> children){
-
-        public HeaderNode(HeaderRef header) {
-            this(header, new ArrayList<>());
-        }
-    }
 }

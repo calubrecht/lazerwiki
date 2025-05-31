@@ -56,7 +56,7 @@ class MacroServiceTest {
 
     @MockBean
     MediaOverrideService mediaOverrideService;
-    
+
     @MockBean
     TOCRenderService tocRenderService;
 
