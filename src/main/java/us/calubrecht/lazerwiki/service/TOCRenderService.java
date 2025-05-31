@@ -35,22 +35,6 @@ public class TOCRenderService {
         }
         render.append("</div>");
         return render.toString();
-
-        /*       String source = "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n";
-        String headerRender = """
-                <div id="lw_TOC">
-                  <ol>
-                    <li>Header 1</li>
-                    <ol>
-                      <li>Header 2</li>
-                    </ol>
-                    <li>Header 3</li>
-                    <ol>
-                      <li>Header 2</li>
-                    </ol>
-                  </ol>
-                </div>
-                """;*/
     }
 
     public String fmtIndents(int indents) {
@@ -58,7 +42,7 @@ public class TOCRenderService {
     }
 
     public String fmtHeader(HeaderRef ref) {
-        return String.format("<li>%s</li>", ref.header());
+        return String.format("<li><a href=\"#%s\">%s</a></li>", ref.id(), ref.header());
     }
 
     public static record HeaderNode(HeaderRef header, List<HeaderRef> children){

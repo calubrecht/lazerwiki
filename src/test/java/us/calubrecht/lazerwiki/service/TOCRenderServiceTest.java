@@ -20,9 +20,9 @@ class TOCRenderServiceTest {
         String headerRender = """
                 <div id="lw_TOC">
                   <ol>
-                    <li>Header 1</li>
-                    <li>Header 2</li>
-                    <li>Header 3</li>
+                    <li><a href="#Header_1">Header 1</a></li>
+                    <li><a href="#Header_2">Header 2</a></li>
+                    <li><a href="#Header_3">Header 3</a></li>
                   </ol>
                 </div>""";
         assertEquals(headerRender, service.renderTOC(headers));
@@ -39,13 +39,13 @@ class TOCRenderServiceTest {
         String headerRender = """
                 <div id="lw_TOC">
                   <ol>
-                    <li>Header 1</li>
+                    <li><a href="#Header_1">Header 1</a></li>
                     <ol>
-                      <li>Header 2</li>
+                      <li><a href="#Header_2">Header 2</a></li>
                     </ol>
-                    <li>Header 3</li>
+                    <li><a href="#Header_3">Header 3</a></li>
                     <ol>
-                      <li>Header 2</li>
+                      <li><a href="#Header_2_1">Header 2</a></li>
                     </ol>
                   </ol>
                 </div>""";
@@ -63,14 +63,14 @@ class TOCRenderServiceTest {
         String headerRender = """
                 <div id="lw_TOC">
                   <ol>
-                    <li>Header 1</li>
+                    <li><a href="#Header_1">Header 1</a></li>
                     <ol>
-                      <li>Header 2</li>
+                      <li><a href="#Header_2">Header 2</a></li>
                       <ol>
-                        <li>Header 3</li>
+                        <li><a href="#Header_3">Header 3</a></li>
                       </ol>
                     </ol>
-                    <li>Header 2</li>
+                    <li><a href="#Header_2_1">Header 2</a></li>
                   </ol>
                 </div>""";
         assertEquals(headerRender, service.renderTOC(headers));
@@ -86,10 +86,10 @@ class TOCRenderServiceTest {
         String headerRender = """
                 <div id="lw_TOC">
                   <ol>
-                    <li>Header 1</li>
-                    <li>Header 2</li>
+                    <li><a href="#Header_1">Header 1</a></li>
+                    <li><a href="#Header_2">Header 2</a></li>
                     <ol>
-                      <li>Header 3</li>
+                      <li><a href="#Header_3">Header 3</a></li>
                     </ol>
                   </ol>
                 </div>""";
