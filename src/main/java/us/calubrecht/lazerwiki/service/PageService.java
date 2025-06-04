@@ -86,8 +86,12 @@ public class PageService {
         }
         Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
+        List<String> overrideBacklinks = linkOverrideService.getOverridesForNewTargetPage(host, sPageDescriptor).stream().map(
+                LinkOverride::getSource
+        ).toList();
+        List<String> allBackLnks = Stream.concat(backlinks.stream(), overrideBacklinks.stream()).distinct().toList();
         List<String> visibleBacklinks = namespaceService.
-          filterReadablePageDescriptors(backlinks.stream().map(bl -> PageDescriptor.fromFullName(bl)).toList(), site, userName).stream().
+          filterReadablePageDescriptors(allBackLnks.stream().map(bl -> PageDescriptor.fromFullName(bl)).toList(), site, userName).stream().
                 map(PageDescriptor::toString).toList();
 
         if (p == null ) {

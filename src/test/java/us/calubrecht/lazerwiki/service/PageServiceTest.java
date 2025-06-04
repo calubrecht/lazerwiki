@@ -153,6 +153,29 @@ public class PageServiceTest {
     }
 
     @Test
+    public void testGetPageDataWithOverrideBacklinks() {
+        when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
+        when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+        when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
+
+        Page p = new Page();
+        p.setText("This is raw page text");
+        p.setTags(Collections.emptyList());
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(pageRepository.getBySiteAndNamespaceAndPagename("site1","ns", "realPage")).
+                thenReturn(p);
+        when(linkService.getBacklinks("site1", "ns:realPage")).thenReturn(List.of("page1", "page2"));
+        when(linkOverrideService.getOverridesForNewTargetPage("host1", "nd:realPage")).
+                thenReturn(List.of(new LinkOverride("site1","", "page1", "", "oldPage", "ns", "realPage"),
+                        new LinkOverride("site1","", "page5", "", "oldPage", "ns", "realPage")));
+        when(namespaceService.filterReadablePageDescriptors(any(), any(), any())).thenAnswer(inv -> {
+                   return (List<PageDescriptor>)inv.getArgument(0);
+                });
+
+        assertEquals(new PageData(null, "This is raw page text", "Real Page", Collections.emptyList(), List.of("page1", "page2"), new PageFlags(true, false, true, true, false, false)), pageService.getPageData("host1", "ns:realPage", "Bob"));
+    }
+
+    @Test
     public void testGetPageDataDeleted() {
         when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
         when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
