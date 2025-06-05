@@ -143,13 +143,13 @@ unformat_span
   ;
 
 all_char
-   : WORD | NUM | CHARACTER | WS  | DASH | STAR | BLOCKQUOTE_START | header_tok | NO_TOC_TOKEN | YES_TOC_TOKEN
+   : all_char_nows | WS | BLOCKQUOTE_START | NO_TOC_TOKEN | YES_TOC_TOKEN
    ;
 
 all_char_nows
    :
      WORD | NUM | CHARACTER | DASH | STAR | header_tok
-   ;
+  ;
 
 broken_bold_span
    :
@@ -237,7 +237,7 @@ row:
   ;
 
 control_row:
-  ( NO_TOC_TOKEN | YES_TOC_TOKEN |  WS+  )* NEWLINE
+  ( NO_TOC_TOKEN | YES_TOC_TOKEN |  WS+  )+ NEWLINE
   ;
 
 blockquote:
