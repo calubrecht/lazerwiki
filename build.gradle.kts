@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "1.0.4.7"
+version = "1.0.4.8"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -39,7 +39,7 @@ dependencies {
 	implementation("org.hibernate.orm:hibernate-community-dialects")
 
 
-	providedRuntime("mysql:mysql-connector-java:8.0.33")
+	implementation("mysql:mysql-connector-java:8.0.33")
 	implementation("com.github.usefulness:webp-imageio:0.5.1")
 	// Gradle will pull in an older version of this if not explicit.
 	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24")

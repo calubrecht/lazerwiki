@@ -233,7 +233,7 @@ ulist_item
   ;
 
 row:
-  ( line  ) NEWLINE?
+  ( line  ) NEWLINE
   ;
 
 control_row:
@@ -250,7 +250,7 @@ hidden:
 
 
 image
-  : IMG_START_TOKEN inner_text (PIPE inner_text)? IMG_END_TOKEN
+  : IMG_START_TOKEN inner_text+ (PIPE inner_text)? IMG_END_TOKEN
   ;
 
 broken_image
@@ -276,7 +276,7 @@ broken_link
 
 inner_text
   :
-    (all_char | link | broken_link | PIPE )+
+    (all_char | link | broken_link | PIPE )
   ;
 
 inner_text_ext
