@@ -149,12 +149,17 @@ unformat_span
   ;
 
 all_char
-   : all_char_nows | WS | BLOCKQUOTE_START | NO_TOC_TOKEN | YES_TOC_TOKEN
+   : all_char_nows |DASH | STAR | WS | BLOCKQUOTE_START | NO_TOC_TOKEN | YES_TOC_TOKEN
    ;
 
 all_char_nows
    :
-     WORD | NUM | CHARACTER | DASH | STAR | header_tok
+     WORD | NUM | CHARACTER |  broken_header
+  ;
+
+broken_header
+  :
+  { allowBroken}? header_tok
   ;
 
 broken_bold_span
@@ -230,12 +235,12 @@ broken_span
 
 olist_item
   :
-    WS+ DASH (IMG_START_TOKEN NUM IMG_END_TOKEN)? WS* (inner_text | styled_span | macro)+
+    WS+ DASH (IMG_START_TOKEN NUM IMG_END_TOKEN)?  (inner_text | styled_span | macro )+
   ;
 
 ulist_item
   :
-    WS+ STAR  WS* (inner_text | styled_span | macro)+
+    WS+ STAR  (inner_text | styled_span | macro )+
   ;
 
 row:
@@ -261,7 +266,7 @@ image
 
 broken_image
   :
-   { allowBroken}?IMG_START_TOKEN | IMG_END_TOKEN
+   { allowBroken}? IMG_START_TOKEN | IMG_END_TOKEN
   ;
 
 macro
@@ -271,12 +276,12 @@ macro
 
 broken_macro
  :
-   { allowBroken}?MACRO_START_TOKEN | MACRO_END_TOKEN
+   { allowBroken}? MACRO_START_TOKEN | MACRO_END_TOKEN
  ;
 
 broken_link
   :
-   { allowBroken}?LINK_START | LINK_END
+   { allowBroken}? LINK_START | LINK_END
   ;
 
 
@@ -292,7 +297,7 @@ inner_text_ext
 
 inner_text_nowsstart
   :
-    WS? (all_char_nows | link | broken_link |  PIPE )+
+    WS? (all_char_nows | link | broken_link |  PIPE ) (all_char_nows | link | broken_link |  PIPE )*
   ;
 
 header
@@ -311,7 +316,7 @@ line_item
 ;
 
 line
-  : (ulist_item | olist_item) | ((image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | image | broken_image | macro | broken_macro | line_break ) (line_item |  macro | broken_macro)*)
+  : (ulist_item | olist_item) | ((image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | broken_image | macro | broken_macro | line_break ) (line_item |  macro | broken_macro)*)
   ;
 
 

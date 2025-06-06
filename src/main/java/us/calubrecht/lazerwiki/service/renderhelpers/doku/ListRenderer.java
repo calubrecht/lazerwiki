@@ -83,11 +83,13 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
         else {
             sb.append("<li>");
         }
+        StringBuilder innerContent = new StringBuilder();
         List<ParseTree> content = getChildren(tree).stream().filter(t -> innerTreesToRender.contains(t.getClass())).toList();
         content.forEach(pt -> {
             TreeRenderer renderer = renderers.getRenderer(pt.getClass(), pt);
-            sb.append(renderer.render(pt, renderContext)); }
+            innerContent.append(renderer.render(pt, renderContext)); }
         );
+        sb.append(innerContent.toString().trim());
         sb.append("</li>\n");
         return sb;
     }
