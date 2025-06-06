@@ -1,8 +1,13 @@
 package us.calubrecht.lazerwiki.service;
 
+import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DiagnosticErrorListener;
+import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.HeaderRef;
@@ -24,6 +29,7 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.TOC;
 @Service
 public class DokuWikiRenderer implements IMarkupRenderer {
 
+    Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     RendererRegistrar renderers;
 
@@ -50,6 +56,8 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         if (allowBroken) {
             parser.setAllowBroken();
         }
+        parser.addErrorListener(new DiagnosticErrorListener());
+        parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
         ParseTree tree = parser.page();
         if (!allowBroken && parser.getNumberOfSyntaxErrors() > 0) {
             return null;
