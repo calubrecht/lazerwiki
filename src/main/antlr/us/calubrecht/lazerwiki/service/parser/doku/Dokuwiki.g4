@@ -297,7 +297,7 @@ inner_text_ext
 
 inner_text_nowsstart
   :
-    WS? (all_char_nows | link | broken_link |  PIPE ) (all_char_nows | link | broken_link |  PIPE )*
+    WS? (all_char_nows | link | broken_link |  PIPE )
   ;
 
 header
