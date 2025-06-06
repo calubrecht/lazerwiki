@@ -4,6 +4,12 @@ grammar Dokuwiki;
 package us.calubrecht.lazerwiki.service.parser.doku;
 }
 
+@members {
+private boolean allowBroken = false;
+
+public void setAllowBroken() { allowBroken = true;}
+}
+
 
 //lexer grammar DokuLexer;
 
@@ -219,7 +225,7 @@ no_unformat_span
 
 broken_span
  :
- broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span | broken_sup | broken_sub | broken_del | broken_unformat
+ { allowBroken}? broken_bold_span | broken_italic_span | broken_underline_span | broken_monospace_span | broken_sup | broken_sub | broken_del | broken_unformat
  ;
 
 olist_item
@@ -255,7 +261,7 @@ image
 
 broken_image
   :
-   IMG_START_TOKEN | IMG_END_TOKEN
+   { allowBroken}?IMG_START_TOKEN | IMG_END_TOKEN
   ;
 
 macro
@@ -265,12 +271,12 @@ macro
 
 broken_macro
  :
-   MACRO_START_TOKEN | MACRO_END_TOKEN
+   { allowBroken}?MACRO_START_TOKEN | MACRO_END_TOKEN
  ;
 
 broken_link
   :
-   LINK_START | LINK_END
+   { allowBroken}?LINK_START | LINK_END
   ;
 
 

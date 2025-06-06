@@ -36,10 +36,25 @@ public class DokuWikiRenderer implements IMarkupRenderer {
     }
 
     ParseTree parseMarkup(String markup) {
+       ParseTree tree = doParseMarkup(markup, false);
+       if (tree == null) {
+           return doParseMarkup(markup, true);
+       }
+       return tree;
+    }
+
+    ParseTree doParseMarkup(String markup, boolean allowBroken) {
         DokuwikiLexer lexer = new DokuwikiLexer(CharStreams.fromString(markup + '\n'));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         DokuwikiParser parser = new DokuwikiParser(tokens);
-        return parser.page();
+        if (allowBroken) {
+            parser.setAllowBroken();
+        }
+        ParseTree tree = parser.page();
+        if (!allowBroken && parser.getNumberOfSyntaxErrors() > 0) {
+            return null;
+        }
+        return tree;
     }
 
     String renderToString(ParseTree tree, RenderContext context) {
