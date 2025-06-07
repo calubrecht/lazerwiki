@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.service.UserService;
 
+import java.io.Console;
 import java.util.List;
 import java.util.Scanner;
 
@@ -34,9 +35,9 @@ public class AdminCommandLine implements CommandLineRunner {
                     String confirm = "confirm";
                     while (!password.equals(confirm)) {
                         System.out.println("Password: ");
-                        password = scanner.nextLine();
+                        password = readPassword(scanner);
                         System.out.println("Confirm Password: ");
-                        confirm = scanner.nextLine();
+                        confirm = readPassword(scanner);
                         if (!password.equals(confirm)) {
                             System.out.println("Passwords are not equal. Try again");
                         }
@@ -51,5 +52,14 @@ public class AdminCommandLine implements CommandLineRunner {
                 }
             }
         }
+    }
+
+    public String readPassword(Scanner scanner) {
+        Console c = System.console();
+        if (c == null) {
+            // If running from IDE, console may not be available. Password input will not be masked.
+            return scanner.nextLine();
+        }
+        return new String(System.console().readPassword());
     }
 }
