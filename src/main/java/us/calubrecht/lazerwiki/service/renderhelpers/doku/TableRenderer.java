@@ -44,6 +44,9 @@ public class TableRenderer extends FlatteningRenderer {
                     nextOpenTag = "th";
                 }
             } else if (tree.getText().equals("\n") ) {
+                if (currTableData.internalToString().toString().trim().equals("::")) {
+                    // find the rowspan;;
+                }
                 currRow.add(currTableData);
                 currRow = new ArrayList<>();
                 rows.add(currRow);
@@ -97,6 +100,7 @@ public class TableRenderer extends FlatteningRenderer {
 
     class TableData {
         int colspan = 1;
+        int rowspan = 1;
         final String tagType;
         final List<ParseTree> internal = new ArrayList<>();
         final RenderContext renderContext;
@@ -112,12 +116,20 @@ public class TableRenderer extends FlatteningRenderer {
             internal.add(tree);
         }
 
+        public StringBuilder internalToString() {
+            return renderChildren(internal, renderContext);
+        }
+
         public String toString() {
             String colspanAttr = " colspan=\"%s\"".formatted(colspan);
+            String rowspanAttr = " rowspan=\"%s\"".formatted(rowspan);
             if (colspan ==1) {
                 colspanAttr = "";
             }
-            return "<%s%s>%s</%s>".formatted(tagType, colspanAttr, renderChildren(internal, renderContext), tagType);
+            if (rowspan ==1) {
+                rowspanAttr = "";
+            }
+            return "<%s%s%s>%s</%s>".formatted(tagType, colspanAttr, rowspanAttr, internalToString(), tagType);
         }
     }
 }
