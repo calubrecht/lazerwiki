@@ -293,4 +293,4 @@ CREATE TABLE `mediaOverrides` (
 CREATE VIEW activityLogView as
   SELECT al.timestamp, t.fullDesc, al.site, al.target, u.userName FROM `activityLog` al
   inner join `activityType` t on al.activityType = t.activityTypeId
-  inner join userRecord u on al.user = u.userId order by al.timestamp DESC;
+  left join userRecord u on al.user = u.userId order by al.timestamp DESC;

@@ -46,7 +46,7 @@ public class AdminCommandLine implements CommandLineRunner {
                         System.out.println("User already exists");
                     }
                     else {
-                        userService.addUser(user, password, List.of(LazerWikiAuthenticationManager.USER, LazerWikiAuthenticationManager.ADMIN));
+                        userService.addUser(user, password, null, List.of(LazerWikiAuthenticationManager.USER, LazerWikiAuthenticationManager.ADMIN));
                         System.out.println("Admin user " + user + " created");
                     }
                 }

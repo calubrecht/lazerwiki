@@ -10,10 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
-import us.calubrecht.lazerwiki.model.User;
-import us.calubrecht.lazerwiki.model.UserDTO;
-import us.calubrecht.lazerwiki.model.UserRole;
-import us.calubrecht.lazerwiki.model.VerificationToken;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.repository.VerificationTokenRepository;
 import us.calubrecht.lazerwiki.service.exception.VerificationException;
@@ -50,6 +47,9 @@ public class UserServiceTest {
     @MockBean
     TemplateService templateService;
 
+    @MockBean
+    ActivityLogService activityLogService;
+
     @BeforeEach
     public void setup() {
         userService.passwordUtil = Mockito.mock(PasswordUtil.class);
@@ -58,7 +58,8 @@ public class UserServiceTest {
     @Test
     public void testCreateUser() {
         when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
-        userService.addUser("Bob", "password",  List.of(LazerWikiAuthenticationManager.USER));
+        User createdBy = new User("Admin", "");
+        userService.addUser("Bob", "password", createdBy, List.of(LazerWikiAuthenticationManager.USER));
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
 
@@ -71,6 +72,12 @@ public class UserServiceTest {
         assertEquals(1, u.roles.size());
         assertEquals("ROLE_USER", u.roles.get(0).role);
         assertEquals(Map.of(), u.settings);
+
+        verify(activityLogService).log(eq(ActivityType.ACTIVITY_PROTO_CREATE_USER), isNull(), eq(createdBy), eq("Bob"));
+
+        userService.addUser("Jake", "password", null, List.of(LazerWikiAuthenticationManager.USER));
+
+        verify(activityLogService).log(eq(ActivityType.ACTIVITY_PROTO_CREATE_USER), isNull(), isNull(), eq("Self-register: Jake"));
     }
 
     @Test
@@ -116,7 +123,7 @@ public class UserServiceTest {
         User u = new User("Frank", "pass");
         u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
         when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
-        UserDTO changedUser = userService.deleteRole("Frank", "ROLE_ADMIN");
+        UserDTO changedUser = userService.deleteRole("Frank", "ROLE_ADMIN", null);
 
         assertEquals(List.of("ROLE_USER"), changedUser.userRoles());
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -129,14 +136,14 @@ public class UserServiceTest {
         User u = new User("Frank", "pass");
         u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
         when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
-        UserDTO changedUser = userService.addRole("Frank", "ROLE_ADMIN:oneSite");
+        UserDTO changedUser = userService.addRole("Frank", "ROLE_ADMIN:oneSite", null);
 
         assertEquals(List.of("ROLE_ADMIN", "ROLE_USER", "ROLE_ADMIN:oneSite"), changedUser.userRoles());
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
         assertEquals(List.of("ROLE_ADMIN", "ROLE_USER", "ROLE_ADMIN:oneSite"), captor.getValue().roles.stream().map(ur -> ur.role).toList());
 
-        changedUser = userService.addRole("Frank", "ROLE_ADMIN:oneSite");
+        changedUser = userService.addRole("Frank", "ROLE_ADMIN:oneSite", null);
         assertEquals(List.of("ROLE_ADMIN", "ROLE_USER", "ROLE_ADMIN:oneSite"), changedUser.userRoles());
         // Don't save again if role already exists'
         verify(userRepository, times(1)).save(captor.capture());
@@ -163,8 +170,10 @@ public class UserServiceTest {
 
     @Test
     public void test_deleteUser() {
-        userService.deleteUser("Frank");
+        User user = new User ("Bob", "hash");
+        userService.deleteUser("Frank", user);
         verify(userRepository).deleteByUserName("Frank");
+        verify(activityLogService).log(eq(ActivityType.ACTIVITY_PROTO_DELETE_USER), isNull(), eq(user), eq("Frank"));
     }
 
     @Test
@@ -251,7 +260,7 @@ public class UserServiceTest {
         user.roles = new ArrayList<>(List.of("ROLE_READ:site1:ns2", "ROLE_ADMIN", "ROLE_WRITE:site2:ns3").stream().
                 map(roleName -> new UserRole(user, roleName)).toList());
         when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
-        UserDTO dto = userService.setSiteRoles("Bob", "site1", List.of("ROLE_READ:site1:ns1", "ROLE_WRITE:site1:ns2"));
+        UserDTO dto = userService.setSiteRoles("Bob", "site1", List.of("ROLE_READ:site1:ns1", "ROLE_WRITE:site1:ns2"), null);
 
         User savedUser = new User("Bob", "hash");
         savedUser.roles = List.of("ROLE_READ:site1:ns1", "ROLE_WRITE:site1:ns2", "ROLE_ADMIN", "ROLE_WRITE:site2:ns3").stream().

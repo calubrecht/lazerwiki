@@ -6,10 +6,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.model.User;
-import us.calubrecht.lazerwiki.model.UserDTO;
-import us.calubrecht.lazerwiki.model.UserRole;
-import us.calubrecht.lazerwiki.model.VerificationToken;
+import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.repository.VerificationTokenRepository;
 import us.calubrecht.lazerwiki.service.exception.VerificationException;
@@ -48,16 +45,22 @@ public class UserService {
     @Autowired
     VerificationTokenRepository tokenRepository;
 
+    @Autowired
+    ActivityLogService activityLogService;
+
     PasswordUtil passwordUtil = new PasswordUtil();
 
     @Transactional
     @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
-    public void addUser(String userName, String password, List<GrantedAuthority> roles) {
+    public void addUser(String userName, String password, User createdBy, List<GrantedAuthority> roles) {
 
         User newUser = new User(userName, passwordUtil.hashPassword(password));
         newUser.roles = roles.stream().map(role -> new UserRole(newUser, role.getAuthority())).collect(Collectors.toList());
         newUser.settings = Map.of();
         userRepository.save(newUser);
+        String msg = createdBy == null ? "Self-register: " + newUser.userName : newUser.userName;
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_CREATE_USER,
+                null, createdBy, msg);
     }
 
     @Transactional
@@ -89,8 +92,10 @@ public class UserService {
 
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
-    public UserDTO deleteRole(String userName, String userRole) {
+    public UserDTO deleteRole(String userName, String userRole, User adminUser) {
         Optional<User> u = userRepository.findByUserName(userName);
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_CHANGE_ROLES,
+                null, adminUser, userName + " - " + userRole);
         return u.map(user -> {
             Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
             ur.ifPresent( role -> user.roles.remove(role));
@@ -101,8 +106,10 @@ public class UserService {
 
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
-    public UserDTO addRole(String userName, String userRole) {
+    public UserDTO addRole(String userName, String userRole, User adminUser) {
         Optional<User> u = userRepository.findByUserName(userName);
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_CHANGE_ROLES,
+                null, adminUser, userName + " + " + userRole);
         return u.map(user -> {
             // List<UserRole> modifiedRoles = new ArrayList<>(user.roles.stream().filter(ur -> !ur.role.equals(userRole)).toList());
             Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
@@ -181,13 +188,15 @@ public class UserService {
 
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
-    public void deleteUser(String userName) {
+    public void deleteUser(String userName, User deletedBy) {
        userRepository.deleteByUserName(userName);
+       activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_USER,
+                null, deletedBy, userName);
     }
 
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
-    public UserDTO setSiteRoles(String user, String site, List<String> newRoles) {
+    public UserDTO setSiteRoles(String user, String site, List<String> newRoles, User adminUser) {
         Optional<User> u = userRepository.findByUserName(user);
         Optional<UserDTO> dto = u.map(user1 -> {
             List<UserRole> userRoles = new ArrayList<>(newRoles.stream().map(role -> new UserRole(user1, role)).toList());
@@ -200,6 +209,8 @@ public class UserService {
            userRepository.save(user1);
            return new UserDTO (user, site, userRoles.stream().map(role -> role.role).toList(), user1.getSettings());
         });
+        activityLogService.log(ActivityType.ACTIVITY_PROTO_CHANGE_ROLES,
+                null, adminUser, user + " set Multiple Roles");
         return dto.orElseGet(null);
     }
 }

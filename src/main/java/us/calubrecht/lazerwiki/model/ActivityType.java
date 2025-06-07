@@ -14,6 +14,10 @@ public class ActivityType {
     public static ActivityType ACTIVITY_PROTO_REPLACE_MEDIA = new ActivityType(60L);
     public static ActivityType ACTIVITY_PROTO_DELETE_MEDIA = new ActivityType(70L);
     public static ActivityType ACTIVITY_PROTO_MOVE_MEDIA = new ActivityType(80L);
+    public static ActivityType ACTIVITY_PROTO_CREATE_USER = new ActivityType(90L);
+    public static ActivityType ACTIVITY_PROTO_DELETE_USER = new ActivityType(100L);
+    public static ActivityType ACTIVITY_PROTO_CHANGE_ROLES = new ActivityType(110L);
+    public static ActivityType ACTIVITY_PROTO_CHANGE_SETTINGS = new ActivityType(120L);
 
     public ActivityType() {
 

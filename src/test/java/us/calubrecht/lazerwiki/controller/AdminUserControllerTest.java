@@ -12,8 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.UserService;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,7 +40,7 @@ public class AdminUserControllerTest {
                 content(requestJson)).
                 andExpect(status().isOk());
 
-        verify(userService).addUser(eq("Bob"), eq("BigSecret"), any());
+        verify(userService).addUser(eq("Bob"), eq("BigSecret"), isNull(), any());
     }
 
     @Test
@@ -54,7 +53,7 @@ public class AdminUserControllerTest {
                         content(requestJson)).
                         andExpect(status().isNotFound());
 
-        verify(userService, never()).addUser(any(), any(), any());
+        verify(userService, never()).addUser(any(), any(), any(), any());
     }
 
     @Test
@@ -68,7 +67,7 @@ public class AdminUserControllerTest {
                         header("X-Real-IP", "192.168.1.1")).
                         andExpect(status().isNotFound());
 
-        verify(userService, never()).addUser(any(), any(), any());
+        verify(userService, never()).addUser(any(), any(), any(), any());
     }
 
     @Test
@@ -81,6 +80,6 @@ public class AdminUserControllerTest {
                         content(requestJson)).
                 andExpect(status().isNotFound());
 
-        verify(userService, never()).addUser(any(), any(), any());
+        verify(userService, never()).addUser(any(), any(), any(), any());
     }
 }

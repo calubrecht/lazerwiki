@@ -55,7 +55,7 @@ public class AdminUserController {
                 logger.error("Attempt to create Admin User '" + body.get("userName") + "' from " + remoteAddress);
                 return ResponseEntity.notFound().build();
             }
-            userService.addUser(body.get("userName"), body.get("password"), List.of(LazerWikiAuthenticationManager.USER, LazerWikiAuthenticationManager.ADMIN));
+            userService.addUser(body.get("userName"), body.get("password"), null, List.of(LazerWikiAuthenticationManager.USER, LazerWikiAuthenticationManager.ADMIN));
             return ResponseEntity.ok(body.get("userName") + " created");
         } catch (UnknownHostException e) {
             logger.error(e);

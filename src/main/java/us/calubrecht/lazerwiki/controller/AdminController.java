@@ -96,7 +96,7 @@ public class AdminController {
             // Cannot remove your own admin role
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(userService.deleteRole(userName, userRole));
+        return ResponseEntity.ok(userService.deleteRole(userName, userRole, user));
     }
 
     @PutMapping("role/{userName}/{userRole}")
@@ -106,7 +106,7 @@ public class AdminController {
         if (!roles.contains("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(userService.addRole(userName, userRole));
+        return ResponseEntity.ok(userService.addRole(userName, userRole, user));
     }
 
     @PutMapping("roles/{userName}/site/{site}")
@@ -122,11 +122,12 @@ public class AdminController {
         })) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(userService.setSiteRoles(userName, site, siteRoles));
+        return ResponseEntity.ok(userService.setSiteRoles(userName, site, siteRoles, user));
     }
 
     @PutMapping("user/{userName}")
     public ResponseEntity<?> addUser(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
+        User user = null;
         if (principal == null) {
             GlobalSettings settings = globalSettingsService.getSettings();
             if (!BooleanUtils.isTrue((Boolean) settings.settings.get(GlobalSettings.ENABLE_SELF_REG))) {
@@ -134,7 +135,7 @@ public class AdminController {
             }
         }
         else {
-            User user = userService.getUser(principal.getName());
+            user = userService.getUser(principal.getName());
             Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
             if (!roles.contains("ROLE_ADMIN")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -143,7 +144,7 @@ public class AdminController {
         if (userService.getUser(userName) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User %s already exists".formatted(userName));
         }
-        userService.addUser(userName, userRequest.password(), List.of(LazerWikiAuthenticationManager.USER));
+        userService.addUser(userName, userRequest.password(), user, List.of(LazerWikiAuthenticationManager.USER));
         User u = userService.getUser(userName);
         UserDTO dto = new UserDTO(u.userName, null, u.roles.stream().map(role -> role.role).toList(), u.getSettings());
         return ResponseEntity.ok(dto);
@@ -167,7 +168,7 @@ public class AdminController {
         if (!roles.contains("ROLE_ADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        userService.deleteUser(userName);
+        userService.deleteUser(userName, user);
         return ResponseEntity.ok().build();
     }
 

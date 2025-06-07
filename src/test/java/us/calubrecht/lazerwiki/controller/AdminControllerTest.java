@@ -119,8 +119,8 @@ class AdminControllerTest {
 
     @Test
     void deleteRole() throws Exception {
-        when(userService.deleteRole(eq("Frank"), eq("ROLE_ADMIN"))).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
-        when(userService.deleteRole(eq("Bob"), eq("ROLE_EXTRA"))).thenReturn(new UserDTO("Bob",null, List.of("ROLE_ADMIN"), Map.of()));
+        when(userService.deleteRole(eq("Frank"), eq("ROLE_ADMIN"), any())).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
+        when(userService.deleteRole(eq("Bob"), eq("ROLE_EXTRA"), any())).thenReturn(new UserDTO("Bob",null, List.of("ROLE_ADMIN"), Map.of()));
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";
@@ -148,7 +148,7 @@ class AdminControllerTest {
 
     @Test
     void addRoles() throws Exception {
-        when(userService.addRole(eq("Frank"), eq("ROLE_ADMIN"))).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
+        when(userService.addRole(eq("Frank"), eq("ROLE_ADMIN"), any())).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";
@@ -168,7 +168,7 @@ class AdminControllerTest {
 
     @Test
     void setRoles() throws Exception {
-        when(userService.setSiteRoles(eq("Frank"), eq("site1"), anyList())).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
+        when(userService.setSiteRoles(eq("Frank"), eq("site1"), anyList(), any())).thenReturn(new UserDTO("Frank",null, List.of("ROLE_USER"), Map.of()));
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";
@@ -185,7 +185,7 @@ class AdminControllerTest {
                 "[\"ROLE_READ:site1:bo\"]"
                 ).contentType(MediaType.APPLICATION_JSON)).
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
-        verify(userService).setSiteRoles("Frank", "site1", List.of("ROLE_READ:site1:bo"));
+        verify(userService).setSiteRoles(eq("Frank"), eq("site1"), eq(List.of("ROLE_READ:site1:bo")), any());
 
         // Only Admin can add role
         this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Frank", "")).content(
@@ -198,7 +198,7 @@ class AdminControllerTest {
                         "[\"ROLE_READ:site1:bo\"]"
                 ).contentType(MediaType.APPLICATION_JSON)).
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
-        verify(userService, times(2)).setSiteRoles("Frank", "site1", List.of("ROLE_READ:site1:bo"));
+        verify(userService, times(2)).setSiteRoles(eq("Frank"), eq("site1"), eq(List.of("ROLE_READ:site1:bo")), any());
 
         this.mockMvc.perform(put("/api/admin/roles/Frank/site/site2").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
                         "[\"ROLE_READ:site2:bo\"]"
@@ -291,11 +291,11 @@ class AdminControllerTest {
         this.mockMvc.perform(delete("/api/admin/user/User").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk());
 
-        verify(userService).deleteUser("User");
+        verify(userService).deleteUser("User", adminUser);
         // Only Admin can add user
         this.mockMvc.perform(delete("/api/admin/user/User").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
                 andExpect(status().isUnauthorized());
-        verify(userService, times(1)).deleteUser("User");
+        verify(userService, times(1)).deleteUser(eq("User"), any());
     }
 
     @Test
