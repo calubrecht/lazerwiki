@@ -11,7 +11,7 @@ CREATE TABLE "sites" (
 	PRIMARY KEY("name")
 );
 
-INSERT INTO `sites` (`name`, `hostname`, `siteName`,) VALUES ('default', '*', 'Default Site');
+INSERT INTO `sites` (`name`, `hostname`, `siteName`) VALUES ('default', '*', 'Default Site');
 
 CREATE TABLE "userRecord" (
 	"userId"	INTEGER NOT NULL,
@@ -94,12 +94,13 @@ CREATE INDEX "MEDIA_RECORD_UPLOADED_IDX" ON "mediaRecord" (
 	"uploadedBy"
 );
 
-CREATE TABLE `activityType` (
-  `activityTypeId` INTEGER NOT NULL,
-  `activityName` TEXT NOT NULL,
-  `simpleName` TEXT DEFAULT NULL,
-  `fullDesc` TEXT DEFAULT NULL
-  );
+CREATE TABLE "activityType" (
+	"activityTypeId"	INTEGER NOT NULL,
+	"activityName"	TEXT NOT NULL,
+	"simpleName"	TEXT DEFAULT NULL,
+	"fullDesc"	TEXT DEFAULT NULL,
+	PRIMARY KEY("activityTypeId")
+);
 INSERT INTO activityType (activityTypeId,activityName,simpleName,fullDesc) VALUES
 	 (10,'createPage','Created','Create Page'),
 	 (20,'modifyPage','Modified','Modify Page'),
@@ -261,7 +262,7 @@ CREATE TABLE "verificationToken" (
 	"expiry"	DATETIME NOT NULL DEFAULT (DATETIME(CURRENT_TIMESTAMP, '+15 minutes')),
 	FOREIGN KEY("user") REFERENCES "userRecord"("userId") ON DELETE CASCADE ON UPDATE CASCADE,
 	PRIMARY KEY("id" AUTOINCREMENT)
-)
+);
 
 CREATE TABLE activityLog (
   id INTEGER NOT NULL,
