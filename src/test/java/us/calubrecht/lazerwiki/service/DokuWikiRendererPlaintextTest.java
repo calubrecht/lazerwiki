@@ -147,4 +147,15 @@ public class DokuWikiRendererPlaintextTest {
 
         assertEquals(" Header 1 \n Header 2 \n Header 3 \n Header 2 ", doRender(source));
     }
+
+    @Test
+    public void testRenderBrokenInput() {
+        String source="---";
+
+        assertEquals("ERROR: Cannot parse: [-]\n" +
+                "ERROR: Cannot parse: [-]\n" +
+                "ERROR: Cannot parse: [-]\n" +
+                "ERROR: Cannot parse: [\n" +
+                "]", doRender(source));
+    }
 }

@@ -74,6 +74,7 @@ public class RegenCacheService {
             PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
             RenderContext renderContext = new RenderContext(host, siteKey, desc.toString(), UserService.SYS_USER);
             renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+            logger.info("Render: " + desc.toString());
             RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
             PageCache newCache = new PageCache();
             newCache.site = siteKey;

@@ -623,4 +623,11 @@ public class DokuWikiRendererTest {
 
         assertEquals(headerRender+"<h1 id=\"header_Header_1\">Header 1</h1>\n<h3 id=\"header_Header_2\">Header 2</h3>", doRender(source));
     }
+
+    @Test
+    public void testRenderBrokenInput() {
+        String source="---";
+
+        assertEquals("<div class=\"parseError\"><b>ERROR:</b> Cannot parse: [---<br>]</div>", doRender(source));
+    }
 }

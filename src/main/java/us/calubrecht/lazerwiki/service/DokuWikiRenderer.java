@@ -79,6 +79,11 @@ public class DokuWikiRenderer implements IMarkupRenderer {
             }
             outBuffer.append(renderer.render(child, renderContext));
         }
+        if (lastChildClass != null) {
+            AdditiveTreeRenderer aRenderer = (AdditiveTreeRenderer)renderers.getRenderer(lastChildClass, childrenToMerge.get(0));
+            outBuffer.append(aRenderer.render(childrenToMerge, renderContext));
+            childrenToMerge.clear();
+        }
         renderToC(outBuffer, renderContext);
         return outBuffer.toString().strip();
     }
