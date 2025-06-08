@@ -106,11 +106,11 @@ public class RenderServiceTest {
     public void testPreviewPage() {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         RenderContext context = new RenderContext("localhost", "default", "thisPage<preview>", "Bob");
-        context.renderState().put("ID_SUFFIX", "_pagePreview");
+        context.renderState().put("ID_SUFFIX", "_previewPage");
         when(renderer.renderToString("goodSource", context)).thenReturn("This rendered");
         assertEquals("This rendered", underTest.previewPage("localhost", "thisPage", "goodSource", "Bob").rendered());
 
-        when(renderer.renderToString("brokenSource", "localhost", "default", "thisPage<preview>", "Bob")).thenThrow(new RuntimeException("This is broken"));
+        when(renderer.renderToString("brokenSource", context)).thenThrow(new RuntimeException("This is broken"));
         assertEquals("<h1>Error</h1>\n" +
                 "<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n" +
                 "<code>brokenSource</code>", underTest.previewPage("localhost", "thisPage", "brokenSource", "Bob").rendered());
@@ -145,7 +145,7 @@ public class RenderServiceTest {
     @Test
     public void testGetHistoricalRenderedPage() {
         PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
-        RenderContext context = new RenderContext("localhost", "default", "thisPage<preview>", "Bob");
+        RenderContext context = new RenderContext("host1", "default", "ns:realPage", "Bob");
         context.renderState().put("ID_SUFFIX", "_historyView");
         when(renderer.renderWithInfo(eq("This is raw page text"), eq(context))).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
         when(pageService.getHistoricalPageData(any(), eq("ns:realPage"), eq(1L), any())).thenReturn(pd);
@@ -163,7 +163,9 @@ public class RenderServiceTest {
 
         PageData badRender = new PageData(null, "BAD",  null,null, PageData.ALL_RIGHTS);
         when(pageService.getHistoricalPageData(any(), eq("badRender"), anyLong(), any())).thenReturn(badRender);
-        when(renderer.renderWithInfo(eq("BAD"), any(), any(), any(), any())).thenThrow(new RuntimeException("OUTCH"));
+        context = new RenderContext("host1", "default", "badRender", "Bob");
+        context.renderState().put("ID_SUFFIX", "_historyView");
+        when(renderer.renderWithInfo(eq("BAD"), eq(context))).thenThrow(new RuntimeException("OUTCH"));
         assertEquals(new PageData("""
                 <h1>Error</h1>
                 <div>There was an error rendering this page! Please contact an admin, or correct the markup</div>
