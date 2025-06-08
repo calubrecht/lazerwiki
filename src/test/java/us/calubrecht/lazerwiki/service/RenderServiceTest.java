@@ -105,7 +105,9 @@ public class RenderServiceTest {
     @Test
     public void testPreviewPage() {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
-        when(renderer.renderToString("goodSource", "localhost", "default", "thisPage<preview>", "Bob")).thenReturn("This rendered");
+        RenderContext context = new RenderContext("localhost", "default", "thisPage<preview>", "Bob");
+        context.renderState().put("ID_SUFFIX", "_pagePreview");
+        when(renderer.renderToString("goodSource", context)).thenReturn("This rendered");
         assertEquals("This rendered", underTest.previewPage("localhost", "thisPage", "goodSource", "Bob").rendered());
 
         when(renderer.renderToString("brokenSource", "localhost", "default", "thisPage<preview>", "Bob")).thenThrow(new RuntimeException("This is broken"));
@@ -143,7 +145,9 @@ public class RenderServiceTest {
     @Test
     public void testGetHistoricalRenderedPage() {
         PageData pd = new PageData(null, "This is raw page text",  null,null, PageData.ALL_RIGHTS);
-        when(renderer.renderWithInfo(eq("This is raw page text"), eq("host1"), eq("default"), anyString(), anyString())).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
+        RenderContext context = new RenderContext("localhost", "default", "thisPage<preview>", "Bob");
+        context.renderState().put("ID_SUFFIX", "_historyView");
+        when(renderer.renderWithInfo(eq("This is raw page text"), eq(context))).thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
         when(pageService.getHistoricalPageData(any(), eq("ns:realPage"), eq(1L), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.HEADERS;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ID_SUFFIX;
 
 @Component
 public class HeaderRenderer extends TreeRenderer {
@@ -57,7 +58,8 @@ public class HeaderRenderer extends TreeRenderer {
         HeaderRef headerRef = new HeaderRef(7 - headerSize, plainTextHeader, toId(plainTextHeader, headers));
         headers.add(headerRef);
         StringBuilder outBuffer = new StringBuilder();
-        outBuffer.append("<").append(hTag).append(" id=\"").append(headerRef.id()).append("\">");
+        String id = headerRef.id() + renderContext.renderState().getOrDefault(ID_SUFFIX.name(), "").toString();
+        outBuffer.append("<").append(hTag).append(" id=\"").append(id).append("\">");
         outBuffer.append(renderChildren(getChildren(tree), renderContext).toString().strip());
         outBuffer.append("</").append(hTag).append(">\n");
         if (!renderContext.renderState().containsKey(RenderResult.RENDER_STATE_KEYS.TITLE.name())) {

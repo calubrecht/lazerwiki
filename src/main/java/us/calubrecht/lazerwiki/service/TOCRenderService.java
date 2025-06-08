@@ -9,8 +9,8 @@ import java.util.List;
 
 @Service
 public class TOCRenderService {
-    public String renderTOC(List<HeaderRef> headers) {
-        StringBuilder render = new StringBuilder("<div id=\"lw_TOC\">\n");
+    public String renderTOC(List<HeaderRef> headers, String idSuffix) {
+        StringBuilder render = new StringBuilder("<div class=\"TOC\" id=\"lw_TOC" + idSuffix+ "\">\n");
         int indents = 1;
         int currentLevel = -1;
         for (int i = 0; i < headers.size(); i++) {
@@ -27,7 +27,7 @@ public class TOCRenderService {
                 }
                 currentLevel--;
             }
-            render.append(fmtIndents(indents)).append(fmtHeader(header)).append("\n");
+            render.append(fmtIndents(indents)).append(fmtHeader(header, idSuffix)).append("\n");
         }
         indents--;
         for (; indents > 0; indents--) {
@@ -41,7 +41,7 @@ public class TOCRenderService {
         return String.join("", Collections.nCopies(indents, "  "));
     }
 
-    public String fmtHeader(HeaderRef ref) {
-        return String.format("<li><a href=\"#%s\">%s</a></li>", ref.id(), ref.header());
+    public String fmtHeader(HeaderRef ref, String idSuffix) {
+        return String.format("<li><a href=\"#%s%s\">%s</a></li>", ref.id(), idSuffix, ref.header());
     }
 }

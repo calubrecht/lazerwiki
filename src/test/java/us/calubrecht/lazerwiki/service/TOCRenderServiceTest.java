@@ -18,14 +18,14 @@ class TOCRenderServiceTest {
                 new HeaderRef(1, "Header 3", "Header_3")
         );
         String headerRender = """
-                <div id="lw_TOC">
+                <div class="TOC" id="lw_TOC">
                   <ol>
                     <li><a href="#Header_1">Header 1</a></li>
                     <li><a href="#Header_2">Header 2</a></li>
                     <li><a href="#Header_3">Header 3</a></li>
                   </ol>
                 </div>""";
-        assertEquals(headerRender, service.renderTOC(headers));
+        assertEquals(headerRender, service.renderTOC(headers, ""));
     }
 
     @Test
@@ -37,7 +37,7 @@ class TOCRenderServiceTest {
                 new HeaderRef(2, "Header 2", "Header_2_1")
         );
         String headerRender = """
-                <div id="lw_TOC">
+                <div class="TOC" id="lw_TOC">
                   <ol>
                     <li><a href="#Header_1">Header 1</a></li>
                     <ol>
@@ -49,7 +49,7 @@ class TOCRenderServiceTest {
                     </ol>
                   </ol>
                 </div>""";
-        assertEquals(headerRender, service.renderTOC(headers));
+        assertEquals(headerRender, service.renderTOC(headers, ""));
     }
 
     @Test
@@ -61,7 +61,7 @@ class TOCRenderServiceTest {
                 new HeaderRef(1, "Header 2", "Header_2_1")
         );
         String headerRender = """
-                <div id="lw_TOC">
+                <div class="TOC" id="lw_TOC">
                   <ol>
                     <li><a href="#Header_1">Header 1</a></li>
                     <ol>
@@ -73,7 +73,7 @@ class TOCRenderServiceTest {
                     <li><a href="#Header_2_1">Header 2</a></li>
                   </ol>
                 </div>""";
-        assertEquals(headerRender, service.renderTOC(headers));
+        assertEquals(headerRender, service.renderTOC(headers, ""));
     }
 
     @Test
@@ -84,7 +84,7 @@ class TOCRenderServiceTest {
                 new HeaderRef(2, "Header 3", "Header_3")
         );
         String headerRender = """
-                <div id="lw_TOC">
+                <div class="TOC" id="lw_TOC">
                   <ol>
                     <li><a href="#Header_1">Header 1</a></li>
                     <li><a href="#Header_2">Header 2</a></li>
@@ -93,6 +93,24 @@ class TOCRenderServiceTest {
                     </ol>
                   </ol>
                 </div>""";
-        assertEquals(headerRender, service.renderTOC(headers));
+        assertEquals(headerRender, service.renderTOC(headers, ""));
+    }
+
+    @Test
+    void renderTOCSimpleWSuffix() {
+        List<HeaderRef> headers = List.of(
+                new HeaderRef(1, "Header 1", "Header_1"),
+                new HeaderRef(1, "Header 2", "Header_2"),
+                new HeaderRef(1, "Header 3", "Header_3")
+        );
+        String headerRender = """
+                <div class="TOC" id="lw_TOC_wSuffix">
+                  <ol>
+                    <li><a href="#Header_1_wSuffix">Header 1</a></li>
+                    <li><a href="#Header_2_wSuffix">Header 2</a></li>
+                    <li><a href="#Header_3_wSuffix">Header 3</a></li>
+                  </ol>
+                </div>""";
+        assertEquals(headerRender, service.renderTOC(headers, "_wSuffix"));
     }
 }

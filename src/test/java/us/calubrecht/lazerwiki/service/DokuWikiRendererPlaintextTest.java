@@ -143,7 +143,7 @@ public class DokuWikiRendererPlaintextTest {
                 <div id="lw_TOC"></div>
                 """;
 
-        when(tocRenderService.renderTOC(any())).thenReturn(headerRender);
+        when(tocRenderService.renderTOC(any(), any())).thenReturn(headerRender);
 
         assertEquals(" Header 1 \n Header 2 \n Header 3 \n Header 2 ", doRender(source));
     }

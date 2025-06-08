@@ -15,6 +15,8 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.*;
 
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ID_SUFFIX;
+
 @Service
 public class RenderService {
     final Logger logger = LogManager.getLogger(getClass());
@@ -99,7 +101,9 @@ public class RenderService {
             return d;
         }
         try {
-            RenderResult rendered = renderer.renderWithInfo(d.source(), host, site, sPageDescriptor, userName);
+            RenderContext context = new RenderContext(host, site, sPageDescriptor, userName);
+            context.renderState().put(ID_SUFFIX.name(), "_historyView");
+            RenderResult rendered = renderer.renderWithInfo(d.source(), context);
             PageData pd = new PageData(rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags());
             return pd;
         }
@@ -128,7 +132,9 @@ public class RenderService {
         StopWatch sw = StopWatch.createStarted();
         String site = siteService.getSiteForHostname(host);
         try {
-            PageData pd = new PageData(renderer.renderToString(text, host, site, sPageDescriptor+"<preview>", userName), text, null, null, null);
+            RenderContext context = new RenderContext(host, site, sPageDescriptor+"<preview>", userName);
+            context.renderState().put(ID_SUFFIX.name(), "_previewPage");
+            PageData pd = new PageData(renderer.renderToString(text, context), text, null, null, null);
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render preview for " + sPageDescriptor + " took " + totalMillis + "ms");
