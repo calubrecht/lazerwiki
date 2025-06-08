@@ -9,7 +9,6 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.List;
-import java.util.Random;
 
 @Component
 public class HiddenRenderer extends TreeRenderer {
@@ -42,7 +41,7 @@ public class HiddenRenderer extends TreeRenderer {
     public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         StringBuilder sb = new StringBuilder();
         sb.append(getStartTags());
-        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()), renderContext));
+        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
         sb.append(endTag);
         return sb;
     }
@@ -50,7 +49,7 @@ public class HiddenRenderer extends TreeRenderer {
     @Override
     public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
         StringBuilder sb = new StringBuilder();
-        sb.append(renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()), renderContext));
+        sb.append(renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
         return sb;
     }
 }

@@ -582,9 +582,9 @@ public class DokuWikiRendererTest {
     public void testHidden() {
         when(randomService.nextInt()).thenReturn(5,8);
         String inputBlockquote = "<hidden>simple</hidden>";
-        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle5\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle5\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><div>simple</div></div></div>", doRender(inputBlockquote));
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle5\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle5\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">simple</div></div>", doRender(inputBlockquote));
 
-        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle8\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle8\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><div>line1</div>\n<div>line2<img src=\"/_media/animage\" class=\"media\" loading=\"lazy\"></div></div></div>",
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle8\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle8\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><div>line1</div>\nline2<img src=\"/_media/animage\" class=\"media\" loading=\"lazy\"></div></div>",
                 doRender("<hidden>line1\n\nline2{{animage}}</hidden>"));
     }
 
