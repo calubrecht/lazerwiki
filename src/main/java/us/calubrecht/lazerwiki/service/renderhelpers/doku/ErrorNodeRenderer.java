@@ -5,7 +5,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
-import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.List;
 import java.util.stream.Collectors;

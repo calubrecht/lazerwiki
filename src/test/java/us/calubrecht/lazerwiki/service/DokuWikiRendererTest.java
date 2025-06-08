@@ -628,6 +628,15 @@ public class DokuWikiRendererTest {
     public void testRenderBrokenInput() {
         String source="---";
 
-        assertEquals("<div class=\"parseError\"><b>ERROR:</b> Cannot parse: [---<br>]</div>", doRender(source));
+        assertEquals("<div class=\"parseError\"><b>ERROR:</b> Cannot parse: [---]</div>", doRender(source));
+    }
+
+    @Test
+    public void testRenderHR() {
+        String source="----";
+
+        assertEquals("<hr>", doRender(source));
+        source = "-----";
+        assertEquals("<hr>", doRender(source));
     }
 }

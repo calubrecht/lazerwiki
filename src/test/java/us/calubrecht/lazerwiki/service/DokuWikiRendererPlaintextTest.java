@@ -152,10 +152,15 @@ public class DokuWikiRendererPlaintextTest {
     public void testRenderBrokenInput() {
         String source="---";
 
-        assertEquals("ERROR: Cannot parse: [-]\n" +
-                "ERROR: Cannot parse: [-]\n" +
-                "ERROR: Cannot parse: [-]\n" +
-                "ERROR: Cannot parse: [\n" +
-                "]", doRender(source));
+        assertEquals("ERROR: Cannot parse: [---]\n", doRender(source));
+    }
+
+    @Test
+    public void testRenderHR() {
+        String source="----";
+
+        assertEquals("----", doRender(source));
+        source = "-----";
+        assertEquals("-----", doRender(source));
     }
 }

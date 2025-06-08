@@ -78,7 +78,7 @@ YES_TOC_TOKEN: '~~YESTOC~~' ;
 //options { tokenVocab=DokuLexer; }
 
 page
-    : ( header | row | just_newline | code_box | blockquote | hidden | control_row )* EOF
+    : ( header | row | just_newline | code_box | blockquote | hidden | control_row | horizontal_rule )* EOF
     ;
 
 code_box:
@@ -259,6 +259,9 @@ hidden:
   HIDDEN_START ( header | row | line | just_newline | code_box | blockquote  )* HIDDEN_END
   ;
 
+horizontal_rule:
+  DASH DASH DASH DASH+
+  ;
 
 image
   : IMG_START_TOKEN inner_text+ (PIPE inner_text)? IMG_END_TOKEN
@@ -316,7 +319,7 @@ line_item
 ;
 
 line
-  : (ulist_item | olist_item) | ((image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | broken_image | macro | broken_macro | line_break ) (line_item |  macro | broken_macro)*)
+  : (ulist_item | olist_item ) | ((image | (WS? styled_span) | (WS? broken_span) | inner_text_nowsstart | broken_image | macro | broken_macro | line_break ) (line_item |  macro | broken_macro)*)
   ;
 
 
