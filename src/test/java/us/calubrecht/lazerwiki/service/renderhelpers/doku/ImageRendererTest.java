@@ -105,6 +105,16 @@ class ImageRendererTest {
     }
 
     @Test
+    void testFileNameWithSpace() {
+        String justWidth = "img 1.jpg?30";
+        RenderContext renderContext = new RenderContext("host", "site", "page", "user");
+        assertEquals(
+                "<img src=\"/_media/img 1.jpg?30\" class=\"media\" loading=\"lazy\">",
+                renderer.parseInner(justWidth, null, renderContext).toString()
+        );
+    }
+
+    @Test
     public void testOverrides() {
         DokuwikiParser.ImageContext tree = Mockito.mock(DokuwikiParser.ImageContext.class);
         DokuwikiParser.Inner_textContext innerText = Mockito.mock(DokuwikiParser.Inner_textContext.class);
