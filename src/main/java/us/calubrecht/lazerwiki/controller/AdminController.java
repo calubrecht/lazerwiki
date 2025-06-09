@@ -136,7 +136,7 @@ public class AdminController {
         else {
             User user = userService.getUser(principal.getName());
             Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-            if (!roles.contains("ROLE_ADMIN")) {
+            if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_USERADMIN")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         }
@@ -153,7 +153,7 @@ public class AdminController {
     public ResponseEntity<Void> resetPassword(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
+        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_USERADMIN")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         userService.resetPassword(userName, userRequest.password());
