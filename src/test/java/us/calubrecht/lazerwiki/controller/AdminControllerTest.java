@@ -220,16 +220,22 @@ class AdminControllerTest {
     void addUser() throws Exception {
         User u =  new User("NewUser", null);
         u.roles = List.of(new UserRole(u, "ROLE_USER"));
-        when(userService.getUser(eq("NewUser"))).thenReturn(null, u);
+        when(userService.getUser(eq("NewUser"))).thenReturn(null, u, null, u);
         User adminUser = new User();
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";
         when(userService.getUser("Bob")).thenReturn(adminUser);
+        User userAdminUser = new User();
+        userAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_USERADMIN"));
+        userAdminUser.userName = "Joe";
+        when(userService.getUser("Joe")).thenReturn(userAdminUser);
         User regularUser = new User();
         regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
         regularUser.userName = "Frank";
         when(userService.getUser("Frank")).thenReturn(regularUser);
         this.mockMvc.perform(put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
+                andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"NewUser\", \"userRoles\":[\"ROLE_USER\"]}"));
+        this.mockMvc.perform(put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Joe", ""))).
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"NewUser\", \"userRoles\":[\"ROLE_USER\"]}"));
 
         // Only Admin can add user
@@ -264,6 +270,10 @@ class AdminControllerTest {
         adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
         adminUser.userName = "Bob";
         when(userService.getUser("Bob")).thenReturn(adminUser);
+        User userAdminUser = new User();
+        userAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_USERADMIN"));
+        userAdminUser.userName = "Joe";
+        when(userService.getUser("Joe")).thenReturn(userAdminUser);
         User regularUser = new User();
         regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
         regularUser.userName = "Frank";
@@ -272,10 +282,15 @@ class AdminControllerTest {
                 andExpect(status().isOk());
 
         verify(userService).resetPassword("User", "password");
+
+        this.mockMvc.perform(post("/api/admin/passwordReset/User").content("{\"userName\": \"User\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Joe", ""))).
+                andExpect(status().isOk());
+
+        verify(userService, times(2)).resetPassword("User", "password");
         // Only Admin can add user
         this.mockMvc.perform(post("/api/admin/passwordReset/User").content("{\"userName\": \"User\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
                 andExpect(status().isUnauthorized());
-        verify(userService, times(1)).resetPassword("User", "password");
+        verify(userService, times(2)).resetPassword("User", "password");
     }
 
     @Test
