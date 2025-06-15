@@ -30,6 +30,8 @@ public class TableRenderer extends FlatteningRenderer {
         List<List<TableData>> rows = new ArrayList<>();
         List<TableData> currRow = new ArrayList<>();
         rows.add(currRow);
+        int rowNum = 0;
+        int colNum = 0;
         for (ParseTree tree : children) {
             if (DATA_TAGS.contains(tree.getText())) {
                 if (currTableData != null) {
@@ -44,16 +46,19 @@ public class TableRenderer extends FlatteningRenderer {
                     nextOpenTag = "th";
                 }
             } else if (tree.getText().equals("\n") ) {
-                currRow.add(currTableData);
+                addCellData(currTableData, rowNum, rows, colNum, currRow);
                 currRow = new ArrayList<>();
                 rows.add(currRow);
+                rowNum++;
+                colNum = 0;
                 currTableData = null;
                 closingData = false;
             } else {
                 if (closingData) {
-                    currRow.add(currTableData);
+                    addCellData(currTableData, rowNum, rows, colNum, currRow);
                     closingData = false;
                     currTableData = null;
+                    colNum++;
                 }
                 if (currTableData == null) {
                     currTableData = new TableData(nextOpenTag, renderContext);
@@ -62,7 +67,7 @@ public class TableRenderer extends FlatteningRenderer {
             }
         }
         rows.forEach(row -> {
-            if (row.size() == 0) {
+            if (row.isEmpty()) {
                 return;
             }
             sb.append("<tr>");
@@ -73,6 +78,26 @@ public class TableRenderer extends FlatteningRenderer {
         });
         sb.append("</tbody></table>");
         return sb;
+    }
+
+    private void addCellData(TableData currTableData, int rowNum, List<List<TableData>> rows, int colNum, List<TableData> currRow) {
+        if (currTableData.internalToString().toString().trim().equals("::")) {
+            if (rowNum != 0) {
+              // Update rowspans
+              for (int checkRowNum = rowNum -1; checkRowNum >= 0; checkRowNum--) {
+                  if (rows.get(checkRowNum).size() <= colNum) {
+                      break;
+                  }
+                  TableData checkTD = rows.get(checkRowNum).get(colNum);
+                  if (!checkTD.isPlaceholder()) {
+                      checkTD.rowspan++;
+                      break;
+                  }
+              }
+            }
+            currTableData = new RowspanPlaceholder();
+        }
+        currRow.add(currTableData);
     }
 
     @Override
@@ -97,6 +122,7 @@ public class TableRenderer extends FlatteningRenderer {
 
     class TableData {
         int colspan = 1;
+        int rowspan = 1;
         final String tagType;
         final List<ParseTree> internal = new ArrayList<>();
         final RenderContext renderContext;
@@ -112,12 +138,40 @@ public class TableRenderer extends FlatteningRenderer {
             internal.add(tree);
         }
 
+        public StringBuilder internalToString() {
+            return renderChildren(internal, renderContext);
+        }
+
         public String toString() {
             String colspanAttr = " colspan=\"%s\"".formatted(colspan);
+            String rowspanAttr = " rowspan=\"%s\"".formatted(rowspan);
             if (colspan ==1) {
                 colspanAttr = "";
             }
-            return "<%s%s>%s</%s>".formatted(tagType, colspanAttr, renderChildren(internal, renderContext), tagType);
+            if (rowspan ==1) {
+                rowspanAttr = "";
+            }
+            return "<%s%s%s>%s</%s>".formatted(tagType, colspanAttr, rowspanAttr, internalToString(), tagType);
+        }
+
+        boolean isPlaceholder() {
+            return false;
+        }
+    }
+
+    class RowspanPlaceholder extends TableData {
+        public RowspanPlaceholder() {
+            super(null, null);
+        }
+
+        @Override
+        public String toString() {
+            return "";
+        }
+
+        @Override
+        boolean isPlaceholder() {
+            return true;
         }
     }
 }
