@@ -542,7 +542,7 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testRenderTable() {
-   /*     String inputSimpleTable = "| First | Line |\n|Second | Line|";
+        String inputSimpleTable = "| First | Line |\n|Second | Line|";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td> First </td><td> Line </td></tr>\n<tr><td>Second </td><td> Line</td></tr>\n</tbody></table>", doRender(inputSimpleTable));
         String tableWithHeader = "^ Header ^ Line ^\n|Second | Line|";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><th> Header </th><th> Line </th></tr>\n<tr><td>Second </td><td> Line</td></tr>\n</tbody></table>", doRender(tableWithHeader));
@@ -555,10 +555,34 @@ public class DokuWikiRendererTest {
         String tableWithLink = "| [[LinkToSomePage]] \\\\ Some text after|";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td> <a class=\"wikiLinkMissing\" href=\"/page/LinkToSomePage\">null</a><br> Some text after</td></tr>\n" +
                 "</tbody></table>", doRender(tableWithLink));
-*/
+    }
+
+    @Test
+    public void testRenderTableWithRowspan() {
         String tableWithRowSpan = "| One | Two |\n| Three | :: |";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td> One </td><td rowspan=\"2\"> Two </td></tr>\n" +
                 "<tr><td> Three </td></tr>\n" +
+                "</tbody></table>", doRender(tableWithRowSpan));
+
+        tableWithRowSpan = "| One | Two |\n| Three | :: |\n| Four |::|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td> One </td><td rowspan=\"3\"> Two </td></tr>\n" +
+                "<tr><td> Three </td></tr>\n" +
+                "<tr><td> Four </td></tr>\n" +
+                "</tbody></table>", doRender(tableWithRowSpan));
+
+        tableWithRowSpan = "| One | Two | Four |\n| Three | :: | Five |";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td> One </td><td rowspan=\"2\"> Two </td><td> Four </td></tr>\n" +
+                "<tr><td> Three </td><td> Five </td></tr>\n" +
+                "</tbody></table>", doRender(tableWithRowSpan));
+
+        // Invalid cases. Do something reasonable rather than break
+        tableWithRowSpan = "| One | :: |\n| Three | :: |"; // Spanning element on first row, just add nothing
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td> One </td></tr>\n" +
+                "<tr><td> Three </td></tr>\n" +
+                "</tbody></table>", doRender(tableWithRowSpan));
+        tableWithRowSpan = "| One | Two |\n| Three | Four | :: |"; // Spanning element beyond upper row, skip
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td> One </td><td> Two </td></tr>\n" +
+                "<tr><td> Three </td><td> Four </td></tr>\n" +
                 "</tbody></table>", doRender(tableWithRowSpan));
     }
 
