@@ -81,7 +81,7 @@ public class TableRenderer extends FlatteningRenderer {
     }
 
     private void addCellData(TableData currTableData, int rowNum, List<List<TableData>> rows, int colNum, List<TableData> currRow) {
-        if (currTableData.internalToString().toString().trim().equals("::")) {
+        if (currTableData.internalToString().trim().equals("::")) {
             if (rowNum != 0) {
               // Update rowspans
               for (int checkRowNum = rowNum -1; checkRowNum >= 0; checkRowNum--) {
@@ -138,20 +138,32 @@ public class TableRenderer extends FlatteningRenderer {
             internal.add(tree);
         }
 
-        public StringBuilder internalToString() {
-            return renderChildren(internal, renderContext);
+        public String internalToString() {
+            return renderChildren(internal, renderContext).toString();
         }
 
         public String toString() {
             String colspanAttr = " colspan=\"%s\"".formatted(colspan);
             String rowspanAttr = " rowspan=\"%s\"".formatted(rowspan);
+            String className = "";
             if (colspan ==1) {
                 colspanAttr = "";
             }
             if (rowspan ==1) {
                 rowspanAttr = "";
             }
-            return "<%s%s%s>%s</%s>".formatted(tagType, colspanAttr, rowspanAttr, internalToString(), tagType);
+            String internal = internalToString();
+            if (internal.startsWith(" ")) {
+                if (internal.endsWith(" ")) {
+                    className=" class=\"tableCenter\"";
+                }
+                else {
+                    className=" class=\"tableRight\"";
+                }
+            } else if (internal.endsWith(" ")) {
+                className=" class=\"tableLeft\"";
+            }
+            return "<%s%s%s%s>%s</%s>".formatted(tagType, className, colspanAttr, rowspanAttr, internal, tagType);
         }
 
         boolean isPlaceholder() {
