@@ -79,7 +79,7 @@ public class AdminController {
     public ResponseEntity<List<UserDTO>> getUsers(Principal principal) {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
+        if (!(roles.contains("ROLE_ADMIN") || roles.contains("ROLE_USERADMIN"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(userService.getUsers());

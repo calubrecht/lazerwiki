@@ -109,9 +109,16 @@ class AdminControllerTest {
         User regularUser = new User();
         regularUser.roles = List.of(new UserRole(regularUser, "ROLE_USER"));
         when(userService.getUser("frank")).thenReturn(regularUser);
+        User userAdminUser = new User();
+        userAdminUser.roles = List.of(new UserRole(adminUser, "ROLE_USERADMIN"));
+        userAdminUser.userName = "Joe";
+        when(userService.getUser("Joe")).thenReturn(userAdminUser);
 
         this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("bob", ""))).
         andExpect(status().isOk()).andExpect(content().json("[{\"userName\":\"Bob\", \"userRoles\":[\"ROLE_ADMIN\", \"ROLE_USER\"]}, {\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}]"));
+
+        this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("Joe", ""))).
+                andExpect(status().isOk()).andExpect(content().json("[{\"userName\":\"Bob\", \"userRoles\":[\"ROLE_ADMIN\", \"ROLE_USER\"]}, {\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}]"));
 
         this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
                 andExpect(status().isUnauthorized());
