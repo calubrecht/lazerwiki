@@ -184,6 +184,7 @@ public class PageService {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
         Page p = pageRepository.getBySiteAndNamespaceAndPagename(site, pageDescriptor.namespace(), pageDescriptor.pageName());
+        pageCacheRepository.deleteBySiteAndNamespaceAndPageName(site, pageDescriptor.namespace(), pageDescriptor.pageName());
         PageCache newCache = new PageCache();
         newCache.site = site;
         newCache.namespace = p.getNamespace();

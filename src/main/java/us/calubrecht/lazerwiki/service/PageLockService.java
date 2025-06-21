@@ -45,6 +45,9 @@ public class PageLockService {
         logger.info("Get page lock for " + sPageDescriptor + "-" + userName + "-" + overrideLock + " existingLock=" + lock + " at " + LocalDateTime.now());
         if (lock == null || lock.getLockTime().isBefore(LocalDateTime.now()) || overrideLock) {
             User user = userService.getUser(userName);
+            if (lock !=null) {
+                p = new PageDescriptor(lock.getNamespace(), lock.getPagename());
+            }
             LocalDateTime lockTime = LocalDateTime.now().plusMinutes(pageLockMinutes);
             lock = new PageLock(site, p.namespace(), p.pageName(), user, lockTime, newLockId());
             logger.info("Get get new Lock - " +lock);

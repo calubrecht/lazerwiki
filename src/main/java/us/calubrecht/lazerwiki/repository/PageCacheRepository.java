@@ -14,6 +14,8 @@ public interface PageCacheRepository extends CrudRepository<PageCache, PageCache
 
     void deleteBySite(String site);
 
+    void deleteBySiteAndNamespaceAndPageName(String site, String namespace, String pageName);
+
     @Query(value = "SELECT * FROM pageCache WHERE MATCH(pageName, title) AGAINST (:searchTerm IN BOOLEAN MODE) AND site=:site", nativeQuery= true)
     List<PageCache> searchByTitleMysql(String site, String searchTerm);
 
