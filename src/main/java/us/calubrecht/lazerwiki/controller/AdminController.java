@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.*;
@@ -53,35 +54,47 @@ public class AdminController {
     @Autowired
     GlobalSettingsService globalSettingsService;
 
+    public boolean hasAdmin(String userName, String site)
+    {
+        User user = userService.getUser(userName);
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_ADMIN:" + site);
+    }
+
+    public boolean hasRole(String userName, String... requiredRoles) {
+        User user = userService.getUser(userName);
+        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
+        for (String role : requiredRoles) {
+            if (roles.contains(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @PostMapping("regenLinkTable/{site}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
     public ResponseEntity<Void> regenLinkTable(@PathVariable("site") String site, Principal principal) {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + site)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         regenCacheService.regenLinks(site);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("regenCacheTable/{site}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
     public ResponseEntity<Void> regenCacheTable(@PathVariable("site") String site, Principal principal) {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + site)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         regenCacheService.regenCache(site);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("getUsers")
+    @PreAuthorize("@adminController.hasRole(#principal.getName(), 'ROLE_ADMIN', 'ROLE_USERADMIN')")
     public ResponseEntity<List<UserDTO>> getUsers(Principal principal) {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!(roles.contains("ROLE_ADMIN") || roles.contains("ROLE_USERADMIN"))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         return ResponseEntity.ok(userService.getUsers());
     }
 

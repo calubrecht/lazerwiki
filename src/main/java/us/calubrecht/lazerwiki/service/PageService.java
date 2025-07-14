@@ -91,7 +91,7 @@ public class PageService {
         ).toList();
         List<String> allBackLnks = Stream.concat(backlinks.stream(), overrideBacklinks.stream()).distinct().toList();
         List<String> visibleBacklinks = namespaceService.
-          filterReadablePageDescriptors(allBackLnks.stream().map(bl -> PageDescriptor.fromFullName(bl)).toList(), site, userName).stream().
+          filterReadablePageDescriptors(allBackLnks.stream().map(PageDescriptor::fromFullName).toList(), site, userName).stream().
                 map(PageDescriptor::toString).toList();
 
         if (p == null ) {
@@ -110,10 +110,10 @@ public class PageService {
         return new PageData(null, source, getTitle(pageDescriptor, p),  p.getTags().stream().map(PageTag::getTag).toList(), visibleBacklinks, new PageFlags(true, false, true, canWrite, canDelete, false), p.getId(), p.getRevision());
     }
 
-    @Transactional
     /**
      * Bulk page get, does not retireve backlinks or tags
      */
+    @Transactional
     public Map<PageDescriptor, PageData> getPageData(String host, List<String> pageDescriptors, String userName) {
         String site = siteService.getSiteForHostname(host);
         List<String> keys = pageDescriptors.stream().map( desc ->
@@ -203,6 +203,7 @@ public class PageService {
 
     public static String doAdjustSource(String source, RenderResult rendered) {
         if (rendered.renderState().containsKey(OVERRIDE_STATS.name())) {
+            @SuppressWarnings("unchecked")
             List<LinkOverrideInstance> overrides = new ArrayList<>((List<LinkOverrideInstance>)rendered.renderState().get(OVERRIDE_STATS.name()));
             Collections.reverse(overrides);
             StringBuilder sb = new StringBuilder(source);
@@ -331,7 +332,7 @@ public class PageService {
             List<SearchResult> tagPages = namespaceService.
                     filterReadablePages(pageRepository.getByTagname(dbEngine, site, tagName), site, userName).stream().
                     sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
-                    map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
+                    map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).toList();
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
                 Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
                 return Map.of("tag", tagPages.stream().filter(pd -> nsPattern.matcher(pd.namespace()).matches()).toList());
@@ -364,7 +365,7 @@ public class PageService {
     }
 
     SearchResult searchResultFromPlaintext(PageCache pc, List<String> searchTerms) {
-        Optional<String> searchLine = Stream.of(pc.plaintextCache.split("\\\n")).
+        Optional<String> searchLine = Stream.of(pc.plaintextCache.split("\n")).
                 filter(line -> {
                     // Can do something smarter? make prefer if text is a word of its own?
                     String lowerLine = line.toLowerCase();

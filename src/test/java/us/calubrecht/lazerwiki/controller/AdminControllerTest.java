@@ -7,6 +7,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.*;
@@ -21,13 +24,16 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static us.calubrecht.lazerwiki.controller.MvcTestUtil.unauthorized;
 
 @WebMvcTest(controllers = {AdminController.class, VersionController.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
+@EnableMethodSecurity(proxyTargetClass = true)
 class AdminControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -73,8 +79,8 @@ class AdminControllerTest {
         this.mockMvc.perform(post("/api/admin/regenLinkTable/default").principal(new UsernamePasswordAuthenticationToken("celia", ""))).
                 andExpect(status().isOk());
         verify(regenCacheService, times(2)).regenLinks("default");
-        this.mockMvc.perform(post("/api/admin/regenLinkTable/default").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(mockMvc, post("/api/admin/regenLinkTable/default").principal(new UsernamePasswordAuthenticationToken("frank", "")));
+
         verify(regenCacheService, times(2)).regenLinks("default");
     }
 
@@ -95,8 +101,7 @@ class AdminControllerTest {
         this.mockMvc.perform(post("/api/admin/regenCacheTable/default").principal(new UsernamePasswordAuthenticationToken("celia", ""))).
                 andExpect(status().isOk());
         verify(regenCacheService, times(2)).regenCache("default");
-        this.mockMvc.perform(post("/api/admin/regenCacheTable/default").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(mockMvc, post("/api/admin/regenCacheTable/default").principal(new UsernamePasswordAuthenticationToken("frank", "")));
         verify(regenCacheService, times(2)).regenCache("default");
     }
 
@@ -120,8 +125,7 @@ class AdminControllerTest {
         this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("Joe", ""))).
                 andExpect(status().isOk()).andExpect(content().json("[{\"userName\":\"Bob\", \"userRoles\":[\"ROLE_ADMIN\", \"ROLE_USER\"]}, {\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}]"));
 
-        this.mockMvc.perform(get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(mockMvc, get("/api/admin/getUsers").principal(new UsernamePasswordAuthenticationToken("frank", "")));
     }
 
     @Test
