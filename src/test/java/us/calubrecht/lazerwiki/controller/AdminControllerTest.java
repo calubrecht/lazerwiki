@@ -8,23 +8,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.*;
-import us.calubrecht.lazerwiki.requests.SiteSettingsRequest;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.SiteSettingsException;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -145,16 +140,14 @@ class AdminControllerTest {
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
 
         // Cannot delete own ADMIN
-        this.mockMvc.perform(delete("/api/admin/role/Bob/ROLE_ADMIN").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, delete("/api/admin/role/Bob/ROLE_ADMIN").principal(new UsernamePasswordAuthenticationToken("Bob", "")));
 
         // But can delete other own roles
         this.mockMvc.perform(delete("/api/admin/role/Bob/ROLE_EXTRA").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Bob\", \"userRoles\":[\"ROLE_ADMIN\"]}"));
 
         // Only Admin can delete
-        this.mockMvc.perform(delete("/api/admin/role/Frank/ROLE_EXTRA").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, delete("/api/admin/role/Frank/ROLE_EXTRA").principal(new UsernamePasswordAuthenticationToken("Frank", "")));
     }
 
     @Test
@@ -173,8 +166,7 @@ class AdminControllerTest {
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
 
         // Only Admin can add role
-        this.mockMvc.perform(put("/api/admin/role/Frank/ROLE_EXTRA").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, put("/api/admin/role/Frank/ROLE_EXTRA").principal(new UsernamePasswordAuthenticationToken("Frank", "")));
     }
 
     @Test
@@ -199,10 +191,9 @@ class AdminControllerTest {
         verify(userService).setSiteRoles(eq("Frank"), eq("site1"), eq(List.of("ROLE_READ:site1:bo")), any());
 
         // Only Admin can add role
-        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Frank", "")).content(
+        unauthorized(this.mockMvc,put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Frank", "")).content(
                 "[\"ROLE_READ:site1:bo\"]"
-                ).contentType(MediaType.APPLICATION_JSON)).
-                andExpect(status().isUnauthorized());
+                ).contentType(MediaType.APPLICATION_JSON));
 
         // Site admin can add for site, but not other site
         this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
@@ -211,20 +202,18 @@ class AdminControllerTest {
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"Frank\", \"userRoles\":[\"ROLE_USER\"]}"));
         verify(userService, times(2)).setSiteRoles(eq("Frank"), eq("site1"), eq(List.of("ROLE_READ:site1:bo")), any());
 
-        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site2").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
+        unauthorized(this.mockMvc,put("/api/admin/roles/Frank/site/site2").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
                         "[\"ROLE_READ:site2:bo\"]"
-                ).contentType(MediaType.APPLICATION_JSON)).
-                andExpect(status().isUnauthorized());
+                ).contentType(MediaType.APPLICATION_JSON));
 
         // And flag invalid roles
-        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
+        unauthorized(this.mockMvc, put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
                         "[\"ROLE_READ:site2:bo\"]"
-                ).contentType(MediaType.APPLICATION_JSON)).
-                andExpect(status().isUnauthorized());
-        this.mockMvc.perform(put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
+                ).contentType(MediaType.APPLICATION_JSON));
+
+        unauthorized(this.mockMvc, put("/api/admin/roles/Frank/site/site1").principal(new UsernamePasswordAuthenticationToken("Joey", "")).content(
                         "[\"ROLE_ADMIN\"]"
-                ).contentType(MediaType.APPLICATION_JSON)).
-                andExpect(status().isUnauthorized());
+                ).contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -244,32 +233,31 @@ class AdminControllerTest {
         regularUser.roles = List.of(new UserRole(adminUser, "ROLE_USER"));
         regularUser.userName = "Frank";
         when(userService.getUser("Frank")).thenReturn(regularUser);
+        GlobalSettings settings = new GlobalSettings();
+        settings.settings = Map.of(GlobalSettings.ENABLE_SELF_REG, false);
+        when(globalSettingsService.getSettings()).thenReturn(settings);
         this.mockMvc.perform(put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"NewUser\", \"userRoles\":[\"ROLE_USER\"]}"));
         this.mockMvc.perform(put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Joe", ""))).
                 andExpect(status().isOk()).andExpect(content().json("{\"userName\":\"NewUser\", \"userRoles\":[\"ROLE_USER\"]}"));
 
         // Only Admin can add user
-        this.mockMvc.perform(put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", "")));
 
         // Cannot add user that already exists
         this.mockMvc.perform(put("/api/admin/user/NewUser").content("{\"userName\": \"NewUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isConflict());
 
         // If enableSelfReg is on, can self register
+        settings.settings = Map.of(GlobalSettings.ENABLE_SELF_REG, true);
         when(userService.getUser(eq("NewerUser"))).thenReturn(null, u);
         when(userService.getUser(eq("NewestUser"))).thenReturn(null, u);
-        GlobalSettings settings = new GlobalSettings();
-        settings.settings = Map.of(GlobalSettings.ENABLE_SELF_REG, true);
-        when(globalSettingsService.getSettings()).thenReturn(settings);
         this.mockMvc.perform(put("/api/admin/user/NewerUser").content("{\"userName\": \"NewerUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON)).
                 andExpect(status().isOk());
 
         // if not, cannot
         settings.settings = Map.of(GlobalSettings.ENABLE_SELF_REG, false);
-        this.mockMvc.perform(put("/api/admin/user/NewestUser").content("{\"userName\": \"NewestUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON)).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, put("/api/admin/user/NewestUser").content("{\"userName\": \"NewestUser\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -299,8 +287,7 @@ class AdminControllerTest {
 
         verify(userService, times(2)).resetPassword("User", "password");
         // Only Admin can add user
-        this.mockMvc.perform(post("/api/admin/passwordReset/User").content("{\"userName\": \"User\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, post("/api/admin/passwordReset/User").content("{\"userName\": \"User\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", "")));
         verify(userService, times(2)).resetPassword("User", "password");
     }
 
@@ -318,9 +305,8 @@ class AdminControllerTest {
                 andExpect(status().isOk());
 
         verify(userService).deleteUser("User", adminUser);
-        // Only Admin can add user
-        this.mockMvc.perform(delete("/api/admin/user/User").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
-                andExpect(status().isUnauthorized());
+        // Only Admin can delete user
+        unauthorized(this.mockMvc, delete("/api/admin/user/User").principal(new UsernamePasswordAuthenticationToken("Frank", "")));
         verify(userService, times(1)).deleteUser(eq("User"), any());
     }
 
@@ -350,8 +336,7 @@ class AdminControllerTest {
         // No for Frank
         // {"siteName":"site1", "displayName":"Site 1", "hostName":"site.com"}
         String content = "{\"name\":\"site1\", \"siteName\":\"Site 1\", \"hostName\":\"site.com\"}";
-        this.mockMvc.perform(put("/api/admin/site/site1").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, put("/api/admin/site/site1").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", "")));
 
         // Creat site fails, don't go an and call create Page
         this.mockMvc.perform(put("/api/admin/site/site1").content(content).contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
@@ -380,8 +365,7 @@ class AdminControllerTest {
         when(siteService.getAllSites(any())).thenReturn(List.of(new Site("OneWiki", "wiki.com", "One Wiki"), new Site("TwoWiki", "wiki2.com", "Two Wiki")));
 
         // No for Frank
-        this.mockMvc.perform(delete("/api/admin/site/site1").principal(new UsernamePasswordAuthenticationToken("Frank", ""))).
-                andExpect(status().isUnauthorized());
+        unauthorized(this.mockMvc, delete("/api/admin/site/site1").principal(new UsernamePasswordAuthenticationToken("Frank", "")));
 
         // Yes forBob
         this.mockMvc.perform(delete("/api/admin/site/site1").principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
@@ -422,11 +406,10 @@ class AdminControllerTest {
         regularUser.roles = List.of(new UserRole(regularUser, "ROLE_USER"));
         when(userService.getUser("Frank")).thenReturn(regularUser);
 
-        this.mockMvc.perform(post("/api/admin/site/settings/TestWiki")
+        unauthorized(this.mockMvc, post("/api/admin/site/settings/TestWiki")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"hostName\":\"wiki.com\", \"siteSettings\":\"new settings\"}")
-                        .principal(new UsernamePasswordAuthenticationToken("Frank", "")))
-                .andExpect(status().isUnauthorized());
+                        .principal(new UsernamePasswordAuthenticationToken("Frank", "")));
 
         // Test exception
         when(siteService.setSiteSettings(eq("TestWiki"), eq("wiki.com"), eq("bad settings"), any()))
@@ -476,11 +459,10 @@ class AdminControllerTest {
         regularUser.roles = List.of(new UserRole(regularUser, "ROLE_USER"));
         when(userService.getUser("Frank")).thenReturn(regularUser);
 
-        this.mockMvc.perform(post("/api/admin/namespace/restrictionType")
+        unauthorized(this.mockMvc, post("/api/admin/namespace/restrictionType")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"site\":\"site1\", \"namespace\":\"ns\", \"restrictionType\": \"OPEN\"}")
-                        .principal(new UsernamePasswordAuthenticationToken("Frank", "")))
-                .andExpect(status().isUnauthorized());
+                        .principal(new UsernamePasswordAuthenticationToken("Frank", "")));
     }
 
     @Test
@@ -519,10 +501,9 @@ class AdminControllerTest {
 
         verify(globalSettingsService).setSettings(settings);
 
-        this.mockMvc.perform(post("/api/admin/globalSettings")
+        unauthorized(this.mockMvc, post("/api/admin/globalSettings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"settings\": {\"Setting1\":\"value1\"}}")
-                        .principal(new UsernamePasswordAuthenticationToken("Jake", "")))
-                .andExpect(status().isUnauthorized());
+                        .principal(new UsernamePasswordAuthenticationToken("Jake", "")));
     }
 }

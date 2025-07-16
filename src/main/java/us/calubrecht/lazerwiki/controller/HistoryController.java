@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
-import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.RecentChangesResponse;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.MediaService;

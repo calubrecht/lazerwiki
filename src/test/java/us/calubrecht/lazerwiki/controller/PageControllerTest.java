@@ -79,7 +79,7 @@ public class PageControllerTest {
         Authentication auth2 = new UsernamePasswordAuthenticationToken("Jack", "password1");
         this.mockMvc.perform(get("/api/page/history/testPage").
                         principal(auth2)).
-                andExpect(status().isUnauthorized());
+                andExpect(status().isForbidden());
 
         this.mockMvc.perform(get("/api/page/history/testPage")).
                 andExpect(status().isOk());
@@ -103,7 +103,7 @@ public class PageControllerTest {
         Authentication auth2 = new UsernamePasswordAuthenticationToken("Jack", "password1");
         this.mockMvc.perform(get("/api/page/diff/testPage/1/2").
                         principal(auth2)).
-                andExpect(status().isUnauthorized());
+                andExpect(status().isForbidden());
 
         this.mockMvc.perform(get("/api/page/diff/testPage/1/2")).
                 andExpect(status().isOk());

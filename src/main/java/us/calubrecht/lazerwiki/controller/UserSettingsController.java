@@ -30,7 +30,7 @@ public class UserSettingsController {
         User user = userService.getUser(principal.getName());
         if (!user.userName.equals(passwordRequest.userName()))
         {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         userService.resetPassword(user.userName, passwordRequest.password());
         return ResponseEntity.ok(new SetPasswordResponse(true, ""));
@@ -49,7 +49,7 @@ public class UserSettingsController {
         User user = userService.getUser(principal.getName());
         if (!user.userName.equals(emailRequest.userName()))
         {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         userService.requestSetEmail(user.userName, url.getHost(), emailRequest.email());
         return ResponseEntity.ok(new SaveEmailResponse(true, ""));

@@ -57,7 +57,7 @@ public class PageController {
         try {
             return ResponseEntity.ok(pageService.getPageHistory(url.getHost(), pageDescriptor.orElse(""), userName));
         } catch (PageReadException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -75,7 +75,7 @@ public class PageController {
         try {
             return ResponseEntity.ok(pageService.getPageDiff(url.getHost(), pageDescriptor.orElse(""), rev1, rev2, userName));
         } catch (PageReadException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 

@@ -65,7 +65,7 @@ class MediaControllerTest {
                 new MediaReadException(""));
         this.mockMvc.perform(get("/_media/forbidden.file").
                         principal(authJoe)).
-                andExpect(status().isUnauthorized());
+                andExpect(status().isForbidden());
     }
 
     @Test
@@ -89,7 +89,7 @@ class MediaControllerTest {
 
         Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
         Mockito.doThrow(new MediaWriteException("")).when(mediaService).saveFile(eq("localhost"), eq("Joe"), eq(mfile), eq("ns"));
-        this.mockMvc.perform(multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(authJoe)).andExpect(status().isUnauthorized());
+        this.mockMvc.perform(multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(authJoe)).andExpect(status().isForbidden());
     }
 
     @Test
@@ -118,7 +118,7 @@ class MediaControllerTest {
 
         Mockito.doThrow(new MediaWriteException("")).when(mediaService).deleteFile(eq("localhost"), eq("unauthfile.jpg"), eq("Joe"));
         Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
-        this.mockMvc.perform(delete("/_media/unauthfile.jpg").principal(authJoe)).andExpect(status().isUnauthorized());
+        this.mockMvc.perform(delete("/_media/unauthfile.jpg").principal(authJoe)).andExpect(status().isForbidden());
     }
 
     @Test

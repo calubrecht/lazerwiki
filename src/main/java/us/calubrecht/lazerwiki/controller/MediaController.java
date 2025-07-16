@@ -13,13 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 import us.calubrecht.lazerwiki.model.MediaHistoryRecord;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.requests.MoveFileRequest;
-import us.calubrecht.lazerwiki.requests.MovePageRequest;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.responses.MoveStatus;
 import us.calubrecht.lazerwiki.service.MediaService;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
-import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -53,7 +51,7 @@ public class MediaController {
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
         } catch (MediaReadException | MediaWriteException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -66,7 +64,7 @@ public class MediaController {
             return ResponseEntity.ok("Upload successful");
         } catch (MediaWriteException e) {
             logger.error("Upload failed because: " +e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -96,7 +94,7 @@ public class MediaController {
             mediaService.deleteFile(url.getHost(), fileName, userName);
             return ResponseEntity.ok().build();
         } catch (MediaWriteException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 

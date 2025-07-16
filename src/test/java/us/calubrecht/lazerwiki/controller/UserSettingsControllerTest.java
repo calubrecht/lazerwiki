@@ -40,7 +40,7 @@ public class UserSettingsControllerTest {
        verify(userService).resetPassword("Bob", "OK");
 
        mockMvc.perform(post("/api/users/setPassword").content("{\"userName\":\"jim\", \"password\":\"OK\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
-                andExpect(status().isUnauthorized());
+                andExpect(status().isForbidden());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class UserSettingsControllerTest {
         verify(userService).requestSetEmail("Bob", "localhost", "bob@super.com");
 
         mockMvc.perform(post("/api/users/saveEmail").content("{\"userName\":\"jim\", \"email\":\"jimbo@super.com\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
-                andExpect(status().isUnauthorized());
+                andExpect(status().isForbidden());
     }
 
     @Test

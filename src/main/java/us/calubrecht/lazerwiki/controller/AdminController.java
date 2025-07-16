@@ -2,10 +2,11 @@ package us.calubrecht.lazerwiki.controller;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.*;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.*;
@@ -56,9 +57,12 @@ public class AdminController {
 
     public boolean hasAdmin(String userName, String site)
     {
-        User user = userService.getUser(userName);
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_ADMIN:" + site);
+        return hasRole(userName, "ROLE_ADMIN", "ROLE_ADMIN:" + site);
+    }
+
+    public boolean hasAdmin(String userName)
+    {
+        return hasRole(userName, "ROLE_ADMIN");
     }
 
     public boolean hasRole(String userName, String... requiredRoles) {
@@ -72,11 +76,17 @@ public class AdminController {
         return false;
     }
 
+    public boolean hasSelfReg() {
+        GlobalSettings settings = globalSettingsService.getSettings();
+        if (!BooleanUtils.isTrue((Boolean) settings.settings.get(GlobalSettings.ENABLE_SELF_REG))) {
+            return false;
+        }
+        return true;
+    }
+
     @PostMapping("regenLinkTable/{site}")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
     public ResponseEntity<Void> regenLinkTable(@PathVariable("site") String site, Principal principal) {
-        User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
         regenCacheService.regenLinks(site);
         return ResponseEntity.ok().build();
     }
@@ -84,8 +94,6 @@ public class AdminController {
     @PostMapping("regenCacheTable/{site}")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
     public ResponseEntity<Void> regenCacheTable(@PathVariable("site") String site, Principal principal) {
-        User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
         regenCacheService.regenCache(site);
         return ResponseEntity.ok().build();
     }
@@ -93,67 +101,45 @@ public class AdminController {
     @GetMapping("getUsers")
     @PreAuthorize("@adminController.hasRole(#principal.getName(), 'ROLE_ADMIN', 'ROLE_USERADMIN')")
     public ResponseEntity<List<UserDTO>> getUsers(Principal principal) {
-        User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
         return ResponseEntity.ok(userService.getUsers());
     }
 
     @DeleteMapping("role/{userName}/{userRole}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName())")
     public ResponseEntity<UserDTO> deleteRole(Principal principal, @PathVariable("userName") String userName, @PathVariable("userRole") String userRole) {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         if (user.userName.equals(userName) && userRole.equals("ROLE_ADMIN")) {
             // Cannot remove your own admin role
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new AuthorizationDeniedException("Cannot remove your own admin role", new AuthorizationDecision(false));
         }
         return ResponseEntity.ok(userService.deleteRole(userName, userRole, user));
     }
 
     @PutMapping("role/{userName}/{userRole}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName())")
     public ResponseEntity<UserDTO> addRole(Principal principal, @PathVariable("userName") String userName, @PathVariable("userRole") String userRole) {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         return ResponseEntity.ok(userService.addRole(userName, userRole, user));
     }
 
     @PutMapping("roles/{userName}/site/{site}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
     public ResponseEntity<UserDTO> setSiteRoles(Principal principal, @PathVariable("userName") String userName, @PathVariable("site") String site, @RequestBody List<String> siteRoles) {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + site)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         if (siteRoles.stream().anyMatch(role -> {
             String[] parts = role.split(":");
             return parts.length != 3 || !parts[1].equals(site);
         })) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new AuthorizationDeniedException("Cannot remove your own admin role", new AuthorizationDecision(false));
         }
         return ResponseEntity.ok(userService.setSiteRoles(userName, site, siteRoles, user));
     }
 
     @PutMapping("user/{userName}")
+    @PreAuthorize("@adminController.hasSelfReg() || #principal != null && @adminController.hasRole(#principal.getName(), 'ROLE_ADMIN', 'ROLE_USERADMIN')")
     public ResponseEntity<?> addUser(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
-        User user = null;
-        if (principal == null) {
-            GlobalSettings settings = globalSettingsService.getSettings();
-            if (!BooleanUtils.isTrue((Boolean) settings.settings.get(GlobalSettings.ENABLE_SELF_REG))) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-        }
-        else {
-            user = userService.getUser(principal.getName());
-            Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-            if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_USERADMIN")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-        }
+        User user = principal == null ? null : userService.getUser(principal.getName());
         if (userService.getUser(userName) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User %s already exists".formatted(userName));
         }
@@ -164,23 +150,16 @@ public class AdminController {
     }
 
     @PostMapping("passwordReset/{userName}")
+    @PreAuthorize("@adminController.hasRole(#principal.getName(), 'ROLE_ADMIN', 'ROLE_USERADMIN')")
     public ResponseEntity<Void> resetPassword(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
-        User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_USERADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         userService.resetPassword(userName, userRequest.password());
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("user/{userName}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName())")
     public ResponseEntity<Void> deleteUser(Principal principal, @PathVariable("userName") String userName) {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         userService.deleteUser(userName, user);
         return ResponseEntity.ok().build();
     }
@@ -192,12 +171,9 @@ public class AdminController {
     }
 
     @PutMapping("site/{siteName}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName())")
     public ResponseEntity<List<Site>> addSite(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteRequest siteRequest) throws PageWriteException, IOException {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         String siteKey = siteRequest.name().toLowerCase();
         if (siteService.addSite(siteKey, siteRequest.hostName(), siteRequest.siteName() )) {
             pageUpdateService.createDefaultSiteHomepage(siteKey, siteRequest.siteName(), user.userName);
@@ -206,12 +182,9 @@ public class AdminController {
     }
 
     @PostMapping("site/settings/{siteName}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #siteName)")
     public ResponseEntity<SiteSettingsResponse> setSiteSettings(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteSettingsRequest siteRequest) throws PageWriteException, IOException {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + siteName)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         try {
             Site site = siteService.setSiteSettings(siteName, siteRequest.hostName(), siteRequest.siteSettings(), user);
             return ResponseEntity.ok(new SiteSettingsResponse(site, true, ""));
@@ -222,23 +195,18 @@ public class AdminController {
     }
 
     @PostMapping("namespace/restrictionType")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #restrictionRequest.site())")
     public ResponseEntity<PageListResponse> setNamespaceRestrictionType(Principal principal, @RequestBody NamespaceRestrictionRequest restrictionRequest) throws PageWriteException, IOException {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN") && !roles.contains("ROLE_ADMIN:" + restrictionRequest.site())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         namespaceService.setNSRestriction(restrictionRequest.site(), restrictionRequest.namespace(), restrictionRequest.restrictionType());
         return ResponseEntity.ok(pageService.getAllNamespaces(restrictionRequest.site(), user.userName));
     }
 
     @DeleteMapping("site/{siteName}")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName())")
     public ResponseEntity<List<Site>> deleteSite(Principal principal, @PathVariable("siteName") String siteName) throws PageWriteException, IOException, MediaWriteException {
         User user = userService.getUser(principal.getName());
         Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         siteDelService.deleteSiteCompletely(siteName, principal.getName());
         return ResponseEntity.ok(siteService.getAllSites(user));
     }
@@ -249,12 +217,8 @@ public class AdminController {
     }
 
     @PostMapping("globalSettings")
+    @PreAuthorize("@adminController.hasAdmin(#principal.getName())")
     public ResponseEntity<CommonResponse> setGlobalSettings(Principal principal, @RequestBody GlobalSettings settings) {
-        User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
-        if (!roles.contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         globalSettingsService.setSettings(settings);
         return ResponseEntity.ok(new CommonResponse(true, null));
     }
