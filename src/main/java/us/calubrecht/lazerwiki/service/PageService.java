@@ -375,7 +375,7 @@ public class PageService {
                         }
                     }
                     return false;
-                }).map(line -> StringEscapeUtils.escapeHtml4(line).replaceAll("&quot;", "\"")).findFirst();
+                }).findFirst();
         return new SearchResult(pc.getNamespace(), pc.getPagename(), pc.getTitle(), searchLine.orElse(null));
     }
 

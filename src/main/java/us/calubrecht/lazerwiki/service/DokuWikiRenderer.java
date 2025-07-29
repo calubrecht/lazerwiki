@@ -119,7 +119,7 @@ public class DokuWikiRenderer implements IMarkupRenderer {
         }
         // Remove trailing new line
         outBuffer.deleteCharAt(outBuffer.length() -1);
-        return TreeRenderer.sanitize(outBuffer.toString());
+        return outBuffer.toString();
     }
 
 }

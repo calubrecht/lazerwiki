@@ -163,4 +163,12 @@ public class DokuWikiRendererPlaintextTest {
         source = "-----";
         assertEquals("-----", doRender(source));
     }
+
+    @Test
+    public void testHtmlEntities() {
+        String source="<Ä   #";
+
+        // Plaintext renderer should not replace with entities
+        assertEquals(source, doRender(source));
+    }
 }
