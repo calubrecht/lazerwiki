@@ -1,3 +1,7 @@
+CREATE DATABASE `lazerwiki` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+
+USE lazerwiki;
+
 CREATE TABLE `page_ids` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	PRIMARY KEY (`id`) USING BTREE
@@ -10,11 +14,11 @@ CREATE TABLE `sites` (
 	`name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`hostname` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
 	`siteName` VARCHAR(200) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`settings` JSON NOT NULL DEFAULT '{}' COLLATE 'utf8mb4_bin',
+	`settings` JSON NOT NULL DEFAULT '{}' ,
 	PRIMARY KEY (`name`) USING BTREE,
 
 	UNIQUE INDEX `HostnameIdx` (`hostname`) USING BTREE,
-	UNIQUE INDEX `SitenameIdx` (`siteName`) USING BTREE,
+	UNIQUE INDEX `SitenameIdx` (`siteName`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -39,8 +43,7 @@ CREATE TABLE `userRole` (
   `userId` INT(11),
 	`role` VARCHAR(150) NOT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
-	INDEX `FK_USER` (`userName`) USING BTREE,
-  CONSTRAINT userRole_userRecord_FK FOREIGN KEY (userId) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
+  CONSTRAINT userRole_userRecord_FK FOREIGN KEY (userId) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -51,9 +54,9 @@ CREATE TABLE `page` (
 	`revision` INT(11) NOT NULL,
 	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`namespace` VARCHAR(50) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
-	`pagename` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
-	`text` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`title` VARCHAR(200) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`pagename` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+	`text` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NULL DEFAULT NULL,
+	`title` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
 	`modified` DATETIME NULL DEFAULT current_timestamp(),
 	`validTS` DATETIME NULL DEFAULT '9999-12-31 00:00:00' ON UPDATE current_timestamp(),
   `modifiedBy` INT NULL,
@@ -61,7 +64,7 @@ CREATE TABLE `page` (
 	PRIMARY KEY (`id`, `revision`) USING BTREE,
 	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`, `validTS`) USING BTREE,
 	CONSTRAINT `FK_ID` FOREIGN KEY (`id`) REFERENCES `page_ids` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT page_userRecord_FK FOREIGN KEY (modifiedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE;
+  CONSTRAINT page_userRecord_FK FOREIGN KEY (modifiedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `FK_SITE` FOREIGN KEY (`site`) REFERENCES sites (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
@@ -78,7 +81,7 @@ CREATE TABLE `pageLock` (
  	PRIMARY KEY (`site`, `namespace`, `pagename`) USING BTREE,
  	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`) USING BTREE,
  	INDEX `pageLockId` (`lockId`) USING BTREE,
-  CONSTRAINT pageLock_userRecord_FK FOREIGN KEY (owner) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
+  CONSTRAINT pageLock_userRecord_FK FOREIGN KEY (owner) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_LOCK_SITE` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
  )
  COLLATE='latin1_swedish_ci'
@@ -99,7 +102,7 @@ CREATE TABLE `mediaRecord` (
 	INDEX `FKmr_site` (`site`) USING BTREE,
 	INDEX `FKmr_uploadedBy` (`uploadedBy`) USING BTREE,
 	CONSTRAINT `FKmr_site` FOREIGN KEY (`site`) REFERENCES `sites` (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT mediaRecord_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE;
+  CONSTRAINT mediaRecord_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -140,7 +143,7 @@ CREATE TABLE mediaHistory (
 	INDEX mediaHistory_site_IDX (site,ts) USING BTREE,
 	CONSTRAINT mediaHistory_pk PRIMARY KEY (id),
 	CONSTRAINT mediaHistory_sites_FK FOREIGN KEY (site) REFERENCES sites(hostname) ON DELETE RESTRICT ON UPDATE RESTRICT,
-	CONSTRAINT mediaHistory_activityType_FK FOREIGN KEY (`action`) REFERENCES activityType(activityTypeId) ON DELETE RESTRICT ON UPDATE CASCADE
+	CONSTRAINT mediaHistory_activityType_FK FOREIGN KEY (`action`) REFERENCES activityType(activityTypeId) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT mediaHistory_userRecord_FK FOREIGN KEY (uploadedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE
 )
 ENGINE=InnoDB
@@ -178,7 +181,7 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
-CREATE VIEW knownNamespaces as select distinct site, namespace from `page` union select distinct site, namespace from `mediarecord` union select distinct site, namespace AS `namespace` from `namespace`;
+CREATE VIEW knownNamespaces as select distinct site, namespace from `page` union select distinct site, namespace from `mediaRecord` union select distinct site, namespace AS `namespace` from `namespace`;
 
 CREATE TABLE `tag` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -250,11 +253,11 @@ ENGINE=InnoDB
 CREATE TABLE `pageCache` (
 	`site` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`namespace` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`pageName` VARCHAR(200) NOT NULL COLLATE 'latin1_swedish_ci',
-	`title` VARCHAR(200) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`renderedCache` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`plaintextCache` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`source` LONGTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`pageName` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+	`title` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+	`renderedCache` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+	`plaintextCache` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+	`source` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NULL DEFAULT NULL,
 	`useCache` BIT(1) NOT NULL DEFAULT b'1',
 	PRIMARY KEY (`site`, `namespace`, `pageName`) USING BTREE,
 	FULLTEXT INDEX `PageCachePlaintextSearch` (`plaintextCache`),
@@ -287,14 +290,14 @@ CREATE TABLE `verificationToken` (
   `expiry` datetime NOT NULL DEFAULT (current_timestamp() + interval 15 minute),
   PRIMARY KEY (`id`),
   KEY `verificationToken_userRecord_FK` (`user`),
-  CONSTRAINT verificationToken_userRecord_FK FOREIGN KEY (`user`) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE;
+  CONSTRAINT verificationToken_userRecord_FK FOREIGN KEY (`user`) REFERENCES userRecord(userId) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 CREATE TABLE `activityLog` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `activityType` int(11) NOT NULL,
   `site` varchar(50) DEFAULT NULL,
-  `target` varchar(500) NOT NULL,
+  `target` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user` int(11) DEFAULT NULL,
   `timestamp` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),

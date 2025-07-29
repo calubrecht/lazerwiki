@@ -1,3 +1,5 @@
+USE LAZERWIKI;
+
 -- Remove existing foreign keys to userRecord
 ALTER TABLE mediaRecord DROP FOREIGN KEY FKmr_uploadedBy;
 ALTER TABLE page DROP FOREIGN KEY FK_MODIFIEDBY;
@@ -133,3 +135,26 @@ CREATE VIEW activityLogView as
   SELECT al.timestamp, t.fullDesc, al.site, al.target, u.userName FROM `activityLog` al
   inner join `activityType` t on al.activityType = t.activityTypeId
   left join userRecord u on al.user = u.userId order by al.timestamp DESC;
+
+
+-- Change character set for text fields to utf8
+ALTER DATABASE `lazerwiki`
+DEFAULT CHARACTER SET utf8mb4
+DEFAULT COLLATE utf8mb4_general_ci;
+
+ALTER TABLE activityLog MODIFY COLUMN target varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+ALTER TABLE page MODIFY COLUMN text mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL;
+ALTER TABLE page MODIFY COLUMN title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL;
+ALTER TABLE pageCache MODIFY COLUMN source mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL;
+ALTER TABLE pageCache MODIFY COLUMN renderedCache mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+ALTER TABLE pageCache MODIFY COLUMN plaintextCache mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+
+ALTER TABLE lazerwiki.pageCache DROP FOREIGN KEY FK_pageCache_page;
+ALTER TABLE lazerwiki.pageCache DROP INDEX PageCachePageNameSearch;
+ALTER TABLE page MODIFY COLUMN pageName VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+ALTER TABLE pageCache MODIFY COLUMN pageName VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+ALTER TABLE pageCache MODIFY COLUMN title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL;
+CREATE FULLTEXT INDEX PageCachePageNameSearch ON lazerwiki.pageCache (pageName,title);
+ALTER TABLE lazerwiki.pageCache ADD CONSTRAINT FK_pageCache_page FOREIGN KEY (site,namespace,pageName) REFERENCES lazerwiki.page(site,namespace,pagename) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+

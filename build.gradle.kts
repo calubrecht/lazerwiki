@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "1.0.6.1"
+version = "1.0.6.2"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
