@@ -365,11 +365,18 @@ public class PageServiceTest {
         results = pageService.searchPages("host1", "bob",Map.of("text","banana", "ns", "ns"));
         assertEquals(1, results.get("title").size());
         assertEquals(1, results.get("text").size());
+        assertEquals("All your bananas", results.get("text").get(0).resultLine());
 
         // If asterix specifically applied
         results = pageService.searchPages("host1", "bob","text:banana*");
         assertEquals(2, results.get("title").size());
         assertEquals(2, results.get("text").size());
+
+        // If full search term exists
+        results = pageService.searchPages("host1", "bob", "text:banana thief");
+        assertEquals(2, results.get("title").size());
+        assertEquals(2, results.get("text").size());
+        assertEquals("The banana thief", results.get("text").get(1).resultLine());
 
     }
 
