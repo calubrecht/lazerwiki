@@ -365,12 +365,26 @@ public class PageServiceTest {
         results = pageService.searchPages("host1", "bob",Map.of("text","banana", "ns", "ns"));
         assertEquals(1, results.get("title").size());
         assertEquals(1, results.get("text").size());
+        assertEquals("All your bananas", results.get("text").get(0).resultLine());
 
         // If asterix specifically applied
         results = pageService.searchPages("host1", "bob","text:banana*");
         assertEquals(2, results.get("title").size());
         assertEquals(2, results.get("text").size());
 
+        // If full search term exists
+        results = pageService.searchPages("host1", "bob", "text:banana thief");
+        assertEquals(2, results.get("title").size());
+        assertEquals(2, results.get("text").size());
+        assertEquals("The banana thief", results.get("text").get(1).resultLine());
+
+        PageCache page3 = new PageCache("site1", "ns", "page2", "Page2", "", "The dog is there\nall the dogs are me\nThe cow lives", false);
+        when(namespaceService.filterReadablePages(any(), eq("site1"), eq("jay"))).thenReturn(List.of(page3));
+        when(pageCacheRepository.searchByText(any(),eq("site1"), eq("the cow"))).thenReturn(List.of(page3));
+        results = pageService.searchPages("host1", "jay", "text:the cow");
+        assertEquals(1, results.get("title").size());
+        assertEquals(1, results.get("text").size());
+        assertEquals("The cow lives", results.get("text").get(0).resultLine());
     }
 
     @Test

@@ -347,7 +347,7 @@ public class PageService {
                     map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
             List<SearchResult> textPages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(dbEngine, site, searchTerm)), site, userName).stream().
-                    map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchLower.split(" ")))).collect(Collectors.toList());
+                    map(pc -> searchResultFromPlaintext((PageCache)pc, searchLower)).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
                 Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
                 titlePages = titlePages.stream().filter(pd -> nsPattern.matcher(pd.namespace()).matches()).toList();
@@ -362,18 +362,28 @@ public class PageService {
         return Stream.of(terms.split(" ")).map(term -> !term.endsWith("*") ? term + "*" : term).collect(Collectors.joining(" "));
     }
 
-    SearchResult searchResultFromPlaintext(PageCache pc, List<String> searchTerms) {
+    SearchResult searchResultFromPlaintext(PageCache pc, String search) {
+        // Check full term first
         Optional<String> searchLine = Stream.of(pc.plaintextCache.split("\n")).
                 filter(line -> {
                     // Can do something smarter? make prefer if text is a word of its own?
                     String lowerLine = line.toLowerCase();
-                    for (String term: searchTerms) {
-                        if (lowerLine.contains(term)) {
-                            return true;
-                        }
-                    }
-                    return false;
+                    return lowerLine.contains(search);
                 }).findFirst();
+        List<String> searchTerms = List.of(search.split(" "));
+        if (searchLine.isEmpty()) {
+            searchLine = Stream.of(pc.plaintextCache.split("\n")).
+                    filter(line -> {
+                        // Can do something smarter? make prefer if text is a word of its own?
+                        String lowerLine = line.toLowerCase();
+                        for (String term: searchTerms) {
+                            if (lowerLine.contains(term)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }).findFirst();
+        }
         return new SearchResult(pc.getNamespace(), pc.getPagename(), pc.getTitle(), searchLine.orElse(null));
     }
 
