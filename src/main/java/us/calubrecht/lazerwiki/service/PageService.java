@@ -344,11 +344,9 @@ public class PageService {
             String searchLower = searchTerms.get("text").toLowerCase();
             List<SearchResult> titlePages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(dbEngine, site, searchTerm)), site, userName).stream().
-                    sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
                     map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
             List<SearchResult> textPages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(dbEngine, site, searchTerm)), site, userName).stream().
-                    sorted(Comparator.comparing(p -> p.getNamespace() + ":" + p.getPagename())).
                     map(pc -> searchResultFromPlaintext((PageCache)pc, List.of(searchLower.split(" ")))).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
                 Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));
