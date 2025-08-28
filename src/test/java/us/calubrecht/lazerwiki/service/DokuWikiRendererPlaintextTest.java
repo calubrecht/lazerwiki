@@ -134,6 +134,9 @@ public class DokuWikiRendererPlaintextTest {
 
         assertEquals("line1\n\nline2with some title text",
                 doRender("<hidden>line1\n\nline2{{animage|with some title text}}</hidden>"));
+
+        String namedHidden = "<hidden name=\"Bark\">Something in  here</hidden>";
+        assertEquals("Bark:Something in  here", doRender(namedHidden));
     }
 
     @Test

@@ -9,6 +9,8 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class HiddenRenderer extends TreeRenderer {
@@ -34,22 +36,52 @@ public class HiddenRenderer extends TreeRenderer {
 
     }
 
+    String getNamedStartTags(String name) {
+        String id = getId();
+        return "<div class=\"hidden\"><input id=\"" + id + "\" class=\"toggle\" type=\"checkbox\">"+
+                "<label for=\"" + id + "\" class=\"hdn-toggle\" data-named=\"true\">" + name + "</label>"
+                + "<div class=\"collapsible\">";
+
+    }
+
     String getId() {
         return "hiddenToggle" + randomService.nextInt();
     }
 
+
+    Pattern namePattern = Pattern.compile("\s*name=\"(.*)\"\s*");
+    String getName(String attributes) {
+        Matcher m = namePattern.matcher(attributes);
+        if (!m.matches()) {
+            return "";
+        }
+        return sanitize(m.group(1));
+    }
+
     public StringBuilder render(ParseTree tree, RenderContext renderContext) {
+        DokuwikiParser.HiddenContext hiddenTree = (DokuwikiParser.HiddenContext)tree;
         StringBuilder sb = new StringBuilder();
-        sb.append(getStartTags());
-        sb.append(renderChildren(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
+        String name = getName(hiddenTree.hidden_attributes().getText());
+        if (name.isEmpty()) {
+            sb.append(getStartTags());
+        }
+        else {
+            sb.append(getNamedStartTags(name));
+        }
+        sb.append(renderChildren(List.of(hiddenTree.hidden_contents()), renderContext));
         sb.append(endTag);
         return sb;
     }
 
     @Override
     public StringBuilder renderToPlainText(ParseTree tree, RenderContext renderContext) {
+        DokuwikiParser.HiddenContext hiddenTree = (DokuwikiParser.HiddenContext)tree;
         StringBuilder sb = new StringBuilder();
-        sb.append(renderChildrenToPlainText(getChildren(tree, 1, tree.getChildCount()-1), renderContext));
+        String name = getName(hiddenTree.hidden_attributes().getText());
+        if (!name.isEmpty()) {
+            sb.append(name).append(":");
+        }
+        sb.append(renderChildrenToPlainText(List.of(hiddenTree.hidden_contents()), renderContext));
         return sb;
     }
 }

@@ -57,7 +57,7 @@ UNFORMAT_TOKEN: '%%' ;
 UNFORMAT_TAG_START: '<nowiki>';
 UNFORMAT_TAG_END: '</nowiki>';
 
-HIDDEN_START: '<hidden>';
+HIDDEN_START: '<hidden';
 HIDDEN_END: '</hidden>';
 
 CHARACTER
@@ -255,8 +255,16 @@ blockquote:
   ( BLOCKQUOTE_START+ WS? (line | WS+)?) NEWLINE
   ;
 
+hidden_attributes :
+  all_char*
+  ;
+
+hidden_contents :
+  ( header | row | line | just_newline | code_box | blockquote  )*
+;
+
 hidden:
-  HIDDEN_START ( header | row | line | just_newline | code_box | blockquote  )* HIDDEN_END
+  HIDDEN_START hidden_attributes '>' hidden_contents HIDDEN_END
   ;
 
 horizontal_rule:

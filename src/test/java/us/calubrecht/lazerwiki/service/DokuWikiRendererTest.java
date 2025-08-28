@@ -617,12 +617,18 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testHidden() {
-        when(randomService.nextInt()).thenReturn(5,8);
-        String inputBlockquote = "<hidden>simple</hidden>";
-        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle5\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle5\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">simple</div></div>", doRender(inputBlockquote));
+        when(randomService.nextInt()).thenReturn(5,8, 7, 11);
+        String hidden = "<hidden>simple</hidden>";
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle5\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle5\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">simple</div></div>", doRender(hidden));
 
         assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle8\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle8\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><div>line1</div>\nline2<img src=\"/_media/animage\" class=\"media\" loading=\"lazy\"></div></div>",
                 doRender("<hidden>line1\n\nline2{{animage}}</hidden>"));
+
+        String namedHidden = "<hidden name=\"Bark\">Something in  here</hidden>";
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle7\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle7\" class=\"hdn-toggle\" data-named=\"true\">Bark</label><div class=\"collapsible\">Something in  here</div></div>", doRender(namedHidden));
+
+        String unknownAttr = "<hidden fling=\"Bark\">Something in  here</hidden>";
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">Something in  here</div></div>", doRender(unknownAttr));
     }
 
     @Test
