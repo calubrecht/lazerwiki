@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service.renderhelpers.doku;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
+import org.hibernate.grammars.hql.HqlParser;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.AdditiveTreeRenderer;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -77,8 +78,9 @@ public abstract class ListRenderer extends AdditiveTreeRenderer {
     public StringBuilder render(ParseTree tree, RenderContext renderContext) {
         String value = null;
         StringBuilder sb = new StringBuilder();
-        if (tree.getChild(2).getText().equals("{{")) {
-            sb.append("<li value=\"").append(tree.getChild(3).getText()).append("\">");
+        DokuwikiParser.Olist_itemContext olist = tree instanceof DokuwikiParser.Olist_itemContext ? (DokuwikiParser.Olist_itemContext)tree : null;
+        if (olist != null && olist.image() != null) {
+            sb.append("<li value=\"").append(olist.image().inner_text(0).getText()).append("\">");
         }
         else {
             sb.append("<li>");
