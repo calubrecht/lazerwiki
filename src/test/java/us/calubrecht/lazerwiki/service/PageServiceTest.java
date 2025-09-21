@@ -388,6 +388,44 @@ public class PageServiceTest {
     }
 
     @Test
+    public void testSearchTextDeprioritizeThe() {
+        PageCache page1 = new PageCache("site1", "", "page1", "Page 1", "", "The rock is old\nThe rock is very old\nmight be a granite", false);
+        List<PageCache> pages = List.of(page1);
+        List<PageDesc> pagesDesc = List.of(page1);
+        when(pageCacheRepository.searchByTitle(any(), any(), any())).thenReturn(List.of());
+        when(pageCacheRepository.searchByText(any(), any(), any())).thenReturn(pages);
+        when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
+        when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenAnswer(inv ->
+        {
+            return (List<PageDesc>)inv.getArgument(0);
+        });
+
+        Map<String, List<SearchResult>> results = pageService.searchPages("host1", "bob","text:The granite");
+        assertEquals(0, results.get("title").size());
+        assertEquals(1, results.get("text").size());
+        assertEquals("might be a granite", results.get("text").get(0).resultLine());
+
+        results = pageService.searchPages("host1", "bob","text:The");
+        assertEquals(1, results.get("text").size());
+        assertEquals("The rock is old", results.get("text").get(0).resultLine());
+
+        results = pageService.searchPages("host1", "bob","text:The cowboy");
+        assertEquals(1, results.get("text").size());
+        assertEquals("The rock is old", results.get("text").get(0).resultLine());
+
+        results = pageService.searchPages("host1", "bob","text:The cowboy");
+        assertEquals(1, results.get("text").size());
+        assertEquals("The rock is old", results.get("text").get(0).resultLine());
+
+        pageService.searchPages("host1", "bob","text:The sword");
+        verify(pageCacheRepository).searchByTitle(any(), any(), eq("sword*"));
+
+        verify(pageCacheRepository, times(1)).searchByTitle(any(), any(), eq("The*"));
+        pageService.searchPages("host1", "bob","text:The");
+        verify(pageCacheRepository, times(2)).searchByTitle(any(), any(), eq("The*"));
+    }
+
+    @Test
     public void testUnsupportedSearch() {
         when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
         Map<String, String> searchTerms = Map.of("fullText","Test");

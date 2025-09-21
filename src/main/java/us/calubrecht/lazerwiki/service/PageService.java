@@ -341,9 +341,10 @@ public class PageService {
         }
         else if (searchTerms.containsKey("text")) {
             String searchTerm = prepareSearchTerm(searchTerms.get("text"));
+            String titleSearchTerm = prepareTitleSearchTerm(searchTerms.get("text"));
             String searchLower = searchTerms.get("text").toLowerCase();
             List<SearchResult> titlePages = namespaceService.
-                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(dbEngine, site, searchTerm)), site, userName).stream().
+                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(dbEngine, site, titleSearchTerm)), site, userName).stream().
                     map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
             List<SearchResult> textPages = namespaceService.
                     filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(dbEngine, site, searchTerm)), site, userName).stream().
@@ -362,6 +363,21 @@ public class PageService {
         return Stream.of(terms.split(" ")).map(term -> !term.endsWith("*") ? term + "*" : term).collect(Collectors.joining(" "));
     }
 
+    String prepareTitleSearchTerm(String terms) {
+        List<String> rawTerms = Stream.of(terms.split(" ")).toList();
+        List<String> searchTerms = rawTerms.stream().filter(term ->
+                !(List.of("a", "the").contains(term.toLowerCase()))).toList();
+        searchTerms = searchTerms.isEmpty() ? rawTerms : searchTerms;
+        return searchTerms.stream().map(term -> !term.endsWith("*") ? term + "*" : term).collect(Collectors.joining(" "));
+    }
+
+    List<List<String>> prioritizeSearchTerms(List<String> originalSearchTerms) {
+        // Could be configurable, what terms to deprioritize.
+        List<String> priorityTerms = originalSearchTerms.stream().filter(term ->
+                !(List.of("a", "the").contains(term.toLowerCase()))).toList();
+        return List.of(priorityTerms, originalSearchTerms);
+    }
+
     SearchResult searchResultFromPlaintext(PageCache pc, String search) {
         // Check full term first
         Optional<String> searchLine = Stream.of(pc.plaintextCache.split("\n")).
@@ -370,19 +386,25 @@ public class PageService {
                     String lowerLine = line.toLowerCase();
                     return lowerLine.contains(search);
                 }).findFirst();
-        List<String> searchTerms = List.of(search.split(" "));
         if (searchLine.isEmpty()) {
-            searchLine = Stream.of(pc.plaintextCache.split("\n")).
-                    filter(line -> {
-                        // Can do something smarter? make prefer if text is a word of its own?
-                        String lowerLine = line.toLowerCase();
-                        for (String term: searchTerms) {
-                            if (lowerLine.contains(term)) {
-                                return true;
+            List<String> searchTerms = List.of(search.split(" "));
+            List<List<String>> priorityList = prioritizeSearchTerms(searchTerms);
+            for (List<String> terms : priorityList) {
+                searchLine = Stream.of(pc.plaintextCache.split("\n")).
+                        filter(line -> {
+                            // Can do something smarter? make prefer if text is a word of its own?
+                            String lowerLine = line.toLowerCase();
+                            for (String term: terms) {
+                                if (lowerLine.contains(term)) {
+                                    return true;
+                                }
                             }
-                        }
-                        return false;
-                    }).findFirst();
+                            return false;
+                        }).findFirst();
+                if (searchLine.isPresent()) {
+                    break;
+                }
+            }
         }
         return new SearchResult(pc.getNamespace(), pc.getPagename(), pc.getTitle(), searchLine.orElse(null));
     }
