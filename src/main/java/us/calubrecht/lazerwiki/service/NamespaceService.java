@@ -50,7 +50,7 @@ public class NamespaceService {
             return parentNS == null || canReadNamespace(site, parentNS, userName);
         }
 
-        Set<Namespace.RESTRICTION_TYPE> readable = Set.of(Namespace.RESTRICTION_TYPE.OPEN, Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED);
+        Set<Namespace.RESTRICTION_TYPE> readable = Set.of(Namespace.RESTRICTION_TYPE.OPEN, Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, Namespace.RESTRICTION_TYPE.GUEST_WRITABLE);
         if (readable.contains(nsObj.restriction_type)) {
             return true;
         }
@@ -69,13 +69,16 @@ public class NamespaceService {
     }
 
     public boolean canWriteNamespace(String site, String namespace, String userName) {
-        if (User.isGuest(userName)) {
-            return false;
-        }
         Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
         if (nsObj == null ) {
             String parentNS = parentNamespace(namespace);
-            return parentNS == null || canWriteNamespace(site, parentNS, userName);
+            if (parentNS == null) {
+                return !User.isGuest(userName);
+            }
+            return canWriteNamespace(site, parentNS, userName);
+        }
+        if (User.isGuest(userName)) {
+            return nsObj.restriction_type == Namespace.RESTRICTION_TYPE.GUEST_WRITABLE;
         }
 
         if (nsObj.restriction_type == Namespace.RESTRICTION_TYPE.OPEN) {

@@ -38,6 +38,8 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
+INSERT INTO `userRecord` (`userName`, `passwordHash`) VALUES ('Guest', '');
+
 CREATE TABLE `userRole` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
   `userId` INT(11),
@@ -163,7 +165,8 @@ ENGINE=InnoDB
 INSERT INTO `ns_restriction_types` (`type`) VALUES
 	('OPEN'),
 	('READ_RESTRICTED'),
-	('WRITE_RESTRICTED');
+	('WRITE_RESTRICTED'),
+	('GUEST_WRITABLE');
 
 
 CREATE TABLE `namespace` (

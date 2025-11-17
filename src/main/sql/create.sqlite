@@ -25,6 +25,8 @@ CREATE UNIQUE INDEX "USERRECORD_USERNAME" ON "userRecord" (
 	"userName"
 );
 
+INSERT INTO `userRecord` (`userName`, `passwordHash`) VALUES ('Guest', '');
+
 CREATE TABLE "page" (
 	"id"	INTEGER NOT NULL,
 	"revision"	INTEGER NOT NULL,
@@ -140,7 +142,8 @@ CREATE TABLE "ns_restriction_types" (
 INSERT INTO `ns_restriction_types` (`type`) VALUES
 	('OPEN'),
 	('READ_RESTRICTED'),
-	('WRITE_RESTRICTED');
+	('WRITE_RESTRICTED'),
+	('GUEST_WRITABLE');
 
 
 CREATE TABLE "namespace" (

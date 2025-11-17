@@ -345,4 +345,28 @@ public class NamespaceServiceTest {
         assertEquals("singleNS", underTest.joinNS("", "singleNS"));
         assertEquals("ns:nestedNS", underTest.joinNS("ns", "nestedNS"));
     }
+
+    @Test
+    public void testCanWriteGuest() {
+        Namespace nsObj3 = new Namespace();
+        nsObj3.id = 5L;
+        nsObj3.site = "site1";
+        nsObj3.namespace ="ns3";
+        nsObj3.restriction_type = Namespace.RESTRICTION_TYPE.OPEN;
+
+        when(namespaceRepository.findBySiteAndNamespace("site1", "ns3")).thenReturn(nsObj3);
+        Namespace nsObjGuestWritable = new Namespace();
+        nsObjGuestWritable.id = 5L;
+        nsObjGuestWritable.site = "site1";
+        nsObjGuestWritable.namespace ="guestWritable";
+        nsObjGuestWritable.restriction_type = Namespace.RESTRICTION_TYPE.GUEST_WRITABLE;
+
+        when(namespaceRepository.findBySiteAndNamespace("site1", "guestWritable")).thenReturn(nsObjGuestWritable);
+        assertFalse(underTest.canWriteNamespace("site1", "ns3", null));
+        assertFalse(underTest.canWriteNamespace("site1", "basicNS", null));
+        assertTrue(underTest.canWriteNamespace("site1", "guestWritable", null));
+
+        assertTrue(underTest.canReadNamespace("site1", "guestWritable", null));
+
+    }
 }

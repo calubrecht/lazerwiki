@@ -70,6 +70,9 @@ public class WebSecurityConfig {
                                             new AntPathRequestMatcher("/*", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/assets/*", HttpMethod.GET.toString()),
                                             new AntPathRequestMatcher("/page/*", HttpMethod.GET.toString()),
+                                            new AntPathRequestMatcher("/api/page/savePage", HttpMethod.POST.toString()),
+                                            new AntPathRequestMatcher("/api/page/*/savePage", HttpMethod.POST.toString()),
+                                            new AntPathRequestMatcher("/api/page/lock/**", HttpMethod.POST.toString()),
                                             // Ignore for CORS requests
                                             new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.toString()),
                                             createAdminMatcher).permitAll().

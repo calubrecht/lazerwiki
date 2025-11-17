@@ -158,3 +158,6 @@ CREATE FULLTEXT INDEX PageCachePageNameSearch ON lazerwiki.pageCache (pageName,t
 ALTER TABLE lazerwiki.pageCache ADD CONSTRAINT FK_pageCache_page FOREIGN KEY (site,namespace,pageName) REFERENCES lazerwiki.page(site,namespace,pagename) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 
+INSERT INTO `userRecord` (`userName`, `passwordHash`) VALUES ('Guest', '');
+
+INSERT INTO `ns_restriction_types` (`type`) VALUES ('GUEST_WRITABLE');
