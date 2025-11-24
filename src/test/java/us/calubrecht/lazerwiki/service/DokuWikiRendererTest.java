@@ -595,6 +595,12 @@ public class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderTableWithBraces() {
+        String inputTable = "|<some thing>|<or else>|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>&lt;some thing&gt;</td><td>&lt;or else&gt;</td></tr>\n</tbody></table>", doRender(inputTable));
+    }
+
+    @Test
     public void testRenderBlockquote() {
         String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
         assertEquals("<blockquote> One quote <span class=\"bold\">with some bold</span>\n<br>And\n<br><blockquote>Another layer of quote\n</blockquote></blockquote>", doRender(inputBlockquote));

@@ -13,8 +13,7 @@ import java.util.Set;
 @Component
 public class TableRenderer extends FlatteningRenderer {
     final Set<Class<? extends ParseTree>> treesToFlatten = Set.of(
-            DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class,
-            DokuwikiParser.Inner_textContext.class, DokuwikiParser.Inner_text_nowsstartContext.class);
+            DokuwikiParser.LineContext.class, DokuwikiParser.Line_itemContext.class);
 
     static final Set<String> DATA_TAGS = Set.of("|", "^");
 
