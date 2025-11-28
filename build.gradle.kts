@@ -6,10 +6,11 @@ plugins {
 	id("org.springframework.boot") version "3.3.2"
 	id("io.spring.dependency-management") version "1.1.3"
 	id("com.github.jk1.dependency-license-report") version "2.5"
+    `maven-publish`
 }
 
 group = "us.calubrecht"
-version = "1.1.1.1"
+version = "1.1.1.2"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -99,10 +100,17 @@ tasks.register<Jar>("localMacroJar") {
 	from(sourceSets.main.get().output).include("localMacros/**")
 }
 
-
-tasks.build {
-	dependsOn(tasks.getByName("macroApiJar"))
+tasks.register<Jar>("macroApiSourceJar") {
+    manifest {
+        attributes("Implementation-Version" to archiveVersion)
+    }
+    group="build"
+    archiveBaseName="lazerwiki-macro-api"
+    archiveClassifier = "sources"
+    from(sourceSets.main.get().java).include("us/calubrecht/lazerwiki/macro/**","us/calubrecht/lazerwiki/plugin/**")
+    dependsOn(tasks.getByName("generateGrammarSource"))
 }
+
 
 tasks.bootWar {
 	enabled = false
@@ -145,3 +153,34 @@ tasks.jacocoTestReport {
 	)
 	dependsOn(tasks.test) // tests are required to run before generating the report
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifact(tasks.getByName("macroApiJar"))
+            artifact(tasks.getByName("macroApiSourceJar"))
+            pom {
+                artifactId = "lazerwiki-macro-api"
+                name.set("Lazerwiki Macro API")
+                description.set("A library to allow creations of macros to modify behavior of Lazerwiki")
+                developers {
+                    developer {
+                        name.set("Chad Lubrecht")
+                        email.set("chad.lubrecht@gmail.com")
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://repo.repsy.io/mvn/ca_lazerdwarf/default")
+            credentials {
+                username = findProperty("repsyUser") as String
+                password = findProperty("repsyPassword") as String
+            }
+        }
+    }
+}
+        
+
