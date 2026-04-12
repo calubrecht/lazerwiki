@@ -11,11 +11,13 @@ def usage():
     sys.exit(1)
 
 
-versionRE='^version\\s*=\\s\"(.*)\"\\s*'
+versionRE='^version=\"(.*)\"\\s*'
+
+FILE_NAME='gradle.properties'
 
 def getCurrentVersion():
     version = ''
-    with open('build.gradle.kts') as f:
+    with open(FILE_NAME) as f:
         for line in f:
             match = re.match(versionRE, line)
             if match:
@@ -69,14 +71,14 @@ def parseArgs():
 
 def updateVersion(newVersion):
     outLines = []
-    with open('build.gradle.kts') as f:
+    with open(FILE_NAME) as f:
         for line in f:
             match = re.match(versionRE, line)
             if match:
-                outLines.append('version = "{0}"\n'.format(newVersion))
+                outLines.append('version="{0}"\n'.format(newVersion))
                 continue
             outLines.append(line)
-    with open('build.gradle.kts', 'w') as fw:
+    with open(FILE_NAME, 'w') as fw:
         fw.writelines(outLines)
 
 
@@ -85,5 +87,5 @@ if __name__ == '__main__':
     newVersion = parseArgs();
     print("Setting version to " + newVersion);
     updateVersion(newVersion)
-    os.system('git add build.gradle.kts')
+    os.system(f'git add {FILE_NAME}')
 

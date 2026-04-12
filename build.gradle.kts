@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = "1.1.1.2"
+version = project.properties["version"]!!
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
