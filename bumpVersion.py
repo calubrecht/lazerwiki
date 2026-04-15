@@ -11,7 +11,7 @@ def usage():
     sys.exit(1)
 
 
-versionRE='^version=\"(.*)\"\\s*'
+versionRE='^version=(.*)\\s*'
 
 FILE_NAME='gradle.properties'
 
@@ -75,7 +75,7 @@ def updateVersion(newVersion):
         for line in f:
             match = re.match(versionRE, line)
             if match:
-                outLines.append('version="{0}"\n'.format(newVersion))
+                outLines.append('version={0}\n'.format(newVersion))
                 continue
             outLines.append(line)
     with open(FILE_NAME, 'w') as fw:

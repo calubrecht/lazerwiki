@@ -17,7 +17,7 @@ CREATE TABLE "userRecord" (
 	"userId"	INTEGER NOT NULL,
 	"userName"	TEXT NOT NULL,
 	"passwordHash"	TEXT NOT NULL,
-	"settings"	INTEGER NOT NULL DEFAULT '{}',
+	"settings"	TEXT NOT NULL DEFAULT '{}',
 	PRIMARY KEY("userId" AUTOINCREMENT)
 );
 
@@ -71,7 +71,7 @@ CREATE TABLE "userRole" (
 	FOREIGN KEY("userId") REFERENCES "userRecord"("userId") ON UPDATE RESTRICT ON DELETE CASCADE
 );
 CREATE INDEX "USERROLE_USER_IDX" ON "userRole" (
-	"userName"
+	"userId"
 );
 
 CREATE TABLE "mediaRecord" (
@@ -271,7 +271,7 @@ CREATE TABLE activityLog (
   id INTEGER NOT NULL,
   activityType INTEGER NOT NULL,
   target TEXT NOT NULL,
-  site TEXT NOT NULL,
+  site TEXT NULL,
   user INTEGER DEFAULT NULL,
   timestamp timestamp NULL DEFAULT current_timestamp,
   PRIMARY KEY("id" AUTOINCREMENT),
