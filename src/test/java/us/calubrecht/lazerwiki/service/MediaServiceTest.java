@@ -86,7 +86,7 @@ class MediaServiceTest {
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Joe"))).thenReturn(false);
 
         assertThrows(MediaReadException.class, () -> underTest.getBinaryFile("localhost", "Joe", "any.file", null));
-        verify(cacheService, never()).getBinaryFile(anyString(), any(MediaRecord.class), any(IOSupplier.class), anyInt(), anyInt());
+        verify(cacheService, never()).getBinaryFile(anyString(), any(MediaRecord.class), any(IOSupplier.class), anyInt(), anyInt(), anyBoolean());
     }
 
     @Test
@@ -99,28 +99,28 @@ class MediaServiceTest {
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "circle.png")).thenReturn(newRecord);
         byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "10x10");
         // If size matches record size, don't bother calling cache
-        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt(), anyBoolean());
         // Can supply only a single size;
         bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "10");
-        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt(), anyBoolean());
         bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "0x10");
-        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt(), anyBoolean());
 
         byte[] scaledBytes = new byte[] {1,2,3,4};
-        when(cacheService.getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(5))).thenReturn(scaledBytes);
+        when(cacheService.getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(5), anyBoolean())).thenReturn(scaledBytes);
         bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "5x5");
         assertEquals(scaledBytes.length, bytes.length);
         assertEquals(scaledBytes[3], bytes[3]);
-        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(5));
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(5), eq(false));
 
         underTest.getBinaryFile("localhost", "Bob", "circle.png", "5x10");
-        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(10));
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(10), eq(false));
         underTest.getBinaryFile("localhost", "Bob", "circle.png", "10x5");
-        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(10), eq(5));
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(10), eq(5), eq(false));
         underTest.getBinaryFile("localhost", "Bob", "circle.png", "0x5");
-        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(0), eq(5));
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(0), eq(5), eq(false));
         underTest.getBinaryFile("localhost", "Bob", "circle.png", "5x0");
-        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(0));
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(5), eq(0), eq(false));
 
     }
 
@@ -130,10 +130,42 @@ class MediaServiceTest {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         assertThrows(IOException.class, () -> underTest.getBinaryFile("localhost", "Bob", "nothere.png", "10x10"));
         // No MediaRecord, can't try to resize, don't look in cache.
-        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt(), anyBoolean());
 
         underTest.getBinaryFile("localhost", "Bob", "circle.png", "10x10");
-        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt());
+        verify(cacheService, never()).getBinaryFile(any(), any(), any(), anyInt(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    void getBinaryFileContain() throws IOException, MediaReadException, MediaWriteException {
+        User user = new User("Bob", "hash");
+        when(userService.getUser("Bob")).thenReturn(user);
+        when(siteService.getSiteForHostname(any())).thenReturn("default");
+        when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
+        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10);
+        when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "circle.png")).thenReturn(newRecord);
+        byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "c8x8");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(8), eq(8), eq(true));
+
+        // scale by height
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "c10x8");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(10), eq(8), eq(true));
+
+
+        // incomplete dimensions
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "c8");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(8), eq(0), eq(false));
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "c0x8");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(0), eq(8), eq(false));
+
+        reset(cacheService);
+        // no need to scale
+        bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "c15x10");
+        assertNotNull(bytes);
+        verify(cacheService, never()).getBinaryFile(eq("default"), eq(newRecord), any(), anyInt(), anyInt(), anyBoolean());
+        bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "c10x15");
+        assertNotNull(bytes);
+        verify(cacheService, never()).getBinaryFile(eq("default"), eq(newRecord), any(), anyInt(), anyInt(), anyBoolean());
     }
 
     @Test

@@ -102,6 +102,12 @@ class ImageRendererTest {
                 "<img src=\"/_media/img.avif?20\" class=\"media\" style=\"width:20px\" loading=\"lazy\">",
                 renderer.parseInner(sizeAndnonsize, null, renderContext).toString()
         );
+
+        String widthAndHeightContains = "img.avif?c30x30";
+        assertEquals(
+                "<img src=\"/_media/img.avif?c30x30\" class=\"media\" style=\"width:30px; height:30px\" loading=\"lazy\">",
+                renderer.parseInner(widthAndHeightContains, null, renderContext).toString()
+        );
     }
 
     @Test

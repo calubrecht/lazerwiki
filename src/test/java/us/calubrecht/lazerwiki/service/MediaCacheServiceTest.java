@@ -54,14 +54,19 @@ public class MediaCacheServiceTest {
         }
     }
 
-    @Test
-    public void testGetBinaryFile() throws IOException, MediaWriteException {
+
+    private void mockScaleImage() throws IOException {
         when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
             return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
                     inv.getArgument(1, String.class),
                     inv.getArgument(2, Integer.class),
                     inv.getArgument(3, Integer.class));
         });
+    }
+
+    @Test
+    public void testGetBinaryFile() throws IOException, MediaWriteException {
+        mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media");
@@ -70,11 +75,11 @@ public class MediaCacheServiceTest {
         File f = Paths.get(cacheLocation.toString(),"circle.png-10x15").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15);
+        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15, false);
         assertEquals("(10,15)", getFileDimensions(f));
         verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
 
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15);
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15, false);
         assertEquals("(10,15)", getFileDimensions(f));
         // Should have used cache, did not need to call scale again.
         verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
@@ -86,22 +91,17 @@ public class MediaCacheServiceTest {
         MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         IOSupplier supplier = () -> new byte[] {1,2,3,4};
 
-        assertEquals(4, underTest.getBinaryFile("default", mediaRecord, supplier ,20, 25)[3]);
+        assertEquals(4, underTest.getBinaryFile("default", mediaRecord, supplier ,20, 25, false)[3]);
         verify(mockImageUtil, never()).scaleImage(any(), any(), anyInt(), anyInt());
 
-        assertEquals(4, underTest.getBinaryFile("default", mediaRecord, supplier,25, 0)[3]);
+        assertEquals(4, underTest.getBinaryFile("default", mediaRecord, supplier,25, 0, false)[3]);
         verify(mockImageUtil, never()).scaleImage(any(), any(), anyInt(), anyInt());
 
     }
 
     @Test
     public void testGetBinaryFileKeepAspectRatio() throws IOException, MediaWriteException {
-        when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
-            return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
-                    inv.getArgument(1, String.class),
-                    inv.getArgument(2, Integer.class),
-                    inv.getArgument(3, Integer.class));
-        });
+        mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media");
@@ -110,22 +110,17 @@ public class MediaCacheServiceTest {
         File f = Paths.get(cacheLocation.toString(),"circle.png-10x0").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 0);
+        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 0, false);
         assertEquals("(10,10)", getFileDimensions(f));
 
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),0, 5);
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),0, 5, false);
         f = Paths.get(cacheLocation.toString(),"circle.png-0x5").toFile();
         assertEquals("(5,5)", getFileDimensions(f));
     }
 
     @Test
     public void testGetBinaryFileCropToKeepAspectRatio() throws IOException, MediaWriteException {
-        when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
-            return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
-                    inv.getArgument(1, String.class),
-                    inv.getArgument(2, Integer.class),
-                    inv.getArgument(3, Integer.class));
-        });
+        mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media");
@@ -134,22 +129,17 @@ public class MediaCacheServiceTest {
         File f = Paths.get(cacheLocation.toString(),"circle.png-10x5").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 5);
+        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 5, false);
         assertEquals("(10,5)", getFileDimensions(f));
 
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),5, 10);
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),5, 10, false);
         f = Paths.get(cacheLocation.toString(),"circle.png-5x10").toFile();
         assertEquals("(5,10)", getFileDimensions(f));
     }
 
     @Test
     public void testGetBinaryFileWithNS() throws IOException, MediaWriteException {
-        when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
-            return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
-                    inv.getArgument(1, String.class),
-                    inv.getArgument(2, Integer.class),
-                    inv.getArgument(3, Integer.class));
-        });
+        mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media", "ns");
@@ -158,7 +148,7 @@ public class MediaCacheServiceTest {
         File f = Paths.get(cacheLocation.toString(),"circleWdot.png-10x10").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circleWdot.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 10);
+        byte[] bytes = underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 10, false);
         assertEquals("(10,10)", getFileDimensions(f));
         verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
         assertTrue(f.exists());
@@ -166,12 +156,7 @@ public class MediaCacheServiceTest {
 
     @Test
     public void testClearCache() throws IOException, MediaWriteException {
-        when(mockImageUtil.scaleImage(any(), any(), anyInt(), anyInt())).thenAnswer( (inv) -> {
-            return realImageUtil.scaleImage(inv.getArgument(0, InputStream.class),
-                    inv.getArgument(1, String.class),
-                    inv.getArgument(2, Integer.class),
-                    inv.getArgument(3, Integer.class));
-        });
+        mockScaleImage();
 
         // Create cached file
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
@@ -181,7 +166,7 @@ public class MediaCacheServiceTest {
         File f = Paths.get(cacheLocation.toString(),"circleWdot.png-10x10").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circleWdot.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 10);
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 10, false);
 
         underTest.clearCache("default", mediaRecord);
         assertFalse(f.exists());
@@ -193,10 +178,35 @@ public class MediaCacheServiceTest {
         f = Paths.get(cacheLocation.toString(),"circle.png-10x10").toFile();
         File origFile2 = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile2),10, 10);
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile2),10, 10, false);
 
         underTest.clearCache("default", mediaRecord);
         assertFalse(f.exists());
     }
 
+    @Test
+    public void testGetBinaryFileWithContains() throws IOException, MediaWriteException {
+        mockScaleImage();
+
+        Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
+        Path originalLocation = Paths.get(staticFileRoot, "default", "media");
+        User user = new User("Bob", "hash");
+        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
+        File f = Paths.get(cacheLocation.toString(),"circle.png-10x10").toFile();
+        File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
+        Files.deleteIfExists(Path.of(f.getPath()));
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15, true);
+        assertEquals("(10,10)", getFileDimensions(f));
+        verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
+
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15, true);
+        assertEquals("(10,10)", getFileDimensions(f));
+        // Should have used cache, did not need to call scale again.
+        verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
+
+        //wider than tall version
+        f = Paths.get(cacheLocation.toString(),"circle.png-5x5").toFile();
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),6, 5, true);
+        assertEquals("(5,5)", getFileDimensions(f));
+    }
 }

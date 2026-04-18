@@ -89,7 +89,10 @@ public class MediaService {
 
     }
 
-    boolean sizeMismatch(MediaRecord record, int width, int height) {
+    boolean sizeMismatch(MediaRecord record, int width, int height, boolean contain) {
+        if (contain) {
+            return record.getWidth() > width || record.getHeight() > height;
+        }
         if (width != 0 && record.getWidth() != width) {
             return true;
         }
@@ -115,12 +118,21 @@ public class MediaService {
             if (record == null) {
                 return byteReader.get();
             }
+
             String[] dimensions = size.split("x");
+
+            boolean contain = false;
+            if (dimensions[0].startsWith("c")) {
+               // Contain. Maintain aspect ratio but fit whole image within dimension
+               contain = true;
+               dimensions[0] = dimensions[0].substring(1);
+            }
 
             int width = Integer.parseInt(dimensions[0]);
             int height = dimensions.length > 1 ? Integer.parseInt(dimensions[1]) : 0;
-            if (sizeMismatch(record, width, height)) {
-                return mediaCacheService.getBinaryFile(site, record, byteReader, width, height);
+            contain = contain && width != 0 && height != 0;
+            if (sizeMismatch(record, width, height, contain)) {
+                return mediaCacheService.getBinaryFile(site, record, byteReader, width, height, contain);
             }
         }
         return byteReader.get();

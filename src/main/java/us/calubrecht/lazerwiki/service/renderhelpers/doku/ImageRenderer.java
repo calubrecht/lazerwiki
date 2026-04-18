@@ -107,7 +107,7 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
         return outBuffer;
     }
 
-    static final Pattern SIZE_PATTERN= Pattern.compile("([0-9]+)(x[0-9]+)?");
+    static final Pattern SIZE_PATTERN= Pattern.compile("(c?[0-9]+)(x[0-9]+)?");
     String getSizeTok(String options) {
         if (options == null) {
             return "";
@@ -129,7 +129,9 @@ public class ImageRenderer  extends TypedRenderer<ImageContext> {
         for (String tok : toks) {
             Matcher m = SIZE_PATTERN.matcher(tok);
             if (m.matches()) {
-                int width = Integer.parseInt(m.group(1));
+                String sWidth = m.group(1);
+                sWidth = sWidth.startsWith("c") ? sWidth.substring(1) : sWidth;
+                int width = Integer.parseInt(sWidth);
                 if (m.group(2) != null) {
                     int height = Integer.parseInt(m.group(2).substring(1));
                     if (width == 0) {

@@ -40,13 +40,29 @@ public class MediaCacheService {
     }
 
 
-    public byte[] getBinaryFile(String site, MediaRecord record, IOSupplier<byte[]> fileLoad, int width, int height) throws IOException, MediaWriteException {
+    public int[] containedDimensions(int initialWidth, int initialHeight, int width, int height) {
+        double initialRatio = ((double)initialWidth)/initialHeight;
+        double newAspectRatio = ((double)width)/height;
+        if (newAspectRatio > initialRatio) {
+            width = (int)(height * initialRatio);
+        } else {
+            height = (int)(width / initialRatio);
+        }
+        return new int[] {width, height};
+    }
+
+    public byte[] getBinaryFile(String site, MediaRecord record, IOSupplier<byte[]> fileLoad, int width, int height, boolean contain) throws IOException, MediaWriteException {
         StopWatch sw = new StopWatch();
         sw.start();
         Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
         // refuse to scale up
         if (record.getWidth() < width || record.getHeight() < height) {
             return fileLoad.get();
+        }
+        if (contain) {
+            int[] dimensions = containedDimensions(record.getWidth(), record.getHeight(), width, height);
+            width = dimensions[0];
+            height = dimensions[1];
         }
         File cachedFile = record.getNamespace().isBlank() ? new File(Paths.get(cacheLocation.toString(), record.getFileName() + "-%sx%s".formatted(width, height)).toString())
                 : new File(Paths.get(cacheLocation.toString(), record.getNamespace(),record.getFileName() + "-%sx%s".formatted(width, height)).toString());
