@@ -160,7 +160,7 @@ public class MediaService {
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
         Pair<Integer, Integer> imageDimension = imageUtil.getImageDimension(bis);
         User user = userService.getUser(userName);
-        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getLeft(), imageDimension.getRight());
+        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getRight(), imageDimension.getLeft());
         newRecord.setId(id);
         mediaRecordRepository.save(newRecord);
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, user, action);

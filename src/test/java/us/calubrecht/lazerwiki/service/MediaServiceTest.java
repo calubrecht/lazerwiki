@@ -144,8 +144,8 @@ class MediaServiceTest {
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10);
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "circle.png")).thenReturn(newRecord);
-        byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "c8x8");
-        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(8), eq(8), eq(true));
+        underTest.getBinaryFile("localhost", "Bob", "circle.png", "c8x10");
+        verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(8), eq(10), eq(true));
 
         // scale by height
         underTest.getBinaryFile("localhost", "Bob", "circle.png", "c10x8");
@@ -160,7 +160,7 @@ class MediaServiceTest {
 
         reset(cacheService);
         // no need to scale
-        bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "c15x10");
+        byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "c15x10");
         assertNotNull(bytes);
         verify(cacheService, never()).getBinaryFile(eq("default"), eq(newRecord), any(), anyInt(), anyInt(), anyBoolean());
         bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", "c10x15");

@@ -191,22 +191,22 @@ public class MediaCacheServiceTest {
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
         Path originalLocation = Paths.get(staticFileRoot, "default", "media");
         User user = new User("Bob", "hash");
-        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
-        File f = Paths.get(cacheLocation.toString(),"circle.png-10x10").toFile();
+        MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 10);
+        File f = Paths.get(cacheLocation.toString(),"circle.png-8x16").toFile();
         File origFile = Paths.get(originalLocation.toString(),"circle.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15, true);
-        assertEquals("(10,10)", getFileDimensions(f));
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 16, true);
+        assertEquals("(8,16)", getFileDimensions(f));
         verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
 
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 15, true);
-        assertEquals("(10,10)", getFileDimensions(f));
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),10, 16, true);
+        assertEquals("(8,16)", getFileDimensions(f));
         // Should have used cache, did not need to call scale again.
         verify(mockImageUtil, times(1)).scaleImage(any(), any(), anyInt(), anyInt());
 
         //wider than tall version
-        f = Paths.get(cacheLocation.toString(),"circle.png-5x5").toFile();
-        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),6, 5, true);
-        assertEquals("(5,5)", getFileDimensions(f));
+        f = Paths.get(cacheLocation.toString(),"circle.png-6x12").toFile();
+        underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile),6, 16, true);
+        assertEquals("(6,12)", getFileDimensions(f));
     }
 }
