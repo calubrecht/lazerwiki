@@ -53,7 +53,7 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Bob"));
+        verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Bob"), any());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class PageControllerTest {
         this.mockMvc.perform(get("/api/page/get/testPage")).
                 andExpect(status().isOk());
 
-        verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Guest"));
+        verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Guest"), any());
     }
 
     @Test

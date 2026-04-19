@@ -36,4 +36,8 @@ public record PageData(String rendered, String source, String title, List<String
 
     public static final PageFlags EMPTY_FLAGS = new PageFlags(false, false, false, false, false, false);
     public static final PageFlags ALL_RIGHTS = new PageFlags(true, false, true, true, true, false);
+
+    public PageData addTracker(PerfTracker tracker) {
+        return new PageData(rendered(), source(), title(), tags(), backlinks(), flags(), id(), revision(), success(), msg(), tracker);
+    }
 }

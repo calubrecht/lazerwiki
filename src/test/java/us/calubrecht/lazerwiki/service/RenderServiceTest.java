@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.PageCache;
+import us.calubrecht.lazerwiki.model.PerfTracker;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
@@ -41,6 +42,8 @@ public class RenderServiceTest {
     @MockBean
     MacroService macroService;
 
+    PerfTracker tracker = new PerfTracker();
+
     @Test
     public void testRender() {
         PageData pd = new PageData(null, "This is raw page text",  null,null, null, PageData.ALL_RIGHTS, 1L);
@@ -50,11 +53,11 @@ public class RenderServiceTest {
         when(pageService.adjustSource(anyString(), any())).thenReturn("adjusted Source");
         when(macroService.postRender(any(), any())).thenAnswer(inv -> inv.getArgument(0, String.class));
 
-        assertEquals(new PageData("This is Rendered Text", "adjusted Source",   null,null,null, PageData.ALL_RIGHTS, 1L), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("This is Rendered Text", "adjusted Source",   null,null,null, PageData.ALL_RIGHTS, 1L, null, true, "",tracker), underTest.getRenderedPage("host1", "ns:realPage", "Bob", tracker));
 
         PageData noPageData = new PageData("Doesn't exist", "This is raw page text",  null, null,new PageFlags(false, false, true, true, false, false));
         when(pageService.getPageData(any(), eq("ns:nonPage"), any())).thenReturn(noPageData);
-        assertEquals(new PageData("Doesn't exist", "This is raw page text",   null,null, new PageFlags(false, false, true, true, false, false)), underTest.getRenderedPage("host1", "ns:nonPage", "Bob"));
+        assertEquals(new PageData("Doesn't exist", "This is raw page text", null,   null,null, new PageFlags(false, false, true, true, false, false), null, null, true, null,tracker), underTest.getRenderedPage("host1", "ns:nonPage", "Bob", tracker));
     }
 
     @Test
@@ -64,7 +67,7 @@ public class RenderServiceTest {
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
-        assertEquals(new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>This is raw page text</code>", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>This is raw page text</code>", "This is raw page text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage", "Bob", tracker));
 
     }
 
@@ -73,7 +76,7 @@ public class RenderServiceTest {
         PageData pd = new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false, false));
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
 
-        assertEquals(new PageData("Can't read this", "Can't read this",   null,null,new PageFlags(true, false, false, false, false, false)), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("Can't read this", "Can't read this",   null,null,null,new PageFlags(true, false, false, false, false, false), null,null,true, null,tracker), underTest.getRenderedPage("host1", "ns:realPage", "Bob", tracker));
 
     }
 
@@ -132,14 +135,14 @@ public class RenderServiceTest {
         cached.source = "Cached source";
         when(pageService.getCachedPage("host1", "ns:realPage")).thenReturn(cached);
 
-        assertEquals(new PageData("This is from rendered Cache", "Cached source",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("This is from rendered Cache", "Cached source", null,null,null,PageData.ALL_RIGHTS, null, null, true, "", tracker), underTest.getRenderedPage("host1", "ns:realPage", "Bob", tracker));
         PageCache ignoreCache = new PageCache();
         ignoreCache.useCache = false;
         ignoreCache.renderedCache = "This is from rendered Cache";
         when(pageService.getCachedPage("host1", "ns:realPage2")).thenReturn(ignoreCache);
         when(pageService.adjustSource(anyString(), any())).thenReturn("adjusted Text");
 
-        assertEquals(new PageData("This is Rendered Text", "adjusted Text",   null,null,PageData.ALL_RIGHTS), underTest.getRenderedPage("host1", "ns:realPage2", "Bob"));
+        assertEquals(new PageData("This is Rendered Text", "adjusted Text", null,null,null,PageData.ALL_RIGHTS, null, null, true, "", tracker), underTest.getRenderedPage("host1", "ns:realPage2", "Bob", tracker));
     }
 
     @Test
@@ -180,6 +183,6 @@ public class RenderServiceTest {
         when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
 
-        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,null, flags, 1L), underTest.getRenderedPage("host1", "ns:realPage", "Bob"));
+        assertEquals(new PageData("This is Rendered Text", "This is raw page text",   null,null,null, flags, 1L, null, false, "", tracker), underTest.getRenderedPage("host1", "ns:realPage", "Bob", tracker));
     }
 }

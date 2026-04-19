@@ -43,6 +43,7 @@ public class RenderService {
         perfTracker.startTimer("FetchPage");
         String site = siteService.getSiteForHostname(host);
         PageData d = pageService.getPageData(host, sPageDescriptor, userName);
+        d = d.addTracker(perfTracker);
         perfTracker.stopTimer("FetchPage");
         /*
           XXX:Could make these renderable templates;
