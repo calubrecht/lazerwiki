@@ -161,3 +161,9 @@ ALTER TABLE lazerwiki.pageCache ADD CONSTRAINT FK_pageCache_page FOREIGN KEY (si
 INSERT INTO `userRecord` (`userName`, `passwordHash`) VALUES ('Guest', '');
 
 INSERT INTO `ns_restriction_types` (`type`) VALUES ('GUEST_WRITABLE');
+
+-- Convert datetime columns to timestamp
+ALTER TABLE verificationToken MODIFY COLUMN `expiry` TIMESTAMP NOT NULL DEFAULT (current_timestamp() + interval 15 minute);
+ALTER TABLE page MODIFY COLUMN modified TIMESTAMP NULL DEFAULT current_timestamp();
+ALTER TABLE pageLock MODIFY COLUMN lockTime TIMESTAMP NOT NULL;
+ALTER TABLE mediaHistory MODIFY COLUMN ts TIMESTAMP DEFAULT current_timestamp() NOT NULL;
