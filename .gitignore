@@ -8,7 +8,7 @@ build/
 /log/
 
 
-application-local.properties
+application-*local.properties
 
 ### STS ###
 .apt_generated

@@ -163,6 +163,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
     public void verifyEmailToken(String userName, String token) throws VerificationException {
+        tokenRepository.deleteExpired();
         VerificationToken savedToken = tokenRepository.findByUserUserNameAndTokenAndPurpose(userName, token, VerificationToken.Purpose.VERIFY_EMAIL);
         if (savedToken == null) {
             throw new VerificationException("Invalid token: Please check token and try again");
@@ -175,6 +176,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = {"UserService-getUsers", "UserService-getUser"}, allEntries = true)
     public void verifyPasswordToken(String userName, String token) throws VerificationException {
+        tokenRepository.deleteExpired();
         VerificationToken savedToken = tokenRepository.findByUserUserNameAndTokenAndPurpose(userName, token, VerificationToken.Purpose.RESET_PASSWORD);
         if (savedToken == null) {
             throw new VerificationException("Invalid token: Please check token and try again");
