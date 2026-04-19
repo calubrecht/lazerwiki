@@ -229,7 +229,7 @@ public class PageControllerTest {
                 andExpect(status().isOk());
 
 
-        verify(renderService).previewPage(eq("localhost"), eq("thisPage"), eq("This is some text"), eq("Bob"));
+        verify(renderService).previewPage(eq("localhost"), eq("thisPage"), eq("This is some text"), eq("Bob"), any());
         this.mockMvc.perform(post("/api/page/previewPage/").
                         content(data).
                         contentType(MediaType.APPLICATION_JSON).
@@ -237,7 +237,7 @@ public class PageControllerTest {
                 andExpect(status().isOk());
 
 
-        verify(renderService).previewPage(eq("localhost"), eq(""), eq("This is some text"), eq("Bob"));
+        verify(renderService).previewPage(eq("localhost"), eq(""), eq("This is some text"), eq("Bob"), any());
     }
 
     @Test

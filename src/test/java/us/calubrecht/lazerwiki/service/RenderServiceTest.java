@@ -111,12 +111,12 @@ public class RenderServiceTest {
         RenderContext context = new RenderContext("localhost", "default", "thisPage<preview>", "Bob");
         context.renderState().put("ID_SUFFIX", "_previewPage");
         when(renderer.renderToString("goodSource", context)).thenReturn("This rendered");
-        assertEquals("This rendered", underTest.previewPage("localhost", "thisPage", "goodSource", "Bob").rendered());
+        assertEquals("This rendered", underTest.previewPage("localhost", "thisPage", "goodSource", "Bob", tracker).rendered());
 
         when(renderer.renderToString("brokenSource", context)).thenThrow(new RuntimeException("This is broken"));
         assertEquals("<h1>Error</h1>\n" +
                 "<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n" +
-                "<code>brokenSource</code>", underTest.previewPage("localhost", "thisPage", "brokenSource", "Bob").rendered());
+                "<code>brokenSource</code>", underTest.previewPage("localhost", "thisPage", "brokenSource", "Bob", tracker).rendered());
 
 
     }

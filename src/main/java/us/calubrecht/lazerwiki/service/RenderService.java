@@ -147,13 +147,16 @@ public class RenderService {
         pageService.saveCache(host, sPageDescriptor, text, res);
     }
 
-    public PageData previewPage(String host, String sPageDescriptor, String text, String userName) {
+    public PageData previewPage(String host, String sPageDescriptor, String text, String userName, PerfTracker perfTracker) {
         StopWatch sw = StopWatch.createStarted();
+        perfTracker.startTimer("All");
         String site = siteService.getSiteForHostname(host);
         try {
             RenderContext context = new RenderContext(host, site, sPageDescriptor+"<preview>", userName);
             context.renderState().put(ID_SUFFIX.name(), "_previewPage");
-            PageData pd = new PageData(renderer.renderToString(text, context), text, null, null, null);
+            perfTracker.startTimer("Render");
+            PageData pd = new PageData(renderer.renderToString(text, context), text, null, null, null, null, null, null, true, null, perfTracker);
+            perfTracker.stopTimer("Render");
             sw.stop();
             long totalMillis = sw.getTime();
             logger.info("Render preview for " + sPageDescriptor + " took " + totalMillis + "ms");
@@ -165,7 +168,7 @@ public class RenderService {
             String sanitizedSource =  StringEscapeUtils.escapeHtml4(text).replaceAll("&quot;", "\"");
 
             return new PageData("<h1>Error</h1>\n<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n<code>%s</code>".formatted(sanitizedSource),
-                    text, null, null, null);
+                    text, null, null, null, null, null, null, false, "", perfTracker);
 
         }
 
