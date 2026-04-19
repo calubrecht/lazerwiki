@@ -40,6 +40,7 @@ public class PerfTracker {
     }
 
     public Map<String, Double> getTimers() {
+        stopAll();
         return timers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()/1000.0));
     }
 }
