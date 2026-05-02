@@ -16,7 +16,7 @@ ___
 
 Lazerwiki has been tested and developed with the following infrastructure.
 
-Nginx reverse Proxy
+Nginx reverse Proxy (example config [nginxLazerwiki.conf](docs/nginxLazerwiki.conf))
 
 Tomcat 10
 
