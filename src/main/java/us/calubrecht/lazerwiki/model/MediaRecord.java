@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import us.calubrecht.lazerwiki.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "mediaRecord")
@@ -13,7 +14,7 @@ public class MediaRecord {
 
     }
 
-    public MediaRecord(String fileName, String site, String namespace, User uploadedBy, long fileSize, int height, int width) {
+    public MediaRecord(String fileName, String site, String namespace, User uploadedBy, long fileSize, int height, int width, LocalDateTime modified) {
         this.fileName = fileName;
         this.site = site;
         this.namespace = namespace;
@@ -21,6 +22,7 @@ public class MediaRecord {
         this.fileSize = fileSize;
         this.height = height;
         this.width = width;
+        this.modified = modified;
     }
 
     @Id
@@ -43,6 +45,8 @@ public class MediaRecord {
     private int height;
 
     private int width;
+
+    private LocalDateTime modified;
 
     public Long getId() {
         return id;
@@ -107,6 +111,10 @@ public class MediaRecord {
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
+
+    public LocalDateTime getModified() { return modified;}
+
+    public void setModified(LocalDateTime modified) { this.modified = modified; }
 
     @Override
     public boolean equals(Object o) {

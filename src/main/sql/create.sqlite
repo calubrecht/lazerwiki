@@ -73,7 +73,7 @@ CREATE TABLE "userRole" (
 CREATE INDEX "USERROLE_USER_IDX" ON "userRole" (
 	"userId"
 );
-
+/
 CREATE TABLE "mediaRecord" (
 	"id"	INTEGER NOT NULL,
 	"fileName"	TEXT NOT NULL,
@@ -83,6 +83,7 @@ CREATE TABLE "mediaRecord" (
 	"fileSize"	INTEGER NOT NULL DEFAULT 0,
 	"height"	INTEGER NOT NULL DEFAULT 0,
 	"width"	INTEGER NOT NULL DEFAULT 0,
+	"modified" timestamp NULL DEFAULT NULL,
 	FOREIGN KEY("site") REFERENCES "sites"("name") ON UPDATE RESTRICT ON DELETE RESTRICT,
 	PRIMARY KEY("id" AUTOINCREMENT),
 	CONSTRAINT "UNQ_mr" UNIQUE("fileName","site"),

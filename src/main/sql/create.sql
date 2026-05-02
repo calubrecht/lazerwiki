@@ -99,6 +99,7 @@ CREATE TABLE `mediaRecord` (
 	`fileSize` INT(11) NOT NULL DEFAULT '0',
 	`height` INT(11) NOT NULL DEFAULT '0',
 	`width` INT(11) NOT NULL DEFAULT '0',
+    `modified` timestamp NULL DEFAULT NULL,
 	PRIMARY KEY (`id`) USING BTREE,
 	UNIQUE INDEX `UNQ_mr` (`fileName`, `site`,`namespace`) USING BTREE,
 	INDEX `FKmr_site` (`site`) USING BTREE,

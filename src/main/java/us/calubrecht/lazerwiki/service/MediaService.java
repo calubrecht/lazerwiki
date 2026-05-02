@@ -27,6 +27,7 @@ import us.calubrecht.lazerwiki.util.ImageUtil;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -160,7 +161,7 @@ public class MediaService {
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
         Pair<Integer, Integer> imageDimension = imageUtil.getImageDimension(bis);
         User user = userService.getUser(userName);
-        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getRight(), imageDimension.getLeft());
+        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getRight(), imageDimension.getLeft(), LocalDateTime.now());
         newRecord.setId(id);
         mediaRecordRepository.save(newRecord);
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, user, action);
@@ -217,7 +218,7 @@ public class MediaService {
         String oldPageDescriptor = new PageDescriptor(oldFileNS, oldFileName).toString();
         String newPageDescriptor = new PageDescriptor(newFileNS, newFileName).toString();
         User user = userService.getUser(userName);
-        MediaRecord newRecord = new MediaRecord(newFileName, site, newFileNS, user, oldRecord.getFileSize(), oldRecord.getHeight(), oldRecord.getWidth());
+        MediaRecord newRecord = new MediaRecord(newFileName, site, newFileNS, user, oldRecord.getFileSize(), oldRecord.getHeight(), oldRecord.getWidth(), LocalDateTime.now());
         mediaCacheService.clearCache(site, oldRecord);
         mediaCacheService.clearCache(site, newRecord);
         regenCacheService.regenCachesForImageRefs(site, oldPageDescriptor, newPageDescriptor);

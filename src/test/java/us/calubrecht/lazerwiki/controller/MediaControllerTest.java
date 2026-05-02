@@ -96,8 +96,8 @@ class MediaControllerTest {
     void listFiles() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         User user = new User("Bob", "hash");
-        MediaRecord file1 = new MediaRecord("file1.png", "default", "",user, 0, 0, 0);
-        MediaRecord file2 = new MediaRecord("file2.jpg", "default", "", user, 0, 0, 0);
+        MediaRecord file1 = new MediaRecord("file1.png", "default", "",user, 0, 0, 0, null);
+        MediaRecord file2 = new MediaRecord("file2.jpg", "default", "", user, 0, 0, 0, null);
         MediaListResponse resp = new MediaListResponse(Map.of("", List.of(file1, file2)), new NsNode("", true));
         when(mediaService.getAllFiles(any(), any())).thenReturn(resp);
 

@@ -35,7 +35,9 @@ public class SitemapService {
                String descriptor = page.getDescriptor();
                String path = descriptor.isEmpty() ? "" : "/page/" + descriptor;
                WebSitemapUrl.Options options = new WebSitemapUrl.Options(sUrl + path);
-               options.lastMod(page.getModified().toString());
+               if (page.getModified() != null) {
+                   options.lastMod(page.getModified().toString());
+               }
                WebSitemapUrl sitemapUrl = new WebSitemapUrl(options);
                wsg.addUrl(sitemapUrl);
            }
@@ -46,7 +48,9 @@ public class SitemapService {
             for (MediaRecord media : mediaItems) {
                 String descriptor = ns.isEmpty() ? media.getFileName() : ns + ":" + media.getFileName();
                 WebSitemapUrl.Options options = new WebSitemapUrl.Options(sUrl + "/_media/" + descriptor);
-                //options.lastMod(media.getModified().toString());  // Could snag from MediaHistory table
+                if (media.getModified() != null) {
+                    options.lastMod(media.getModified().toString());
+                }
                 WebSitemapUrl sitemapUrl = new WebSitemapUrl(options);
                 wsg.addUrl(sitemapUrl);
             }
