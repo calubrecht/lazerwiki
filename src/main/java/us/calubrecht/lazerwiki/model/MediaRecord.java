@@ -2,6 +2,9 @@ package us.calubrecht.lazerwiki.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.time.LocalDateTime;
@@ -14,7 +17,7 @@ public class MediaRecord {
 
     }
 
-    public MediaRecord(String fileName, String site, String namespace, User uploadedBy, long fileSize, int height, int width, LocalDateTime modified) {
+    public MediaRecord(String fileName, String site, String namespace, User uploadedBy, long fileSize, int height, int width) {
         this.fileName = fileName;
         this.site = site;
         this.namespace = namespace;
@@ -22,7 +25,6 @@ public class MediaRecord {
         this.fileSize = fileSize;
         this.height = height;
         this.width = width;
-        this.modified = modified;
     }
 
     @Id
@@ -46,6 +48,7 @@ public class MediaRecord {
 
     private int width;
 
+    @CreationTimestamp
     private LocalDateTime modified;
 
     public Long getId() {

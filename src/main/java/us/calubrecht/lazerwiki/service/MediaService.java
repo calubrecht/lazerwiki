@@ -161,7 +161,7 @@ public class MediaService {
         ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
         Pair<Integer, Integer> imageDimension = imageUtil.getImageDimension(bis);
         User user = userService.getUser(userName);
-        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getRight(), imageDimension.getLeft(), LocalDateTime.now());
+        MediaRecord newRecord = new MediaRecord(fileName, site, namespace, user, mfile.getSize(), imageDimension.getRight(), imageDimension.getLeft());
         newRecord.setId(id);
         mediaRecordRepository.save(newRecord);
         MediaHistoryRecord historyRecord = new MediaHistoryRecord(fileName, site, namespace, user, action);
@@ -218,7 +218,7 @@ public class MediaService {
         String oldPageDescriptor = new PageDescriptor(oldFileNS, oldFileName).toString();
         String newPageDescriptor = new PageDescriptor(newFileNS, newFileName).toString();
         User user = userService.getUser(userName);
-        MediaRecord newRecord = new MediaRecord(newFileName, site, newFileNS, user, oldRecord.getFileSize(), oldRecord.getHeight(), oldRecord.getWidth(), LocalDateTime.now());
+        MediaRecord newRecord = new MediaRecord(newFileName, site, newFileNS, user, oldRecord.getFileSize(), oldRecord.getHeight(), oldRecord.getWidth());
         mediaCacheService.clearCache(site, oldRecord);
         mediaCacheService.clearCache(site, newRecord);
         regenCacheService.regenCachesForImageRefs(site, oldPageDescriptor, newPageDescriptor);

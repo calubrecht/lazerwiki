@@ -93,7 +93,7 @@ class MediaServiceTest {
     void getBinaryFileWrongSize() throws IOException, MediaReadException, MediaWriteException {
         User user = new User("Bob", "hash");
         when(userService.getUser("Bob")).thenReturn(user);
-        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10, null);
+        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10);
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "circle.png")).thenReturn(newRecord);
@@ -142,7 +142,7 @@ class MediaServiceTest {
         when(userService.getUser("Bob")).thenReturn(user);
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
-        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10, null);
+        MediaRecord newRecord = new MediaRecord("circle.png", "default",  "",user, 7, 10, 10);
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "circle.png")).thenReturn(newRecord);
         underTest.getBinaryFile("localhost", "Bob", "circle.png", "c8x10");
         verify(cacheService).getBinaryFile(eq("default"), eq(newRecord), any(), eq(8), eq(10), eq(true));
@@ -181,7 +181,7 @@ class MediaServiceTest {
         when(userService.getUser("Bob")).thenReturn(user);
         underTest.saveFile("localhost", "Bob", file, "");
         // Not real image so dimensions recorded as 0, 0
-        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0, null);
+        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         verify(mediaRecordRepository).save(eq(newRecord));
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user, ActivityType.ACTIVITY_PROTO_UPLOAD_MEDIA);
         verify(mediaHistoryRepository).save(eq(newHistoryRecord));
@@ -213,7 +213,7 @@ class MediaServiceTest {
         Files.deleteIfExists(Path.of(f.getPath()));
         underTest.saveFile("localhost", "Bob", file, "ns1");
         // Not real image so dimensions recorded as 0, 0
-        MediaRecord newRecord = new MediaRecord("other.bin", "default",  "ns1",user, 7, 0, 0, null);
+        MediaRecord newRecord = new MediaRecord("other.bin", "default",  "ns1",user, 7, 0, 0);
         verify(mediaRecordRepository).save(eq(newRecord));
 
         FileInputStream fis = new FileInputStream(f);
@@ -247,7 +247,7 @@ class MediaServiceTest {
         File f = Paths.get(staticFileRoot, "default", "media", "circle2.png").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
         underTest.saveFile("localhost", "Bob", file, "");
-        MediaRecord newRecord = new MediaRecord("circle2.png", "default", "", user, 768, 20, 20, null);
+        MediaRecord newRecord = new MediaRecord("circle2.png", "default", "", user, 768, 20, 20);
         verify(mediaRecordRepository).save(eq(newRecord));
     }
 
@@ -263,7 +263,7 @@ class MediaServiceTest {
         MockMultipartFile file = new MockMultipartFile("file", "small.bin", null, bytesToSave);
         File f = Paths.get(staticFileRoot, "default", "media", "small.bin").toFile();
         Files.deleteIfExists(Path.of(f.getPath()));
-        MediaRecord existingRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0, null);
+        MediaRecord existingRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         existingRecord.setId(10L);
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "small.bin")).thenReturn(existingRecord);
         // Frank cannot delete, so cannot overwrite.
@@ -271,7 +271,7 @@ class MediaServiceTest {
 
         underTest.saveFile("localhost", "Bob", file, "");
 
-        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0, null);
+        MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         newRecord.setId(10L);
         verify(mediaRecordRepository).save(eq(newRecord));
         MediaHistoryRecord newHistoryRecord = new MediaHistoryRecord("small.bin", "default", "", user,  ActivityType.ACTIVITY_PROTO_REPLACE_MEDIA);
@@ -298,8 +298,8 @@ class MediaServiceTest {
         when(namespaceService.canReadNamespace(any(), any(), eq("user1"))).thenReturn(true);
         User user = new User("Bob", "hash");
         when(userService.getUser("Bob")).thenReturn(user);
-        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "",user, 0, 0, 0, null);
-        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "", user, 0, 0, 0, null);
+        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "",user, 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "", user, 0, 0, 0);
         when(mediaRecordRepository.findAllBySiteOrderByFileName("default")).thenReturn(List.of(file1, file2));
         when(namespaceService.filterReadableMedia(any(), eq("default"), eq("user1"))).thenReturn(List.of(file1, file2));
 
@@ -314,8 +314,8 @@ class MediaServiceTest {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         User user = new User("Bob", "hash");
         when(userService.getUser("Bob")).thenReturn(user);
-        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "ns1",user, 0, 0, 0, null);
-        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "ns2:ns4", user, 0, 0, 0, null);
+        MediaRecord file1 = new MediaRecord("file1.jpg", "default", "ns1",user, 0, 0, 0);
+        MediaRecord file2 = new MediaRecord("afile2.jpg", "default", "ns2:ns4", user, 0, 0, 0);
         when(namespaceService.canReadNamespace(any(), any(), eq("user1"))).thenReturn(true);
         when(mediaRecordRepository.findAllBySiteOrderByFileName("default")).thenReturn(List.of(file1, file2));
         when(namespaceService.filterReadableMedia(any(), eq("default"), eq("user1"))).thenReturn(List.of(file1, file2));
@@ -412,7 +412,7 @@ class MediaServiceTest {
         when(namespaceService.canUploadInNamespace(any(), eq("ns1"), eq("Bob"))).thenReturn(true);
         when(namespaceService.canUploadInNamespace(any(), eq("ns2"), eq("Bob"))).thenReturn(true);
         when(userService.getUser("Bob")).thenReturn(newUser);
-        MediaRecord oldRecord = new MediaRecord("img1.jpg", "default", "ns1", oldUser, 10000L, 10, 10, null);
+        MediaRecord oldRecord = new MediaRecord("img1.jpg", "default", "ns1", oldUser, 10000L, 10, 10);
         oldRecord.setId(12L);
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "ns1", "img1.jpg")).
                 thenReturn(oldRecord);
@@ -429,7 +429,7 @@ class MediaServiceTest {
         assertTrue(status.success());
 
         verify(mediaOverrideService).createOverride("localhost", "ns1", "img1.jpg", "ns2", "img2.jpg");
-        MediaRecord newRecord = new MediaRecord("img2.jpg", "default", "ns2", newUser, 10000L, 10, 10, null);
+        MediaRecord newRecord = new MediaRecord("img2.jpg", "default", "ns2", newUser, 10000L, 10, 10);
         verify(mediaRecordRepository).save(newRecord);
         verify(mediaRecordRepository).deleteById(12L);
         verify(cacheService).clearCache("default", oldRecord);
@@ -465,7 +465,7 @@ class MediaServiceTest {
 
         // Target file already exists
         when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "ns2", "img3.jpg")).
-                thenReturn(new MediaRecord("img3.jpg", "default", "ns2", newUser, 10000L, 10, 10, null));
+                thenReturn(new MediaRecord("img3.jpg", "default", "ns2", newUser, 10000L, 10, 10));
         status = underTest.moveImage("localhost", "Bob", "ns1", "img1.jpg", "ns2", "img3.jpg");
         assertFalse(status.success());
         assertEquals("img3.jpg already exists, move cannot overwrite it", status.message());

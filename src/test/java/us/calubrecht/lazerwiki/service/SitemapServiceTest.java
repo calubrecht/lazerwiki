@@ -159,6 +159,8 @@ public class SitemapServiceTest {
 
     MediaRecord mediaRecord(String namespace, String filename, int date) {
         LocalDateTime dateTime = date == 0 ? null : LocalDateTime.of(2026, date/100, date%100, 0, 0);
-        return new MediaRecord(filename, "", namespace, null, 0, 0, 0, dateTime);
+        MediaRecord mr = new MediaRecord(filename, "", namespace, null, 0, 0, 0);
+        mr.setModified(dateTime);
+        return mr;
     }
 }
