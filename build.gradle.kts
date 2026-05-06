@@ -177,8 +177,8 @@ publishing {
         maven {
             url = uri("https://repo.repsy.io/mvn/ca_lazerdwarf/default")
             credentials {
-                username = findProperty("repsyUser") as String
-                password = findProperty("repsyPassword") as String
+                username = if (hasProperty("repsyUser")) findProperty("repsyUser") as String else ""
+				password = if (hasProperty("repsyPassword")) findProperty("repsyPassword") as String else ""
             }
         }
     }
