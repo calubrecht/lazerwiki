@@ -13,6 +13,8 @@ import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.Principal;
 
@@ -27,14 +29,9 @@ public class SessionsController {
     SiteService siteService;
 
     @GetMapping("username")
-    public UserDTO username(Principal principal, HttpServletRequest request, @CookieValue("JSESSIONID") String sessionCookie, HttpServletResponse response) throws MalformedURLException {
-        URL url = new URL(request.getRequestURL().toString());
-        Cookie fakeCookie = new Cookie("JESSSIONID-BACK", sessionCookie);
-        fakeCookie.setHttpOnly(true);
-        fakeCookie.setMaxAge(Integer.MAX_VALUE);
-        fakeCookie.setPath("/");
+    public UserDTO username(Principal principal, HttpServletRequest request, @CookieValue("JSESSIONID") String sessionCookie, HttpServletResponse response) throws MalformedURLException, URISyntaxException {
+        URI url = new URI(request.getRequestURL().toString());
 
-        response.addCookie(fakeCookie);
         User user = userService.getUser(principal.getName());
         return new UserDTO(principal.getName(), siteService.getSiteForHostname(url.getHost()), user.roles.stream().map(ur -> ur.role).toList(), user.getSettings());
     }

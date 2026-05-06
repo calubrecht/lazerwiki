@@ -99,7 +99,7 @@ public class MediaService {
     }
 
 
-    public byte[] getBinaryFile(String host, String userName, String fileName, String size) throws IOException, MediaReadException, MediaWriteException {
+    public byte[] getBinaryFile(String host, String userName, String fileName, String size) throws IOException, MediaReadException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         if (!namespaceService.canReadNamespace(site, splitFile.getLeft(), userName)) {
@@ -138,7 +138,7 @@ public class MediaService {
     }
 
     @Transactional
-    public void saveFile(String host, String userName, MultipartFile mfile, String namespace) throws IOException, MediaWriteException {
+    public void saveFile(String host, String userName, MultipartFile mfile, String namespace) throws IOException, MediaReadException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         if (!namespaceService.canUploadInNamespace(site, namespace, userName)) {
             throw new MediaWriteException("Not permissioned to write this file");
@@ -176,20 +176,20 @@ public class MediaService {
     }
 
     @NotNull
-    private File getFileInNS(String site, String nsPath, String fileName) throws MediaWriteException, IOException {
+    private File getFileInNS(String site, String nsPath, String fileName) throws MediaReadException, IOException {
         File f = nsPath.isBlank() ?
                 new File(String.join("/", staticFileRoot, site, "media", fileName)):
                 new File(String.join("/", staticFileRoot, site, "media", nsPath, fileName));
         File rootFile = new File(staticFileRoot);
         if (!f.getCanonicalPath().startsWith(Paths.get(rootFile.getCanonicalPath(), site, "media").toString())) {
             // Path traversal attempt
-            throw new MediaWriteException("Invalid path");
+            throw new MediaReadException("Invalid path");
         }
         return f;
     }
 
     @Transactional
-    public MoveStatus moveImage(String host, String userName, String oldFileNS, String oldFileName, String newFileNS, String newFileName) throws MediaWriteException, IOException {
+    public MoveStatus moveImage(String host, String userName, String oldFileNS, String oldFileName, String newFileNS, String newFileName) throws MediaWriteException, MediaReadException, IOException {
         String site = siteService.getSiteForHostname(host);
 
         if (!namespaceService.canUploadInNamespace(site, oldFileNS, userName)) {
@@ -269,7 +269,7 @@ public class MediaService {
     }
 
     @Transactional
-    public void deleteFile(String host, String fileName, String userName) throws IOException, MediaWriteException {
+    public void deleteFile(String host, String fileName, String userName) throws IOException, MediaReadException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         String nsPath = splitFile.getLeft().replace(":", "/");
@@ -289,7 +289,7 @@ public class MediaService {
         // XXX: Delete scaled images if exist
     }
 
-    public long getFileLastModified(String host, String fileName) throws IOException, MediaWriteException {
+    public long getFileLastModified(String host, String fileName) throws IOException, MediaReadException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
         String nsPath = splitFile.getLeft().replace(":", "/");

@@ -62,7 +62,7 @@ public class MediaController {
             String userName = principal.getName();
             mediaService.saveFile(url.getHost(), userName, file, namespace);
             return ResponseEntity.ok("Upload successful");
-        } catch (MediaWriteException e) {
+        } catch (MediaWriteException | MediaReadException e) {
             logger.error("Upload failed because: " +e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -74,7 +74,7 @@ public class MediaController {
         String userName = principal.getName();
         try {
             return ResponseEntity.ok(mediaService.moveImage(url.getHost(), userName, moveFileRequest.oldNS(), moveFileRequest.oldFile(), moveFileRequest.newNS(), moveFileRequest.newFile()));
-        } catch (MediaWriteException | IOException e) {
+        } catch (MediaWriteException | MediaReadException | IOException e) {
             return ResponseEntity.ok(new MoveStatus(false, e.getMessage()));
         }
     }
@@ -93,7 +93,7 @@ public class MediaController {
         try {
             mediaService.deleteFile(url.getHost(), fileName, userName);
             return ResponseEntity.ok().build();
-        } catch (MediaWriteException e) {
+        } catch (MediaWriteException | MediaReadException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }

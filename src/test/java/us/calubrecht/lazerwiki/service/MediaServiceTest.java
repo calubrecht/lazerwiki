@@ -165,7 +165,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void saveFile() throws IOException, MediaWriteException {
+    void saveFile() throws IOException, MediaWriteException, MediaReadException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.joinNS("", "small.bin")).thenReturn("small.bin");
@@ -198,7 +198,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void saveFile_wNS() throws IOException, MediaWriteException {
+    void saveFile_wNS() throws IOException, MediaWriteException, MediaReadException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         User user = new User("Bob", "hash");
@@ -248,7 +248,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void saveFile_Existing() throws IOException, MediaWriteException {
+    void saveFile_Existing() throws IOException, MediaWriteException, MediaReadException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
@@ -265,7 +265,7 @@ class MediaServiceTest {
         // Frank cannot delete, so cannot overwrite.
         assertThrows(MediaWriteException.class, () ->underTest.saveFile("localhost", "Frank", file, ""));
 
-        underTest.saveFile("localhost", "Bob", file, "");
+        underTest.saveFile("lo/calhost", "Bob", file, "");
 
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         newRecord.setId(10L);
@@ -284,7 +284,7 @@ class MediaServiceTest {
         byte[] bytesToSave = new byte[] {1, 2, 3, 4, 5, 10, 20};
         MockMultipartFile file = new MockMultipartFile("file", "../../small.bin", null, bytesToSave);
         // Refuse to save file if outside sandbox
-        assertThrows(MediaWriteException.class, () ->underTest.saveFile("localhost", "Bob", file, ""));
+        assertThrows(MediaReadException.class, () ->underTest.saveFile("localhost", "Bob", file, ""));
     }
 
 
@@ -338,7 +338,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void testDeleteFile() throws IOException, MediaWriteException {
+    void testDeleteFile() throws IOException, MediaWriteException, MediaReadException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
         User user = new User("bob", "hash");
@@ -372,7 +372,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void getFileLastModified() throws IOException, MediaWriteException {
+    void getFileLastModified() throws IOException, MediaWriteException, MediaReadException {
         when(siteService.getSiteForHostname(any())).thenReturn("default");
         long modifiedtime = underTest.getFileLastModified("localhost",  "circle.png");
 
@@ -401,7 +401,7 @@ class MediaServiceTest {
     }
 
     @Test
-    void testMoveImage() throws MediaWriteException, IOException {
+    void testMoveImage() throws MediaWriteException, MediaReadException, IOException {
         User oldUser = new User("Charlie", "");
         User newUser = new User("Bob", "");
         when(siteService.getSiteForHostname(any())).thenReturn("default");

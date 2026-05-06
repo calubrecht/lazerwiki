@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.MediaRecord;
 import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
@@ -60,7 +61,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFile() throws IOException, MediaWriteException {
+    public void testGetBinaryFile() throws IOException, MediaWriteException, MediaReadException {
         mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
@@ -81,7 +82,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileDontUpscale() throws IOException, MediaWriteException {
+    public void testGetBinaryFileDontUpscale() throws IOException, MediaReadException {
         User user = new User("Bob", "hash");
         MediaRecord mediaRecord = new MediaRecord("circle.png", "default",  "",user, 7, 20, 20);
         IOSupplier<byte[]> supplier = () -> new byte[] {1,2,3,4};
@@ -95,7 +96,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileKeepAspectRatio() throws IOException, MediaWriteException {
+    public void testGetBinaryFileKeepAspectRatio() throws IOException, MediaWriteException, MediaReadException {
         mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
@@ -114,7 +115,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileCropToKeepAspectRatio() throws IOException, MediaWriteException {
+    public void testGetBinaryFileCropToKeepAspectRatio() throws IOException, MediaWriteException, MediaReadException {
         mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
@@ -133,7 +134,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileWithNS() throws IOException, MediaWriteException {
+    public void testGetBinaryFileWithNS() throws IOException, MediaWriteException, MediaReadException {
         mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
@@ -150,7 +151,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testClearCache() throws IOException, MediaWriteException {
+    public void testClearCache() throws IOException, MediaReadException {
         mockScaleImage();
 
         // Create cached file
@@ -180,7 +181,7 @@ public class MediaCacheServiceTest {
     }
 
     @Test
-    public void testGetBinaryFileWithContains() throws IOException, MediaWriteException {
+    public void testGetBinaryFileWithContains() throws IOException, MediaWriteException, MediaReadException {
         mockScaleImage();
 
         Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
