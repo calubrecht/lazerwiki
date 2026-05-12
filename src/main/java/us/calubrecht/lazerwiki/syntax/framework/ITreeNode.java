@@ -4,5 +4,9 @@ import java.util.List;
 
 public interface ITreeNode {
     void addChild(ITreeNode node);
-    public List<ITreeNode> getChildren();
+    List<ITreeNode> getChildren();
+
+    default String asString() {
+        throw new UnsupportedOperationException("No default text representation");
+    }
 }

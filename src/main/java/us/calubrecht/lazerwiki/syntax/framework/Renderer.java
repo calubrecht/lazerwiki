@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.syntax.framework;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.Map;
 
@@ -14,7 +15,13 @@ public class Renderer {
     }
 
 
-    public String render(ITreeNode node, Map<String, Object> renderState) {
-        return null;
+    public String render(ITreeNode node, RenderContext renderContext) {
+        ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
+        return renderer.renderHtml(node, renderContext).toString().trim();
+    }
+
+    public String renderPlaintext(ITreeNode node, RenderContext renderContext) {
+        ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
+        return renderer.renderPlaintext(node, renderContext).toString().trim();
     }
 }

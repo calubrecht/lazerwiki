@@ -37,7 +37,7 @@ public class ParserRegistrar {
 
     }
 
-    public ITreeRenderer getRenderer(Class forClass, ParseTree tree) {
+    public ITreeRenderer getRenderer(Class forClass) {
         ITreeRenderer renderer = renderersForClass.getOrDefault(forClass, DEFAULT_RENDERER);
         return renderer;
     }

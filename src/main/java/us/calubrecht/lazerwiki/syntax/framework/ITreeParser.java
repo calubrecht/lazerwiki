@@ -8,4 +8,9 @@ public interface ITreeParser {
      * Remove any parsed lines from markupLines.
      */
     ITreeNode parse(List<String> markupLines);
+
+    String parserKey();
+    default int priority() {
+        return 100;
+    }
 }

@@ -36,7 +36,8 @@ public record RenderResult (String renderedText, String plainText, Map<String, O
          */
         ITreeNode node = parser.parse(markup);
         Map<String, Object> renderState = new HashMap<>();
-        String rendered = renderer.render(node, renderState);
+        String rendered = renderer.render(node, renderContext);
+        String plainText = renderer.renderPlaintext(node, renderContext);
         return new RenderResult(rendered, "", renderState);
     }
 

@@ -20,4 +20,12 @@ public class TextNode implements ITreeNode {
     public List<ITreeNode> getChildren() {
         return List.of();
     }
+
+    public String asString() {
+        return content;
+    }
+
+    public String toString() {
+        return content;
+    }
 }

@@ -37,6 +37,11 @@ public class HeaderParser implements ITreeParser {
       }
       return null;
   }
+
+    @Override
+    public String parserKey() {
+        return "Header";
+    }
   /*  private final Heading block = new Heading();
 
     SourceLines content;

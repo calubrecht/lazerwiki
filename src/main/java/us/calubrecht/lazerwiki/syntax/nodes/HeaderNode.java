@@ -9,4 +9,8 @@ public class HeaderNode extends ContainerNode{
         this.content = content;
     }
 
+    public int getLevel() {
+        return level;
+    }
+
 }
