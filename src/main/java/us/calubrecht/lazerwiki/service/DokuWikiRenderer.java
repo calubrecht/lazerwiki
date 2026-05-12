@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.HeaderRef;
 import us.calubrecht.lazerwiki.model.RenderResult;
@@ -21,6 +22,7 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.*;
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
  */
 @Service
+@Qualifier("Antlr")
 public class DokuWikiRenderer implements IMarkupRenderer {
 
     @Autowired
