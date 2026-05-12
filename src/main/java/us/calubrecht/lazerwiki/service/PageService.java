@@ -20,6 +20,7 @@ import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import us.calubrecht.lazerwiki.util.DbSupport;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -219,6 +220,13 @@ public class PageService {
         List<String> tokens = new ArrayList<>(Arrays.asList(pageDescriptor.split(":")));
         String pageName = tokens.remove(tokens.size() -1);
         return new PageDescriptor(String.join(":", tokens), pageName);
+    }
+
+
+    static final Pattern pagePattern = Pattern.compile("[A-z0-9-_:.]*");
+    public static boolean validateDescriptor(String pageDescriptor) {
+       Matcher m = pagePattern.matcher(pageDescriptor);
+       return m.matches();
     }
 
     List<String> getNamespaces(String rootNS, List<PageDesc> pages) {

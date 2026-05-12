@@ -10,24 +10,23 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class})
-@ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
+@SpringBootTest(classes = { CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class})
 @ActiveProfiles("test")
 public class DokuWikiRendererPlaintextTest {
     @MockBean
     TOCRenderService tocRenderService;
 
     @Configuration
-    @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
+    @ComponentScan({"us.calubrecht.lazerwiki.syntax"})
     public static class TestConfig {
     }
 
     @Autowired
-    DokuWikiRenderer underTest;
+    CustomWikiRenderer underTest;
 
     @MockBean
     PageService pageService;
@@ -92,6 +91,7 @@ public class DokuWikiRendererPlaintextTest {
 
     @Test
     void testRenderMacro() {
+        when(macroService.renderMacro(anyString(), anyString(), any())).thenReturn("Something that won't show in plaintext");
         assertEquals("", doRender("~~MACRO~~This could be any macro~~/MACRO~~"));
     }
 
@@ -148,14 +148,14 @@ public class DokuWikiRendererPlaintextTest {
 
         when(tocRenderService.renderTOC(any(), any())).thenReturn(headerRender);
 
-        assertEquals(" Header 1 \n Header 2 \n Header 3 \n Header 2 ", doRender(source));
+        assertEquals(" Header 1 \n Header 2 \n Header 3 \n Header 2", doRender(source));
     }
 
     @Test
     public void testRenderBrokenInput() {
         String source="---";
-
-        assertEquals("ERROR: Cannot parse: [---]\n", doRender(source));
+        // If can't figure it out, just print it raw
+        assertEquals("---", doRender(source));
     }
 
     @Test

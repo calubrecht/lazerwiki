@@ -26,9 +26,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {MacroService.class, DokuWikiRenderer.class, RendererRegistrar.class, DokuWikiRendererTest.TestConfig.class},
+@SpringBootTest(classes = {MacroService.class, CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class},
         properties = { "lazerwiki.plugin.scan.packages=us.calubrecht.lazerwiki.service" })
-@ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class MacroServiceTest {
@@ -43,7 +42,7 @@ class MacroServiceTest {
     MacroCssService macroCssService;
 
     @Autowired
-    DokuWikiRenderer renderer;
+    CustomWikiRenderer renderer;
 
     @MockBean
     LinkService linkService;
@@ -78,7 +77,7 @@ class MacroServiceTest {
 
         // Recursive Macro does not continue to render itself
         context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
-        assertEquals("Start:<div></div>", underTest.renderMacro("Recursive", "", context));
+        assertEquals("Start:", underTest.renderMacro("Recursive", "", context));
     }
 
     @Test

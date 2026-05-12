@@ -1,6 +1,5 @@
 plugins {
 	java
-	antlr
 	war
 	jacoco
 	id("org.springframework.boot") version "3.3.2"
@@ -16,10 +15,6 @@ java {
 	sourceCompatibility = JavaVersion.VERSION_17
 }
 
-java.sourceSets["main"].java {
-	srcDir("build/generated-src/antlr/main/")
-}
-
 repositories {
 	mavenCentral()
 }
@@ -29,7 +24,6 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation ("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.antlr:antlr4-runtime:4.13.1")
 	implementation("org.apache.commons:commons-text:1.10.0")
 	implementation("commons-io:commons-io:2.15.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -56,8 +50,6 @@ dependencies {
 	testImplementation("org.mockito:mockito-core")
 	testImplementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
 	testRuntimeOnly ("com.h2database:h2")
-
-	antlr("org.antlr:antlr4:4.13.1")
 }
 
 tasks.withType<Test> {
@@ -109,7 +101,6 @@ tasks.register<Jar>("macroApiSourceJar") {
     archiveBaseName="lazerwiki-macro-api"
     archiveClassifier = "sources"
     from(sourceSets.main.get().java).include("us/calubrecht/lazerwiki/macro/**","us/calubrecht/lazerwiki/plugin/**")
-    dependsOn(tasks.getByName("generateGrammarSource"))
 }
 
 

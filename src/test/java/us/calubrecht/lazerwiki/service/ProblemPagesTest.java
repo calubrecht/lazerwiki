@@ -18,13 +18,13 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = { DokuWikiRenderer.class, RendererRegistrar.class, ProblemPagesTest.TestConfig.class, MacroService.class})
+@SpringBootTest(classes = { CustomWikiRenderer.class, ProblemPagesTest.TestConfig.class, MacroService.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 public class ProblemPagesTest {
 
     @Autowired
-    DokuWikiRenderer underTest;
+    CustomWikiRenderer underTest;
 
     @MockBean
     PageService pageService;
@@ -48,7 +48,7 @@ public class ProblemPagesTest {
     TOCRenderService rocRenderService;
 
     @Configuration
-    @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
+    @ComponentScan("us.calubrecht.lazerwiki.syntax")
     public static class TestConfig {
     }
 

@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
-@SpringBootTest(classes = {MacroService.class, DokuWikiRenderer.class, RendererRegistrar.class, us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class})
+@SpringBootTest(classes = {MacroService.class, CustomWikiRenderer.class,  us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class})
 @ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 class WrapMacroTest {
@@ -33,7 +33,7 @@ class WrapMacroTest {
     MacroCssService macroCssService;
 
     @Autowired
-    DokuWikiRenderer renderer;
+    CustomWikiRenderer renderer;
 
     @MockBean
     LinkService linkService;

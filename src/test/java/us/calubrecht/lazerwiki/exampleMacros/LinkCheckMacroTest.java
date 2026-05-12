@@ -4,25 +4,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.RenderResult;
-import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {MacroService.class, DokuWikiRenderer.class, RendererRegistrar.class, us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class})
-@ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
+@SpringBootTest(classes = {MacroService.class, CustomWikiRenderer.class,us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class})
 @ActiveProfiles("test")
 public class LinkCheckMacroTest {
     @Autowired
@@ -35,7 +31,7 @@ public class LinkCheckMacroTest {
     MacroCssService macroCssService;
 
     @Autowired
-    DokuWikiRenderer renderer;
+    CustomWikiRenderer renderer;
 
     @MockBean
     LinkService linkService;
