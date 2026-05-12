@@ -1,21 +1,43 @@
-package us.calubrecht.lazerwiki.service.custommark;
+package us.calubrecht.lazerwiki.syntax.parser;
 
 import org.apache.commons.lang3.StringUtils;
-import org.commonmark.internal.HeadingParser;
-import org.commonmark.internal.inline.Position;
-import org.commonmark.internal.inline.Scanner;
-import org.commonmark.internal.util.Parsing;
-import org.commonmark.node.Block;
-import org.commonmark.node.Heading;
-import org.commonmark.node.Node;
-import org.commonmark.node.SourceSpan;
-import org.commonmark.parser.InlineParser;
-import org.commonmark.parser.SourceLine;
-import org.commonmark.parser.SourceLines;
-import org.commonmark.parser.block.*;
+import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
+import us.calubrecht.lazerwiki.syntax.framework.Parser;
+import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 
-public class HeaderParser extends AbstractBlockParser {
-    private final Heading block = new Heading();
+import java.util.List;
+
+@Component
+public class HeaderParser implements ITreeParser {
+  final static char HEADER_CHAR = '=';
+  final static String MIN_HEADER = StringUtils.repeat(HEADER_CHAR, 2);
+
+  public ITreeNode parse(List<String> markupLines) {
+      String line = markupLines.get(0).trim();
+      if (!line.startsWith(MIN_HEADER)) {
+           return null;
+       }
+       //StringUtils.repeat(HEADER_CHAR, starCount))
+      int tokenCount = 0;
+      for (int i = 0; i < line.length(); i++) {
+          if (line.charAt(i) != HEADER_CHAR) {
+              String tokens = StringUtils.repeat(HEADER_CHAR, i);
+              if (line.endsWith(tokens)) {
+                  markupLines.remove(0);
+                  HeaderNode node =  new HeaderNode(7 - i);
+                  Parser.parse(line.substring(i, line.length() - i), node, List.of());
+                  return node;
+              }
+              else {
+                  return null;
+              }
+          }
+      }
+      return null;
+  }
+  /*  private final Heading block = new Heading();
 
     SourceLines content;
 
@@ -64,5 +86,5 @@ public class HeaderParser extends AbstractBlockParser {
 
             return BlockStart.of(new HeaderParser(7 - starCount, SourceLine.of(content, span)));
         }
-    }
+    }*/
 }

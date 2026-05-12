@@ -5,17 +5,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.syntax.framework.Parser;
+import us.calubrecht.lazerwiki.syntax.framework.ParserRegistrar;
+import us.calubrecht.lazerwiki.syntax.parser.HeaderParser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("unchecked")
-@SpringBootTest(classes = { CustomWikiRenderer.class})
-@ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
+@SpringBootTest(classes = { CustomWikiRenderer.class, DokuWikiRender2Test.TestConfig.class})
 @ActiveProfiles("test")
 public class DokuWikiRender2Test {
     @Autowired
     CustomWikiRenderer underTest;
+
+    @Configuration
+    @ComponentScan({"us.calubrecht.lazerwiki.syntax"})
+    public static class TestConfig {
+    }
 
     @MockBean
     PageService pageService;
