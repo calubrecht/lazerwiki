@@ -15,24 +15,27 @@ import java.util.regex.Pattern;
 
 @Component
 public class LinkParser extends AbstractInnerParser {
-    final Pattern linkPattern = Pattern.compile("^\\[\\[( *[0-9A-z:][0-9A-z:_\\-/.]* *)(\\|([^\\]]*))?\\]\\]");
+    final Pattern linkPattern = Pattern.compile("^\\[\\[( *[0-9A-z:_\\-/.]* *)(\\|([^\\]]*))?\\]\\]");
     @Override
     public char keyCharacter() {
         return '[';
     }
 
     @Override
-    public Pair<Integer, ITreeNode> parse(String markup) {
+    public Pair<Integer, ITreeNode> parse(String markup, int start) {
         // Like takes the form [[linkPath|Link Description]]
         Matcher matcher = linkPattern.matcher(markup);
         if (matcher.find()) {
             String dest = matcher.group(1);
             String desc = matcher.groupCount() > 1 ? matcher.group(3) : null;
+            int length = matcher.group().length();
             LinkNode node = new LinkNode(dest);
+            node.setPosition(Pair.of(start, start + length));
+            node.setTargetPosition(Pair.of(start + 2, start + 2 + dest.length()));
             if (desc != null) {
-                Parser.parseInner(List.of(desc), node, registrar);
+                Parser.parseInner(List.of(desc), node, start+2, registrar);
             }
-            return Pair.of(matcher.group().length(), node);
+            return Pair.of(length, node);
         }
         return null;
     }

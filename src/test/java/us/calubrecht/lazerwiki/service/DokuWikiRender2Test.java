@@ -7,13 +7,22 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
+import us.calubrecht.lazerwiki.model.LinkOverride;
+import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
+import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.framework.ParserRegistrar;
 import us.calubrecht.lazerwiki.syntax.parser.HeaderParser;
 
+import java.util.List;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
 @SuppressWarnings("unchecked")
 @SpringBootTest(classes = { CustomWikiRenderer.class, DokuWikiRender2Test.TestConfig.class})
@@ -82,5 +91,85 @@ public class DokuWikiRender2Test {
 
         // broken link syntax
         assertEquals("<div>[[not quite a link]</div>", doRender("[[not quite a link]"));
+    }
+
+    @Test
+    public void testRenderLinkSanitizesLinks() {
+        String linkEmbeddingJS = "[[what \" onclick=\"doEvil|This link may be evil]]";
+        assertEquals("<div>[[what \" onclick=\"doEvil|This link may be evil]]</div>", doRender(linkEmbeddingJS)); // quotes force link parsing to fail
+
+        // External Link
+        assertEquals("<div>[[https://ListGoesWhere\" onclick=\"evil</div>", doRender("[[https://ListGoesWhere\" onclick=\"evil"));
+
+    }
+
+    @Test
+    public void testRenderLinkToHome() {
+        when(pageService.getTitle(eq("localhost"), eq(""))).thenReturn("Home");
+        when(pageService.exists(eq("localhost"), eq(""))).thenReturn(true);
+        assertEquals("<div><a class=\"wikiLink\" href=\"/\">Home</a></div>", doRender("[[]]"));
+        assertEquals("<div><a class=\"wikiLink\" href=\"/\">Name of Home</a></div>", doRender("[[|Name of Home]]"));
+    }
+
+    @Test
+    public void testRenderLinkOtherSite() {
+        when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>", underTest.renderToString("[[exists|This link exists]]", "otherHost", "default", "",""));
+    }
+
+    @Test
+    public void testRenderLinkRecordsLinks() {
+        when(pageService.getTitle(anyString(), anyString())).thenReturn("");
+        RenderResult result = underTest.renderWithInfo("[[oneLink]]\n[[oneLinkWithText|The text]] [[http://external.link]] \n[[ns:ThirdLink]]", "host", "site","page","user");
+        Set<String> links = (Set<String>)result.renderState().get(RenderResult.RENDER_STATE_KEYS.LINKS.name());
+        assertEquals(Set.of("oneLink", "oneLinkWithText", "ns:ThirdLink"), links);
+    }
+
+    @Test
+    public void testRenderLinkWithOverrides() {
+        when(pageService.getTitle(anyString(), eq("new"))).thenReturn("new");
+        when(pageService.getTitle(anyString(), eq("ns2:wns2"))).thenReturn("with ns");
+        when(pageService.exists(eq("otherHost"), eq("new"))).thenReturn(true);
+        when(pageService.exists(eq("otherHost"), eq("ns2:wns2"))).thenReturn(true);
+        List<LinkOverride> overrides = List.of(
+                new LinkOverride("default","", "source", "", "overridden", "", "old"),
+                new LinkOverride("default","", "source", "", "overridden", "", "new"),
+                new LinkOverride("default","", "source", "ns1", "wns", "ns2", "wns2")
+        );
+        when(linkOverrideService.getOverrides(anyString(), anyString())).thenReturn(overrides);
+        RenderContext context = new RenderContext("otherHost", "default", "page", "");
+        String source = "[[overridden]] [[ns1:wns|wtitle]]";
+        assertEquals("<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>", underTest.renderToString(source, context));
+        List<LinkOverrideInstance> overrideInstances = (List<LinkOverrideInstance>)context.renderState().get(OVERRIDE_STATS.name());
+        assertEquals(2, overrideInstances.size());
+        LinkOverrideInstance o1 =overrideInstances.get(0);
+        LinkOverrideInstance o2 =overrideInstances.get(1);
+        StringBuilder sb = new StringBuilder(source);
+        sb.replace(o2.start(), o2.stop(), o2.override());
+        sb.replace(o1.start(), o1.stop(), o1.override());
+        String fixedSource = sb.toString();
+        assertEquals("[[new]] [[ns2:wns2|wtitle]]", fixedSource);
+
+        // Try w/ multiline doc
+        context = new RenderContext("otherHost", "default", "page", "");
+        String source2 = "AnotherParagraph\n\n[[overridden]] [[ns1:wns|wtitle]]";
+        assertEquals("<div>AnotherParagraph</div>\n<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>", underTest.renderToString(source2, context));
+        overrideInstances = (List<LinkOverrideInstance>)context.renderState().get(OVERRIDE_STATS.name());
+        assertEquals(2, overrideInstances.size());
+        o1 =overrideInstances.get(0);
+        o2 =overrideInstances.get(1);
+        sb = new StringBuilder(source2);
+        sb.replace(o2.start(), o2.stop(), o2.override());
+        sb.replace(o1.start(), o1.stop(), o1.override());
+        fixedSource = sb.toString();
+        assertEquals("AnotherParagraph\n\n[[new]] [[ns2:wns2|wtitle]]", fixedSource);
+
+    }
+
+    @Test
+    public void testRenderMalformedURL() {
+        assertEquals("<div>[[http://bad%link]]</div>", doRender("[[http://bad%link]]"));
+        assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://malformed.invalid\">http://malformed.invalid</a></div>", doRender("[[http://]]"));
+
     }
 }

@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.model.LinkOverride;
+import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
 import us.calubrecht.lazerwiki.service.LinkOverrideService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
@@ -13,8 +15,11 @@ import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.*;
 
 @Component
 public class LinkRenderer extends ContainerRenderer{
@@ -39,8 +44,12 @@ public class LinkRenderer extends ContainerRenderer{
       LinkNode link = (LinkNode)node;
       StringBuilder buffer = new StringBuilder();
       String linkTarget = getLinkTarget(link.getDest());
+      linkTarget = doOverrides(linkTarget, link, renderContext);
+      if (isInternal(linkTarget)) {
+            ((Set<String>)renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(linkTarget);
+      }
       String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
-      buffer.append("<a class=\"").append(getCssClass(link.getDest(), renderContext.host())).append("\" href=\"").append(linkURL).append("\">");
+      buffer.append("<a class=\"").append(getCssClass(linkTarget, renderContext.host())).append("\" href=\"").append(linkURL).append("\">");
       buffer.append(getLinkDisplay(link, linkTarget, renderContext));
       buffer.append("</a>");
       return buffer;
@@ -91,5 +100,23 @@ public class LinkRenderer extends ContainerRenderer{
         return !(link.toLowerCase().startsWith("https://") || link.toLowerCase().startsWith("http://"));
     }
 
-    //<a class="wikiLinkMissing" href="/page/missing">This link is missing</a>
+    String doOverrides(String page, LinkNode link, RenderContext renderContext) {
+        Map<String, LinkOverride> overrides = (Map<String, LinkOverride>) renderContext.renderState().get(LINK_OVERRIDES.name());
+        if (overrides == null) {
+            List<LinkOverride> overrideList = linkOverrideService.getOverrides(renderContext.host(), renderContext.page());
+            overrides = overrideList.stream().collect(
+                    Collectors.toMap(LinkOverride::getTarget, Function.identity(), (a, b) -> b)
+            );
+            renderContext.renderState().put(LINK_OVERRIDES.name(), overrides);
+        }
+        if (overrides.containsKey(page)) {
+            String override = overrides.get(page).getNewTarget();
+            // Here's where we're screwed.... Node doesn't know where it is in source.
+            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent(OVERRIDE_STATS.name(),
+                    (k) -> new ArrayList<>())).add(
+                    new LinkOverrideInstance(page, override, link.getTargetPosition().getLeft(), link.getTargetPosition().getRight()));
+            return override;
+        }
+        return page;
+    }
 }

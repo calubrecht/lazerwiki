@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.parser;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
@@ -10,26 +11,33 @@ import us.calubrecht.lazerwiki.syntax.nodes.ParagraphNode;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class ParagraphParser extends AbstractTreeParser {
     @Override
-    public ITreeNode parse(List<String> markupLines) {
+    public ITreeNode parse(List<String> markupLines, AtomicInteger counter) {
         List<String> paragraphLines = new LinkedList<>();
+        int start = counter.get();
         for (String nextLine = markupLines.get(0); !markupLines.isEmpty(); nextLine = getNext(markupLines)) {
           if (!nextLine.isEmpty()) {
               paragraphLines.add(nextLine);
               markupLines.remove(0);
+              counter.addAndGet(nextLine.length() + 1);
           }
           else {
+              // Blank line marks end of paragraph
+              markupLines.remove(0);
+              counter.addAndGet( 1);
               break;
           }
         }
         ParagraphNode node = new ParagraphNode();
+        node.setPosition(Pair.of(start, counter.get()));
         // XXX Need to introduce the concept of legal child parsers. Parser registrar
         // To provide option to look up
         //Parser.parse(paragraphLines, node, List.of());
-        Parser.parseInner(paragraphLines, node, registrar);
+        Parser.parseInner(paragraphLines, node, start, registrar);
         return node;
     }
 

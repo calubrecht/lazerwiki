@@ -17,11 +17,11 @@ public class Renderer {
 
     public String render(ITreeNode node, RenderContext renderContext) {
         ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
-        return renderer.renderHtml(node, renderContext).toString().trim();
+        return renderer.renderHtml(node, renderContext).toString().strip();
     }
 
     public String renderPlaintext(ITreeNode node, RenderContext renderContext) {
         ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
-        return renderer.renderPlaintext(node, renderContext).toString().trim();
+        return renderer.renderPlaintext(node, renderContext).toString().strip();
     }
 }

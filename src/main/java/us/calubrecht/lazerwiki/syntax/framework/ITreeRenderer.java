@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.framework;
 
+import org.apache.commons.text.StringEscapeUtils;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import java.util.Collection;
@@ -27,12 +28,16 @@ public interface ITreeRenderer {
 
         @Override
         public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
-            return new StringBuilder(node.asString());
+            return new StringBuilder(sanitize(node.asString()));
         }
 
         @Override
         public StringBuilder renderPlaintext(ITreeNode node, RenderContext renderContext) {
             return new StringBuilder(node.asString());
         }
+    }
+
+    default String sanitize(String input) {
+        return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
     }
 }

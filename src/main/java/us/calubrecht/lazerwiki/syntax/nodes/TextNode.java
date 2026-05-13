@@ -1,11 +1,13 @@
 package us.calubrecht.lazerwiki.syntax.nodes;
 
+import org.apache.commons.lang3.tuple.Pair;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 
 import java.util.List;
 
 public class TextNode implements ITreeNode {
     String content;
+    Pair<Integer, Integer> position = null;
 
     public TextNode(String content) {
         this.content = content;
@@ -27,5 +29,12 @@ public class TextNode implements ITreeNode {
 
     public String toString() {
         return content;
+    }
+
+    public void setPosition(Pair<Integer, Integer> position) {
+        this.position = position;
+    }
+    public Pair<Integer, Integer> getPosition() {
+        return position;
     }
 }

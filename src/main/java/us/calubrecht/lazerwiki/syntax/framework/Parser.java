@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,10 +33,11 @@ public class Parser {
     }
 
     public static ITreeNode parse(List<String> markupLines, ContainerNode container, Collection<ITreeParser> parsers) {
+        AtomicInteger counter = new AtomicInteger(0);
         while (!markupLines.isEmpty() ) {
             ITreeNode nextNode = null;
             for (ITreeParser parser: parsers) {
-                nextNode = parser.parse(markupLines);
+                nextNode = parser.parse(markupLines, counter);
                 if (nextNode != null) {
                     break;
                 }
@@ -50,9 +52,10 @@ public class Parser {
         return container;
     }
 
-    public static void parseInner(List<String> markupLines, ContainerNode parentNode, ParserRegistrar parserRegistrar) {
+    public static void parseInner(List<String> markupLines, ContainerNode parentNode, int start, ParserRegistrar parserRegistrar) {
         String fullMarkup = String.join("\n", markupLines);
         StringBuilder buffer = new StringBuilder();
+        int textStart = start;
         for (int i = 0; i < fullMarkup.length(); i++ ) {
             char c = fullMarkup.charAt(i);
             if (Character.isAlphabetic(c) || Character.isDigit(c) || Character.isWhitespace(c)) {
@@ -62,24 +65,32 @@ public class Parser {
             List<IInnerParser> parsers = parserRegistrar.getParsersForKeyCharacter(c);
             boolean parseFound = false;
             for (IInnerParser parser: parsers) {
-                Pair<Integer, ITreeNode> parsed = parser.parse(fullMarkup.substring(i));
+                Pair<Integer, ITreeNode> parsed = parser.parse(fullMarkup.substring(i), i + start);
                 if (parsed == null) {
                     continue;
                 }
                 else {
                     parseFound = true;
-                    parentNode.addChild(new TextNode(buffer.toString()));
+                    parentNode.addChild(textNode(buffer, textStart));
                     buffer = new StringBuilder();
                     parentNode.addChild(parsed.getRight());
-                    i += parsed.getLeft();
+                    i += parsed.getLeft() - 1;
+                    textStart  = start + i + 1;
                 }
             }
             if (!parseFound) {
                 buffer.append(c);
             }
         }
-        if (!buffer.isEmpty()) {
-            parentNode.addChild(new TextNode(buffer.toString()));
+        parentNode.addChild(textNode(buffer, textStart));
+    }
+
+    static TextNode textNode(StringBuilder buffer, int position) {
+        if (buffer.isEmpty()) {
+            return null;
         }
+        TextNode node = new TextNode(buffer.toString());
+        node.setPosition(Pair.of(position, position + node.asString().length()));
+        return node;
     }
 }

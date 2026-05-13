@@ -11,5 +11,5 @@ public interface IInnerParser {
 
     void setRegistrar(ParserRegistrar registrar);
 
-    Pair<Integer, ITreeNode> parse(String markup);
+    Pair<Integer, ITreeNode> parse(String markup, int position);
 }

@@ -21,7 +21,7 @@ public class ParagraphRenderer extends ContainerRenderer {
         StringBuilder buffer = new StringBuilder();
         buffer.append("<div>");
         buffer.append(super.renderHtml(node, renderContext));
-        buffer.append("</div>");
+        buffer.append("</div>\n");
         return buffer;
     }
 }

@@ -30,31 +30,15 @@ public class CustomWikiRenderer implements IMarkupRenderer {
 
     @Override
     public RenderResult renderWithInfo(String markup, RenderContext renderContext) {
-        /*
-
-public record RenderResult (String renderedText, String plainText, Map<String, Object> renderState)
-         */
         ITreeNode node = parser.parse(markup);
-        Map<String, Object> renderState = new HashMap<>();
         String rendered = renderer.render(node, renderContext);
         String plainText = renderer.renderPlaintext(node, renderContext);
-        return new RenderResult(rendered, "", renderState);
+        return new RenderResult(rendered, plainText, renderContext.renderState());
     }
 
     @Override
     public String renderToString(String markup, RenderContext renderContext) {
         return renderWithInfo(markup, renderContext).renderedText();
-       /* Parser parser = Parser.builder()
-                .enabledBlockTypes(Collections.emptySet()) // Disable markdown parsers
-                .customBlockParserFactory(new HeaderParser.Factory())
-                .build();
-        HtmlRenderer renderer = HtmlRenderer.builder()
-                .nodeRendererFactory((context) -> {
-                    return new HeaderRenderer(context);
-                })
-                .build();
-        Node n = parser.parse(markup);
-        return renderer.render(n);*/
     }
 
     @Override
