@@ -266,5 +266,25 @@ public class DokuWikiRender2Test {
         String input6 = "Can ''**bold be in** monospace''?";
         assertEquals("<div>Can <span class=\"monospace\"><span class=\"bold\">bold be in</span> monospace</span>?</div>", doRender(input6));
     }
+    @Test
+    public void testRenderSuperSubDel() {
+        String input1 = "<sup>This</sup> should be superscript.";
+        assertEquals("<div><sup>This</sup> should be superscript.</div>", doRender(input1));
+        String input2 = "<sub>This</sub> should be subscript.";
+        assertEquals("<div><sub>This</sub> should be subscript.</div>", doRender(input2));
+        String input3 = "<del>This</del> should be deleted.";
+        assertEquals("<div><del>This</del> should be deleted.</div>", doRender(input3));
 
+        String input4 = "Can <sup>super\nspan</sup> lines?";
+        assertEquals("<div>Can <sup>super\nspan</sup> lines?</div>", doRender(input4));
+
+        String input5 = "<super>What is an unknownTag?</super>";
+        assertEquals("<div>&lt;super&gt;What is an unknownTag?&lt;/super&gt;</div>", doRender(input5));
+    }
+
+    @Test
+    public void testRenderSpanStartsSpace() {
+        String input = " __//**UnderItaliBold **//__";
+        assertEquals("<div> <span class=\"underline\"><span class=\"italic\"><span class=\"bold\">UnderItaliBold </span></span></span></div>", doRender(input));
+    }
 }
