@@ -33,7 +33,7 @@ public class ParagraphParser extends AbstractTreeParser {
           }
         }
         ParagraphNode node = new ParagraphNode();
-        node.setPosition(Pair.of(start, counter.get()));
+        node.setPosition(Pair.of(start, counter.get() -1));
         // XXX Need to introduce the concept of legal child parsers. Parser registrar
         // To provide option to look up
         //Parser.parse(paragraphLines, node, List.of());

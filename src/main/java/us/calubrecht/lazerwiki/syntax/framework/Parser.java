@@ -90,7 +90,7 @@ public class Parser {
             return null;
         }
         TextNode node = new TextNode(buffer.toString());
-        node.setPosition(Pair.of(position, position + node.asString().length()));
+        node.setPosition(Pair.of(position, position + node.asString().length() - 1));
         return node;
     }
 }

@@ -29,14 +29,14 @@ public class HeaderRenderer extends ContainerRenderer {
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
         HeaderNode headerNode = (HeaderNode)node;
         String hTag = "h" + headerNode.getLevel();
-        String plainTextHeader = renderPlaintext(node, renderContext).toString().trim();
+        String plainTextHeader = renderPlaintext(node, renderContext).toString().strip();
         List<HeaderRef> headers = ((List<HeaderRef>)renderContext.renderState().computeIfAbsent(HEADERS.name(), (k) -> new ArrayList<>()));
         HeaderRef headerRef = new HeaderRef(headerNode.getLevel(), plainTextHeader, toId(plainTextHeader, headers));
         headers.add(headerRef);
         StringBuilder outBuffer = new StringBuilder();
         String id = headerRef.id() + renderContext.renderState().getOrDefault(ID_SUFFIX.name(), "").toString();
         outBuffer.append("<").append(hTag).append(" id=\"").append(id).append("\">");
-        outBuffer.append(super.renderHtml(node, renderContext).toString().trim());
+        outBuffer.append(super.renderHtml(node, renderContext).toString().strip());
         outBuffer.append("</").append(hTag).append(">\n");
         if (!renderContext.renderState().containsKey(RenderResult.RENDER_STATE_KEYS.TITLE.name())) {
             renderContext.renderState().put(

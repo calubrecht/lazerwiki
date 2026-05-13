@@ -11,9 +11,6 @@ import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
-import us.calubrecht.lazerwiki.syntax.framework.Parser;
-import us.calubrecht.lazerwiki.syntax.framework.ParserRegistrar;
-import us.calubrecht.lazerwiki.syntax.parser.HeaderParser;
 
 import java.util.List;
 import java.util.Set;
@@ -171,5 +168,35 @@ public class DokuWikiRender2Test {
         assertEquals("<div>[[http://bad%link]]</div>", doRender("[[http://bad%link]]"));
         assertEquals("<div><a class=\"wikiLinkExternal\" href=\"http://malformed.invalid\">http://malformed.invalid</a></div>", doRender("[[http://]]"));
 
+    }
+
+    @Test
+    public void testRenderSanitizeHtmlInText() {
+        assertEquals("<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>", doRender("This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>"));
+
+        assertEquals("<div>Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/page/aLink\"> a link</a> and &lt;b&gt;escape&lt;/b&gt; again</div>", doRender("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
+    }
+
+    @Test
+    public void testLinebreaks() {
+        String input1 = "A single linebreak in the source\nwill not break in the output";
+        assertEquals("<div>A single linebreak in the source\nwill not break in the output</div>", doRender(input1));
+
+        String input2 = "A double linebreak in the source\n\nbreaks in to paragraphs";
+        assertEquals("<div>A double linebreak in the source</div>\n<div>breaks in to paragraphs</div>", doRender(input2));
+    }
+
+    @Test
+    public void testRenderBold() {
+        String input1 = "Some words are **meant to **be bold.";
+        assertEquals("<div>Some words are <span class=\"bold\">meant to </span>be bold.</div>", doRender(input1));
+
+        String input2 = "Some bolds **have [[link|links]] **";
+        assertEquals("<div>Some bolds <span class=\"bold\">have <a class=\"wikiLinkMissing\" href=\"/page/link\">links</a> </span></div>", doRender(input2));
+
+        String input3 = "Some bolds **aren't matched";
+        assertEquals("<div>Some bolds **aren't matched</div>", doRender(input3));
+        String input4 = "Can **bold\nspan lines?**";
+        assertEquals("<div>Can <span class=\"bold\">bold\nspan lines?</span></div>", doRender(input4));
     }
 }

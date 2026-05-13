@@ -30,8 +30,8 @@ public class LinkParser extends AbstractInnerParser {
             String desc = matcher.groupCount() > 1 ? matcher.group(3) : null;
             int length = matcher.group().length();
             LinkNode node = new LinkNode(dest);
-            node.setPosition(Pair.of(start, start + length));
-            node.setTargetPosition(Pair.of(start + 2, start + 2 + dest.length()));
+            node.setPosition(Pair.of(start, start + length - 1));
+            node.setTargetPosition(Pair.of(start + 2, start + 2 + dest.length() - 1));
             if (desc != null) {
                 Parser.parseInner(List.of(desc), node, start+2, registrar);
             }
