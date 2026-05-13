@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeRenderer;
 import us.calubrecht.lazerwiki.syntax.parser.HeaderParser;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -25,25 +22,25 @@ public class ParserRegistrar {
     Set<IInnerParser> innerParsers;
     Map<Character, List<IInnerParser>> innerParsersForKeychar;
 
-    //Map<String, ITreeRenderer> renderersForAdditiveClass;
-
     final ITreeRenderer DEFAULT_RENDERER = new ITreeRenderer.DefaultRenderer();
 
     @PostConstruct
     public void linkBeans() {
         renderersForClass = new ConcurrentHashMap<>();
-        //renderersForAdditiveClass = new ConcurrentHashMap<>();
         for (ITreeRenderer renderer : renderers) {
             renderer.getTargets().forEach(cl -> renderersForClass.put(cl, renderer));
             renderer.setRegistrar(this);
         }
-        for (ITreeParser parsers : parsers) {
-            parsers.setRegistrar(this);
+        for (ITreeParser parser : parsers) {
+            parser.setRegistrar(this);
         }
-        for (IInnerParser parsers : innerParsers) {
-            parsers.setRegistrar(this);
+        innerParsersForKeychar = new HashMap<>();
+        for (IInnerParser parser : innerParsers) {
+            parser.setRegistrar(this);
+            for(Character keyChar : parser.keyCharacters()) {
+                innerParsersForKeychar.computeIfAbsent(keyChar, (k) -> new ArrayList<>()).add(parser);
+            }
         }
-        innerParsersForKeychar = innerParsers.stream().collect(Collectors.groupingBy(IInnerParser::keyCharacter));
         DEFAULT_RENDERER.setRegistrar(this);
 
     }

@@ -1,13 +1,12 @@
 package us.calubrecht.lazerwiki.syntax.framework;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface IInnerParser {
 
-    char keyCharacter();
+    Collection<Character> keyCharacters();
 
     void setRegistrar(ParserRegistrar registrar);
 

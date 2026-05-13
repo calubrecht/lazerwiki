@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 public class LinkParser extends AbstractInnerParser {
     final Pattern linkPattern = Pattern.compile("^\\[\\[( *[0-9A-z:_\\-/.]* *)(\\|([^\\]]*))?\\]\\]");
     @Override
-    public char keyCharacter() {
-        return '[';
+    public List<Character> keyCharacters() {
+        return List.of('[');
     }
 
     @Override

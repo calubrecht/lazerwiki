@@ -199,4 +199,41 @@ public class DokuWikiRender2Test {
         String input4 = "Can **bold\nspan lines?**";
         assertEquals("<div>Can <span class=\"bold\">bold\nspan lines?</span></div>", doRender(input4));
     }
+
+    @Test
+    public void testRenderItalic() {
+        String input1 = "Some words are //meant to //be italic.";
+        assertEquals("<div>Some words are <span class=\"italic\">meant to </span>be italic.</div>", doRender(input1));
+
+        String input2 = "Some italics //have [[link|links]] //";
+        assertEquals("<div>Some italics <span class=\"italic\">have <a class=\"wikiLinkMissing\" href=\"/page/link\">links</a> </span></div>", doRender(input2));
+
+        String input3 = "Some italics //aren't matched";
+        assertEquals("<div>Some italics //aren't matched</div>", doRender(input3));
+        String input4 = "Can //italic\nspan lines?//";
+        assertEquals("<div>Can <span class=\"italic\">italic\nspan lines?</span></div>", doRender(input4));
+        String input5 = "Can **//italic be in// bold**?";
+        assertEquals("<div>Can <span class=\"bold\"><span class=\"italic\">italic be in</span> bold</span>?</div>", doRender(input5));
+        String input6 = "Can //**bold be in** italic//?";
+        assertEquals("<div>Can <span class=\"italic\"><span class=\"bold\">bold be in</span> italic</span>?</div>", doRender(input6));
+    }
+
+    @Test
+    public void testRenderUnderline() {
+        String input1 = "__This__ should be underlined.";
+        assertEquals("<div><span class=\"underline\">This</span> should be underlined.</div>", doRender(input1));
+        String input2 = "__This [[underline|under line]]__ should have a link";
+        assertEquals("<div><span class=\"underline\">This <a class=\"wikiLinkMissing\" href=\"/page/underline\">under line</a></span> should have a link</div>", doRender(input2));
+
+        String input3 = "Some underlines __aren't matched";
+        assertEquals("<div>Some underlines __aren't matched</div>", doRender(input3));
+        String input4 = "Can __underlines\nspan lines?__";
+        assertEquals("<div>Can <span class=\"underline\">underlines\nspan lines?</span></div>", doRender(input4));
+        String input5 = "Can **__underline be in__ bold**?";
+        assertEquals("<div>Can <span class=\"bold\"><span class=\"underline\">underline be in</span> bold</span>?</div>", doRender(input5));
+        String input6 = "Can __**bold be in** underline__?";
+        assertEquals("<div>Can <span class=\"underline\"><span class=\"bold\">bold be in</span> underline</span>?</div>", doRender(input6));
+    }
+
+
 }

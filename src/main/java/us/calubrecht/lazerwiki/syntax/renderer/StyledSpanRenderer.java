@@ -1,32 +1,31 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
 import org.springframework.stereotype.Component;
-import us.calubrecht.lazerwiki.model.HeaderRef;
-import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.nodes.BoldNode;
-import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
+import us.calubrecht.lazerwiki.syntax.nodes.StyledSpanNode;
+import us.calubrecht.lazerwiki.syntax.nodes.StyledSpanNode.SPAN_TYPE;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.HEADERS;
-import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ID_SUFFIX;
+import java.util.Map;
 
 @Component
-public class BoldRenderer extends ContainerRenderer {
-    final String cssClass = "bold";
+public class StyledSpanRenderer extends ContainerRenderer {
+    final Map<SPAN_TYPE, String> cssClassMap =
+            Map.of(SPAN_TYPE.BOLD, "bold",
+                SPAN_TYPE.ITALIC, "italic",
+                SPAN_TYPE.UNDERLINE, "underline");
     @Override
     public Collection<Class> getTargets() {
-        return List.of(BoldNode.class);
+        return List.of(StyledSpanNode.class);
     }
 
     @Override
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
+        StyledSpanNode spanNode = (StyledSpanNode)node;
         StringBuilder outBuffer = new StringBuilder();
-        outBuffer.append("<span class=\"").append(cssClass).append("\">");
+        outBuffer.append("<span class=\"").append(cssClassMap.get(spanNode.getType())).append("\">");
         outBuffer.append(super.renderHtml(node, renderContext).toString());
         outBuffer.append("</span>");
         return outBuffer;
