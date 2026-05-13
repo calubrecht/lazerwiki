@@ -235,5 +235,36 @@ public class DokuWikiRender2Test {
         assertEquals("<div>Can <span class=\"underline\"><span class=\"bold\">bold be in</span> underline</span>?</div>", doRender(input6));
     }
 
+    @Test
+    public void testRenderUnformat() {
+        String input1 = "%%This **should not be bold**%%";
+        assertEquals("<div>This **should not be bold**</div>", doRender(input1));
+        String input2 = "%%This [[underline|under line]]__ should not have a link%%";
+        assertEquals("<div>This [[underline|under line]]__ should not have a link</div>", doRender(input2));
+
+        String input3 = "Some unformats %%aren't matched";
+        assertEquals("<div>Some unformats %%aren't matched</div>", doRender(input3));
+        String input4 = "Can %%unformats\nspan lines?%%";
+        assertEquals("<div>Can unformats\nspan lines?</div>", doRender(input4));
+        String input5 = "Can **%% be in%% bold**?";
+        assertEquals("<div>Can <span class=\"bold\"> be in bold</span>?</div>", doRender(input5));
+    }
+
+    @Test
+    public void testRenderMonospace() {
+        String input1 = "''This'' should be monospace.";
+        assertEquals("<div><span class=\"monospace\">This</span> should be monospace.</div>", doRender(input1));
+        String input2 = "''This [[monospace|monospace]]'' should have a link";
+        assertEquals("<div><span class=\"monospace\">This <a class=\"wikiLinkMissing\" href=\"/page/monospace\">monospace</a></span> should have a link</div>", doRender(input2));
+
+        String input3 = "Some monospace ''aren't matched";
+        assertEquals("<div>Some monospace ''aren't matched</div>", doRender(input3));
+        String input4 = "Can ''monospace\nspan lines?''";
+        assertEquals("<div>Can <span class=\"monospace\">monospace\nspan lines?</span></div>", doRender(input4));
+        String input5 = "Can **''monospace be in'' bold**?";
+        assertEquals("<div>Can <span class=\"bold\"><span class=\"monospace\">monospace be in</span> bold</span>?</div>", doRender(input5));
+        String input6 = "Can ''**bold be in** monospace''?";
+        assertEquals("<div>Can <span class=\"monospace\"><span class=\"bold\">bold be in</span> monospace</span>?</div>", doRender(input6));
+    }
 
 }

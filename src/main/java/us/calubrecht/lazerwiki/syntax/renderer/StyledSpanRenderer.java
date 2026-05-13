@@ -15,7 +15,8 @@ public class StyledSpanRenderer extends ContainerRenderer {
     final Map<SPAN_TYPE, String> cssClassMap =
             Map.of(SPAN_TYPE.BOLD, "bold",
                 SPAN_TYPE.ITALIC, "italic",
-                SPAN_TYPE.UNDERLINE, "underline");
+                SPAN_TYPE.UNDERLINE, "underline",
+                SPAN_TYPE.MONOSPACE, "monospace");
     @Override
     public Collection<Class> getTargets() {
         return List.of(StyledSpanNode.class);
