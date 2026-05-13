@@ -114,7 +114,7 @@ public class LinkRenderer extends ContainerRenderer{
             // Here's where we're screwed.... Node doesn't know where it is in source.
             ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent(OVERRIDE_STATS.name(),
                     (k) -> new ArrayList<>())).add(
-                    new LinkOverrideInstance(page, override, link.getTargetPosition().getLeft(), link.getTargetPosition().getRight()));
+                    new LinkOverrideInstance(page, override, link.getTargetPosition().getLeft(), link.getTargetPosition().getRight()+1));
             return override;
         }
         return page;
