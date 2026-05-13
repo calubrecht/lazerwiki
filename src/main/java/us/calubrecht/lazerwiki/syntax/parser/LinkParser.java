@@ -27,7 +27,7 @@ public class LinkParser extends AbstractInnerParser {
         Matcher matcher = linkPattern.matcher(markup);
         if (matcher.find()) {
             String dest = matcher.group(1);
-            String desc = matcher.groupCount() > 1 ? matcher.group(3) : null;
+            String desc = matcher.group(3);
             int length = matcher.group().length();
             LinkNode node = new LinkNode(dest);
             node.setPosition(Pair.of(start, start + length - 1));

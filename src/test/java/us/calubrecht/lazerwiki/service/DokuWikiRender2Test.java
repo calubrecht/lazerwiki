@@ -287,4 +287,84 @@ public class DokuWikiRender2Test {
         String input = " __//**UnderItaliBold **//__";
         assertEquals("<div> <span class=\"underline\"><span class=\"italic\"><span class=\"bold\">UnderItaliBold </span></span></span></div>", doRender(input));
     }
+
+    @Test
+    public void testRenderImage() {
+        String input1 = "{{img.jpg}}";
+        assertEquals(
+                "<div><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(input1)
+        );
+
+        // Image inside link
+        String input2 = "[[somePage|w {{img.jpg}} y]]";
+        assertEquals(
+                "<div><a class=\"wikiLinkMissing\" href=\"/page/somePage\">w <img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"> y</a></div>",
+                doRender(input2)
+        );
+
+        // Image with dash in name
+        String input3 = "{{an-image.jpg}}";
+        assertEquals(
+                "<div><img src=\"/_media/an-image.jpg\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(input3)
+        );
+
+        String inputWithTitle = "{{image.jpg|A title }}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg\" class=\"media\" title=\"A title\" loading=\"lazy\"></div>",
+                doRender(inputWithTitle)
+        );
+
+        String inputWithSize = "{{image.jpg?10}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg?10\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(inputWithSize)
+        );
+        String inputWithSizeAndLinkType = "{{image.jpg?nolink&10}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg?10\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(inputWithSizeAndLinkType)
+        );
+
+        String inputWithTypeNoSize = "{{image.jpg?nolink}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(inputWithTypeNoSize)
+        );
+
+        String inputWithTypeFullLink = "{{image.jpg?fullLink}}";
+        assertEquals(
+                "<div><img src=\"/_media/image.jpg\" class=\"media fullLink\" loading=\"lazy\"></div>",
+                doRender(inputWithTypeFullLink)
+        );
+
+        String inputWithLinkOnly = "{{image.jpg?linkonly}}";
+        assertEquals(
+                "<div><a href=\"/_media/image.jpg\" class=\"media linkOnly\" target=\"_blank\">image.jpg</a></div>",
+                doRender(inputWithLinkOnly)
+        );
+        String inputWithLinkOnlyAndName = "{{image.jpg?linkonly|LinkName}}";
+        assertEquals(
+                "<div><a href=\"/_media/image.jpg\" class=\"media linkOnly\" target=\"_blank\">LinkName</a></div>",
+                doRender(inputWithLinkOnlyAndName)
+        );
+    }
+
+    @Test
+    public void testRenderWeirdImage() {
+        String linkEmbeddingJS = "{{ thisLinkHastooMany&&options}}";
+        assertEquals("<div><img src=\"/_media/thisLinkHastooMany&&options\" class=\"mediaright\" loading=\"lazy\"></div>", doRender(linkEmbeddingJS));
+
+    }
+
+    @Test
+    public void testRenderImageRecordsRefs() {
+        String imageInput = "{{image.jpg}}";
+        RenderResult renderRes = underTest.renderWithInfo(imageInput, "host", "site", "page", "user");
+        assertEquals(Set.of("image.jpg"), renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.IMAGES.name()));
+        String linkOnlyInput = "{{image.jpg?linkonly}}";
+        renderRes = underTest.renderWithInfo(linkOnlyInput, "host", "site", "page", "user");
+        assertEquals(Set.of("image.jpg"), renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.IMAGES.name()));
+    }
 }

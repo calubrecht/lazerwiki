@@ -9,9 +9,8 @@ import java.util.List;
 /**
  * A Tree node represeneting a list of nodes with no inherent meaning itself.
  */
-public class ContainerNode implements ITreeNode {
+public class ContainerNode extends AbstractNode {
     List<ITreeNode> children = new ArrayList<>();
-    Pair<Integer, Integer> position = null;
 
     public void addChild(ITreeNode node) {
         if (node != null) {
@@ -21,12 +20,5 @@ public class ContainerNode implements ITreeNode {
 
     public List<ITreeNode> getChildren() {
         return children;
-    }
-
-    public void setPosition(Pair<Integer, Integer> position) {
-        this.position = position;
-    }
-    public Pair<Integer, Integer> getPosition() {
-        return position;
     }
 }

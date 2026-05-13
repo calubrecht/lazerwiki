@@ -11,7 +11,5 @@ public interface ITreeNode {
     void setPosition(Pair<Integer, Integer> position);
     Pair<Integer, Integer> getPosition();
 
-    default String asString() {
-        throw new UnsupportedOperationException("No default text representation");
-    }
+    String asString();
 }
