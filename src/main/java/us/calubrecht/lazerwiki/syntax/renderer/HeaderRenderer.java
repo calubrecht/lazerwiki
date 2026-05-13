@@ -19,15 +19,7 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.HEADE
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ID_SUFFIX;
 
 @Component
-public class HeaderRenderer  extends ContainerRenderer {
-  /*  protected final HtmlNodeRendererContext context;
-    private final HtmlWriter html;
-
-    public HeaderRenderer(HtmlNodeRendererContext context) {
-        this.context = context;
-        this.html = context.getWriter();
-    }*/
-
+public class HeaderRenderer extends ContainerRenderer {
     @Override
     public Collection<Class> getTargets() {
         return List.of(HeaderNode.class);

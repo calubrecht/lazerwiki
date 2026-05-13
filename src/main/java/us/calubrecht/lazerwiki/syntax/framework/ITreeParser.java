@@ -9,6 +9,8 @@ public interface ITreeParser {
      */
     ITreeNode parse(List<String> markupLines);
 
+    void setRegistrar(ParserRegistrar registrar);
+
     String parserKey();
     default int priority() {
         return 100;

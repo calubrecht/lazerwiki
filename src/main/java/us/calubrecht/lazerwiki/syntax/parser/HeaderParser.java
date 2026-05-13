@@ -10,7 +10,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 import java.util.List;
 
 @Component
-public class HeaderParser implements ITreeParser {
+public class HeaderParser extends AbstractTreeParser {
   final static char HEADER_CHAR = '=';
   final static String MIN_HEADER = StringUtils.repeat(HEADER_CHAR, 2);
 
@@ -19,7 +19,6 @@ public class HeaderParser implements ITreeParser {
       if (!line.startsWith(MIN_HEADER)) {
            return null;
        }
-       //StringUtils.repeat(HEADER_CHAR, starCount))
       int tokenCount = 0;
       for (int i = 0; i < line.length(); i++) {
           if (line.charAt(i) != HEADER_CHAR) {
@@ -27,7 +26,7 @@ public class HeaderParser implements ITreeParser {
               if (line.endsWith(tokens)) {
                   markupLines.remove(0);
                   HeaderNode node =  new HeaderNode(7 - i);
-                  Parser.parse(line.substring(i, line.length() - i), node, List.of());
+                  Parser.parseInner(List.of(line.substring(i, line.length() - i)), node, registrar);
                   return node;
               }
               else {

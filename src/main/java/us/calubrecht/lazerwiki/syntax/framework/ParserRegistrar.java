@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class ParserRegistrar {
@@ -20,6 +21,9 @@ public class ParserRegistrar {
     Map<Class, ITreeRenderer> renderersForClass;
     @Autowired
     Set<ITreeParser> parsers;
+    @Autowired
+    Set<IInnerParser> innerParsers;
+    Map<Character, List<IInnerParser>> innerParsersForKeychar;
 
     //Map<String, ITreeRenderer> renderersForAdditiveClass;
 
@@ -33,6 +37,13 @@ public class ParserRegistrar {
             renderer.getTargets().forEach(cl -> renderersForClass.put(cl, renderer));
             renderer.setRegistrar(this);
         }
+        for (ITreeParser parsers : parsers) {
+            parsers.setRegistrar(this);
+        }
+        for (IInnerParser parsers : innerParsers) {
+            parsers.setRegistrar(this);
+        }
+        innerParsersForKeychar = innerParsers.stream().collect(Collectors.groupingBy(IInnerParser::keyCharacter));
         DEFAULT_RENDERER.setRegistrar(this);
 
     }
@@ -45,6 +56,10 @@ public class ParserRegistrar {
     public Collection<ITreeParser> getParsers() {
         // Need to order?
         return parsers;
+    }
+
+    public List<IInnerParser> getParsersForKeyCharacter(char c) {
+        return innerParsersForKeychar.getOrDefault(c, List.of());
     }
 
 }

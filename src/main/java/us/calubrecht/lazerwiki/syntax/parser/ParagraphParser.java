@@ -4,13 +4,15 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
+import us.calubrecht.lazerwiki.syntax.framework.ParserRegistrar;
+import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ParagraphNode;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @Component
-public class ParagraphParser implements ITreeParser {
+public class ParagraphParser extends AbstractTreeParser {
     @Override
     public ITreeNode parse(List<String> markupLines) {
         List<String> paragraphLines = new LinkedList<>();
@@ -26,7 +28,8 @@ public class ParagraphParser implements ITreeParser {
         ParagraphNode node = new ParagraphNode();
         // XXX Need to introduce the concept of legal child parsers. Parser registrar
         // To provide option to look up
-        Parser.parse(paragraphLines, node, List.of());
+        //Parser.parse(paragraphLines, node, List.of());
+        Parser.parseInner(paragraphLines, node, registrar);
         return node;
     }
 
