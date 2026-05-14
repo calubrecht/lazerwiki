@@ -532,4 +532,16 @@ public class DokuWikiRender2Test {
         String render = underTest.renderToString(inputMacro, "", "", "page", "");
         assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
     }
+
+    @Test
+    public void testRenderLinebreak() {
+        String input = "This is a line \\\\ with a linebreak";
+        assertEquals("<div>This is a line<br> with a linebreak</div>", doRender(input));
+        String inputBreakSymbolInHeader = "====This is \\\\ a header====";
+        assertEquals("<h3 id=\"header_This_is__a_header\">This is<br> a header</h3>", doRender(inputBreakSymbolInHeader));
+
+        String inputRequireWS = "This is a line\\\\with a linebreak but no spaces";
+        assertEquals("<div>This is a line\\\\with a linebreak but no spaces</div>", doRender(inputRequireWS));
+    }
+
 }
