@@ -15,7 +15,7 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGE
 @Component
 public class ImageRenderer extends AbstractRenderer {
     @Override
-    public Collection<Class> getTargets() {
+    public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(ImageNode.class);
     }
 
@@ -44,7 +44,7 @@ public class ImageRenderer extends AbstractRenderer {
         return new StringBuilder(String.format("<a href=\"/_media/%s%s\" class=\"media linkOnly\" target=\"_blank\">%s</a>", src, size, linkText));
     }
 
-    Map<ALIGN_TYPE, String> alignClasses = Map.of(
+    final Map<ALIGN_TYPE, String> alignClasses = Map.of(
             ALIGN_TYPE.NONE, "media",
             ALIGN_TYPE.CENTER, "mediacenter",
             ALIGN_TYPE.LEFT, "medialeft",
@@ -59,7 +59,7 @@ public class ImageRenderer extends AbstractRenderer {
         return String.join(" ", classes);
     }
 
-    Pattern sizePattern = Pattern.compile("([0-9]+)(x(0-9]+))?");
+    final Pattern sizePattern = Pattern.compile("([0-9]+)(x(0-9]+))?");
     Map<String, String> parseOptions(String options) {
         String[] allOptions = options.split("&");
         Map<String, String> optionMap = new HashMap<>();

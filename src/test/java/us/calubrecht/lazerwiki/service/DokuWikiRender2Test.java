@@ -429,4 +429,48 @@ public class DokuWikiRender2Test {
                 doRender(input1)
         );
     }
+
+    @Test
+    public void testRenderOListWithValues() {
+        String input1 = " - Simple List\n -{{5}}With one row value defined\n -One follow\n";
+        assertEquals(
+                "<ol>\n<li>Simple List</li>\n<li value=\"5\">With one row value defined</li>\n<li>One follow</li>\n</ol>",
+                doRender(input1)
+        );
+    }
+
+    @Test
+    public void testRenderNestedLists() {
+        String input1 = " - Simple List\n  -Deeper List\n   * DeepestList\n";
+        assertEquals(
+                """
+                        <ol>
+                        <li>Simple List</li>
+                        <ol>
+                        <li>Deeper List</li>
+                        <ul>
+                        <li>DeepestList</li>
+                        </ul>
+                        </ol>
+                        </ol>""",
+                doRender(input1)
+        );
+
+        String input2 = " - Simple List\n *List Changes Type\n   * DeepestList\n * and backout\n";
+        assertEquals(
+                """
+                        <ol>
+                        <li>Simple List</li>
+                        </ol>
+                        <ul>
+                        <li>List Changes Type</li>
+                        <ul>
+                        <li>DeepestList</li>
+                        </ul>
+                        <li>and backout</li>
+                        </ul>""",
+                doRender(input2)
+        );
+    }
+
 }

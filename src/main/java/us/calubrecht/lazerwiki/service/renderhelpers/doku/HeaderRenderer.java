@@ -9,9 +9,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.TreeRenderer;
 import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.HEADERS;

@@ -8,23 +8,20 @@ import us.calubrecht.lazerwiki.syntax.nodes.SpecialSpanNode;
 import us.calubrecht.lazerwiki.syntax.nodes.SpecialSpanNode.SPAN_TYPE;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import us.calubrecht.lazerwiki.syntax.nodes.SpecialSpanNode.SPAN_TYPE;
-
 @Component
 public class SpecialSpanParser extends AbstractInnerParser {
-    String patternFormat = "<%s>(.*?)</%s>";
+    final String patternFormat = "<%s>(.*?)</%s>";
 
-    Pattern tagPattern = Pattern.compile("^<(sup|sub|del)>");
-    Map<String, Pattern> patternMap = new ConcurrentHashMap<>();
+    final Pattern tagPattern = Pattern.compile("^<(sup|sub|del)>");
+    final Map<String, Pattern> patternMap = new ConcurrentHashMap<>();
 
-    Map<String, SPAN_TYPE> typeForTag =
+    final Map<String, SPAN_TYPE> typeForTag =
             Map.of("sup", SPAN_TYPE.SUP, "sub", SPAN_TYPE.SUB, "del", SPAN_TYPE.DEL);
 
     @Override

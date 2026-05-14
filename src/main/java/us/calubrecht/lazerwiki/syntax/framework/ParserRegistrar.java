@@ -1,24 +1,18 @@
 package us.calubrecht.lazerwiki.syntax.framework;
 
 import jakarta.annotation.PostConstruct;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.syntax.framework.ITreeRenderer;
-import us.calubrecht.lazerwiki.syntax.parser.HeaderParser;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class ParserRegistrar {
     @Autowired
     Set<ITreeRenderer> renderers;
-    Map<Class, ITreeRenderer> renderersForClass;
+    Map<Class<? extends ITreeNode>, ITreeRenderer> renderersForClass;
     @Autowired
     Set<ITreeParser> parsers;
     @Autowired
@@ -54,9 +48,8 @@ public class ParserRegistrar {
 
     }
 
-    public ITreeRenderer getRenderer(Class forClass) {
-        ITreeRenderer renderer = renderersForClass.getOrDefault(forClass, DEFAULT_RENDERER);
-        return renderer;
+    public ITreeRenderer getRenderer(Class<? extends ITreeNode> forClass) {
+        return renderersForClass.getOrDefault(forClass, DEFAULT_RENDERER);
     }
 
     public Collection<ITreeParser> getParsers() {

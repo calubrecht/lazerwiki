@@ -17,7 +17,7 @@ public class SpecialSpanRenderer extends ContainerRenderer {
                 SPAN_TYPE.SUB, "sub",
                 SPAN_TYPE.DEL, "del");
     @Override
-    public Collection<Class> getTargets() {
+    public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(SpecialSpanNode.class);
     }
 

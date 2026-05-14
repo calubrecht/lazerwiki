@@ -18,7 +18,7 @@ public class StyledSpanRenderer extends ContainerRenderer {
                 SPAN_TYPE.UNDERLINE, "underline",
                 SPAN_TYPE.MONOSPACE, "monospace");
     @Override
-    public Collection<Class> getTargets() {
+    public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(StyledSpanNode.class);
     }
 

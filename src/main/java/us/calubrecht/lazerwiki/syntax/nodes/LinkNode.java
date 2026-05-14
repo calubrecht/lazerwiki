@@ -1,10 +1,9 @@
 package us.calubrecht.lazerwiki.syntax.nodes;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class LinkNode extends ContainerNode{
-    String dest;
+    final String dest;
     Pair<Integer, Integer> targetPosition;
 
     public LinkNode(String dest) {

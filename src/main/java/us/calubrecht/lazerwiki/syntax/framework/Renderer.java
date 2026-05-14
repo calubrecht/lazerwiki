@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
-import java.util.Map;
-
 @Component
 public class Renderer {
     final ParserRegistrar parserRegistrar;

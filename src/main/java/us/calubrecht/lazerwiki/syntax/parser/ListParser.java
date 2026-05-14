@@ -3,21 +3,19 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.nodes.ListItemNode;
+import us.calubrecht.lazerwiki.syntax.nodes.ListChild;
 import us.calubrecht.lazerwiki.syntax.nodes.ListNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ListNode.LIST_TYPE;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 public class ListParser extends AbstractTreeParser {
-    Pattern pattern = Pattern.compile("^(\\s+)([\\-*])");
+    final Pattern pattern = Pattern.compile("^(\\s+)([\\-*])(\\{\\{([0-9]+)}})?");
 
     @Override
     public ITreeNode parse(List<String> markupLines, AtomicInteger counter) {
@@ -45,19 +43,25 @@ public class ListParser extends AbstractTreeParser {
                 //ListNode innerList =
                 // Define a sublist[
                 // more looping
-                node = node;
+                ListNode list = (ListNode)parse(markupLines, counter);
+                node.addItem(new ListChild.ListChildList(list));
             } else {
                 listToken = newToken;
                 depth = lineDepth;
                 if (node == null) {
                     node = new ListNode(listToken.equals("*" ) ? LIST_TYPE.UNORDERED : LIST_TYPE.ORDERED);
                 }
-                String itemText = nextLine.substring(lineDepth + 1);
+                int length = m.group().length();
+                String itemText = nextLine.substring(length);
                 markupLines.remove(0);
-                int itemStart = counter.get() + lineDepth + 1;
+                int itemStart = counter.get() + length;
                 int lineEnd = counter.addAndGet(nextLine.length() + 1) - 1;
-                ListItemNode item = new ListItemNode();
+                ListChild.ListItemNode item = new ListChild.ListItemNode();
                 item.setPosition(Pair.of(itemStart, lineEnd));
+                if (m.group(4) != null && listToken.equals("-") ) {
+                    // An item value was provided. Only handle if Ordered
+                    item.setValue(m.group(4));
+                }
                 Parser.parseInner(List.of(itemText), item, itemStart, registrar);
                 node.addItem(item);
             }

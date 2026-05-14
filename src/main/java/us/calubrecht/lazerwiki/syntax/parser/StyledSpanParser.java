@@ -20,8 +20,8 @@ public class StyledSpanParser extends AbstractInnerParser {
     final Pattern underlinePattern = Pattern.compile("^__(.*?)__", Pattern.DOTALL);
     final Pattern monospacePattern = Pattern.compile("^''(.*?)''", Pattern.DOTALL);
 
-    Map<Character, Pattern> patternForChar = Map.of('*', boldPattern, '/', italicPattern, '_', underlinePattern, '\'', monospacePattern);
-    Map<Character, SPAN_TYPE> typeForChar = Map.of('*', SPAN_TYPE.BOLD, '/', SPAN_TYPE.ITALIC, '_', SPAN_TYPE.UNDERLINE, '\'', SPAN_TYPE.MONOSPACE);
+    final Map<Character, Pattern> patternForChar = Map.of('*', boldPattern, '/', italicPattern, '_', underlinePattern, '\'', monospacePattern);
+    final Map<Character, SPAN_TYPE> typeForChar = Map.of('*', SPAN_TYPE.BOLD, '/', SPAN_TYPE.ITALIC, '_', SPAN_TYPE.UNDERLINE, '\'', SPAN_TYPE.MONOSPACE);
 
     @Override
     public Collection<Character> keyCharacters() {

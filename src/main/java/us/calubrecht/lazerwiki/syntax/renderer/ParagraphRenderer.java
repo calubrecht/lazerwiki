@@ -12,7 +12,7 @@ import java.util.List;
 public class ParagraphRenderer extends ContainerRenderer {
 
     @Override
-    public Collection<Class> getTargets() {
+    public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(ParagraphNode.class);
     }
 

@@ -1,16 +1,10 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
-import org.commonmark.node.*;
-import org.commonmark.renderer.NodeRenderer;
-import org.commonmark.renderer.html.HtmlNodeRendererContext;
-import org.commonmark.renderer.html.HtmlWriter;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.model.HeaderRef;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.framework.ITreeRenderer;
-import us.calubrecht.lazerwiki.syntax.framework.ParserRegistrar;
 import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 
 import java.util.*;
@@ -21,7 +15,7 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ID_SU
 @Component
 public class HeaderRenderer extends ContainerRenderer {
     @Override
-    public Collection<Class> getTargets() {
+    public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(HeaderNode.class);
     }
 
@@ -58,26 +52,4 @@ public class HeaderRenderer extends ContainerRenderer {
         }
         return id;
     }
-
-/*
-    @Override
-    public Set<Class<? extends Node>> getNodeTypes() {
-        return new HashSet<>(Arrays.asList(
-                Heading.class));
-    }
-
-    @Override
-    public void render(Node node) {
-        node.accept(this);
-    }
-
-    @Override
-    public void visit(Heading heading) {
-        String htag = "h" + heading.getLevel();
-        html.line();
-        html.tag(htag, Map.of("id","spaghettti"));
-        visitChildren(heading);
-        html.tag('/' + htag);
-        html.line();
-    }*/
 }

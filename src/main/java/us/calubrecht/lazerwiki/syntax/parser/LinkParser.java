@@ -1,12 +1,9 @@
 package us.calubrecht.lazerwiki.syntax.parser;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Component;
-import us.calubrecht.lazerwiki.syntax.framework.IInnerParser;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
-import us.calubrecht.lazerwiki.syntax.framework.ParserRegistrar;
 import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
 
 import java.util.List;

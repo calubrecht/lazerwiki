@@ -7,17 +7,17 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ITreeRenderer {
-    Collection<Class> getTargets();
+    Collection<Class<? extends ITreeNode>> getTargets();
 
     void setRegistrar(ParserRegistrar registrar);
 
     StringBuilder renderHtml(ITreeNode node, RenderContext renderContext);
     StringBuilder renderPlaintext(ITreeNode node, RenderContext renderContext);
 
-    public static class DefaultRenderer implements ITreeRenderer {
+    class DefaultRenderer implements ITreeRenderer {
 
         @Override
-        public Collection<Class> getTargets() {
+        public Collection<Class<? extends ITreeNode>> getTargets() {
             return List.of();
         }
 
@@ -38,6 +38,6 @@ public interface ITreeRenderer {
     }
 
     default String sanitize(String input) {
-        return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
+        return StringEscapeUtils.escapeHtml4(input).replace("&quot;", "\"");
     }
 }

@@ -10,10 +10,6 @@ import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.framework.Renderer;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
  */

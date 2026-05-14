@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 @Component
 public class ImageParser extends AbstractInnerParser{
-    Pattern pattern = Pattern.compile("^\\{\\{(\\s)*(.*?)(\\s)*(\\|(.*?))?}}", Pattern.DOTALL);
+    final Pattern pattern = Pattern.compile("^\\{\\{(\\s)*(.*?)(\\s)*(\\|(.*?))?}}", Pattern.DOTALL);
 
     @Override
     public Collection<Character> keyCharacters() {
@@ -35,7 +35,7 @@ public class ImageParser extends AbstractInnerParser{
     }
 
     ImageInfo parseSource(String srcFmt) {
-        String parts[] = srcFmt.split("\\?");
+        String[] parts = srcFmt.split("\\?");
         String options = parts.length > 1 ? parts[1] : "";
         return new ImageInfo(parts[0].strip(), options);
     }
@@ -55,7 +55,7 @@ public class ImageParser extends AbstractInnerParser{
         return ALIGN_TYPE.NONE;
     }
 
-    static record ImageInfo(String src, String options) {
+    record ImageInfo(String src, String options) {
     }
 
 }

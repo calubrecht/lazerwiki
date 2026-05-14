@@ -8,7 +8,6 @@ import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
 import us.calubrecht.lazerwiki.service.LinkOverrideService;
 import us.calubrecht.lazerwiki.service.PageService;
-import us.calubrecht.lazerwiki.service.parser.doku.DokuwikiParser;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
@@ -35,7 +34,7 @@ public class LinkRenderer extends ContainerRenderer{
     LinkOverrideService linkOverrideService;
 
     @Override
-    public Collection<Class> getTargets() {
+    public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(LinkNode.class);
     }
 
@@ -62,13 +61,13 @@ public class LinkRenderer extends ContainerRenderer{
                 URI uri = new URI(rawTarget);
                 return uri.toString();
             } catch (URISyntaxException e) {
-                logger.error("Could not format URL of form: " + rawTarget);
+                logger.error("Could not format URL of form: {}", rawTarget);
                 return "http://malformed.invalid";
             }
         }
         String ret = rawTarget.replaceAll("[ \"=]+", "_");
         if (! ret.equals(rawTarget)) {
-            logger.warn("Substitutions made when formatting URL: " + rawTarget);
+            logger.warn("Substitutions made when formatting URL: {}", rawTarget);
         }
         return ret;
     }

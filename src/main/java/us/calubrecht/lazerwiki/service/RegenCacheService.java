@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
@@ -29,6 +30,7 @@ public class RegenCacheService {
     ImageRefService imageRefService;
 
     @Autowired
+    @Qualifier("Antlr")
     IMarkupRenderer renderer;
 
     @Autowired

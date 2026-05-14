@@ -4,12 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component

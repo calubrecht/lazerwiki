@@ -9,7 +9,7 @@ public record PageData(String rendered, String source, String title, List<String
 
     public PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id, Long revision, boolean success, String msg) {
        this(rendered, source, title, tags, backlinks, flags, id, revision, success, msg, null);
-  ;  }
+    }
 
     public PageData(String rendered, String source, String title, List<String> tags, List<String> backlinks, PageFlags flags, Long id, Long revision) {
         this(rendered, source, title, tags, backlinks, flags, id, revision, true, null);

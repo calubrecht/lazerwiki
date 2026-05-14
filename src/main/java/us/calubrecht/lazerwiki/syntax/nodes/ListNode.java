@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListNode extends AbstractNode{
-    public enum LIST_TYPE {ORDERED, UNORDERED};
+    public enum LIST_TYPE {ORDERED, UNORDERED}
 
     final LIST_TYPE listType;
-    List<ListItemNode> items = new ArrayList<>();
+    final List<ListChild> items = new ArrayList<>();
 
     public ListNode(LIST_TYPE type) {
         listType = type;
@@ -17,11 +17,11 @@ public class ListNode extends AbstractNode{
         return listType;
     }
 
-    public void addItem(ListItemNode item) {
+    public void addItem(ListChild item) {
         items.add(item);
     }
 
-    public List<ListItemNode> getItems() {
+    public List<ListChild> getItems() {
         return items;
     }
 }

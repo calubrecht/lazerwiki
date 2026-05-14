@@ -3,8 +3,6 @@ package us.calubrecht.lazerwiki.syntax.nodes;
 import org.apache.commons.lang3.tuple.Pair;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 
-import java.util.List;
-
 public abstract class AbstractNode implements ITreeNode {
     Pair<Integer, Integer> position = null;
 
