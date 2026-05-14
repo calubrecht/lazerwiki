@@ -9,16 +9,6 @@ public abstract class AbstractNode implements ITreeNode {
     Pair<Integer, Integer> position = null;
 
     @Override
-    public void addChild(ITreeNode node) {
-        throw new UnsupportedOperationException("Text Node cannot have children");
-    }
-
-    @Override
-    public List<ITreeNode> getChildren() {
-        return List.of();
-    }
-
-    @Override
     public void setPosition(Pair<Integer, Integer> position) {
         this.position = position;
     }

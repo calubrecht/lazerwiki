@@ -9,6 +9,7 @@ import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component

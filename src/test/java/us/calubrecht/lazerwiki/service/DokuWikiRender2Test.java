@@ -352,6 +352,33 @@ public class DokuWikiRender2Test {
     }
 
     @Test
+    public void testRenderImageAlignments() {
+        String input1 = "{{img.jpg}}";
+        assertEquals(
+                "<div><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"></div>",
+                doRender(input1)
+        );
+
+        String leftImage = "{{img.jpg }}";
+        assertEquals(
+                "<div><img src=\"/_media/img.jpg\" class=\"medialeft\" loading=\"lazy\"></div>",
+                doRender(leftImage)
+        );
+
+        String rightImage = "{{ img.jpg}}";
+        assertEquals(
+                "<div><img src=\"/_media/img.jpg\" class=\"mediaright\" loading=\"lazy\"></div>",
+                doRender(rightImage)
+        );
+
+        String centerImage = "{{ img.jpg }}";
+        assertEquals(
+                "<div><img src=\"/_media/img.jpg\" class=\"mediacenter\" loading=\"lazy\"></div>",
+                doRender(centerImage)
+        );
+    }
+
+    @Test
     public void testRenderWeirdImage() {
         String linkEmbeddingJS = "{{ thisLinkHastooMany&&options}}";
         assertEquals("<div><img src=\"/_media/thisLinkHastooMany&&options\" class=\"mediaright\" loading=\"lazy\"></div>", doRender(linkEmbeddingJS));
@@ -366,5 +393,40 @@ public class DokuWikiRender2Test {
         String linkOnlyInput = "{{image.jpg?linkonly}}";
         renderRes = underTest.renderWithInfo(linkOnlyInput, "host", "site", "page", "user");
         assertEquals(Set.of("image.jpg"), renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.IMAGES.name()));
+    }
+
+    @Test
+    public void testRenderUList() {
+        String input1 = " * Simple List\n *With 2 rows\nThen * non-matching\n";
+        assertEquals(
+                "<ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\n<div>Then * non-matching</div>",
+                doRender(input1)
+        );
+
+        // List after blank line
+        String input2 = "Something\n\n * Simple List\n *With 2 rows\nThen * non-matching\n";
+        assertEquals(
+                "<div>Something</div>\n<ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\n<div>Then * non-matching</div>",
+                doRender(input2)
+        );
+
+        // List item with bold
+        String inputBold = """
+                 * **item1**
+                 * **item2** - is mixed
+                """;
+        assertEquals(
+                "<ul>\n<li><span class=\"bold\">item1</span></li>\n<li><span class=\"bold\">item2</span> - is mixed</li>\n</ul>",
+                doRender(inputBold)
+        );
+    }
+
+    @Test
+    public void testRenderOList() {
+        String input1 = " - Simple List\n -With 2 rows\nThen * non-matching\n";
+        assertEquals(
+                "<ol>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ol>\n<div>Then * non-matching</div>",
+                doRender(input1)
+        );
     }
 }

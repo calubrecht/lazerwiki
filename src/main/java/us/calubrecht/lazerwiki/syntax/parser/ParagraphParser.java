@@ -11,6 +11,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.ParagraphNode;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -36,7 +37,6 @@ public class ParagraphParser extends AbstractTreeParser {
         node.setPosition(Pair.of(start, counter.get() -1));
         // XXX Need to introduce the concept of legal child parsers. Parser registrar
         // To provide option to look up
-        //Parser.parse(paragraphLines, node, List.of());
         Parser.parseInner(paragraphLines, node, start, registrar);
         return node;
     }
