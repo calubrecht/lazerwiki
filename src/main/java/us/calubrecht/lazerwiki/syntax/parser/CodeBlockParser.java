@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.CodeBlockNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
@@ -14,29 +15,31 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CodeBlockParser extends AbstractTreeParser {
     final String doubleSpace = "  ";
     @Override
-    public ITreeNode parse(List<String> markupLines, AtomicInteger counter) {
-        List<String> blockLines = new ArrayList<>();
-        int start = counter.get();
-        while(!markupLines.isEmpty()) {
-            String nextLine = markupLines.get(0);
+    public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
+        ParseContext blockLines = new ParseContext();
+        // Sub context counts from current location
+        blockLines.setRoot(parseContext.getPosition());
+        int start = parseContext.getPosition();
+        while(!parseContext.isEmpty()) {
+            String nextLine = parseContext.peekLine();
             if (nextLine.startsWith(doubleSpace)) {
-                blockLines.add(nextLine);
-                counter.addAndGet(nextLine.length() + 1);
-                markupLines.remove(0);
+                blockLines.addLine(nextLine);
+                parseContext.advanceLine();
             }
             else if (blockLines.isEmpty() ){
                // No Block Found
                return null;
             }
         }
+        blockLines.lock();
         CodeBlockNode node = new CodeBlockNode();
-        node.setPosition(Pair.of(start, counter.get()));
+        node.setPosition(Pair.of(start, blockLines.getPosition() -1));
         int lineStart = start;
         for (String line : blockLines) {
             TextNode textNode = new TextNode(line.substring(2) + '\n');
             textNode.setPosition(Pair.of(lineStart+2, lineStart + line.length() - 1));
             node.addChild(textNode);
-            lineStart += line.length() + 1;
+            lineStart = blockLines.getPosition();
         }
         return node;
     }

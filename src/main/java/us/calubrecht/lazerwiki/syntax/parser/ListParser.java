@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.ListChild;
 import us.calubrecht.lazerwiki.syntax.nodes.ListNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ListNode.LIST_TYPE;
@@ -18,12 +19,12 @@ public class ListParser extends AbstractTreeParser {
     final Pattern pattern = Pattern.compile("^(\\s+)([\\-*])(\\{\\{([0-9]+)}})?");
 
     @Override
-    public ITreeNode parse(List<String> markupLines, AtomicInteger counter) {
-        int start = counter.get();
+    public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
+        int start = parseContext.getPosition();
         ListNode node = null;
         int depth = -1;
         String listToken = null;
-        for (String nextLine = markupLines.get(0); !markupLines.isEmpty(); nextLine = getNext(markupLines)) {
+        for (String nextLine = parseContext.peekLine(); !parseContext.isEmpty(); nextLine = getNext(parseContext)) {
             Matcher m = pattern.matcher(nextLine);
             if (!m.find()) {
                 if (node == null) {
@@ -43,7 +44,7 @@ public class ListParser extends AbstractTreeParser {
                 //ListNode innerList =
                 // Define a sublist[
                 // more looping
-                ListNode list = (ListNode)parse(markupLines, counter);
+                ListNode list = (ListNode)parse(parseContext, counter);
                 node.addItem(new ListChild.ListChildList(list));
             } else {
                 listToken = newToken;
@@ -53,9 +54,9 @@ public class ListParser extends AbstractTreeParser {
                 }
                 int length = m.group().length();
                 String itemText = nextLine.substring(length);
-                markupLines.remove(0);
-                int itemStart = counter.get() + length;
-                int lineEnd = counter.addAndGet(nextLine.length() + 1) - 1;
+                int itemStart = parseContext.getPosition() + length;
+                parseContext.advanceLine();
+                int lineEnd = parseContext.getPosition() - -1;
                 ListChild.ListItemNode item = new ListChild.ListItemNode();
                 item.setPosition(Pair.of(itemStart, lineEnd));
                 if (m.group(4) != null && listToken.equals("-") ) {
@@ -79,8 +80,8 @@ public class ListParser extends AbstractTreeParser {
         return node;
     }
 
-    String getNext(List<String> list) {
-        return list.isEmpty() ? null : list.get(0);
+    String getNext(ParseContext parseContext) {
+        return parseContext.isEmpty() ? null : parseContext.peekLine();
     }
 
     @Override

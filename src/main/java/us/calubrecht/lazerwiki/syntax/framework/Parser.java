@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,32 +19,30 @@ public class Parser {
     }
 
     public ITreeNode parse(String markup) {
-        List<String> markupLines = new LinkedList<>(markup.lines().toList());
+        ParseContext parseContext = new ParseContext(markup);
         ContainerNode rootNode = new ContainerNode();
-        return parse(markupLines, rootNode, parserRegistrar.getParsers());
+        return parse(parseContext, rootNode, parserRegistrar.getParsers());
     }
 
-    public static ITreeNode parse(String markupLine, ContainerNode container, Collection<ITreeParser> parsers) {
-        return parse(new ArrayList<>(List.of(markupLine)), container, parsers);
-    }
-
-    public static ITreeNode parse(List<String> markupLines, ContainerNode container, Collection<ITreeParser> parsers) {
+    public static ITreeNode parse(ParseContext parseContext, ContainerNode container, Collection<ITreeParser> parsers) {
         AtomicInteger counter = new AtomicInteger(0);
-        while (!markupLines.isEmpty() ) {
+        while (!parseContext.isEmpty() ) {
             ITreeNode nextNode = null;
             for (ITreeParser parser: parsers) {
-                if (!parser.canBeginParse(markupLines.get(0))) {
+                if (!parser.canBeginParse(parseContext.peekLine())) {
                     continue;
                 }
-                nextNode = parser.parse(markupLines, counter);
+                nextNode = parser.parse(parseContext, counter);
                 if (nextNode != null) {
                     break;
                 }
             }
             if (nextNode == null) {
-                String nextLine = markupLines.get(0);
-                nextNode = new TextNode(nextLine);
-                markupLines.remove(0);
+                int nodeStart = parseContext.getPosition();
+                String nextLine = parseContext.peekLine();
+                nextNode = new TextNode(parseContext.peekLine());
+                parseContext.advanceLine();
+                nextNode.setPosition(Pair.of(nodeStart, nodeStart + nextLine.length() -1));
             }
             container.addChild(nextNode);
         }

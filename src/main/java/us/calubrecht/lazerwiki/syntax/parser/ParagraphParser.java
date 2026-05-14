@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.ParagraphNode;
 
@@ -15,23 +16,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class ParagraphParser extends AbstractTreeParser {
     @Override
-    public ITreeNode parse(List<String> markupLines, AtomicInteger counter) {
+    public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
+        // XXX: Replace with subcontext
         List<String> paragraphLines = new LinkedList<>();
         int start = counter.get();
-        for (String nextLine = markupLines.get(0); !markupLines.isEmpty(); nextLine = getNext(markupLines)) {
+        for (String nextLine = parseContext.peekLine(); !parseContext.isEmpty(); nextLine = getNext(parseContext)) {
           if (nonParagraphBlock(nextLine)) {
               // End of paragraph. Preserve line for next parser
               break;
           }
           if (!nextLine.isEmpty()) {
               paragraphLines.add(nextLine);
-              markupLines.remove(0);
-              counter.addAndGet(nextLine.length() + 1);
+              parseContext.advanceLine();
           }
           else {
               // Blank line marks end of paragraph
-              markupLines.remove(0);
-              counter.addAndGet( 1);
+              parseContext.advanceLine();
               break;
           }
         }
@@ -46,8 +46,8 @@ public class ParagraphParser extends AbstractTreeParser {
         return true; // Paragraph is final fall-through parser and will handle any line
     }
 
-    String getNext(List<String> list) {
-        return list.isEmpty() ? null : list.get(0);
+    String getNext(ParseContext parseContext) {
+        return parseContext.isEmpty() ? null : parseContext.peekLine();
     }
 
     /**
