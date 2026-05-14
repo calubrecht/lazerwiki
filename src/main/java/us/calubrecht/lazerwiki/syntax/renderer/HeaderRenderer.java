@@ -12,7 +12,7 @@ import java.util.*;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.HEADERS;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ID_SUFFIX;
 
-@Component
+@Component("customSynHeaderRenderer")
 public class HeaderRenderer extends ContainerRenderer {
     @Override
     public Collection<Class<? extends ITreeNode>> getTargets() {

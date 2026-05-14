@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component("customSynListRenderer")
 public class ListRenderer extends AbstractRenderer {
     final Map<LIST_TYPE, String> tagNameMap = Map.of(
             LIST_TYPE.ORDERED, "ol",

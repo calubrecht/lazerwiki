@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.*;
 
-@Component
+@Component("customSynLinkRenderer")
 public class LinkRenderer extends ContainerRenderer{
     final Logger logger = LogManager.getLogger(getClass());
     static final String MISSING_LINK_CLASS ="wikiLinkMissing";

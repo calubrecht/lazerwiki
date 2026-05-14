@@ -10,7 +10,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.MacroNode;
 import java.util.Collection;
 import java.util.List;
 
-@Component
+@Component("customSynMacroRenderer")
 public class MacroRenderer extends AbstractRenderer {
     final MacroService macroService;
 

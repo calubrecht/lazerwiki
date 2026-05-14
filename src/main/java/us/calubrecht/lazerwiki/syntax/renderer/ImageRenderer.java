@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGES;
 
-@Component
+@Component("customSynImageRenderer")
 public class ImageRenderer extends AbstractRenderer {
     @Override
     public Collection<Class<? extends ITreeNode>> getTargets() {
