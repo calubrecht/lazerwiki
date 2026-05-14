@@ -48,8 +48,9 @@ public class ParagraphParser extends AbstractTreeParser {
 
     /**
      * Bit hack: Break a paraagraph if we hit a code block or list.
+     * Potential solution: ITreeParser... have "shouldBeginParse" to say if should take over parsing
      */
-    final Set<String> breakingStart = Set.of("  ", " *", " -");
+    final Set<String> breakingStart = Set.of("  ", " *", " -", "==");
     boolean nonParagraphBlock(String line) {
         String twoChar = line.length() < 2 ? line : line.substring(0,2);
         return breakingStart.contains(twoChar);

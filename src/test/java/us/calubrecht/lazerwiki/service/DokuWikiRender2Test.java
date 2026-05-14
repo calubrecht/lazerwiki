@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -501,7 +502,28 @@ public class DokuWikiRender2Test {
                 "<pre class=\"code\">This is a block\n==== It has a header in it ====\n</pre>",
                 doRender(input1)
         );
+    }
 
+    @Test
+    public void testRenderTitles() {
+        String input1 = "=== Here's a title===\n";
+        RenderResult result = underTest.renderWithInfo(input1, "host", "site", "page", "");
+        assertEquals("Here's a title", result.getTitle());
+        String input2 = "==== A title [[WithSomeLink|With Some Link]] ====\n";
+        result = underTest.renderWithInfo(input2, "host", "site", "page", "");
+        assertEquals("A title With Some Link", result.getTitle());
+
+        String input3 = "Title may not be on first line\n== But you'll find it==\n";
+        result = underTest.renderWithInfo(input3, "host", "site", "page", "");
+        assertEquals("But you'll find it", result.getTitle());
+
+        String input4 = "This has no title\n";
+        result = underTest.renderWithInfo(input4, "host", "site", "page", "");
+        assertNull(result.getTitle());
+
+        String input5 = "=== This is the title===\n==== This is just another header ====\n";
+        result = underTest.renderWithInfo(input5, "host", "site", "page", "");
+        assertEquals("This is the title", result.getTitle());
     }
 
 }
