@@ -17,8 +17,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
@@ -526,4 +525,11 @@ public class DokuWikiRender2Test {
         assertEquals("This is the title", result.getTitle());
     }
 
+    @Test
+    public void testRenderMacro() {
+        String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
+        when(macroService.renderMacro(eq("macro1: macro"), anyString(), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
+        String render = underTest.renderToString(inputMacro, "", "", "page", "");
+        assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
+    }
 }
