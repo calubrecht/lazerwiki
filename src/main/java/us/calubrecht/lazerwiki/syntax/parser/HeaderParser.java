@@ -42,6 +42,12 @@ public class HeaderParser extends AbstractTreeParser {
   }
 
     @Override
+    public boolean canBeginParse(String line) {
+        line = line.strip();
+        return line.startsWith("==") && line.endsWith("==");
+    }
+
+    @Override
     public String parserKey() {
         return "Header";
     }

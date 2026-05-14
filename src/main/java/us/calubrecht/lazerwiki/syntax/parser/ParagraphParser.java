@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.ParagraphNode;
 
@@ -36,10 +37,13 @@ public class ParagraphParser extends AbstractTreeParser {
         }
         ParagraphNode node = new ParagraphNode();
         node.setPosition(Pair.of(start, counter.get() -1));
-        // XXX Need to introduce the concept of legal child parsers. Parser registrar
-        // To provide option to look up
         Parser.parseInner(paragraphLines, node, start, registrar);
         return node;
+    }
+
+    @Override
+    public boolean canBeginParse(String line) {
+        return true; // Paragraph is final fall-through parser and will handle any line
     }
 
     String getNext(List<String> list) {
@@ -47,13 +51,15 @@ public class ParagraphParser extends AbstractTreeParser {
     }
 
     /**
-     * Bit hack: Break a paraagraph if we hit a code block or list.
-     * Potential solution: ITreeParser... have "shouldBeginParse" to say if should take over parsing
+     * Check if another block might be starting. List, code block etc. can preempt a paragraph
      */
-    final Set<String> breakingStart = Set.of("  ", " *", " -", "==");
     boolean nonParagraphBlock(String line) {
-        String twoChar = line.length() < 2 ? line : line.substring(0,2);
-        return breakingStart.contains(twoChar);
+        for (ITreeParser parser : registrar.getParsers()) {
+            if (parser != this && parser.canBeginParse(line)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

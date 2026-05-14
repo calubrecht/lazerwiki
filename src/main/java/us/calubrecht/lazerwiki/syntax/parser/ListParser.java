@@ -69,6 +69,11 @@ public class ListParser extends AbstractTreeParser {
         return finishList(node, start, counter);
     }
 
+    @Override
+    public boolean canBeginParse(String line) {
+        return line.startsWith(" *") || line.startsWith(" -");
+    }
+
     ListNode finishList(ListNode node, int start, AtomicInteger counter) {
         node.setPosition(Pair.of(start, counter.get()));
         return node;

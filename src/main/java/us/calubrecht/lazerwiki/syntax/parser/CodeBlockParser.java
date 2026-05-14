@@ -12,13 +12,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class CodeBlockParser extends AbstractTreeParser {
+    final String doubleSpace = "  ";
     @Override
     public ITreeNode parse(List<String> markupLines, AtomicInteger counter) {
         List<String> blockLines = new ArrayList<>();
         int start = counter.get();
         while(!markupLines.isEmpty()) {
             String nextLine = markupLines.get(0);
-            if (nextLine.startsWith("  ")) {
+            if (nextLine.startsWith(doubleSpace)) {
                 blockLines.add(nextLine);
                 counter.addAndGet(nextLine.length() + 1);
                 markupLines.remove(0);
@@ -38,6 +39,11 @@ public class CodeBlockParser extends AbstractTreeParser {
             lineStart += line.length() + 1;
         }
         return node;
+    }
+
+    @Override
+    public boolean canBeginParse(String line) {
+        return line.startsWith(doubleSpace);
     }
 
     @Override

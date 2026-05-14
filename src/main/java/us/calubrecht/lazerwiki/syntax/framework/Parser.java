@@ -35,6 +35,9 @@ public class Parser {
         while (!markupLines.isEmpty() ) {
             ITreeNode nextNode = null;
             for (ITreeParser parser: parsers) {
+                if (!parser.canBeginParse(markupLines.get(0))) {
+                    continue;
+                }
                 nextNode = parser.parse(markupLines, counter);
                 if (nextNode != null) {
                     break;
@@ -56,7 +59,7 @@ public class Parser {
         int textStart = start;
         for (int i = 0; i < fullMarkup.length(); i++ ) {
             char c = fullMarkup.charAt(i);
-            if (Character.isAlphabetic(c) || Character.isDigit(c) || Character.isWhitespace(c)) {
+            if (Character.isAlphabetic(c) || Character.isDigit(c)) {
                 buffer.append(c);
                 continue;
             }

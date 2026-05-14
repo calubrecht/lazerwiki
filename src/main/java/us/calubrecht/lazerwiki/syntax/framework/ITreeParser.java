@@ -1,7 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.framework;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface ITreeParser {
@@ -12,6 +11,11 @@ public interface ITreeParser {
     ITreeNode parse(List<String> markupLines, AtomicInteger counter);
 
     void setRegistrar(ParserRegistrar registrar);
+
+    /**
+     * Parser analyzes the next line to do a quick short-circuit analysis to tell if it can parse the block
+     */
+    boolean canBeginParse(String line);
 
     String parserKey();
     default int priority() {
