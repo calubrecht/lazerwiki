@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Component
-public class ContainerRenderer  extends AbstractRenderer{
+public class ContainerRenderer extends AbstractRenderer{
     @Override
     public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(ContainerNode.class, UnformatSpanNode.class);

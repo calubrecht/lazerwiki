@@ -473,4 +473,35 @@ public class DokuWikiRender2Test {
         );
     }
 
+    @Test
+    public void testCodeBlock() {
+        String input1 = "  This is a block\n  Should all be one block\n   with more spaces?\n";
+        assertEquals(
+                "<pre class=\"code\">This is a block\nShould all be one block\n with more spaces?\n</pre>",
+                doRender(input1)
+        );
+
+        String input2 = "**bold on one line**\n  Raw text box, do not render **bold things**\n";
+        assertEquals(
+                "<div><span class=\"bold\">bold on one line</span></div>\n<pre class=\"code\">Raw text box, do not render **bold things**\n</pre>",
+                doRender(input2)
+        );
+
+        String input3 = "  This is a block\n  Should all be one block\n  \n  Even if a line with only 2 spaces and nothing more\n";
+        assertEquals(
+                "<pre class=\"code\">This is a block\nShould all be one block\n\nEven if a line with only 2 spaces and nothing more\n</pre>",
+                doRender(input3)
+        );
+    }
+
+    @Test
+    public void testHeaderInBox() {
+        String input1 = "  This is a block\n  ==== It has a header in it ====\n";
+        assertEquals(
+                "<pre class=\"code\">This is a block\n==== It has a header in it ====\n</pre>",
+                doRender(input1)
+        );
+
+    }
+
 }
