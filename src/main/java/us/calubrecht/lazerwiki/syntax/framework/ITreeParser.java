@@ -1,14 +1,11 @@
 package us.calubrecht.lazerwiki.syntax.framework;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public interface ITreeParser {
     /**
      * Parse the markupLines into an ITreeNode, or null if Parser cannot parse this input;
-     * Remove any parsed lines from markupLines. Increments counter by number of characters consumed (Plus newline for every line)
+     * If lines are parsed, call advanceLine on parseContext
      */
-    ITreeNode parse(ParseContext parseContext, AtomicInteger counter);
+    ITreeNode parse(ParseContext parseContext);
 
     void setRegistrar(ParserRegistrar registrar);
 

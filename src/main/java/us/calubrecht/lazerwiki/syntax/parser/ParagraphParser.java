@@ -8,15 +8,10 @@ import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.ParagraphNode;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Component
 public class ParagraphParser extends AbstractTreeParser {
     @Override
-    public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
+    public ITreeNode parse(ParseContext parseContext) {
         ParseContext paragraphLines = new ParseContext();
         paragraphLines.setRoot(parseContext.getPosition());
         // Sub context counts from current location
@@ -37,7 +32,7 @@ public class ParagraphParser extends AbstractTreeParser {
           }
         }
         ParagraphNode node = new ParagraphNode();
-        node.setPosition(Pair.of(start, counter.get() -1));
+        node.setPosition(Pair.of(start, parseContext.getPosition() -1));
         Parser.parseInner(paragraphLines, node, registrar);
         return node;
     }

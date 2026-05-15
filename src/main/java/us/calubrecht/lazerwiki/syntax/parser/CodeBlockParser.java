@@ -7,15 +7,11 @@ import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.CodeBlockNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Component
 public class CodeBlockParser extends AbstractTreeParser {
     final String doubleSpace = "  ";
     @Override
-    public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
+    public ITreeNode parse(ParseContext parseContext) {
         ParseContext blockLines = new ParseContext();
         // Sub context counts from current location
         blockLines.setRoot(parseContext.getPosition());

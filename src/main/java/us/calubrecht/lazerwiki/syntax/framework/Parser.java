@@ -8,7 +8,6 @@ import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class Parser {
@@ -25,14 +24,13 @@ public class Parser {
     }
 
     public static ITreeNode parse(ParseContext parseContext, ContainerNode container, Collection<ITreeParser> parsers) {
-        AtomicInteger counter = new AtomicInteger(0);
         while (!parseContext.isEmpty() ) {
             ITreeNode nextNode = null;
             for (ITreeParser parser: parsers) {
                 if (!parser.canBeginParse(parseContext.peekLine())) {
                     continue;
                 }
-                nextNode = parser.parse(parseContext, counter);
+                nextNode = parser.parse(parseContext);
                 if (nextNode != null) {
                     break;
                 }

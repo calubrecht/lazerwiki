@@ -9,8 +9,6 @@ import us.calubrecht.lazerwiki.syntax.nodes.ListNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ListNode.LIST_TYPE;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +17,7 @@ public class ListParser extends AbstractTreeParser {
     final Pattern pattern = Pattern.compile("^(\\s+)([\\-*])(\\{\\{([0-9]+)}})?");
 
     @Override
-    public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
+    public ITreeNode parse(ParseContext parseContext) {
         int start = parseContext.getPosition();
         ListNode node = null;
         int depth = -1;
@@ -32,19 +30,19 @@ public class ListParser extends AbstractTreeParser {
                     return null;
                 }
                 // List is over, cleanup.
-                return finishList(node, start, counter);
+                return finishList(node, start, parseContext.getPosition());
             }
             int lineDepth = m.group(1).length();
             String newToken = m.group(2);
             if (lineDepth < depth || lineDepth == depth && !listToken.equals(newToken)) {
                 // Close out this list;
-                return finishList(node, start, counter);
+                return finishList(node, start, parseContext.getPosition());
             }
             if (node != null && lineDepth > depth) {
                 //ListNode innerList =
                 // Define a sublist[
                 // more looping
-                ListNode list = (ListNode)parse(parseContext, counter);
+                ListNode list = (ListNode)parse(parseContext);
                 node.addItem(new ListChild.ListChildList(list));
             } else {
                 listToken = newToken;
@@ -68,7 +66,7 @@ public class ListParser extends AbstractTreeParser {
                 node.addItem(item);
             }
         }
-        return finishList(node, start, counter);
+        return finishList(node, start, parseContext.getPosition());
     }
 
     @Override
@@ -76,8 +74,8 @@ public class ListParser extends AbstractTreeParser {
         return line.startsWith(" *") || line.startsWith(" -");
     }
 
-    ListNode finishList(ListNode node, int start, AtomicInteger counter) {
-        node.setPosition(Pair.of(start, counter.get()));
+    ListNode finishList(ListNode node, int start, int end) {
+        node.setPosition(Pair.of(start, end -1));
         return node;
     }
 

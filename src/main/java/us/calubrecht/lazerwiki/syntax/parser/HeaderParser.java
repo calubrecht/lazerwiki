@@ -8,15 +8,12 @@ import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Component
 public class HeaderParser extends AbstractTreeParser {
   final static char HEADER_CHAR = '=';
   final static String MIN_HEADER = StringUtils.repeat(HEADER_CHAR, 2);
 
-  public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
+  public ITreeNode parse(ParseContext parseContext) {
       String line = parseContext.peekLine().strip();
       if (!line.startsWith(MIN_HEADER)) {
            return null;
