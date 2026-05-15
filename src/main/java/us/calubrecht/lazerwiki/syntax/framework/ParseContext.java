@@ -31,6 +31,14 @@ public class ParseContext implements Iterable<String> {
         fullText = new StringBuilder();
     }
 
+    public ParseContext(int rootPosition) {
+        readonly = false;
+        lines = new ArrayList<>();
+        fullText = new StringBuilder();
+        lineIdx = rootPosition;
+        charIdx = rootPosition;
+    }
+
     public String peekLine() {
         return nextLine;
     }
@@ -80,6 +88,11 @@ public class ParseContext implements Iterable<String> {
 
     public void lock() {
         readonly = true;
+    }
+
+    // XXX: remove this
+    public List<String> getLines() {
+        return lines;
     }
 
     @NotNull
