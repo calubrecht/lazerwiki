@@ -11,6 +11,8 @@ import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
+import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
+import us.calubrecht.lazerwiki.syntax.renderer.LinkRenderer;
 
 import java.util.List;
 import java.util.Set;
@@ -61,6 +63,13 @@ public class DokuWikiRender2Test {
         assertEquals("<h2 id=\"header_Header_with_space.\">Header with space.</h2>", doRender("=====Header with space.===== "));
 
         assertEquals("<div>===Doesn't parse as header=== with trailing</div>", doRender("===Doesn't parse as header=== with trailing"));
+    }
+
+    @Test
+    void testRenderHeaderSanitize() {
+        String source = "====== <script>doAlert(\"Gotcha\");</script> ======";
+
+        assertEquals("<h1 id=\"header__script_doAlert__Gotcha_____script_\">&lt;script&gt;doAlert(\"Gotcha\");&lt;/script&gt;</h1>", doRender(source));
     }
 
     @Test
@@ -163,6 +172,32 @@ public class DokuWikiRender2Test {
 
     }
 
+    @Autowired
+    LinkRenderer linkRenderer;
+    @Test
+    public void testRenderLinkeSanitize() {
+        String maliciousText = "[[ns:page|<script>someScript</script>]]";
+        RenderResult renderRes = underTest.renderWithInfo(maliciousText, "host", "site", "page", "user");
+        assertEquals("<div><a class=\"wikiLinkMissing\" href=\"/page/ns:page\">&lt;script&gt;someScript&lt;/script&gt;</a></div>", renderRes.renderedText());
+        // TODO: Include potentially malicious link test in an ERRORS entry in renderStaet
+        // List<String> parseErrors = renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name();
+
+        String maliciousHref = "[[ page\" onerror=\"alert(1)\"| text}}";
+        renderRes = underTest.renderWithInfo(maliciousHref, "host", "site", "page", "user");
+        assertEquals("<div>[[ page\" onerror=\"alert(1)\"| text}}</div>", renderRes.renderedText()); // Fails at parsing level, outputs safe html
+
+        // If maliicous code slips through parser to node, sanitize anyway.
+        LinkNode badNode = new LinkNode("page\" onerror=\"alert(1)\"");
+        RenderContext renderContext = new RenderContext("host", "site", "page", "user");
+        String html = linkRenderer.renderHtml(badNode, renderContext).toString();
+        assertEquals("<a class=\"wikiLinkMissing\" href=\"/page/none:invalidPage\">null</a>", html);
+
+        String maliciousProtocol = "[[javascript:ortext| text]]";
+        renderRes = underTest.renderWithInfo(maliciousProtocol, "host", "site", "page", "user");
+        assertEquals("<div><a class=\"wikiLinkMissing\" href=\"/page/javascript:ortext\"> text</a></div>", renderRes.renderedText());
+        // this is a valid possible image, but suspicious. Render it safely, but log it.
+    }
+
     @Test
     public void testRenderMalformedURL() {
         assertEquals("<div>[[http://bad%link]]</div>", doRender("[[http://bad%link]]"));
@@ -173,6 +208,7 @@ public class DokuWikiRender2Test {
     @Test
     public void testRenderSanitizeHtmlInText() {
         assertEquals("<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>", doRender("This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>"));
+        // TODO: scan specifically for <script> tags in input and log as probably malicious
 
         assertEquals("<div>Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/page/aLink\"> a link</a> and &lt;b&gt;escape&lt;/b&gt; again</div>", doRender("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
     }
@@ -396,6 +432,26 @@ public class DokuWikiRender2Test {
     }
 
     @Test
+    public void testRenderImageSanitize() {
+        String maliciousTitle = "{{file.jpg|\" onerror=\"alert(1)\"}}";
+        RenderResult renderRes = underTest.renderWithInfo(maliciousTitle, "host", "site", "page", "user");
+        assertEquals("<div><img src=\"/_media/file.jpg\" class=\"media\" title=\"&quot; onerror=&quot;alert(1)&quot;\" loading=\"lazy\"></div>", renderRes.renderedText());
+        // TODO: Include potentially malicious image titles in an ERRORS entry in renderStaet
+        // List<String> parseErrors = renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name();
+
+        String maliciousSource = "{{\" onerror=\"alert(1)\"| text}}";
+        renderRes = underTest.renderWithInfo(maliciousSource, "host", "site", "page", "user");
+        assertEquals("<div><img src=\"/_media/invalidSource.none\" class=\"media\" title=\"text\" loading=\"lazy\"></div>", renderRes.renderedText());
+        // TODO: Include potentially malicious image src in an ERRORS entry in renderStaet
+        // List<String> parseErrors = renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name();
+
+        String maliciousProtocol = "{{javascript:ortext| text}}";
+        renderRes = underTest.renderWithInfo(maliciousProtocol, "host", "site", "page", "user");
+        assertEquals("<div><img src=\"/_media/javascript:ortext\" class=\"media\" title=\"text\" loading=\"lazy\"></div>", renderRes.renderedText());
+        // this is a valid possible image, but suspicious. Render it safely, but log it.
+    }
+
+    @Test
     public void testRenderUList() {
         String input1 = " * Simple List\n *With 2 rows\nThen * non-matching\n";
         assertEquals(
@@ -491,6 +547,16 @@ public class DokuWikiRender2Test {
         assertEquals(
                 "<pre class=\"code\">This is a block\nShould all be one block\n\nEven if a line with only 2 spaces and nothing more\n</pre>",
                 doRender(input3)
+        );
+    }
+
+    @Test
+    public void testCodeBlockSanitize() {
+        String input1 = "  This is a block <script>doAlert(\"Gotcha\");</script>";
+        assertEquals(
+                "<pre class=\"code\">This is a block &lt;script&gt;doAlert(\"Gotcha\");&lt;/script&gt;\n" +
+                        "</pre>",
+                doRender(input1)
         );
     }
 

@@ -10,7 +10,6 @@ import us.calubrecht.lazerwiki.service.LinkOverrideService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
 
 import java.net.URI;
@@ -41,18 +40,21 @@ public class LinkRenderer extends ContainerRenderer{
 
     @Override
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
-      LinkNode link = (LinkNode)node;
-      StringBuilder buffer = new StringBuilder();
-      String linkTarget = getLinkTarget(link.getDest());
-      linkTarget = doOverrides(linkTarget, link, renderContext);
-      if (isInternal(linkTarget)) {
-            ((Set<String>)renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(linkTarget);
-      }
-      String linkURL = linkTarget.isBlank() ? "/" : ( isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
-      buffer.append("<a class=\"").append(getCssClass(linkTarget, renderContext.host())).append("\" href=\"").append(linkURL).append("\">");
-      buffer.append(getLinkDisplay(link, linkTarget, renderContext));
-      buffer.append("</a>");
-      return buffer;
+        LinkNode link = (LinkNode) node;
+        StringBuilder buffer = new StringBuilder();
+        String linkTarget = getLinkTarget(link.getDest());
+        linkTarget = doOverrides(linkTarget, link, renderContext, true);
+        if (isInternal(linkTarget)) {
+            if (!validateTarget(linkTarget)) {
+                linkTarget = "none:invalidPage";
+            }
+            ((Set<String>) renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>())).add(linkTarget);
+        }
+        String linkURL = linkTarget.isBlank() ? "/" : (isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
+        buffer.append("<a class=\"").append(getCssClass(linkTarget, renderContext.host())).append("\" href=\"").append(linkURL).append("\">");
+        buffer.append(getLinkDisplay(link, linkTarget, renderContext));
+        buffer.append("</a>");
+        return buffer;
     }
 
     @Override
@@ -66,11 +68,13 @@ public class LinkRenderer extends ContainerRenderer{
             }
             // Fall through
         }
+        linkTarget = doOverrides(linkTarget, link, renderContext, false);
         if (isInternal(linkTarget)) {
             return new StringBuilder(pageService.getTitle(renderContext.host(), linkTarget));
         }
         return new StringBuilder(linkTarget);
     }
+
 
     protected String getLinkTarget(String rawTarget) {
         rawTarget = rawTarget.strip();
@@ -117,7 +121,11 @@ public class LinkRenderer extends ContainerRenderer{
         return !(link.toLowerCase().startsWith("https://") || link.toLowerCase().startsWith("http://"));
     }
 
-    String doOverrides(String page, LinkNode link, RenderContext renderContext) {
+    boolean validateTarget(String target) {
+        return PageService.validateDescriptor(target);
+    }
+
+    String doOverrides(String page, LinkNode link, RenderContext renderContext, boolean recordStats) {
         Map<String, LinkOverride> overrides = (Map<String, LinkOverride>) renderContext.renderState().get(LINK_OVERRIDES.name());
         if (overrides == null) {
             List<LinkOverride> overrideList = linkOverrideService.getOverrides(renderContext.host(), renderContext.page());
@@ -128,10 +136,11 @@ public class LinkRenderer extends ContainerRenderer{
         }
         if (overrides.containsKey(page)) {
             String override = overrides.get(page).getNewTarget();
-            // Here's where we're screwed.... Node doesn't know where it is in source.
-            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent(OVERRIDE_STATS.name(),
-                    (k) -> new ArrayList<>())).add(
-                    new LinkOverrideInstance(page, override, link.getTargetPosition().getLeft(), link.getTargetPosition().getRight()+1));
+            if (recordStats) {
+                ((List<LinkOverrideInstance>) renderContext.renderState().computeIfAbsent(OVERRIDE_STATS.name(),
+                        (k) -> new ArrayList<>())).add(
+                        new LinkOverrideInstance(page, override, link.getTargetPosition().getLeft(), link.getTargetPosition().getRight() + 1));
+            }
             return override;
         }
         return page;

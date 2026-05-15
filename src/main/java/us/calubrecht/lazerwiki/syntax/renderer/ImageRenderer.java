@@ -23,6 +23,9 @@ public class ImageRenderer extends AbstractRenderer {
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
         ImageNode imgNode = (ImageNode)node;
         String src = imgNode.getSource();
+        if (!validateSrc(src)) {
+            src = "invalidSource.none";
+        }
         Map<String, String> options = parseOptions(imgNode.getOptions());
         String size = options.getOrDefault("size", "");
         ((Set<String>)renderContext.renderState().computeIfAbsent(IMAGES.name(), (k) -> new HashSet<>())).add(src);
@@ -33,7 +36,7 @@ public class ImageRenderer extends AbstractRenderer {
         StringBuilder buffer = new StringBuilder();
         buffer.append(String.format("<img src=\"/_media/%s%s\" class=\"%s\"", src, size, cssClass));
         if (imgNode.getTitle() != null) {
-            buffer.append(String.format(" title=\"%s\"", imgNode.getTitle().replaceAll("\"", "\\")));
+            buffer.append(String.format(" title=\"%s\"", sanitize(imgNode.getTitle())));
         }
         buffer.append(" loading=\"lazy\">");
         return buffer;
@@ -78,6 +81,12 @@ public class ImageRenderer extends AbstractRenderer {
             }
         }
         return optionMap;
+    }
+
+    Pattern srcPattern = Pattern.compile("[A-z0-9-_:.&?]+");
+    boolean validateSrc(String src) {
+        Matcher m = srcPattern.matcher(src.strip());
+        return m.matches();
     }
 
     @Override

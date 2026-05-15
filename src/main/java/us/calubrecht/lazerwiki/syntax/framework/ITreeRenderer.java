@@ -28,7 +28,7 @@ public interface ITreeRenderer {
 
         @Override
         public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
-            return new StringBuilder(sanitize(node.asString()));
+            return new StringBuilder(sanitizeLeaveQuotes(node.asString()));
         }
 
         @Override
@@ -37,7 +37,18 @@ public interface ITreeRenderer {
         }
     }
 
+    /**
+     * Sanitize user input to escape html elements.
+     * Warn: DOES NOT escape quotes, do not use as part of propertie of an html tag
+     */
+    default String sanitizeLeaveQuotes(String input) {
+        return sanitize(input).replace("&quot;", "\"");
+    }
+
+    /**
+     * Sanitize user input to escape html elements.
+     */
     default String sanitize(String input) {
-        return StringEscapeUtils.escapeHtml4(input).replace("&quot;", "\"");
+        return StringEscapeUtils.escapeHtml4(input);
     }
 }
