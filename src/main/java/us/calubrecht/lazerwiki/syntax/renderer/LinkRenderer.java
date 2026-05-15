@@ -10,6 +10,7 @@ import us.calubrecht.lazerwiki.service.LinkOverrideService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
 
 import java.net.URI;
@@ -52,6 +53,23 @@ public class LinkRenderer extends ContainerRenderer{
       buffer.append(getLinkDisplay(link, linkTarget, renderContext));
       buffer.append("</a>");
       return buffer;
+    }
+
+    @Override
+    public StringBuilder renderPlaintext(ITreeNode node, RenderContext renderContext) {
+        LinkNode link = (LinkNode)node;
+        String linkTarget = getLinkTarget(link.getDest());
+        if (!link.getChildren().isEmpty()) {
+            StringBuilder rendered =  super.renderPlaintext(node, renderContext);
+            if (!rendered.toString().isBlank()) {
+                return rendered;
+            }
+            // Fall through
+        }
+        if (isInternal(linkTarget)) {
+            return new StringBuilder(pageService.getTitle(renderContext.host(), linkTarget));
+        }
+        return new StringBuilder(linkTarget);
     }
 
     protected String getLinkTarget(String rawTarget) {

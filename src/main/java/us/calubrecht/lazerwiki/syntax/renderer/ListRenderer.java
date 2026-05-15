@@ -37,7 +37,19 @@ public class ListRenderer extends AbstractRenderer {
 
     @Override
     public StringBuilder renderPlaintext(ITreeNode node, RenderContext renderContext) {
-        return null;
+        listItemRenderer.setRegistrar(parserRegistrar);
+        ListNode listNode = (ListNode) node;
+        StringBuilder buffer = new StringBuilder();
+        for (ListChild item : listNode.getItems()) {
+            if (item instanceof ListChild.ListChildList childList) {
+                buffer.append(renderPlaintext(childList.list(), renderContext));
+                continue;
+            }
+            ListChild.ListItemNode itemNode = (ListChild.ListItemNode)item;
+            buffer.append(listItemRenderer.renderPlaintext(itemNode, renderContext));
+            buffer.append("\n");
+        }
+        return buffer;
     }
 
     StringBuilder renderChildren(List<ListChild> items, RenderContext renderContext) {
