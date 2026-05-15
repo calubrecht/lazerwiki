@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.ImageNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ImageNode.ALIGN_TYPE;
 
@@ -21,14 +22,16 @@ public class ImageParser extends AbstractInnerParser{
     }
 
     @Override
-    public Pair<Integer, ITreeNode> parse(String markup, int position) {
-        Matcher matcher = pattern.matcher(markup);
+    public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
+        CharSequence sequence = parseContext.subsequence();
+        int start = parseContext.getPosition();
+        Matcher matcher = pattern.matcher(sequence);
         if (matcher.find()) {
            ImageInfo info = parseSource(matcher.group(2));
            int length = matcher.group(0).length();
            String title = matcher.group(5) != null ? matcher.group(5).strip() : null;
            ImageNode node = new ImageNode(info.src(), title, info.options(), parseAlignment(matcher));
-           node.setPosition(Pair.of(position, position + length -1));
+           node.setPosition(Pair.of(start, start + length -1));
            return Pair.of(length, node);
         }
         return null;

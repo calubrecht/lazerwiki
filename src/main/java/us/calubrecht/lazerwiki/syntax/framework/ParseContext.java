@@ -2,11 +2,12 @@ package us.calubrecht.lazerwiki.syntax.framework;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Spliterator;
+import java.nio.CharBuffer;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
+
+import static com.ibm.icu.text.PluralRules.Operand.i;
 
 public class ParseContext implements Iterable<String> {
     StringBuilder fullText;
@@ -17,6 +18,7 @@ public class ParseContext implements Iterable<String> {
     int charInLine = 0;
     List<String> lines;
     boolean readonly;
+    int rootIdx = 0;
 
     public ParseContext(String fullText) {
         this.fullText = new StringBuilder(fullText);
@@ -31,39 +33,50 @@ public class ParseContext implements Iterable<String> {
         fullText = new StringBuilder();
     }
 
-    public ParseContext(int rootPosition) {
-        readonly = false;
-        lines = new ArrayList<>();
-        fullText = new StringBuilder();
-        lineIdx = rootPosition;
-        charIdx = rootPosition;
+    public ParseContext(String fullText, int rootPosition) {
+        this.fullText = new StringBuilder(fullText);
+        lines = fullText.lines().toList();
+        nextLine = lines.get(0);
+        rootIdx = rootPosition;
+        readonly = true;
     }
 
     public String peekLine() {
         return nextLine;
     }
 
-    public String advanceLine() {
+    public void advanceLine() {
         lineIdx++;
         lineStart += nextLine.length() + 1;
         charIdx = lineStart;
         charInLine = 0;
         nextLine = lineIdx < lines.size() ? lines.get(lineIdx) : null;
-        return nextLine;
     }
 
     public Character peekChar() {
+        if (charInLine == nextLine.length()) {
+            return '\n';
+        }
         return nextLine.charAt(charInLine);
     }
 
-    public Character advanceChar() {
+    public void advanceChar() {
+        if (charInLine == nextLine.length()) {
+            advanceLine();
+            return;
+        }
         charInLine++;
         charIdx++;
-        return charInLine < nextLine.length() ? nextLine.charAt(charInLine) : null;
+    }
+
+    public void advanceChars(int number) {
+        for (int i = 0 ; i < number; i++) {
+            advanceChar();
+        }
     }
 
     public int getPosition() {
-        return charIdx;
+        return charIdx + rootIdx;
     }
 
     public boolean isEmpty() {
@@ -74,16 +87,19 @@ public class ParseContext implements Iterable<String> {
         if (readonly) {
             throw new UnsupportedOperationException("Cannot add to a readonly ParseContext");
         }
-        fullText.append('\n').append(line);
+        if (!fullText.isEmpty()) {
+            fullText.append('\n');
+        }
+        fullText.append(line);
         lines.add(line);
+        nextLine = lines.get(0);
     }
 
-    public void setRoot(int root) {
+    public void setRoot(int rootPosition) {
         if (readonly) {
             throw new UnsupportedOperationException("Cannot setRoot on a readonly ParseContext");
         }
-        lineIdx = root;
-        charIdx = root;
+        rootIdx = rootPosition;
     }
 
     public void lock() {
@@ -109,5 +125,14 @@ public class ParseContext implements Iterable<String> {
     @Override
     public Spliterator<String> spliterator() {
         return Iterable.super.spliterator();
+    }
+
+    public CharSequence subsequence() {
+       return CharBuffer.wrap(fullText).subSequence(charIdx, fullText.length());
+    }
+
+    @Override
+    public String toString() {
+        return nextLine;
     }
 }

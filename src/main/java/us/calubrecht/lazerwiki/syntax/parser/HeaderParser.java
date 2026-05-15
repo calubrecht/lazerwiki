@@ -27,10 +27,14 @@ public class HeaderParser extends AbstractTreeParser {
               if (line.endsWith(tokens)) {
                   int start = parseContext.getPosition();
                   parseContext.advanceLine();
-                  int end = parseContext.getPosition() -1;
+                  int end = parseContext.getPosition() - 2;
                   HeaderNode node =  new HeaderNode(7 - i);
                   node.setPosition(Pair.of(start, end));
-                  Parser.parseInner(List.of(line.substring(i, line.length() - i)), node, start, registrar);
+                  ParseContext innerParseContext = new ParseContext();
+                  innerParseContext.addLine(line.substring(i, line.length() - i));
+                  innerParseContext.setRoot(start + i);
+                  innerParseContext.lock();
+                  Parser.parseInner(innerParseContext, node, registrar);
                   return node;
               }
               else {

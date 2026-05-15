@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.MacroNode;
 
 @Component
@@ -21,8 +22,10 @@ public class MacroParser extends AbstractInnerParser {
     }
 
     @Override
-    public Pair<Integer, ITreeNode> parse(String markup, int start) {
-        Matcher matcher = macroPattern.matcher(markup);
+    public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
+        CharSequence sequence = parseContext.subsequence();
+        int start = parseContext.getPosition();
+        Matcher matcher = macroPattern.matcher(sequence);
         if (matcher.find()) {
             String text = matcher.group(1);
             String fullText = matcher.group();

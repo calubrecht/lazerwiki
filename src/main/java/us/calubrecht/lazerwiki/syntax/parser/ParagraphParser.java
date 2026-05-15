@@ -17,7 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ParagraphParser extends AbstractTreeParser {
     @Override
     public ITreeNode parse(ParseContext parseContext, AtomicInteger counter) {
-        ParseContext paragraphLines = new ParseContext(parseContext.getPosition());
+        ParseContext paragraphLines = new ParseContext();
+        paragraphLines.setRoot(parseContext.getPosition());
         // Sub context counts from current location
         int start = parseContext.getPosition();
         for (String nextLine = parseContext.peekLine(); !parseContext.isEmpty(); nextLine = getNext(parseContext)) {
@@ -37,7 +38,7 @@ public class ParagraphParser extends AbstractTreeParser {
         }
         ParagraphNode node = new ParagraphNode();
         node.setPosition(Pair.of(start, counter.get() -1));
-        Parser.parseInner(paragraphLines.getLines(), node, start, registrar);
+        Parser.parseInner(paragraphLines, node, registrar);
         return node;
     }
 

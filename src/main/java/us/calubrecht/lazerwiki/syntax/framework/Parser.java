@@ -49,31 +49,32 @@ public class Parser {
         return container;
     }
 
-    public static void parseInner(List<String> markupLines, ContainerNode parentNode, int start, ParserRegistrar parserRegistrar) {
-        String fullMarkup = String.join("\n", markupLines);
+    public static void parseInner(ParseContext parseContext, ContainerNode parentNode, ParserRegistrar parserRegistrar) {
         StringBuilder buffer = new StringBuilder();
-        int textStart = start;
-        for (int i = 0; i < fullMarkup.length(); i++ ) {
-            char c = fullMarkup.charAt(i);
-            if (Character.isAlphabetic(c) || Character.isDigit(c)) {
+        int textStart = parseContext.getPosition();
+        while(!parseContext.isEmpty()) {
+            char c = parseContext.peekChar();
+            if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '\n') {
                 buffer.append(c);
+                parseContext.advanceChar();
                 continue;
             }
             List<IInnerParser> parsers = parserRegistrar.getParsersForKeyCharacter(c);
             boolean parseFound = false;
             for (IInnerParser parser: parsers) {
-                Pair<Integer, ITreeNode> parsed = parser.parse(fullMarkup.substring(i), i + start);
+                Pair<Integer, ITreeNode> parsed = parser.parse(parseContext);
                 if (parsed != null) {
                     parseFound = true;
                     parentNode.addChild(textNode(buffer, textStart));
                     buffer = new StringBuilder();
                     parentNode.addChild(parsed.getRight());
-                    i += parsed.getLeft() - 1;
-                    textStart  = start + i + 1;
+                    textStart  = parseContext.getPosition();;
+                    parseContext.advanceChars(parsed.getLeft());
                 }
             }
             if (!parseFound) {
                 buffer.append(c);
+                parseContext.advanceChar();
             }
         }
         parentNode.addChild(textNode(buffer, textStart));

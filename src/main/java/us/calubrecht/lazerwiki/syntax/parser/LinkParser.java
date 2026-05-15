@@ -1,8 +1,10 @@
 package us.calubrecht.lazerwiki.syntax.parser;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
 
@@ -19,9 +21,11 @@ public class LinkParser extends AbstractInnerParser {
     }
 
     @Override
-    public Pair<Integer, ITreeNode> parse(String markup, int start) {
+    public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
         // Like takes the form [[linkPath|Link Description]]
-        Matcher matcher = linkPattern.matcher(markup);
+        CharSequence sequence = parseContext.subsequence();
+        int start = parseContext.getPosition();
+        Matcher matcher = linkPattern.matcher(sequence);
         if (matcher.find()) {
             String dest = matcher.group(1);
             String desc = matcher.group(3);
@@ -29,8 +33,9 @@ public class LinkParser extends AbstractInnerParser {
             LinkNode node = new LinkNode(dest);
             node.setPosition(Pair.of(start, start + length - 1));
             node.setTargetPosition(Pair.of(start + 2, start + 2 + dest.length() - 1));
-            if (desc != null) {
-                Parser.parseInner(List.of(desc), node, start+2, registrar);
+            if (!Strings.isBlank(desc)) {
+                ParseContext descContext = new ParseContext(desc, start + 3 + dest.length());
+                Parser.parseInner(descContext, node, registrar);
             }
             return Pair.of(length, node);
         }

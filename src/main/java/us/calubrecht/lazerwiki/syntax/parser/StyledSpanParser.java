@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.StyledSpanNode;
 import us.calubrecht.lazerwiki.syntax.nodes.StyledSpanNode.SPAN_TYPE;
@@ -29,15 +30,18 @@ public class StyledSpanParser extends AbstractInnerParser {
     }
 
     @Override
-    public Pair<Integer, ITreeNode> parse(String markup, int position) {
-        char keyChar = markup.charAt(0);
-        Matcher m = patternForChar.get(keyChar).matcher(markup);
+    public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
+        CharSequence sequence = parseContext.subsequence();
+        int position = parseContext.getPosition();
+        char keyChar = parseContext.peekChar();
+        Matcher m = patternForChar.get(keyChar).matcher(sequence);
 
         if (m.find()) {
             StyledSpanNode styledSpanNode = new StyledSpanNode(typeForChar.get(keyChar));
             int length = m.group(0).length();
             styledSpanNode.setPosition(Pair.of(position, position + length - 1));
-            Parser.parseInner(List.of(m.group(1)), styledSpanNode, position+2, registrar);
+            ParseContext innerParseContext = new ParseContext(m.group(1), position + 2);
+            Parser.parseInner(innerParseContext, styledSpanNode, registrar);
             return Pair.of(length, styledSpanNode);
         }
         return null;

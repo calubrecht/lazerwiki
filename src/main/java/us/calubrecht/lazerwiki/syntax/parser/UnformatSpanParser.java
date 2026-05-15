@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 import us.calubrecht.lazerwiki.syntax.nodes.UnformatSpanNode;
 
@@ -21,8 +22,10 @@ public class UnformatSpanParser extends AbstractInnerParser{
     }
 
     @Override
-    public Pair<Integer, ITreeNode> parse(String markup, int position) {
-        Matcher m = unformatPattern.matcher(markup);
+    public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
+        CharSequence sequence = parseContext.subsequence();
+        int position = parseContext.getPosition();
+        Matcher m = unformatPattern.matcher(sequence);
 
         if (m.find()) {
             UnformatSpanNode node = new UnformatSpanNode();

@@ -63,7 +63,8 @@ public class ListParser extends AbstractTreeParser {
                     // An item value was provided. Only handle if Ordered
                     item.setValue(m.group(4));
                 }
-                Parser.parseInner(List.of(itemText), item, itemStart, registrar);
+                ParseContext itemContext = new ParseContext(itemText, itemStart);
+                Parser.parseInner(itemContext, item, registrar);
                 node.addItem(item);
             }
         }

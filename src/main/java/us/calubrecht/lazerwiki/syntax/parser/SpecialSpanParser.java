@@ -3,6 +3,7 @@ package us.calubrecht.lazerwiki.syntax.parser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.nodes.SpecialSpanNode;
 import us.calubrecht.lazerwiki.syntax.nodes.SpecialSpanNode.SPAN_TYPE;
@@ -30,8 +31,10 @@ public class SpecialSpanParser extends AbstractInnerParser {
     }
 
     @Override
-    public Pair<Integer, ITreeNode> parse(String markup, int position) {
-        Matcher tagMatcher = tagPattern.matcher(markup);
+    public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
+        CharSequence sequence = parseContext.subsequence();
+        int position = parseContext.getPosition();
+        Matcher tagMatcher = tagPattern.matcher(sequence);
 
         if (!tagMatcher.find()) {
             return null;
@@ -41,13 +44,14 @@ public class SpecialSpanParser extends AbstractInnerParser {
         Pattern pattern = patternMap.computeIfAbsent(tagName,
                 (t) -> Pattern.compile(String.format(patternFormat, t, t), Pattern.DOTALL));
 
-        Matcher m = pattern.matcher(markup);
+        Matcher m = pattern.matcher(sequence);
 
         if (m.find()) {
             SpecialSpanNode node = new SpecialSpanNode(typeForTag.get(tagName));
             int length = m.group(0).length();
             node.setPosition(Pair.of(position, position + length - 1));
-            Parser.parseInner(List.of(m.group(1)), node, position+2, registrar);
+            ParseContext innerParseContext = new ParseContext(m.group(1), position + m.start(1));
+            Parser.parseInner(innerParseContext, node, registrar);
             return Pair.of(length, node);
         }
         return null;
