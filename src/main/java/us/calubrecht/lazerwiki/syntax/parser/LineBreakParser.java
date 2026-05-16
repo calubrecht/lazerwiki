@@ -18,13 +18,10 @@ public class LineBreakParser extends AbstractInnerParser {
         return List.of(' ');
     }
 
-    final Pattern pattern = Pattern.compile("^ \\\\\\\\"); // Two backspaces, double escape, once for java once for RE
-
     @Override
     public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
         int position = parseContext.getPosition();
-        Matcher m = pattern.matcher(parseContext.subsequence());
-        if (m.find()) {
+        if (parseContext.remainingStartsWith(" \\\\")) {
             LineBreakNode node = new LineBreakNode();
             node.setPosition(Pair.of(position, position+2));
             return Pair.of(3, node);

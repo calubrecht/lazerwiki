@@ -60,6 +60,24 @@ public class ParseContext implements Iterable<String> {
         return nextLine.charAt(charInLine);
     }
 
+    /** Checks if the sequence at the current location starts with the given string.
+     * Does not support newlines
+     */
+    public boolean remainingStartsWith(String s) {
+       for (int i = 0; i < s.length(); i++) {
+           if (charInLine + i >= nextLine.length()) {
+               // end of line with no match
+               return false;
+           }
+           char parseChar = nextLine.charAt(charInLine + i);
+           if (parseChar != s.charAt(i)) {
+               return false;
+           }
+
+       }
+       return true;
+    }
+
     public void advanceChar() {
         if (charInLine == nextLine.length()) {
             advanceLine();
