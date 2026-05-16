@@ -34,11 +34,12 @@ public class ParseContext implements Iterable<String> {
         fullText = new StringBuilder();
     }
 
-    public ParseContext(String fullText, int rootPosition) {
+    public ParseContext(String fullText, int rootPosition, ParseContext rootContext) {
         this.fullText = new StringBuilder(fullText);
         lines = fullText.lines().toList();
         nextLine = lines.get(0);
         rootIdx = rootPosition;
+        this.rootContext = rootContext;
         readonly = true;
     }
 

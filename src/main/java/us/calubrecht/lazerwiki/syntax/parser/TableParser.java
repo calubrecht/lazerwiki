@@ -108,7 +108,7 @@ public class TableParser extends AbstractTreeParser {
                     cellNode = new TableNode.TableCellNode(TableNode.TableCellNode.CELL_TYPE.ROWSPAN_MARKER);
                 }
                 else {
-                    ParseContext cellContext = new ParseContext(cell, start + cellStart);
+                    ParseContext cellContext = new ParseContext(cell, start + cellStart, parseContext);
                     Parser.parseInner(cellContext, cellNode, registrar);
                     if (cell.startsWith(" ")) {
                         cellNode.setAlignment(cell.endsWith(" ") ? TableNode.TableCellNode.ALIGNMENT.CENTER : TableNode.TableCellNode.ALIGNMENT.RIGHT);

@@ -41,7 +41,7 @@ public class StyledSpanParser extends AbstractInnerParser {
             int length = m.group(0).length();
             styledSpanNode.setPosition(Pair.of(position, position + length - 1));
             styledSpanNode.setParseContext(parseContext);
-            ParseContext innerParseContext = new ParseContext(m.group(1), position + 2);
+            ParseContext innerParseContext = new ParseContext(m.group(1), position + 2, parseContext);
             Parser.parseInner(innerParseContext, styledSpanNode, registrar);
             return Pair.of(length, styledSpanNode);
         }

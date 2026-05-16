@@ -51,7 +51,7 @@ public class SpecialSpanParser extends AbstractInnerParser {
             int length = m.group(0).length();
             node.setPosition(Pair.of(position, position + length - 1));
             node.setParseContext(parseContext);
-            ParseContext innerParseContext = new ParseContext(m.group(1), position + m.start(1));
+            ParseContext innerParseContext = new ParseContext(m.group(1), position + m.start(1), parseContext);
             Parser.parseInner(innerParseContext, node, registrar);
             return Pair.of(length, node);
         }

@@ -35,7 +35,7 @@ public class LinkParser extends AbstractInnerParser {
             node.setTargetPosition(Pair.of(start + 2, start + 2 + dest.length() - 1));
             node.setParseContext(parseContext);
             if (!Strings.isBlank(desc)) {
-                ParseContext descContext = new ParseContext(desc, start + 3 + dest.length());
+                ParseContext descContext = new ParseContext(desc, start + 3 + dest.length(), parseContext);
                 Parser.parseInner(descContext, node, registrar);
             }
             return Pair.of(length, node);
