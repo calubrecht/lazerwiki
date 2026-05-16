@@ -31,8 +31,10 @@ public class UnformatSpanParser extends AbstractInnerParser{
             UnformatSpanNode node = new UnformatSpanNode();
             int length = m.group(0).length();
             node.setPosition(Pair.of(position, position + length - 1));
+            node.setParseContext(parseContext);
             TextNode innerNode = new TextNode(m.group(1));
             innerNode.setPosition(Pair.of(position +2, position +2 + m.group(1).length() -1));
+            innerNode.setParseContext(parseContext);
             node.addChild(innerNode);
             return Pair.of(length, node);
         }

@@ -32,6 +32,7 @@ public class MacroParser extends AbstractInnerParser {
             int length = fullText.length();
             MacroNode node = new MacroNode(text, fullText);
             node.setPosition(Pair.of(start, start + length - 1));
+            node.setParseContext(parseContext);
             return Pair.of(length, node);
         }
         return null;

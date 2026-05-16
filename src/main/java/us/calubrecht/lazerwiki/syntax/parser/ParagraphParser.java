@@ -13,26 +13,33 @@ public class ParagraphParser extends AbstractTreeParser {
     @Override
     public ITreeNode parse(ParseContext parseContext) {
         ParseContext paragraphLines = new ParseContext();
-        paragraphLines.setRoot(parseContext.getPosition());
+        paragraphLines.setRoot(parseContext, parseContext.getPosition());
         // Sub context counts from current location
         int start = parseContext.getPosition();
+        int end =  parseContext.getPosition();
+        int lastEnd = end;
         for (String nextLine = parseContext.peekLine(); !parseContext.isEmpty(); nextLine = getNext(parseContext)) {
-          if (nonParagraphBlock(nextLine)) {
+          if (nonParagraphBlock(getNext(parseContext))) {
               // End of paragraph. Preserve line for next parser
+              end = lastEnd;
               break;
           }
           if (!nextLine.isEmpty()) {
               paragraphLines.addLine(nextLine);
+              lastEnd = end;
               parseContext.advanceLine();
+              end =  parseContext.getPosition();
           }
           else {
               // Blank line marks end of paragraph
+              end =  parseContext.getPosition();
               parseContext.advanceLine();
               break;
           }
         }
         ParagraphNode node = new ParagraphNode();
-        node.setPosition(Pair.of(start, parseContext.getPosition() -1));
+        node.setPosition(Pair.of(start, end));
+        node.setParseContext(parseContext);
         Parser.parseInner(paragraphLines, node, registrar);
         return node;
     }

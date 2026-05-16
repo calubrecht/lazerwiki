@@ -32,6 +32,7 @@ public class ImageParser extends AbstractInnerParser{
            String title = matcher.group(5) != null ? matcher.group(5).strip() : null;
            ImageNode node = new ImageNode(info.src(), title, info.options(), parseAlignment(matcher));
            node.setPosition(Pair.of(start, start + length -1));
+           node.setParseContext(parseContext);
            return Pair.of(length, node);
         }
         return null;

@@ -27,9 +27,10 @@ public class HeaderParser extends AbstractTreeParser {
                   int end = parseContext.getPosition() - 2;
                   HeaderNode node =  new HeaderNode(7 - i);
                   node.setPosition(Pair.of(start, end));
+                  node.setParseContext(parseContext);
                   ParseContext innerParseContext = new ParseContext();
                   innerParseContext.addLine(line.substring(i, line.length() - i));
-                  innerParseContext.setRoot(start + i);
+                  innerParseContext.setRoot(parseContext,start + i);
                   innerParseContext.lock();
                   Parser.parseInner(innerParseContext, node, registrar);
                   return node;

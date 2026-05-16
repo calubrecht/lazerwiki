@@ -49,6 +49,7 @@ public class ListParser extends AbstractTreeParser {
                 depth = lineDepth;
                 if (node == null) {
                     node = new ListNode(listToken.equals("*" ) ? LIST_TYPE.UNORDERED : LIST_TYPE.ORDERED);
+                    node.setParseContext(parseContext);
                 }
                 int length = m.group().length();
                 String itemText = nextLine.substring(length);
@@ -57,6 +58,7 @@ public class ListParser extends AbstractTreeParser {
                 int lineEnd = parseContext.getPosition() - -1;
                 ListChild.ListItemNode item = new ListChild.ListItemNode();
                 item.setPosition(Pair.of(itemStart, lineEnd));
+                item.setParseContext(parseContext);
                 if (m.group(4) != null && listToken.equals("-") ) {
                     // An item value was provided. Only handle if Ordered
                     item.setValue(m.group(4));

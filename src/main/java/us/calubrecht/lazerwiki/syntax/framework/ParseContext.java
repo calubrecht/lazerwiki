@@ -19,6 +19,7 @@ public class ParseContext implements Iterable<String> {
     List<String> lines;
     boolean readonly;
     int rootIdx = 0;
+    ParseContext rootContext = this;
 
     public ParseContext(String fullText) {
         this.fullText = new StringBuilder(fullText);
@@ -94,6 +95,10 @@ public class ParseContext implements Iterable<String> {
     }
 
     public int getPosition() {
+        if (charIdx >= fullText.length()) {
+           // Handle end of string issues
+           return rootIdx + fullText.length() -1;
+        }
         return charIdx + rootIdx;
     }
 
@@ -113,11 +118,16 @@ public class ParseContext implements Iterable<String> {
         nextLine = lines.get(0);
     }
 
-    public void setRoot(int rootPosition) {
+    public void setRoot(ParseContext root, int rootPosition) {
         if (readonly) {
             throw new UnsupportedOperationException("Cannot setRoot on a readonly ParseContext");
         }
+        rootContext = root;
         rootIdx = rootPosition;
+    }
+
+    public ParseContext getRootContext() {
+        return rootContext;
     }
 
     public void lock() {
@@ -152,5 +162,9 @@ public class ParseContext implements Iterable<String> {
     @Override
     public String toString() {
         return nextLine;
+    }
+
+    public String getFullText() {
+        return fullText.toString();
     }
 }

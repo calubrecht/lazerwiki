@@ -20,7 +20,7 @@ public class TableParser extends AbstractTreeParser {
     @Override
     public ITreeNode parse(ParseContext parseContext) {
         ParseContext tableLines = new ParseContext();
-        tableLines.setRoot(parseContext.getPosition());
+        tableLines.setRoot(parseContext, parseContext.getPosition());
         int start = parseContext.getPosition();
         while(!parseContext.isEmpty()) {
             String nextLine = parseContext.peekLine();
@@ -36,6 +36,7 @@ public class TableParser extends AbstractTreeParser {
         }
         TableNode node = new TableNode();
         node.setPosition(Pair.of(start, parseContext.getPosition()));
+        node.setParseContext(parseContext);
         int lineStart = start;
         List<List<ITreeNode>> cellMatrix = new ArrayList<>();
         for (String line : tableLines) {
@@ -44,10 +45,11 @@ public class TableParser extends AbstractTreeParser {
             // For each, Create a TableNode.TableCell (containerNode)
             // Then run parse inside.
             TableNode.TableRowNode row = new TableNode.TableRowNode();
-            parseCells(line, lineStart).stream().forEach(row::addChild);
+            parseCells(line, lineStart, parseContext).stream().forEach(row::addChild);
             cellMatrix.add(row.getChildren());
             node.addChild(row);
-            node.setPosition(Pair.of(lineStart, line.length() -1));
+            row.setPosition(Pair.of(lineStart, line.length() -1));
+            row.setParseContext(parseContext);
             lineStart += line.length() + 1;
         }
         // Count and process ROWSPAN_MARKERS
@@ -78,7 +80,7 @@ public class TableParser extends AbstractTreeParser {
         return node;
     }
 
-    List<TableNode.TableCellNode> parseCells(String row, int start) {
+    List<TableNode.TableCellNode> parseCells(String row, int start, ParseContext parseContext) {
         char token = row.charAt(0);
         List<TableNode.TableCellNode> cells = new ArrayList<>();
         TableNode.TableCellNode lastCell = null;
@@ -90,6 +92,7 @@ public class TableParser extends AbstractTreeParser {
                 String cell = row.substring(cellStart, idx);
                 TableNode.TableCellNode cellNode = new TableNode.TableCellNode(token == '|' ? TableNode.TableCellNode.CELL_TYPE.DATA : TableNode.TableCellNode.CELL_TYPE.HEADER);
                 cellNode.setPosition(Pair.of(cellStart, cellStart + cell.length() -1));
+                cellNode.setParseContext(parseContext);
                 if (cell.isEmpty()) {
                     if (cells.isEmpty()) {
                         cells.add(cellNode);

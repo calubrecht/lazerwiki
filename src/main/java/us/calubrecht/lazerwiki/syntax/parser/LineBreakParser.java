@@ -24,6 +24,7 @@ public class LineBreakParser extends AbstractInnerParser {
         if (parseContext.remainingStartsWith(" \\\\")) {
             LineBreakNode node = new LineBreakNode();
             node.setPosition(Pair.of(position, position+2));
+            node.setParseContext(parseContext);
             return Pair.of(3, node);
         }
         return null;
