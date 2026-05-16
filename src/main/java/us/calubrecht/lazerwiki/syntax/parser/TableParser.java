@@ -1,11 +1,15 @@
 package us.calubrecht.lazerwiki.syntax.parser;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
+import us.calubrecht.lazerwiki.syntax.framework.Parser;
+import us.calubrecht.lazerwiki.syntax.nodes.TableNode;
+import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,16 +18,16 @@ public class TableParser extends AbstractTreeParser {
     final Pattern tablePattern = Pattern.compile("[|^].*[|^]");
 
     @Override
-    public ITreeNode parse(List<String> markupLines, AtomicInteger counter) {
-        List<String> tableLines = new ArrayList<>();
-        int start = counter.get();
-        while(!markupLines.isEmpty()) {
-            String nextLine = markupLines.get(0);
+    public ITreeNode parse(ParseContext parseContext) {
+        ParseContext tableLines = new ParseContext();
+        tableLines.setRoot(parseContext.getPosition());
+        int start = parseContext.getPosition();
+        while(!parseContext.isEmpty()) {
+            String nextLine = parseContext.peekLine();
             Matcher m = tablePattern.matcher(nextLine);
-            if (nextLine.matches("  ")) {
-                tableLines.add(nextLine);
-                counter.addAndGet(nextLine.length() + 1);
-                markupLines.remove(0);
+            if (m.matches()) {
+                tableLines.addLine(nextLine);
+                parseContext.advanceLine();
             }
             else if (tableLines.isEmpty() ){
                // No table Found
@@ -31,19 +35,99 @@ public class TableParser extends AbstractTreeParser {
             }
         }
         TableNode node = new TableNode();
-        node.setPosition(Pair.of(start, counter.get()));
+        node.setPosition(Pair.of(start, parseContext.getPosition()));
         int lineStart = start;
+        List<List<ITreeNode>> cellMatrix = new ArrayList<>();
         for (String line : tableLines) {
             // Create a TableNode.TableRowNode
             // Split row into cells
             // For each, Create a TableNode.TableCell (containerNode)
             // Then run parse inside.
-            TextNode textNode = new TextNode(line.substring(2) + '\n');
-            textNode.setPosition(Pair.of(lineStart+2, lineStart + line.length() - 1));
-            node.addChild(textNode);
+            TableNode.TableRowNode row = new TableNode.TableRowNode();
+            parseCells(line, lineStart).stream().forEach(row::addChild);
+            cellMatrix.add(row.getChildren());
+            node.addChild(row);
+            node.setPosition(Pair.of(lineStart, line.length() -1));
             lineStart += line.length() + 1;
         }
+        // Count and process ROWSPAN_MARKERS
+        final TableNode.TableCellNode.CELL_TYPE marker = TableNode.TableCellNode.CELL_TYPE.ROWSPAN_MARKER;
+        for (int i = cellMatrix.size() -1; i >= 0; i--)  {
+            List<ITreeNode> currRow = cellMatrix.get(i);
+            for (int j = 0; j < currRow.size(); j++) {
+                TableNode.TableCellNode currCell = (TableNode.TableCellNode)currRow.get(j);
+                if (currCell.getType() == marker) {
+                    for (int k = i-1; k >= 0; k--) {
+                        List<ITreeNode> exRow = cellMatrix.get(k);
+                        if (exRow.size() <= j) {
+                            // This row is not long enough, keep going
+                            continue;
+                        }
+                        TableNode.TableCellNode exCell = (TableNode.TableCellNode)exRow.get(j);
+                        if (exCell.getType() == marker) {
+                            continue;
+                        }
+                        exCell.setRowSpan(exCell.getRowSpan() +1);
+                        break;
+                    }
+                    currRow.remove(j);
+                    j++;
+                }
+            }
+        }
         return node;
+    }
+
+    List<TableNode.TableCellNode> parseCells(String row, int start) {
+        char token = row.charAt(0);
+        List<TableNode.TableCellNode> cells = new ArrayList<>();
+        TableNode.TableCellNode lastCell = null;
+        int cellStart = 1;
+        for (int idx = 1; idx < row.length() ; idx ++) {
+            int nextChar = row.charAt(idx);
+            if (nextChar == '^' || nextChar == '|') {
+                // next cell
+                String cell = row.substring(cellStart, idx);
+                TableNode.TableCellNode cellNode = new TableNode.TableCellNode(token == '|' ? TableNode.TableCellNode.CELL_TYPE.DATA : TableNode.TableCellNode.CELL_TYPE.HEADER);
+                cellNode.setPosition(Pair.of(cellStart, cellStart + cell.length() -1));
+                if (cell.isEmpty()) {
+                    if (cells.isEmpty()) {
+                        cells.add(cellNode);
+                    } else {
+                        lastCell.setColSpan(lastCell.getColSpan()+1);
+                        token = row.charAt(idx);
+                        cellStart = idx + 1;
+                        lastCell = cellNode;
+                        continue;
+                    }
+                }
+                else if (cell.strip().equals("::")) {
+                    cellNode = new TableNode.TableCellNode(TableNode.TableCellNode.CELL_TYPE.ROWSPAN_MARKER);
+                }
+                else {
+                    ParseContext cellContext = new ParseContext(cell, start + cellStart);
+                    Parser.parseInner(cellContext, cellNode, registrar);
+                    if (cell.startsWith(" ")) {
+                        cellNode.setAlignment(cell.endsWith(" ") ? TableNode.TableCellNode.ALIGNMENT.CENTER : TableNode.TableCellNode.ALIGNMENT.RIGHT);
+                    }
+                    else if (cell.endsWith(" ")) {
+                        cellNode.setAlignment(TableNode.TableCellNode.ALIGNMENT.LEFT);
+                    }
+                }
+                token = row.charAt(idx);
+                cellStart = idx + 1;
+                cells.add(cellNode);
+                lastCell = cellNode;
+            }
+
+        }
+        return cells;
+    }
+
+    @Override
+    public boolean canBeginParse(String line) {
+        Matcher m = tablePattern.matcher(line);
+        return m.matches() ;
     }
 
     @Override
