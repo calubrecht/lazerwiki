@@ -3,13 +3,12 @@ package us.calubrecht.lazerwiki.syntax.renderer;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TableNode;
 
 import java.util.Collection;
 import java.util.List;
 
-@Component
+@Component("customSynTableRenderer")
 public class TableRenderer extends ContainerRenderer{
     @Override
     public Collection<Class<? extends ITreeNode>> getTargets() {

@@ -636,6 +636,11 @@ public class DokuWikiRender2Test {
         when(pageService.getTitle(eq("localhost"), eq("LinkToSomePage"))).thenReturn("LinkToSomePage");
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td><a class=\"wikiLinkMissing\" href=\"/page/LinkToSomePage\">LinkToSomePage</a><br> Some text after</td></tr>\n" +
                 "</tbody></table>", doRender(tableWithLink));
+
+        String biggerTable = "|One|Two|Three|Four|\n|Five|Six|Seven|Eight|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td>Two</td><td>Three</td><td>Four</td></tr>\n" +
+                "<tr><td>Five</td><td>Six</td><td>Seven</td><td>Eight</td></tr>\n" +
+                "</tbody></table>", doRender(biggerTable));
     }
 
     @Test
@@ -678,11 +683,21 @@ public class DokuWikiRender2Test {
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td class=\"tableLeft\">Left </td><td class=\"tableCenter\"> Center </td></tr>\n" +
                 "<tr><td class=\"tableRight\"> Right</td><td>None</td></tr>\n" +
                 "</tbody></table>", doRender(tableWithRowSpan));
+        tableWithRowSpan = "|**Left** | **Center** |\n| **Right**|**None**|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td class=\"tableLeft\"><span class=\"bold\">Left</span> </td><td class=\"tableCenter\"> <span class=\"bold\">Center</span> </td></tr>\n" +
+                "<tr><td class=\"tableRight\"> <span class=\"bold\">Right</span></td><td><span class=\"bold\">None</span></td></tr>\n" +
+                "</tbody></table>", doRender(tableWithRowSpan));
     }
 
     @Test
     public void testRenderTableWithBraces() {
         String inputTable = "|<some thing>|<or else>|";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td>&lt;some thing&gt;</td><td>&lt;or else&gt;</td></tr>\n</tbody></table>", doRender(inputTable));
+    }
+
+    @Test
+    public void testRenderTableWithLink() {
+        String inputTableWithLink = "|First|Cell [[Link| with a link]]|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Cell <a class=\"wikiLinkMissing\" href=\"/page/Link\"> with a link</a></td></tr>\n</tbody></table>", doRender(inputTableWithLink));
     }
 }

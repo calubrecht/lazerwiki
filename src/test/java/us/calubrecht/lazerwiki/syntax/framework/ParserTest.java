@@ -9,10 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.service.*;
-import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
-import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
-import us.calubrecht.lazerwiki.syntax.nodes.ListChild;
-import us.calubrecht.lazerwiki.syntax.nodes.ListNode;
+import us.calubrecht.lazerwiki.syntax.nodes.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -96,6 +93,21 @@ class ParserTest {
         descNode = link.getChildren().get(0);
         assertEquals(" with a link", descNode.getSourceFromContext());
         // Tables
+        String inputSimpleTable = "|First|Line|\n|Second|Line|";
+        nodes = cn(underTest.parse(inputSimpleTable));
+        TableNode table = (TableNode)nodes.getChildren().get(0);
+        assertEquals(inputSimpleTable, table.getSourceFromContext());
+        assertEquals("|Second|Line|", (table.getChildren().get(1)).getSourceFromContext());
+        assertEquals("|Second|", (cn(table.getChildren().get(1)).getChildren().get(0)).getSourceFromContext());
+
+        String inputTableWithLink = "|First|Line|\n|Second|Cell [[Link| with a link]]|";
+        nodes = cn(underTest.parse(inputTableWithLink));
+        table = (TableNode)nodes.getChildren().get(0);
+        assertEquals(inputTableWithLink, table.getSourceFromContext());
+        assertEquals("|Cell [[Link| with a link]]|", (cn(table.getChildren().get(1)).getChildren().get(1)).getSourceFromContext());
+        ContainerNode cell = cn((cn(table.getChildren().get(1)).getChildren().get(1)));
+        link = (LinkNode)cell.getChildren().get(1);
+        assertEquals("[[Link| with a link]]", link.getSourceFromContext());
     }
 
     @Test
@@ -117,5 +129,52 @@ class ParserTest {
         assertEquals(3, l1.getItems().size());
         l1_1 = ((ListChild.ListChildList)l1.getItems().get(1)).list();
         assertEquals(ListNode.LIST_TYPE.ORDERED, l1_1.getListType());
+    }
+
+    void verifySpans(TableNode.TableCellNode cell, int colSpan, int rowSpan) {
+        assertEquals(colSpan, cell.getColSpan());
+        assertEquals(rowSpan, cell.getRowSpan());
+    }
+
+    @Test
+    void testParseTable() {
+        String inputSimpleTable = "|First|Line|\n|Second|Line|";
+        ContainerNode nodes = cn(underTest.parse(inputSimpleTable));
+        // 1 table
+        assertEquals(1, nodes.getChildren().size());
+        TableNode table = (TableNode)nodes.getChildren().get(0);
+        // 2x2 table
+        assertEquals(2, table.getChildren().size());
+        assertEquals(2, cn(table.getChildren().get(0)).getChildren().size());
+        assertEquals(2, cn(table.getChildren().get(1)).getChildren().size());
+
+        String tableWithColSpan = "^Header|Line|\n|Second||";
+        nodes = cn(underTest.parse(tableWithColSpan));
+        // 1 table
+        assertEquals(1, nodes.getChildren().size());
+        table = (TableNode)nodes.getChildren().get(0);
+        // 2nd row is missing 1 cell, 1st cell has col span=2
+        assertEquals(2, table.getChildren().size());
+        assertEquals(2, cn(table.getChildren().get(0)).getChildren().size());
+        assertEquals(1, cn(table.getChildren().get(1)).getChildren().size());
+        verifySpans((TableNode.TableCellNode)cn(table.getChildren().get(1)).getChildren().get(0), 2, 1);
+        // 1st row's cells still rowspan 1
+        verifySpans((TableNode.TableCellNode)cn(table.getChildren().get(0)).getChildren().get(0), 1, 1);
+        verifySpans((TableNode.TableCellNode)cn(table.getChildren().get(0)).getChildren().get(1), 1, 1);
+
+
+        String tableWithRowSpan = "|One|Two|\n|Three| :: |";
+        nodes = cn(underTest.parse(tableWithRowSpan));
+        // 1 table
+        assertEquals(1, nodes.getChildren().size());
+        table = (TableNode)nodes.getChildren().get(0);
+        // 2nd row is missing 1 cell. 2nd cell in 1st row has rowspan 2
+        assertEquals(2, table.getChildren().size());
+        assertEquals(2, cn(table.getChildren().get(0)).getChildren().size());
+        assertEquals(1, cn(table.getChildren().get(1)).getChildren().size());
+        verifySpans((TableNode.TableCellNode)cn(table.getChildren().get(0)).getChildren().get(1), 1, 2);
+        // Other cells still have correct span
+        verifySpans((TableNode.TableCellNode)cn(table.getChildren().get(0)).getChildren().get(0), 1, 1);
+        verifySpans((TableNode.TableCellNode)cn(table.getChildren().get(1)).getChildren().get(0), 1, 1);
     }
 }

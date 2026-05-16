@@ -10,17 +10,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ParserRegistrar {
-    @Autowired
     Set<ITreeRenderer> renderers;
     Map<Class<? extends ITreeNode>, ITreeRenderer> renderersForClass;
-    @Autowired
     Set<ITreeParser> parsers;
-    @Autowired
-    Set<IInnerParser> innerParsers;
+    List<IInnerParser> innerParsers;
     Map<Character, List<IInnerParser>> innerParsersForKeychar;
     final ITreeRenderer DEFAULT_RENDERER = new ITreeRenderer.DefaultRenderer();
 
     List<ITreeParser> sortedParsers;
+
+    public ParserRegistrar(@Autowired Set<ITreeRenderer> renderers, @Autowired Set<ITreeParser> parsers, @Autowired List<IInnerParser> innerParsers) {
+        this.renderers = renderers;
+        this.parsers = parsers;
+        this.innerParsers = innerParsers;
+    }
 
     @PostConstruct
     public void linkBeans() {

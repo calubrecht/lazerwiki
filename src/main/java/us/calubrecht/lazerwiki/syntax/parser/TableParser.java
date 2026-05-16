@@ -1,15 +1,17 @@
 package us.calubrecht.lazerwiki.syntax.parser;
 
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
-import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
-import us.calubrecht.lazerwiki.syntax.framework.Parser;
+import us.calubrecht.lazerwiki.syntax.framework.*;
+import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TableNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,16 +42,14 @@ public class TableParser extends AbstractTreeParser {
         int lineStart = start;
         List<List<ITreeNode>> cellMatrix = new ArrayList<>();
         for (String line : tableLines) {
-            // Create a TableNode.TableRowNode
-            // Split row into cells
-            // For each, Create a TableNode.TableCell (containerNode)
-            // Then run parse inside.
             TableNode.TableRowNode row = new TableNode.TableRowNode();
-            parseCells(line, lineStart, parseContext).stream().forEach(row::addChild);
+            row.setParseContext(parseContext);
+            ParseContext rowContext = new ParseContext(line, lineStart, parseContext.getRootContext());
+            parseCells(line, lineStart, rowContext).stream().forEach(row::addChild);
+
             cellMatrix.add(row.getChildren());
             node.addChild(row);
-            row.setPosition(Pair.of(lineStart, line.length() -1));
-            row.setParseContext(parseContext);
+            row.setPosition(Pair.of(lineStart, lineStart + line.length() -1));
             lineStart += line.length() + 1;
         }
         // Count and process ROWSPAN_MARKERS
@@ -80,51 +80,122 @@ public class TableParser extends AbstractTreeParser {
         return node;
     }
 
-    List<TableNode.TableCellNode> parseCells(String row, int start, ParseContext parseContext) {
-        char token = row.charAt(0);
-        List<TableNode.TableCellNode> cells = new ArrayList<>();
-        TableNode.TableCellNode lastCell = null;
-        int cellStart = 1;
-        for (int idx = 1; idx < row.length() ; idx ++) {
-            int nextChar = row.charAt(idx);
-            if (nextChar == '^' || nextChar == '|') {
-                // next cell
-                String cell = row.substring(cellStart, idx);
-                TableNode.TableCellNode cellNode = new TableNode.TableCellNode(token == '|' ? TableNode.TableCellNode.CELL_TYPE.DATA : TableNode.TableCellNode.CELL_TYPE.HEADER);
-                cellNode.setPosition(Pair.of(cellStart, cellStart + cell.length() -1));
-                cellNode.setParseContext(parseContext);
-                if (cell.isEmpty()) {
-                    if (cells.isEmpty()) {
-                        cells.add(cellNode);
-                    } else {
-                        lastCell.setColSpan(lastCell.getColSpan()+1);
-                        token = row.charAt(idx);
-                        cellStart = idx + 1;
-                        lastCell = cellNode;
-                        continue;
-                    }
-                }
-                else if (cell.strip().equals("::")) {
-                    cellNode = new TableNode.TableCellNode(TableNode.TableCellNode.CELL_TYPE.ROWSPAN_MARKER);
-                }
-                else {
-                    ParseContext cellContext = new ParseContext(cell, start + cellStart, parseContext);
-                    Parser.parseInner(cellContext, cellNode, registrar);
-                    if (cell.startsWith(" ")) {
-                        cellNode.setAlignment(cell.endsWith(" ") ? TableNode.TableCellNode.ALIGNMENT.CENTER : TableNode.TableCellNode.ALIGNMENT.RIGHT);
-                    }
-                    else if (cell.endsWith(" ")) {
-                        cellNode.setAlignment(TableNode.TableCellNode.ALIGNMENT.LEFT);
-                    }
-                }
-                token = row.charAt(idx);
-                cellStart = idx + 1;
-                cells.add(cellNode);
-                lastCell = cellNode;
+    List<ITreeNode> unpackCells(TableNode.TableCellNode cellNode) {
+        List<ITreeNode> children = cellNode.getChildren();
+        if (children.get(children.size()-1) instanceof TextNode tn) {
+            if (tn.asString().equals("|")) {
+                children.remove(children.size()-1);
             }
-
         }
-        return cells;
+        List<ITreeNode> unpacked = new ArrayList<>();
+        for (int i = children.size() -1; i >= 0; i --) {
+            ITreeNode node = children.get(i);
+            if (node instanceof TableNode.TableCellNode child) {
+                List<ITreeNode> grandChildren = unpackCells(child);
+                unpacked.addAll(0, grandChildren);
+                children.remove(i);
+            }
+        }
+        unpacked.add(0, cellNode);
+        return unpacked;
+    }
+
+
+    List<TableNode.TableCellNode> parseCells(String row, int start, ParseContext parseContext) {
+            StringBuilder buffer = new StringBuilder();
+            List<TableNode.TableCellNode> cells = new ArrayList<>();
+            int cellStart = parseContext.getPosition();
+            int bufferStart = cellStart + 1;
+            char token = parseContext.peekChar();
+            TableNode.TableCellNode currentCell = new TableNode.TableCellNode(token == '|' ? TableNode.TableCellNode.CELL_TYPE.DATA : TableNode.TableCellNode.CELL_TYPE.HEADER);
+            currentCell.setParseContext(parseContext);
+            parseContext.advanceChar(); // Past First token
+            while(!parseContext.isEmpty()) {
+                char c = parseContext.peekChar();
+                if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '\n') {
+                    buffer.append(c);
+                    parseContext.advanceChar();
+                    continue;
+                }
+                if (c == '^' || c == '|') {
+                    // Cell boundary outside of other parsings.
+                    token = c;
+                    if (!buffer.isEmpty()) {
+                        TextNode node = new TextNode(buffer.toString());
+                        node.setParseContext(parseContext);
+                        node.setPosition(bufferStart, parseContext.getPosition()-1);
+                        if (currentCell.getChildren().isEmpty() && startsSpaces(node)) {
+                            currentCell.setAlignment(TableNode.TableCellNode.ALIGNMENT.RIGHT);
+                        }
+                        if (endsSpaces(node)) {
+                            currentCell.setAlignment(currentCell.getAlignment() == TableNode.TableCellNode.ALIGNMENT.RIGHT ? TableNode.TableCellNode.ALIGNMENT.CENTER : TableNode.TableCellNode.ALIGNMENT.LEFT);
+                        }
+                        currentCell.addChild(node);
+                    }
+                    currentCell.setPosition(cellStart, parseContext.getPosition());
+                    if (!currentCell.getChildren().isEmpty()) {
+                        if (parseRowspan(currentCell)) {
+                            currentCell = new TableNode.TableCellNode(TableNode.TableCellNode.CELL_TYPE.ROWSPAN_MARKER);
+                        }
+                        cells.add(currentCell);
+                    }
+                    else {
+                        if (!cells.isEmpty()) {
+                            TableNode.TableCellNode lastCell = cells.get(cells.size()-1);
+                            lastCell.setColSpan(lastCell.getColSpan() + 1);
+                        }
+                    }
+                    currentCell = new TableNode.TableCellNode(token == '|' ? TableNode.TableCellNode.CELL_TYPE.DATA : TableNode.TableCellNode.CELL_TYPE.HEADER);
+                    currentCell.setParseContext(parseContext);
+                    cellStart = parseContext.getPosition();
+                    parseContext.advanceChar();
+                    buffer.setLength(0);
+                    bufferStart = parseContext.getPosition();
+                    continue;
+                }
+                List<IInnerParser> parsers = registrar.getParsersForKeyCharacter(c);
+                boolean parseFound = false;
+                for (IInnerParser parser: parsers) {
+                    Pair<Integer, ITreeNode> parsed = parser.parse(parseContext);
+                    if (parsed != null) {
+                        parseFound = true;
+                        TextNode node = new TextNode(buffer.toString());
+                        node.setParseContext(parseContext);
+                        node.setPosition(bufferStart, parseContext.getPosition()-1);
+                        if (startsSpaces(node)) {
+                            currentCell.setAlignment(TableNode.TableCellNode.ALIGNMENT.RIGHT);
+                        }
+                        currentCell.addChild(node);
+                        buffer.setLength(0);
+                        bufferStart = parseContext.getPosition();
+                        currentCell.addChild(parsed.getRight());
+                        parseContext.advanceChars(parsed.getLeft());
+                    }
+                }
+                if (!parseFound) {
+                    buffer.append(c);
+                    parseContext.advanceChar();
+                }
+            }
+            currentCell.setPosition(cellStart, parseContext.getPosition());
+            return cells;
+    }
+
+    boolean parseRowspan(TableNode.TableCellNode node) {
+        if (node.getChildren().size() == 1) {
+            if (node.getChildren().get(0) instanceof TextNode tn) {
+                return tn.asString().strip().equals("::");
+            }
+        }
+        return false;
+    }
+
+    boolean startsSpaces(TextNode node) {
+        return node.asString().startsWith(" ");
+    }
+
+    boolean endsSpaces(TextNode node) {
+        return node.asString().endsWith(" ");
     }
 
     @Override

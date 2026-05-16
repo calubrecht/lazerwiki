@@ -39,12 +39,16 @@ public class ParseContext implements Iterable<String> {
         lines = fullText.lines().toList();
         nextLine = lines.get(0);
         rootIdx = rootPosition;
-        this.rootContext = rootContext;
+        this.rootContext = rootContext.getRootContext();
         readonly = true;
     }
 
     public String peekLine() {
         return nextLine;
+    }
+
+    public String remainingLine() {
+        return nextLine.substring(charInLine);
     }
 
     public void advanceLine() {
@@ -123,7 +127,7 @@ public class ParseContext implements Iterable<String> {
         if (readonly) {
             throw new UnsupportedOperationException("Cannot setRoot on a readonly ParseContext");
         }
-        rootContext = root;
+        rootContext = root.getRootContext();
         rootIdx = rootPosition;
     }
 
