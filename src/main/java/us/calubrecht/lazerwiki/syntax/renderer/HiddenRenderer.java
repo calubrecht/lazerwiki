@@ -13,7 +13,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.TaggedContainerNode;
 import java.util.Collection;
 import java.util.List;
 
-@Component
+@Component("customSynHiddenRenderer")
 public class HiddenRenderer extends ContainerRenderer {
     @Autowired
     RandomService randomService;
@@ -48,6 +48,21 @@ public class HiddenRenderer extends ContainerRenderer {
         outBuffer.append(super.renderHtml(cn, renderContext).toString().strip());
         outBuffer.append("</div></div>");
         return outBuffer;
+    }
+
+    @Override
+    public StringBuilder renderPlaintext(ITreeNode node, RenderContext renderContext) {
+        HiddenNode hidden = (HiddenNode)node;
+        ContainerNode container = (ContainerNode)node;
+        StringBuilder buffer = new StringBuilder();
+        if (hidden.getOptions().containsKey("name")) {
+            buffer.append(hidden.getOptions().get("name")).append(":");
+        }
+        for(ITreeNode child : container.getChildren()) {
+            buffer.append(parserRegistrar.getRenderer(child.getClass()).renderPlaintext(child, renderContext));
+            buffer.append("\n\n");
+        }
+        return new StringBuilder(buffer.toString());
     }
 
     /**

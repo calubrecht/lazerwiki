@@ -4,11 +4,17 @@ package us.calubrecht.lazerwiki.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import us.calubrecht.lazerwiki.model.HeaderRef;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.framework.Renderer;
+
+import java.util.Collections;
+import java.util.List;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.*;
 
 /**
  * An implementation of IMarkupRenderer that speaks DokuWiki's markup language.
@@ -19,17 +25,21 @@ public class CustomWikiRenderer implements IMarkupRenderer {
     final Parser parser;
     final Renderer renderer;
 
-    public CustomWikiRenderer(@Autowired Parser parser, @Autowired Renderer renderer) {
+    final TOCRenderService tocRenderService;
+
+    public CustomWikiRenderer(@Autowired Parser parser, @Autowired Renderer renderer, @Autowired TOCRenderService tocRenderService) {
         this.parser = parser;
         this.renderer = renderer;
+        this.tocRenderService = tocRenderService;
     }
 
     @Override
     public RenderResult renderWithInfo(String markup, RenderContext renderContext) {
         ITreeNode node = parser.parse(markup);
         String rendered = renderer.render(node, renderContext);
+        String TOC = renderToC( renderContext);
         String plainText = renderer.renderPlaintext(node, renderContext);
-        return new RenderResult(rendered, plainText, renderContext.renderState());
+        return new RenderResult(TOC + rendered, plainText, renderContext.renderState());
     }
 
     @Override
@@ -40,5 +50,15 @@ public class CustomWikiRenderer implements IMarkupRenderer {
     @Override
     public String renderToPlainText(String markup, RenderContext renderContext) {
         return renderWithInfo(markup, renderContext).plainText();
+    }
+
+    private String renderToC(RenderContext renderContext) {
+        List<HeaderRef> headers = (List<HeaderRef>)renderContext.renderState().getOrDefault(HEADERS.name(), Collections.emptyList());
+        Object forceTOC = renderContext.renderState().get(TOC.name());
+        if (Boolean.FALSE.equals(forceTOC) || (headers.size() < 3) && !Boolean.TRUE.equals(forceTOC)) {
+            return "";
+        }
+        String idSuffix = renderContext.renderState().getOrDefault(ID_SUFFIX.name(), "").toString();
+        return tocRenderService.renderTOC(headers, idSuffix);
     }
 }

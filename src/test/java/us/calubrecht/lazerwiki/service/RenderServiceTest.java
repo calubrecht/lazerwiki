@@ -2,6 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,6 +35,7 @@ public class RenderServiceTest {
     PageUpdateService pageUpdateService;
 
     @MockBean
+    @Qualifier("Antlr")
     IMarkupRenderer renderer;
 
     @MockBean

@@ -42,7 +42,7 @@ public class HeaderRenderer extends ContainerRenderer {
 
     @Override
     public StringBuilder renderPlaintext(ITreeNode node, RenderContext renderContext) {
-        return super.renderPlaintext(node, renderContext);
+        return super.renderPlaintext(node, renderContext).append("\n");
     }
 
     String toId(String headerText, List<HeaderRef>existingHeaders) {

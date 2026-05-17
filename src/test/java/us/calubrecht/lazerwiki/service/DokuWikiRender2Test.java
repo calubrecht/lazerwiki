@@ -50,6 +50,9 @@ public class DokuWikiRender2Test {
     @MockBean
     MediaOverrideService mediaOverrideService;
 
+    @MockBean
+    TOCRenderService tocRenderService;
+
     String doRender(String source) {
         return underTest.renderToString(source, "localhost", "default", "page", "");
     }
@@ -816,4 +819,48 @@ on sameline</hidden>
 
     }
 
+    @Test
+    public void testRenderTOC() {
+        String source = "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n";
+        String headerRender = """
+                <div id="lw_TOC"></div>
+                """;
+
+        when(tocRenderService.renderTOC(any(), any())).thenReturn(headerRender);
+
+        assertEquals(headerRender + "<h1 id=\"header_Header_1\">Header 1</h1>\n<h3 id=\"header_Header_2\">Header 2</h3>\n<h1 id=\"header_Header_3\">Header 3</h1>\n<h2 id=\"header_Header_2_1\">Header 2</h2>", doRender(source));
+    }
+
+    @Test
+    public void testRenderNoTOC() {
+        String source = "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n  ~~NOTOC~~";
+        String headerRender = """
+                <div id="lw_TOC"></div>
+                """;
+
+        when(tocRenderService.renderTOC(any(), any())).thenReturn(headerRender);
+
+        assertEquals("<h1 id=\"header_Header_1\">Header 1</h1>\n<h3 id=\"header_Header_2\">Header 2</h3>\n<h1 id=\"header_Header_3\">Header 3</h1>\n<h2 id=\"header_Header_2_1\">Header 2</h2>", doRender(source));
+    }
+
+    @Test
+    public void testRenderYesTOC() {
+        String source = "====== Header 1 ======\n ==== Header 2 ====\n  ~~YESTOC~~";
+        String headerRender = """
+                <div id="lw_TOC"></div>
+                """;
+
+        when(tocRenderService.renderTOC(any(), any())).thenReturn(headerRender);
+
+        assertEquals(headerRender+"<h1 id=\"header_Header_1\">Header 1</h1>\n<h3 id=\"header_Header_2\">Header 2</h3>", doRender(source));
+    }
+
+    @Test
+    public void testRenderHR() {
+        String source="----";
+
+        assertEquals("<hr>", doRender(source));
+        source = "-----";
+        assertEquals("<hr>", doRender(source));
+    }
 }
