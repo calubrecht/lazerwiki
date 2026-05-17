@@ -6,7 +6,7 @@ import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
 import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
-import us.calubrecht.lazerwiki.syntax.nodes.ParagraphNode;
+import us.calubrecht.lazerwiki.syntax.nodes.TaggedContainerNode;
 
 @Component
 public class ParagraphParser extends AbstractTreeParser {
@@ -37,7 +37,7 @@ public class ParagraphParser extends AbstractTreeParser {
               break;
           }
         }
-        ParagraphNode node = new ParagraphNode();
+        TaggedContainerNode node = new TaggedContainerNode(TaggedContainerNode.TYPE.PARAGRAPH);
         node.setPosition(Pair.of(start, end));
         node.setParseContext(parseContext);
         Parser.parseInner(paragraphLines, node, registrar);

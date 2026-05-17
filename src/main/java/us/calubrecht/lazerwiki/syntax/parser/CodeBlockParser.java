@@ -4,7 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
-import us.calubrecht.lazerwiki.syntax.nodes.CodeBlockNode;
+import us.calubrecht.lazerwiki.syntax.nodes.TaggedContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
 @Component
@@ -28,7 +28,7 @@ public class CodeBlockParser extends AbstractTreeParser {
             }
         }
         blockLines.lock();
-        CodeBlockNode node = new CodeBlockNode();
+        TaggedContainerNode node = new TaggedContainerNode(TaggedContainerNode.TYPE.CODE_BLOCK);
         node.setPosition(Pair.of(start, blockLines.getPosition() -1));
         node.setParseContext(parseContext);
         int lineStart = start;

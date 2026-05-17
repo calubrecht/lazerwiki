@@ -741,4 +741,17 @@ public class DokuWikiRender2Test {
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Line</td></tr>\n</tbody></table>\n" +
                 "<table class=\"lazerTable\"><tbody><tr><td>Second</td><td>Line</td></tr>\n</tbody></table>", doRender(inputSimpleTable));
     }
+
+    @Test
+    public void testRenderBlockquote() {
+        String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
+        assertEquals("<blockquote> One quote <span class=\"bold\">with some bold</span>\n" +
+               "<br>And<blockquote>Another layer of quote</blockquote></blockquote>", doRender(inputBlockquote));
+
+        String inputBlockquoteWithBlankLines = "> **//Some bold//**\n>\n>A blank line\n> \n>And one with just space";
+        assertEquals("<blockquote> <span class=\"bold\"><span class=\"italic\">Some bold</span></span>\n<br>\n<br>A blank line\n<br> \n<br>And one with just space</blockquote>", doRender(inputBlockquoteWithBlankLines));
+
+        String inputBlockquoteUpAndDown = ">One Quote\n>>TwoQuote\n>One Quote";
+        assertEquals("<blockquote>One Quote<blockquote>TwoQuote</blockquote>One Quote</blockquote>", doRender(inputBlockquoteUpAndDown));
+    }
 }
