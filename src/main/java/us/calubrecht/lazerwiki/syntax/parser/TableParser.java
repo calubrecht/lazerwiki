@@ -31,9 +31,9 @@ public class TableParser extends AbstractTreeParser {
                 tableLines.addLine(nextLine);
                 parseContext.advanceLine();
             }
-            else if (tableLines.isEmpty() ){
-               // No table Found
-               return null;
+            else {
+                // End of Table
+                break;
             }
         }
         TableNode node = new TableNode();

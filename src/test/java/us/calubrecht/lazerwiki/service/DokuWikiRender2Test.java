@@ -734,4 +734,11 @@ public class DokuWikiRender2Test {
         String inputTableWithLink = "|First|Cell [[Link| with a link]]|";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Cell <a class=\"wikiLinkMissing\" href=\"/page/Link\"> with a link</a></td></tr>\n</tbody></table>", doRender(inputTableWithLink));
     }
+
+    @Test
+    public void testRender2Tables() {
+        String inputSimpleTable = "|First|Line|\n\n|Second|Line|";
+        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Line</td></tr>\n</tbody></table>\n" +
+                "<table class=\"lazerTable\"><tbody><tr><td>Second</td><td>Line</td></tr>\n</tbody></table>", doRender(inputSimpleTable));
+    }
 }
