@@ -43,6 +43,24 @@ public class ParseContext implements Iterable<String> {
         readonly = true;
     }
 
+    /**
+     * Clone the context, shares rootContext and text and starts at same position, but does not move
+     * root parser;
+     * @param rootContext
+     */
+    public ParseContext(ParseContext rootContext) {
+        this.fullText = new StringBuilder(rootContext.fullText);
+        nextLine = rootContext.nextLine;
+        lineStart = rootContext.lineStart;
+        lineIdx = rootContext.lineIdx;
+        charIdx = rootContext.charIdx;
+        charInLine = rootContext.charInLine;
+        lines = new ArrayList<>(rootContext.lines);
+        readonly = true;
+        rootIdx = rootContext.rootIdx;
+        this.rootContext = rootContext.getRootContext();
+    }
+
     public String peekLine() {
         return nextLine;
     }

@@ -126,6 +126,8 @@ class ParserTest {
         ContainerNode cell = cn((cn(table.getChildren().get(1)).getChildren().get(1)));
         link = (LinkNode)cell.getChildren().get(1);
         assertEquals("[[Link| with a link]]", link.getSourceFromContext());
+
+        // Test hiddens
     }
 
     @Test

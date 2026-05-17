@@ -755,4 +755,65 @@ public class DokuWikiRender2Test {
         String inputBlockquoteUpAndDown = ">One Quote\n>>TwoQuote\n>One Quote";
         assertEquals("<blockquote>One Quote<blockquote>TwoQuote</blockquote>One Quote</blockquote>", doRender(inputBlockquoteUpAndDown));
     }
+
+    @Test
+    public void testRenderBlockquoteSpaceIMage() {
+        String inputBlockquote = "> {{animage}}";
+        assertEquals("<blockquote> <img src=\"/_media/animage\" class=\"media\" loading=\"lazy\"></blockquote>", doRender(inputBlockquote));
+    }
+
+    @Test
+    public void testHidden() {
+        when(randomService.nextInt()).thenReturn(5,8, 7, 11);
+        String hidden = "<hidden>simple</hidden>";
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle5\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle5\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">simple</div></div>", doRender(hidden));
+
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle8\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle8\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><div>line1</div>\n<div>line2<img src=\"/_media/animage\" class=\"media\" loading=\"lazy\"></div></div></div>",
+                doRender("<hidden>line1\n\nline2{{animage}}</hidden>"));
+
+        String namedHidden = "<hidden name=\"Bark\">Something in  here</hidden>";
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle7\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle7\" class=\"hdn-toggle\" data-named=\"true\">Bark</label><div class=\"collapsible\">Something in  here</div></div>", doRender(namedHidden));
+        String maliciousName = "<hidden name=\"<script>runsomething</script>\">Hidden</hidden>";
+        RenderResult renderRes = underTest.renderWithInfo(maliciousName, "host", "site", "page", "user");
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\" data-named=\"true\">&lt;script&gt;runsomething&lt;/script&gt;</label><div class=\"collapsible\">Hidden</div></div>", renderRes.renderedText());
+        List<String> parseErrors = (List<String>) renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name());
+        assertEquals("Suspicious hidden tag name at 0. Raw text =[<script>runsomething</script>]", parseErrors.get(0));
+
+        String unknownAttr = "<hidden fling=\"Bark\">Something in  here</hidden>";
+        renderRes = underTest.renderWithInfo(unknownAttr, "host", "site", "page", "user");
+        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">Something in  here</div></div>", renderRes.renderedText());
+        parseErrors = (List<String>) renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name());
+        assertEquals("Unknown attribute \"fling\" in hidden tag at 0", parseErrors.get(0));
+
+        // Other hidden cases to try
+/*
+
+<hidden> hidden closetag
+on sameline</hidden>
+
+<hidden> single line hidden</hidden>
+
+<hidden>
+ -Hidden with list
+ -A list
+</hidden>
+
+<hidden> -Hidden with list
+ -starting on hidden line
+</hidden>
+<hidden> -Hidden with
+<hidden>Nested hidden</hidden>
+</hidden>
+         */
+    }
+
+    @Test
+    public void testHidden_unsupportedCases() {
+        when(randomService.nextInt()).thenReturn(5);
+        String notAtStart = "Can <hidden> start\nin middle ofline\n</hidden>";
+        // Just escapes the hidden tag and parses as paragraph
+        assertEquals("<div>Can &lt;hidden&gt; start\nin middle ofline\n&lt;/hidden&gt;</div>", doRender(notAtStart));
+
+    }
+
 }
