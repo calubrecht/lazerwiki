@@ -5,9 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.CharBuffer;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
-
-import static com.ibm.icu.text.PluralRules.Operand.i;
 
 public class ParseContext implements Iterable<String> {
     StringBuilder fullText;
