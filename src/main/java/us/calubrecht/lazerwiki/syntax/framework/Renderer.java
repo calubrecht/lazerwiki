@@ -20,6 +20,6 @@ public class Renderer {
 
     public String renderPlaintext(ITreeNode node, RenderContext renderContext) {
         ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
-        return renderer.renderPlaintext(node, renderContext).toString().strip();
+        return renderer.renderPlaintext(node, renderContext).toString().stripTrailing();
     }
 }

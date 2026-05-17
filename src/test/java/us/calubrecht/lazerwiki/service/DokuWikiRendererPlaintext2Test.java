@@ -10,8 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = { CustomWikiRenderer.class, DokuWikiRendererPlaintext2Test.TestConfig.class})
@@ -92,6 +91,7 @@ public class DokuWikiRendererPlaintext2Test {
 
     @Test
     void testRenderMacro() {
+        when(macroService.renderMacro(anyString(), anyString(), any())).thenReturn("Something that won't show in plaintext");
         assertEquals("", doRender("~~MACRO~~This could be any macro~~/MACRO~~"));
     }
 
@@ -154,8 +154,8 @@ public class DokuWikiRendererPlaintext2Test {
     @Test
     public void testRenderBrokenInput() {
         String source="---";
-
-        assertEquals("ERROR: Cannot parse: [---]\n", doRender(source));
+        // If can't figure it out, just print it raw
+        assertEquals("---", doRender(source));
     }
 
     @Test

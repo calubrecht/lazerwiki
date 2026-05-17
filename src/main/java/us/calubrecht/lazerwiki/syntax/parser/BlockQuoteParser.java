@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.framework.Parser;
-import us.calubrecht.lazerwiki.syntax.nodes.TaggedContainerNode;
-import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
+import us.calubrecht.lazerwiki.syntax.nodes.BlockQuoteNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +32,8 @@ public class BlockQuoteParser extends AbstractTreeParser{
             }
         }
         blockLines.lock();
-        List<TaggedContainerNode> nodeStack = new ArrayList<>();
-        TaggedContainerNode node = newNode(nodeStack, parseContext);
+        List<BlockQuoteNode> nodeStack = new ArrayList<>();
+        BlockQuoteNode node = newNode(nodeStack, parseContext);
         node.setPosition(Pair.of(start, -1));
         node.setParseContext(parseContext);
         int nodeStart = start;
@@ -47,7 +46,7 @@ public class BlockQuoteParser extends AbstractTreeParser{
                 nodeStart = nodeLines.getPosition();
                 nodeLines = new ParseContext();
                 nodeLines.setRoot(parseContext, nodeStart);
-                TaggedContainerNode oldNode = node;
+                BlockQuoteNode oldNode = node;
                 node = newNode(nodeStack, parseContext);
                 node.setPosition(nodeStart, -1);
                 oldNode.addChild(node);
@@ -78,8 +77,8 @@ public class BlockQuoteParser extends AbstractTreeParser{
         return node;
     }
 
-    TaggedContainerNode newNode(List<TaggedContainerNode> nodeStack, ParseContext parseContext) {
-        TaggedContainerNode node = new TaggedContainerNode(TaggedContainerNode.TYPE.BLOCK_QUOTE);
+    BlockQuoteNode newNode(List<BlockQuoteNode> nodeStack, ParseContext parseContext) {
+        BlockQuoteNode node = new BlockQuoteNode();
         node.setParseContext(parseContext);
         nodeStack.add(0, node);
         return node;
