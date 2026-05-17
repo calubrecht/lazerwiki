@@ -13,35 +13,40 @@ public class HeaderParser extends AbstractTreeParser {
   final static char HEADER_CHAR = '=';
   final static String MIN_HEADER = StringUtils.repeat(HEADER_CHAR, 2);
 
-  public ITreeNode parse(ParseContext parseContext) {
-      String line = parseContext.peekLine().strip();
-      if (!line.startsWith(MIN_HEADER)) {
-           return null;
-       }
-      for (int i = 0; i < line.length(); i++) {
-          if (line.charAt(i) != HEADER_CHAR) {
-              String tokens = StringUtils.repeat(HEADER_CHAR, i);
-              if (line.endsWith(tokens)) {
-                  int start = parseContext.getPosition();
-                  parseContext.advanceLine();
-                  int end = parseContext.getPosition() - 2;
-                  HeaderNode node =  new HeaderNode(7 - i);
-                  node.setPosition(Pair.of(start, end));
-                  node.setParseContext(parseContext);
-                  ParseContext innerParseContext = new ParseContext();
-                  innerParseContext.addLine(line.substring(i, line.length() - i));
-                  innerParseContext.setRoot(parseContext,start + i);
-                  innerParseContext.lock();
-                  Parser.parseInner(innerParseContext, node, registrar);
-                  return node;
-              }
-              else {
-                  return null;
-              }
-          }
-      }
-      return null;
-  }
+    public ITreeNode parse(ParseContext parseContext) {
+        String line = parseContext.peekLine().strip();
+        if (!line.startsWith(MIN_HEADER)) {
+            return null;
+        }
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) != HEADER_CHAR) {
+                int start = parseContext.getPosition();
+                parseContext.advanceLine();
+                int end = parseContext.getPosition() - 2;
+                HeaderNode node = new HeaderNode(7 - i);
+                node.setPosition(Pair.of(start, end));
+                node.setParseContext(parseContext);
+                ParseContext innerParseContext = new ParseContext();
+                int trailingTokens = countTrailingTokens(line);
+                innerParseContext.addLine(line.substring(i, line.length() - trailingTokens));
+                innerParseContext.setRoot(parseContext, start + trailingTokens);
+                innerParseContext.lock();
+                Parser.parseInner(innerParseContext, node, registrar);
+                return node;
+            }
+        }
+        return null;
+    }
+
+    int countTrailingTokens(String s) {
+        int c = 0;
+        for (int i = s.length() -1; i>=0; i--, c++) {
+            if (s.charAt(i) != HEADER_CHAR) {
+                break;
+            }
+        }
+        return c;
+    }
 
     @Override
     public boolean canBeginParse(String line) {

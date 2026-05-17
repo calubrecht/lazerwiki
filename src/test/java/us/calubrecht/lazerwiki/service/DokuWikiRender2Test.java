@@ -66,6 +66,15 @@ public class DokuWikiRender2Test {
     }
 
     @Test
+    void testRenderHeaderImbalance() {
+        // Imbalanced header tokens? Just use the opening tokens for size
+        String source = "====== Header with unmatching tokens =====";
+        assertEquals("<h1 id=\"header_Header_with_unmatching_tokens\">Header with unmatching tokens</h1>", doRender(source));
+        source = "==== Mismatched the other way =====";
+        assertEquals("<h3 id=\"header_Mismatched_the_other_way\">Mismatched the other way</h3>", doRender(source));
+    }
+
+    @Test
     void testRenderHeaderSanitize() {
         String source = "====== <script>doAlert(\"Gotcha\");</script> ======";
 
