@@ -30,7 +30,6 @@ public class RegenCacheService {
     ImageRefService imageRefService;
 
     @Autowired
-    @Qualifier("Antlr")
     IMarkupRenderer renderer;
 
     @Autowired

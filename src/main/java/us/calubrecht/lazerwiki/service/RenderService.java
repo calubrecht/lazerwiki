@@ -24,7 +24,6 @@ public class RenderService {
     final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
-    @Qualifier("Antlr")
     IMarkupRenderer renderer;
 
     @Autowired

@@ -20,8 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {MacroService.class, DokuWikiRenderer.class, RendererRegistrar.class, us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class})
-@ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
+@SpringBootTest(classes = {MacroService.class, CustomWikiRenderer.class, us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class})
 @ActiveProfiles("test")
 class IncludeMacroTest {
 
@@ -35,7 +34,7 @@ class IncludeMacroTest {
     MacroCssService macroCssService;
 
     @Autowired
-    DokuWikiRenderer renderer;
+    CustomWikiRenderer renderer;
 
     @MockBean
     LinkService linkService;

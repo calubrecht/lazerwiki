@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.syntax.framework.Parser;
 import us.calubrecht.lazerwiki.syntax.framework.Renderer;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.*;
@@ -36,9 +37,12 @@ public class CustomWikiRenderer implements IMarkupRenderer {
     @Override
     public RenderResult renderWithInfo(String markup, RenderContext renderContext) {
         ITreeNode node = parser.parse(markup);
-        String rendered = renderer.render(node, renderContext);
+        RenderContext htmlContext = new RenderContext(renderContext.host(), renderContext.site(), renderContext.page(), renderContext.user(),this, renderContext.renderState());
+        String rendered = renderer.render(node, htmlContext);
         String TOC = renderToC( renderContext);
-        String plainText = renderer.renderPlaintext(node, renderContext);
+        RenderContext plaintextContext = new RenderContext(renderContext.host(), renderContext.site(), renderContext.page(), renderContext.user(),this, new HashMap<>());
+        plaintextContext.renderState().put("plainText", true);
+        String plainText = renderer.renderPlaintext(node, plaintextContext);
         return new RenderResult(TOC + rendered, plainText, renderContext.renderState());
     }
 

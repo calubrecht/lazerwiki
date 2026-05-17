@@ -32,7 +32,6 @@ class RegenCacheServiceTest {
     PageRepository pageRepository;
 
     @MockBean
-    @Qualifier("Antlr")
     IMarkupRenderer renderer;
 
     @MockBean

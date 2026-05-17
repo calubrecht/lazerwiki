@@ -35,7 +35,6 @@ public class RenderServiceTest {
     PageUpdateService pageUpdateService;
 
     @MockBean
-    @Qualifier("Antlr")
     IMarkupRenderer renderer;
 
     @MockBean
