@@ -66,6 +66,13 @@ public class DokuWikiRender2Test {
     }
 
     @Test
+    void testRenderHeaderBlanBetween() {
+        String source = "====== Big header ======\n\n ==== Smaller Header ====";
+
+        assertEquals("<h1 id=\"header_Big_header\">Big header</h1>\n<h3 id=\"header_Smaller_Header\">Smaller Header</h3>", doRender(source));
+    }
+
+    @Test
     void testRenderHeaderImbalance() {
         // Imbalanced header tokens? Just use the opening tokens for size
         String source = "====== Header with unmatching tokens =====";
@@ -556,6 +563,15 @@ public class DokuWikiRender2Test {
         assertEquals(
                 "<pre class=\"code\">This is a block\nShould all be one block\n\nEven if a line with only 2 spaces and nothing more\n</pre>",
                 doRender(input3)
+        );
+    }
+
+    @Test
+    public void testCodeBlockThenSpace() {
+        String input1 = "  This is a block\n\n  andAnotherBlock\n";
+        assertEquals(
+                "<pre class=\"code\">This is a block\n</pre><pre class=\"code\">andAnotherBlock\n</pre>",
+                doRender(input1)
         );
     }
 

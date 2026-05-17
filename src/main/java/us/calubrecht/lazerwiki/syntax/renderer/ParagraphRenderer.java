@@ -18,9 +18,13 @@ public class ParagraphRenderer extends ContainerRenderer {
 
     @Override
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
+        StringBuilder content = super.renderHtml(node, renderContext);
+        if (content.isEmpty()) {
+            return new StringBuilder();
+        }
         StringBuilder buffer = new StringBuilder();
         buffer.append("<div>");
-        buffer.append(super.renderHtml(node, renderContext));
+        buffer.append(content);
         buffer.append("</div>\n");
         return buffer;
     }

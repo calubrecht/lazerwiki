@@ -22,9 +22,9 @@ public class CodeBlockParser extends AbstractTreeParser {
                 blockLines.addLine(nextLine);
                 parseContext.advanceLine();
             }
-            else if (blockLines.isEmpty() ){
-               // No Block Found
-               return null;
+            else if (nextLine.isEmpty()) {
+                // Empty line, break codeblock
+                break;
             }
         }
         blockLines.lock();
