@@ -40,7 +40,7 @@ class ParserTest {
     MediaOverrideService mediaOverrideService;
 
     /**
-     * Conveniance casting function
+     * Convenience casting function
      */
     ContainerNode cn(ITreeNode node) {
         return (ContainerNode)node;
@@ -54,27 +54,45 @@ class ParserTest {
         assertEquals("This is one paragraph\n\n", p0.getSourceFromContext());
         ContainerNode p1 = cn(nodes.getChildren().get(1));
         assertEquals("This is another", p1.getSourceFromContext());
+    }
 
+    @Test
+    void testParse_testPositionHandling_Links() {
         // Link context
         String testText = "This is one paragraph\n\nThis is a paragraph [[ link:Target|with a link ]]. All goood\nAnd more";
-        nodes = cn(underTest.parse(testText));
+        ContainerNode nodes = cn(underTest.parse(testText));
         assertEquals(2, nodes.getChildren().size());
-        p0 = cn(nodes.getChildren().get(0));
+        ContainerNode p0 = cn(nodes.getChildren().get(0));
         assertEquals("This is one paragraph\n\n", p0.getSourceFromContext());
-        p1 = cn(nodes.getChildren().get(1));
+        ContainerNode p1 = cn(nodes.getChildren().get(1));
         assertEquals("This is a paragraph [[ link:Target|with a link ]]. All goood\nAnd more", p1.getSourceFromContext());
-        LinkNode l1 = (LinkNode)p1.getChildren().get(1);
+        LinkNode l1 = (LinkNode) p1.getChildren().get(1);
         assertEquals("[[ link:Target|with a link ]]", l1.getSourceFromContext());
         assertEquals(" link:Target", l1.getTargetSourceFromContext());
         ITreeNode descNode = l1.getChildren().get(0);
         assertEquals("with a link ", descNode.getSourceFromContext());
+        testText = "This is one paragraph\n\nThis is a paragraph [[ link:Target|with a **bold link** ]]. All goood\nAnd more";
+        nodes = cn(underTest.parse(testText));
+        p1 = cn(nodes.getChildren().get(1));
+        l1 = (LinkNode) p1.getChildren().get(1);
+        assertEquals("with a ", l1.getChildren().get(0).getSourceFromContext());
+        assertEquals("**bold link**", l1.getChildren().get(1).getSourceFromContext());
+    }
 
-        // Continue tests.
-        // Images
-        // Images and Links embedded deep in other structures
+    @Test
+    void testParse_testPositionHandling_Images() {
+        String imageInput = "This is one paragraph\n\nThis is a paragraph {{ image:target| title }}. All goood\nAnd more";
+        ContainerNode nodes = cn(underTest.parse(imageInput));
+        ImageNode imageNode = (ImageNode) cn(nodes.getChildren().get(1)).getChildren().get(1);
+        assertEquals(2, nodes.getChildren().size());
+        assertEquals("{{ image:target| title }}", imageNode.getSourceFromContext());
+    }
+
+    @Test
+    void testParse_testPositionHandling_Other() {
         // Lists
         String listInput = " - Simple List\n *List Changes Type\n   * DeepestList\n * and backout\n";
-        nodes = cn(underTest.parse(listInput));
+        ContainerNode nodes = cn(underTest.parse(listInput));
         assertEquals(listInput, nodes.getSourceFromContext());
         ListNode list1 = (ListNode)nodes.getChildren().get(1);
         assertEquals(3, list1.getItems().size());
@@ -90,7 +108,7 @@ class ParserTest {
         LinkNode link = (LinkNode)((ListChild.ListItemNode)list1_1.getItems().get(0)).getChildren().get(1);
         assertEquals("[[Link| with a link]]", link.getSourceFromContext());
         assertEquals("Link", link.getTargetSourceFromContext());
-        descNode = link.getChildren().get(0);
+        ITreeNode descNode = link.getChildren().get(0);
         assertEquals(" with a link", descNode.getSourceFromContext());
         // Tables
         String inputSimpleTable = "|First|Line|\n|Second|Line|";
