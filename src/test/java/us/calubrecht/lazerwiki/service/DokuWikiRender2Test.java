@@ -449,22 +449,23 @@ public class DokuWikiRender2Test {
 
     @Test
     public void testRenderImageSanitize() {
-        String maliciousTitle = "{{file.jpg|\" onerror=\"alert(1)\"}}";
+        String maliciousTitle = "Check {{file.jpg|\" onerror=\"alert(1)\"}}";
         RenderResult renderRes = underTest.renderWithInfo(maliciousTitle, "host", "site", "page", "user");
-        assertEquals("<div><img src=\"/_media/file.jpg\" class=\"media\" title=\"&quot; onerror=&quot;alert(1)&quot;\" loading=\"lazy\"></div>", renderRes.renderedText());
-        // TODO: Include potentially malicious image titles in an ERRORS entry in renderStaet
-        // List<String> parseErrors = renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name();
+        assertEquals("<div>Check <img src=\"/_media/file.jpg\" class=\"media\" title=\"&quot; onerror=&quot;alert(1)&quot;\" loading=\"lazy\"></div>", renderRes.renderedText());
+        List<String> parseErrors = (List<String>) renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name());
+        assertEquals("Suspicious img tag title at 6. Raw text =[\" onerror=\"alert(1)\"]", parseErrors.get(0));
 
-        String maliciousSource = "{{\" onerror=\"alert(1)\"| text}}";
+        String maliciousSource = "Check {{\" onerror=\"alert(1)\"| text}}";
         renderRes = underTest.renderWithInfo(maliciousSource, "host", "site", "page", "user");
-        assertEquals("<div><img src=\"/_media/invalidSource.none\" class=\"media\" title=\"text\" loading=\"lazy\"></div>", renderRes.renderedText());
-        // TODO: Include potentially malicious image src in an ERRORS entry in renderStaet
-        // List<String> parseErrors = renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name();
+        assertEquals("<div>Check <img src=\"/_media/invalidSource.none\" class=\"media\" title=\"text\" loading=\"lazy\"></div>", renderRes.renderedText());
+        parseErrors = (List<String>) renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name());
+        assertEquals("Suspicious img tag src at 6. Raw text =[\" onerror=\"alert(1)\"]", parseErrors.get(0));
 
         String maliciousProtocol = "{{javascript:ortext| text}}";
         renderRes = underTest.renderWithInfo(maliciousProtocol, "host", "site", "page", "user");
         assertEquals("<div><img src=\"/_media/javascript:ortext\" class=\"media\" title=\"text\" loading=\"lazy\"></div>", renderRes.renderedText());
-        // this is a valid possible image, but suspicious. Render it safely, but log it.
+        parseErrors = (List<String>) renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name());
+        assertEquals("Suspicious img tag src at 0. Raw text =[javascript:ortext]", parseErrors.get(0));
     }
 
     @Test

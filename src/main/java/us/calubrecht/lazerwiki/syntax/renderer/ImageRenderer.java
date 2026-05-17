@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ERRORS;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGES;
 
 @Component("customSynImageRenderer")
@@ -24,7 +25,13 @@ public class ImageRenderer extends AbstractRenderer {
         ImageNode imgNode = (ImageNode)node;
         String src = imgNode.getSource();
         if (!validateSrc(src)) {
+            String error = String.format("Suspicious img tag src at %s. Raw text =[%s]", imgNode.getPosition().getLeft(), src);
+            addError(renderContext, error);
             src = "invalidSource.none";
+        }
+        if (suspiciousSrc(src)) {
+            String error = String.format("Suspicious img tag src at %s. Raw text =[%s]", imgNode.getPosition().getLeft(), src);
+            addError(renderContext, error);
         }
         Map<String, String> options = parseOptions(imgNode.getOptions());
         String size = options.getOrDefault("size", "");
@@ -36,7 +43,12 @@ public class ImageRenderer extends AbstractRenderer {
         StringBuilder buffer = new StringBuilder();
         buffer.append(String.format("<img src=\"/_media/%s%s\" class=\"%s\"", src, size, cssClass));
         if (imgNode.getTitle() != null) {
-            buffer.append(String.format(" title=\"%s\"", sanitize(imgNode.getTitle())));
+            String title =  sanitize(imgNode.getTitle());
+            if (!title.equals(imgNode.getTitle())) {
+                String error = String.format("Suspicious img tag title at %s. Raw text =[%s]", imgNode.getPosition().getLeft(), imgNode.getTitle());
+                addError(renderContext, error);
+            }
+            buffer.append(String.format(" title=\"%s\"", title));
         }
         buffer.append(" loading=\"lazy\">");
         return buffer;
@@ -83,11 +95,22 @@ public class ImageRenderer extends AbstractRenderer {
         return optionMap;
     }
 
-    Pattern srcPattern = Pattern.compile("[A-z0-9-_:.&?]+");
+    final Pattern srcPattern = Pattern.compile("[A-z0-9-_:.&?]+");
     boolean validateSrc(String src) {
         Matcher m = srcPattern.matcher(src.strip());
         return m.matches();
     }
+
+    /**
+     * No exploit with these patterns (will be parsed and treated as a namespace), but likely
+     * an attempt at an exploit.
+     */
+    final Pattern suspiciousSrcPattern = Pattern.compile("^(javascript|data|vbscript):.*");
+    private boolean suspiciousSrc(String src) {
+        Matcher m = suspiciousSrcPattern.matcher(src.strip());
+        return m.matches();
+    }
+
 
     @Override
     public StringBuilder renderPlaintext(ITreeNode node, RenderContext renderContext) {
