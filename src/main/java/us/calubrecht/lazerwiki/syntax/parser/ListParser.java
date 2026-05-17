@@ -73,7 +73,11 @@ public class ListParser extends AbstractTreeParser {
 
     @Override
     public boolean canBeginParse(String line) {
-        return line.startsWith(" *") || line.startsWith(" -");
+        if (line.isBlank() || line.charAt(0) != ' ') {
+            return false;
+        }
+        String afterSpaces = line.stripLeading();
+        return afterSpaces.startsWith("*") || afterSpaces.startsWith("-");
     }
 
     ListNode finishList(ListNode node, int start, int end) {

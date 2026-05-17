@@ -494,6 +494,15 @@ public class DokuWikiRender2Test {
     }
 
     @Test
+    public void testRenderUList_startsDeeper() {
+        String input1 = "  * Simple List\n  *With 2 rows\n";
+        assertEquals(
+                "<ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>",
+                doRender(input1)
+        );
+    }
+
+    @Test
     public void testRenderOList() {
         String input1 = " - Simple List\n -With 2 rows\nThen * non-matching\n";
         assertEquals(
