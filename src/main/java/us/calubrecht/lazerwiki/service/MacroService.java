@@ -12,6 +12,7 @@ import org.springframework.data.util.AnnotatedTypeScanner;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
+import us.calubrecht.lazerwiki.macro.MacroProvider;
 import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
@@ -57,17 +58,41 @@ public class MacroService {
 
     @PostConstruct
     public void registerMacros() {
+        // Load macros from annotation scanner (built-in macros)
+        logger.info("Loading built-in macros from packages: {}", macroPackages);
         AnnotatedTypeScanner scanner = new AnnotatedTypeScanner(CustomMacro.class);
         Set<Class<?>> macroClasses = scanner.findTypes(macroPackages);
-        macroClasses.forEach((cl) -> {
-            try {
-                Macro macro = (Macro) cl.getDeclaredConstructor().newInstance();
-                registerMacro(macro);
+        macroClasses.forEach(this::instantiateMacroFromClass);
 
+        // Load macros from SPI providers (external macro JARs)
+        logger.info("Loading macros from SPI providers");
+        ServiceLoader<MacroProvider> providers = ServiceLoader.load(MacroProvider.class);
+        for (MacroProvider provider : providers) {
+            try {
+                logger.info("Loading macros from provider: {}", provider.getName());
+                List<Macro> providedMacros = provider.getMacros();
+                if (providedMacros != null) {
+                    providedMacros.forEach(this::registerMacro);
+                    logger.info("Loaded {} macros from provider: {}", providedMacros.size(), provider.getName());
+                }
             } catch (Exception e) {
-                logger.error("Failed to instantiate a macro of type {}.", cl, e);
+                logger.error("Failed to load macros from provider: {}", provider.getName(), e);
             }
-        });
+        }
+
+        logger.info("Macro registration complete. Total macros registered: {}", macros.size());
+    }
+
+    /**
+     * Instantiate a macro from a class (used for annotation-scanned macros).
+     */
+    private void instantiateMacroFromClass(Class<?> cl) {
+        try {
+            Macro macro = (Macro) cl.getDeclaredConstructor().newInstance();
+            registerMacro(macro);
+        } catch (Exception e) {
+            logger.error("Failed to instantiate a macro of type {}.", cl, e);
+        }
     }
 
     protected String sanitize(String input) {
