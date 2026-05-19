@@ -59,39 +59,30 @@ public class MacroService {
     @PostConstruct
     public void registerMacros() {
         // Load macros from annotation scanner (built-in macros)
-        logger.info("Loading built-in macros from packages: {}", macroPackages);
+        logger.info("Scanning for built-in macros in packages: {}", macroPackages);
         AnnotatedTypeScanner scanner = new AnnotatedTypeScanner(CustomMacro.class);
         Set<Class<?>> macroClasses = scanner.findTypes(macroPackages);
-        macroClasses.forEach(this::instantiateMacroFromClass);
+        macroClasses.forEach((cl) -> {
+            try {
+                Macro macro = (Macro) cl.getDeclaredConstructor().newInstance();
+                registerMacro(macro);
 
-        // Load macros from SPI providers (external macro JARs)
-        logger.info("Loading macros from SPI providers");
+            } catch (Exception e) {
+                logger.error("Failed to instantiate a macro of type {}.", cl, e);
+            }
+        });
+
+        // Load macros from SPI providers (external macros in separate JARs)
+        logger.info("Scanning for external macros via ServiceLoader");
         ServiceLoader<MacroProvider> providers = ServiceLoader.load(MacroProvider.class);
         for (MacroProvider provider : providers) {
             try {
                 logger.info("Loading macros from provider: {}", provider.getName());
-                List<Macro> providedMacros = provider.getMacros();
-                if (providedMacros != null) {
-                    providedMacros.forEach(this::registerMacro);
-                    logger.info("Loaded {} macros from provider: {}", providedMacros.size(), provider.getName());
-                }
+                List<Macro> externalMacros = provider.getMacros();
+                externalMacros.forEach(this::registerMacro);
             } catch (Exception e) {
-                logger.error("Failed to load macros from provider: {}", provider.getName(), e);
+                logger.error("Failed to load macros from provider {}.", provider.getClass(), e);
             }
-        }
-
-        logger.info("Macro registration complete. Total macros registered: {}", macros.size());
-    }
-
-    /**
-     * Instantiate a macro from a class (used for annotation-scanned macros).
-     */
-    private void instantiateMacroFromClass(Class<?> cl) {
-        try {
-            Macro macro = (Macro) cl.getDeclaredConstructor().newInstance();
-            registerMacro(macro);
-        } catch (Exception e) {
-            logger.error("Failed to instantiate a macro of type {}.", cl, e);
         }
     }
 
@@ -193,7 +184,7 @@ public class MacroService {
                 renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
                 String rendered = postRender(pageCache.renderedCache, renderContext);
                 long end = System.currentTimeMillis();
-                logger.info("getCachedRender({}) total= {} fetchPageData= {} fetchCache= {} else={}", pageDescriptor, end - start, fetchedPageData - start, fetchedCache - fetchedPageData, end - fetchedCache);
+                logger.info("getCachedRender(" + pageDescriptor + ") total= " + (end - start) + " fetchPageData= " + (fetchedPageData - start) + " fetchCache= " + (fetchedCache - fetchedPageData) + "ms");
                 return new RenderOutputImpl(rendered, renderState);
             }
             return doRender(page, pageDescriptor);
