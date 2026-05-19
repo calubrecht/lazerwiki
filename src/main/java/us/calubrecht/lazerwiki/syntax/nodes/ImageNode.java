@@ -1,5 +1,8 @@
 package us.calubrecht.lazerwiki.syntax.nodes;
 
+import org.apache.commons.lang3.tuple.Pair;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
+
 public class ImageNode extends AbstractNode {
     final String source;
     final String title;
@@ -7,6 +10,7 @@ public class ImageNode extends AbstractNode {
     public enum ALIGN_TYPE {NONE, LEFT, RIGHT, CENTER}
 
     final ALIGN_TYPE alignment;
+    Pair<Integer, Integer> sourcePosition;
 
     public ImageNode(String source, String title, String options, ALIGN_TYPE alignment) {
         this.source = source;
@@ -29,5 +33,23 @@ public class ImageNode extends AbstractNode {
 
     public ALIGN_TYPE getAlignment() {
         return alignment;
+    }
+
+    public void setSourcePosition(Pair<Integer, Integer> sourcePosition) {
+        this.sourcePosition = sourcePosition;
+    }
+    public Pair<Integer, Integer> getSourcePosition() {
+        return sourcePosition;
+    }
+
+    public String getSourceSourceFromContext() {
+        if (getParseContext() == null || getPosition() == null) {
+            // Node has not been fully initialized, cannot get source
+            return null;
+        }
+        ParseContext context = getParseContext();
+        Pair<Integer, Integer> position = getSourcePosition();
+        // Position uses inclusive endpoints, substring's end is exclusive
+        return context.getFullText().substring(position.getLeft(), position.getRight() + 1);
     }
 }

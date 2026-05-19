@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -9,6 +10,7 @@ import us.calubrecht.lazerwiki.model.MediaOverride;
 import us.calubrecht.lazerwiki.service.MediaOverrideService;
 
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.ImageNode;
 
 import java.lang.reflect.Field;
@@ -22,17 +24,14 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERR
 
 class ImageRendererTest {
 
-    final ImageRenderer renderer = new ImageRenderer();
     MediaOverrideService mediaOverrideService = Mockito.mock(MediaOverrideService.class);
+    final ImageRenderer renderer = new ImageRenderer(mediaOverrideService);
 
     @BeforeEach
     void setup() throws NoSuchFieldException, IllegalAccessException {
         Field uieField = ImageRenderer.class.getDeclaredField("unscalableImageExts");
         uieField.setAccessible(true);
         uieField.set(renderer, Set.of("avif"));
-        /**Field mediaOverrideServiceFld = ImageRenderer.class.getDeclaredField("mediaOverrideService");
-        mediaOverrideServiceFld.setAccessible(true);
-        mediaOverrideServiceFld.set(renderer, mediaOverrideService);*/
     }
     /**
        Certain image files cannot be scaled on the backend. If these are provided
@@ -115,17 +114,10 @@ class ImageRendererTest {
                 "<img src=\"/_media/img 1.jpg?30\" class=\"media\" loading=\"lazy\">",
                 renderer.parseInner(justWidth, null, renderContext).toString()
         );
-    }
+    }*/
 
     @Test
     public void testOverrides() {
-        DokuwikiParser.ImageContext tree = Mockito.mock(DokuwikiParser.ImageContext.class);
-        DokuwikiParser.Inner_textContext innerText = Mockito.mock(DokuwikiParser.Inner_textContext.class);
-        Token startToken = Mockito.mock(Token.class);
-        when(tree.inner_text(0)).thenReturn(innerText);
-        when(innerText.getStart()).thenReturn(startToken);
-        when(innerText.getText()).thenReturn("img.jpg");
-        when(startToken.getStartIndex()).thenReturn(10);
         String input1 = "img.jpg";
         List<MediaOverride> overrides = List.of(
                 new MediaOverride("default", "", "page", "", "img.jpg", "ns2", "img5.jpg"));
@@ -133,30 +125,36 @@ class ImageRendererTest {
                 overrides
         );
 
+        ParseContext parseContext = new ParseContext("0123456789{{img.jpg}}");
+        ImageNode imageNode = new ImageNode(input1, null, "", ImageNode.ALIGN_TYPE.NONE);
+        imageNode.setPosition(10, 20);
+        imageNode.setSourcePosition(Pair.of(12, 18));
+        imageNode.setParseContext(parseContext);
+
+        String imgString = imageNode.getSourceFromContext();
+        assertEquals("{{img.jpg}}", imgString);
+        String srcString = imageNode.getSourceSourceFromContext();
+        assertEquals("img.jpg", srcString);
         RenderContext renderContext = new RenderContext("host", "site", "page", "user");
         assertEquals(
                 "<img src=\"/_media/ns2:img5.jpg\" class=\"media\" loading=\"lazy\">",
-                renderer.parseInner(input1, tree, renderContext).toString()
+                renderer.renderHtml(imageNode, renderContext).toString()
         );
         List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
         assertEquals(1, overrideStats.size());
         LinkOverrideInstance override = overrideStats.get(0);
         assertEquals("img.jpg", override.src());
         assertEquals("ns2:img5.jpg", override.override());
-        assertEquals(10, override.start());
-        assertEquals(17, override.stop());
+        assertEquals(12, override.start()); // imageNode starts at 10, source string starts at 12
+        assertEquals(19, override.stop());
     }
 
     @Test
     public void testOverridesWithComplexInputs() {
-        DokuwikiParser.ImageContext tree = Mockito.mock(DokuwikiParser.ImageContext.class);
-        DokuwikiParser.Inner_textContext innerText = Mockito.mock(DokuwikiParser.Inner_textContext.class);
-        Token startToken = Mockito.mock(Token.class);
-        when(tree.inner_text(0)).thenReturn(innerText);
-        when(innerText.getStart()).thenReturn(startToken);
-        when(innerText.getText()).thenReturn(" img.jpg | alternate text");
-        when(startToken.getStartIndex()).thenReturn(10);
-        String input1 = " img.jpg";
+        String input1 = "img.jpg";
+        ImageNode imageNode = new ImageNode(input1, " alternate text", "", ImageNode.ALIGN_TYPE.RIGHT);
+        imageNode.setPosition(8, 21);
+        imageNode.setSourcePosition(Pair.of(11, 17));
         List<MediaOverride> overrides = List.of(
                 new MediaOverride("default", "", "page", "", "img.jpg", "ns2", "img5.jpg"));
         when(mediaOverrideService.getOverrides("host", "page")).thenReturn(
@@ -165,8 +163,8 @@ class ImageRendererTest {
 
         RenderContext renderContext = new RenderContext("host", "site", "page", "user");
         assertEquals(
-                "<img src=\"/_media/ns2:img5.jpg\" class=\"mediaright\" loading=\"lazy\">",
-                renderer.parseInner(input1, tree, renderContext).toString()
+                "<img src=\"/_media/ns2:img5.jpg\" class=\"mediaright\" title=\" alternate text\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
         );
         List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
         assertEquals(1, overrideStats.size());
@@ -175,5 +173,5 @@ class ImageRendererTest {
         assertEquals("ns2:img5.jpg", override.override());
         assertEquals(11, override.start());
         assertEquals(18, override.stop());
-    }*/
+    }
 }

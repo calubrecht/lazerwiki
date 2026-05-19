@@ -1,21 +1,32 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
+import us.calubrecht.lazerwiki.model.MediaOverride;
+import us.calubrecht.lazerwiki.service.MediaOverrideService;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ImageNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ImageNode.ALIGN_TYPE;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ERRORS;
-import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGES;
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.*;
 
 @Component("customSynImageRenderer")
 public class ImageRenderer extends AbstractRenderer {
+    final MediaOverrideService mediaOverrideService;
+
+    public ImageRenderer(@Autowired MediaOverrideService mediaOverrideService) {
+        this.mediaOverrideService = mediaOverrideService;
+    }
+
     @Value("#{'${lazerwiki.unscalable-image.ext}'.split(',')}")
     private Set<String> unscalableImageExts;
 
@@ -37,6 +48,7 @@ public class ImageRenderer extends AbstractRenderer {
             String error = String.format("Suspicious img tag src at %s. Raw text =[%s]", imgNode.getPosition().getLeft(), src);
             addError(renderContext, error);
         }
+        src = doOverrides(src, imgNode, renderContext);
         Map<String, String> options = parseOptions(imgNode.getOptions(), imgNode.getSource());
         String size = options.getOrDefault("size", "");
         ((Set<String>)renderContext.renderState().computeIfAbsent(IMAGES.name(), (k) -> new HashSet<>())).add(src);
@@ -132,6 +144,28 @@ public class ImageRenderer extends AbstractRenderer {
         Matcher m = suspiciousSrcPattern.matcher(src.strip());
         return m.matches();
     }
+
+    String doOverrides(String file, ImageNode node, RenderContext renderContext) {
+        Map<String, MediaOverride> overrides = (Map<String, MediaOverride>) renderContext.renderState().get(MEDIA_OVERRIDES.name());
+        if (overrides == null) {
+            List<MediaOverride> mediaOverrideList = mediaOverrideService.getOverrides(renderContext.host(), renderContext.page());
+            overrides = mediaOverrideList.stream().collect(
+                    Collectors.toMap(MediaOverride::getTarget, Function.identity(), (a, b) -> b)
+            );
+            renderContext.renderState().put(MEDIA_OVERRIDES.name(), overrides);
+        }
+        if (overrides.containsKey(file)) {
+            String override = overrides.get(file).getNewTarget();
+            int startIndex = node.getSourcePosition().getLeft();
+            int endIndex = node.getSourcePosition().getRight() + 1;
+            ((List<LinkOverrideInstance>)renderContext.renderState().computeIfAbsent(OVERRIDE_STATS.name(),
+                    (k) -> new ArrayList<>())).add(
+                    new LinkOverrideInstance(file, override, startIndex, endIndex));
+            return override;
+        }
+        return file;
+    }
+
 
 
     @Override

@@ -89,6 +89,7 @@ class ParserTest {
         ImageNode imageNode = (ImageNode) cn(nodes.getChildren().get(1)).getChildren().get(1);
         assertEquals(2, nodes.getChildren().size());
         assertEquals("{{ image:target| title }}", imageNode.getSourceFromContext());
+        assertEquals("image:target", imageNode.getSourceSourceFromContext());
     }
 
     @Test
