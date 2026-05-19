@@ -53,6 +53,13 @@ class ImageRendererTest {
                 renderer.renderHtml(imageNode, renderContext).toString()
         );
 
+        String widthAnd0Height = "30x0";
+        imageNode = new ImageNode("img.avif", null, widthAnd0Height, ImageNode.ALIGN_TYPE.NONE);
+        assertEquals(
+                "<img src=\"/_media/img.avif?30x0\" class=\"media\" style=\"width:30px\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
+        );
+
         String widthAndHeight = "30x30";
         imageNode = new ImageNode("img.avif", null, widthAndHeight, ImageNode.ALIGN_TYPE.NONE);
         assertEquals(

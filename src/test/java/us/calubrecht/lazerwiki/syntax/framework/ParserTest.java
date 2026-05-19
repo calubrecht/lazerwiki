@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.syntax.nodes.*;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -149,6 +150,14 @@ class ParserTest {
         assertEquals(null, node2.getTargetSourceFromContext());
         assertEquals(null, node2.getSourceFromContext());
         assertThrows(RuntimeException.class, () -> Parser.validateNode(node2));
+
+        ImageNode imageNode = new ImageNode("img.jpg", "", "", null);
+        assertEquals(null, imageNode.getSourceSourceFromContext());
+        imageNode.setParseContext(new ParseContext());
+        assertEquals(null, imageNode.getSourceSourceFromContext());
+        imageNode = new ImageNode("img.jpg", "", "", null);
+        imageNode.setPosition(1, 5);
+        assertEquals(null, imageNode.getSourceSourceFromContext());
     }
 
     @Test
