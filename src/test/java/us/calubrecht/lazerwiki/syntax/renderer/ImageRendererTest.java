@@ -9,6 +9,7 @@ import us.calubrecht.lazerwiki.model.MediaOverride;
 import us.calubrecht.lazerwiki.service.MediaOverrideService;
 
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
+import us.calubrecht.lazerwiki.syntax.nodes.ImageNode;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -26,55 +27,87 @@ class ImageRendererTest {
 
     @BeforeEach
     void setup() throws NoSuchFieldException, IllegalAccessException {
-      /*  Field uieField = ImageRenderer.class.getDeclaredField("unscalableImageExts");
+        Field uieField = ImageRenderer.class.getDeclaredField("unscalableImageExts");
         uieField.setAccessible(true);
         uieField.set(renderer, Set.of("avif"));
-        Field mediaOverrideServiceFld = ImageRenderer.class.getDeclaredField("mediaOverrideService");
+        /**Field mediaOverrideServiceFld = ImageRenderer.class.getDeclaredField("mediaOverrideService");
         mediaOverrideServiceFld.setAccessible(true);
         mediaOverrideServiceFld.set(renderer, mediaOverrideService);*/
     }
- /*
+    /**
+       Certain image files cannot be scaled on the backend. If these are provided
+       with a size descriptor, scale by using inline css styling.
+    */
     @Test
-    void parseInnerAlignment() {
-        assertEquals(Map.of(),renderer.parseOptions(""));
-        assertEquals(Map.of(),renderer.parseOptions(""));
+    void applyInlineStylesForUnscalable() {
+        String noScale = "";
+        ImageNode imageNode = new ImageNode("img.avif", null, noScale, ImageNode.ALIGN_TYPE.NONE);
         RenderContext renderContext = new RenderContext("host", "site", "page", "user");
-     assertEquals(
-                "<img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\">",
-                renderer.parseInner(input1, null, renderContext).toString()
-        );
-        String inputCentered = " img.jpg ";
         assertEquals(
-                "<img src=\"/_media/img.jpg\" class=\"mediacenter\" loading=\"lazy\">",
-                renderer.parseInner(inputCentered, null, renderContext).toString()
-        );
-        String inputRight = " img.jpg";
-        assertEquals(
-                "<img src=\"/_media/img.jpg\" class=\"mediaright\" loading=\"lazy\">",
-                renderer.parseInner(inputRight, null, renderContext).toString()
-        );
-        String inputLeft = "img.jpg ";
-        assertEquals(
-                "<img src=\"/_media/img.jpg\" class=\"medialeft\" loading=\"lazy\">",
-                renderer.parseInner(inputLeft, null, renderContext).toString()
+                "<img src=\"/_media/img.avif\" class=\"media\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
         );
 
-    }*/
+        String justWidth = "30";
+        imageNode = new ImageNode("img.avif", null, justWidth, ImageNode.ALIGN_TYPE.NONE);
+        assertEquals(
+                "<img src=\"/_media/img.avif?30\" class=\"media\" style=\"width:30px\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
+        );
+
+        String widthAndHeight = "30x30";
+        imageNode = new ImageNode("img.avif", null, widthAndHeight, ImageNode.ALIGN_TYPE.NONE);
+        assertEquals(
+                "<img src=\"/_media/img.avif?30x30\" class=\"media\" style=\"width:30px; height:30px\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
+        );
+
+
+        String justHeight = "0x30";
+        imageNode = new ImageNode("img.avif", null, justHeight, ImageNode.ALIGN_TYPE.NONE);
+        assertEquals(
+                "<img src=\"/_media/img.avif?0x30\" class=\"media\" style=\"height:30px\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
+        );
+
+        String sizeAndnonsize = "soWhat&20";
+        imageNode = new ImageNode("img.avif", null, sizeAndnonsize, ImageNode.ALIGN_TYPE.NONE);
+        assertEquals(
+                "<img src=\"/_media/img.avif?20\" class=\"media\" style=\"width:20px\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
+        );
+
+        String widthAndHeightContains = "c30x30";
+        imageNode = new ImageNode("img.avif", null, widthAndHeightContains, ImageNode.ALIGN_TYPE.NONE);
+        assertEquals(
+                "<img src=\"/_media/img.avif?c30x30\" class=\"media\" style=\"width:30px; height:30px\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
+        );
+
+        /*
+        If image is of a scalable type, do not apply inline styles
+         */
+        imageNode = new ImageNode("scalable.jpg", null, widthAndHeight, ImageNode.ALIGN_TYPE.NONE);
+        assertEquals(
+                "<img src=\"/_media/scalable.jpg?30x30\" class=\"media\" loading=\"lazy\">",
+                renderer.renderHtml(imageNode, renderContext).toString()
+        );
+    }
 
     @Test
     void testParseOptions() {
-        assertEquals(Map.of(),renderer.parseOptions(""));
-        assertEquals(Map.of("size", "?30"),renderer.parseOptions("30"));
-        assertEquals(Map.of("size", "?30x30"),renderer.parseOptions("30x30"));
-        assertEquals(Map.of("size", "?0x30"),renderer.parseOptions("0x30"));
-        assertEquals(Map.of(),renderer.parseOptions("sowhat"));
-        assertEquals(Map.of("size", "?20"),renderer.parseOptions("soWhat&20"));
-        assertEquals(Map.of("size", "?20", "linkType", "full"),renderer.parseOptions("fullLink&20"));
-        assertEquals(Map.of("size", "?20", "linkType", "linkonly"),renderer.parseOptions("linkonly&20"));
+        assertEquals(Map.of(),renderer.parseOptions("", "a.jpg"));
+        assertEquals(Map.of("size", "?30"),renderer.parseOptions("30", "a.jpg"));
+        assertEquals(Map.of("size", "?30x30"),renderer.parseOptions("30x30", "a.jpg"));
+        assertEquals(Map.of("size", "?0x30"),renderer.parseOptions("0x30", "a.jpg"));
+        assertEquals(Map.of(),renderer.parseOptions("sowhat", "a.jpg"));
+        assertEquals(Map.of("size", "?20"),renderer.parseOptions("soWhat&20", "a.jpg"));
+        assertEquals(Map.of("size", "?20", "linkType", "full"),renderer.parseOptions("fullLink&20", "a.jpg"));
+        assertEquals(Map.of("size", "?20", "linkType", "linkonly"),renderer.parseOptions("linkonly&20", "a.jpg"));
 
     }/*
 
-    @Test
+    @Test/
     void testFileNameWithSpace() {
         String justWidth = "img 1.jpg?30";
         RenderContext renderContext = new RenderContext("host", "site", "page", "user");

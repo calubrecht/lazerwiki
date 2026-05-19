@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
@@ -15,6 +16,9 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.IMAGE
 
 @Component("customSynImageRenderer")
 public class ImageRenderer extends AbstractRenderer {
+    @Value("#{'${lazerwiki.unscalable-image.ext}'.split(',')}")
+    private Set<String> unscalableImageExts;
+
     @Override
     public Collection<Class<? extends ITreeNode>> getTargets() {
         return List.of(ImageNode.class);
@@ -33,7 +37,7 @@ public class ImageRenderer extends AbstractRenderer {
             String error = String.format("Suspicious img tag src at %s. Raw text =[%s]", imgNode.getPosition().getLeft(), src);
             addError(renderContext, error);
         }
-        Map<String, String> options = parseOptions(imgNode.getOptions());
+        Map<String, String> options = parseOptions(imgNode.getOptions(), imgNode.getSource());
         String size = options.getOrDefault("size", "");
         ((Set<String>)renderContext.renderState().computeIfAbsent(IMAGES.name(), (k) -> new HashSet<>())).add(src);
         if (options.getOrDefault("linkType", "").equals("linkonly")) {
@@ -41,7 +45,8 @@ public class ImageRenderer extends AbstractRenderer {
         }
         String cssClass = getCssClass(options, imgNode.getAlignment());
         StringBuilder buffer = new StringBuilder();
-        buffer.append(String.format("<img src=\"/_media/%s%s\" class=\"%s\"", src, size, cssClass));
+        String sizeStyle = options.getOrDefault("sizeStyle", "");
+        buffer.append(String.format("<img src=\"/_media/%s%s\" class=\"%s\"%s", src, size, cssClass, sizeStyle));
         if (imgNode.getTitle() != null) {
             String title =  sanitize(imgNode.getTitle());
             if (!title.equals(imgNode.getTitle())) {
@@ -74,16 +79,33 @@ public class ImageRenderer extends AbstractRenderer {
         return String.join(" ", classes);
     }
 
-    final Pattern sizePattern = Pattern.compile("([0-9]+)(x([0-9]+))?");
-    Map<String, String> parseOptions(String options) {
+    String getExt(String source) {
+        String[] parts = source.split("\\.");
+        return parts[parts.length-1];
+    }
+
+    final Pattern sizePattern = Pattern.compile("(c)?([0-9]+)(x([0-9]+))?");
+    Map<String, String> parseOptions(String options, String source) {
         String[] allOptions = options.split("&");
         Map<String, String> optionMap = new HashMap<>();
         for (String option : allOptions) {
             Matcher sizeMatcher = sizePattern.matcher(option);
             if (sizeMatcher.matches()) {
-                String s1 = sizeMatcher.group(1);
-                String s2 = sizeMatcher.group(3);
-                optionMap.put("size", s2 == null ? String.format("?%s", s1) : String.format("?%sx%s", s1, s2));
+                String containsKey = sizeMatcher.group(1) == null ? "" : sizeMatcher.group(1);
+                String s1 = sizeMatcher.group(2);
+                String s2 = sizeMatcher.group(4) == null ? "" : sizeMatcher.group(4);
+                optionMap.put("size", !s2.isEmpty() ? String.format("?%s%sx%s", containsKey,s1, s2) : String.format("?%s%s", containsKey,s1));
+                String extension = getExt(source);
+                if (unscalableImageExts.contains(extension)) {
+                    List<String> styles = new ArrayList<>();
+                    if (!s1.isEmpty() && !s1.equals("0")) {
+                        styles.add(String.format("width:%spx", s1));
+                    }
+                    if (!s2.isEmpty() && !s2.equals("0")) {
+                        styles.add(String.format("height:%spx", s2));
+                    }
+                    optionMap.put("sizeStyle", String.format(" style=\"%s\"", String.join("; ", styles)));
+                }
             }
             if (option.equals("fullLink")) {
                 optionMap.put("linkType", "full");
