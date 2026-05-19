@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
-import org.antlr.v4.runtime.Token;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -104,17 +103,17 @@ class ImageRendererTest {
         assertEquals(Map.of("size", "?20", "linkType", "full"),renderer.parseOptions("fullLink&20", "a.jpg"));
         assertEquals(Map.of("size", "?20", "linkType", "linkonly"),renderer.parseOptions("linkonly&20", "a.jpg"));
 
-    }/*
+    }
 
-    @Test/
+    @Test
     void testFileNameWithSpace() {
-        String justWidth = "img 1.jpg?30";
+        ImageNode imageNode = new ImageNode("img 1.jpg?30", null, "", ImageNode.ALIGN_TYPE.NONE);
         RenderContext renderContext = new RenderContext("host", "site", "page", "user");
         assertEquals(
                 "<img src=\"/_media/img 1.jpg?30\" class=\"media\" loading=\"lazy\">",
-                renderer.parseInner(justWidth, null, renderContext).toString()
+                renderer.renderHtml(imageNode, renderContext).toString()
         );
-    }*/
+    }
 
     @Test
     public void testOverrides() {

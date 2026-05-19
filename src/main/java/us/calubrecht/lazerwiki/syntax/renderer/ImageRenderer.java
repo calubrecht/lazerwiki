@@ -129,7 +129,7 @@ public class ImageRenderer extends AbstractRenderer {
         return optionMap;
     }
 
-    final Pattern srcPattern = Pattern.compile("[A-z0-9-_:.&?]+");
+    final Pattern srcPattern = Pattern.compile("[A-z0-9-_:.&? ]+");
     boolean validateSrc(String src) {
         Matcher m = srcPattern.matcher(src.strip());
         return m.matches();
