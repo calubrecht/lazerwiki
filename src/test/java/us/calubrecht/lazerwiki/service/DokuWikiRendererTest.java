@@ -1,6 +1,8 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,7 +21,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
 @SuppressWarnings("unchecked")
@@ -659,6 +661,18 @@ public class DokuWikiRendererTest {
         when(macroService.renderMacro(eq("macro1: macro"), anyString(), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
         String render = underTest.renderToString(inputMacro, "", "", "page", "");
         assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
+
+        when(macroService.renderMacro(Mockito.startsWith("macro1: Start1"), anyString(), any())).thenReturn("<div>Inside Macro 1</div>");
+        when(macroService.renderMacro(Mockito.startsWith("macro2"), anyString(), any())).thenReturn("<div>Inside Macro 2</div>");
+
+        // Outside most ~~MACRO~~ and ~~/MACRO~~ tags should be matched and pass entire thing to macroService
+        String nestedMacro = "~~MACRO~~macro1: Start1 ~~MACRO~~macro2: Start2 ~~/MACRO~~ End1 ~~/MACRO~~ Outside";
+        render = underTest.renderToString(nestedMacro, "", "", "page", "");
+        assertEquals("<div><div>Inside Macro 1</div> Outside</div>", render);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(macroService, times(2)).renderMacro(captor.capture(), anyString(), any());
+
+        assertEquals("macro1: Start1 ~~MACRO~~macro2: Start2 ~~/MACRO~~ End1 ", captor.getAllValues().get(1));
     }
 
     @Test

@@ -14,7 +14,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.MacroNode;
 
 @Component
 public class MacroParser extends AbstractInnerParser {
-    final Pattern macroPattern = Pattern.compile("^~~MACRO~~(.*?)~~/MACRO~~", Pattern.DOTALL);
+    final Pattern macroPattern = Pattern.compile("^~~MACRO~~(.*)~~/MACRO~~", Pattern.DOTALL);
 
     @Override
     public Collection<Character> keyCharacters() {
