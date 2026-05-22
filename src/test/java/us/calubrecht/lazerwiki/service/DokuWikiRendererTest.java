@@ -13,6 +13,7 @@ import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
 import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
+import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
 import us.calubrecht.lazerwiki.syntax.renderer.LinkRenderer;
 
@@ -209,8 +210,8 @@ public class DokuWikiRendererTest {
         String maliciousText = "[[ns:page|<script>someScript</script>]]";
         RenderResult renderRes = underTest.renderWithInfo(maliciousText, "host", "site", "page", "user");
         assertEquals("<div><a class=\"wikiLinkMissing\" href=\"/page/ns:page\">&lt;script&gt;someScript&lt;/script&gt;</a></div>", renderRes.renderedText());
-        // TODO: Include potentially malicious link test in an ERRORS entry in renderStaet
-        // List<String> parseErrors = renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name();
+        List<String> parseErrors = (List<String>) renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name());
+        assertEquals("Suspicious link source at 0. Raw text =[[[ns:page|<script>someScript</script>]]]", parseErrors.get(0));
 
         String maliciousHref = "[[ page\" onerror=\"alert(1)\"| text}}";
         renderRes = underTest.renderWithInfo(maliciousHref, "host", "site", "page", "user");
@@ -218,6 +219,8 @@ public class DokuWikiRendererTest {
 
         // If maliicous code slips through parser to node, sanitize anyway.
         LinkNode badNode = new LinkNode("page\" onerror=\"alert(1)\"");
+        badNode.setParseContext(new ParseContext("[[page\" onerror=\"alert(1)\"]]"));
+        badNode.setPosition(0, 10);
         RenderContext renderContext = new RenderContext("host", "site", "page", "user");
         String html = linkRenderer.renderHtml(badNode, renderContext).toString();
         assertEquals("<a class=\"wikiLinkMissing\" href=\"/page/none:invalidPage\">null</a>", html);
@@ -237,8 +240,11 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testRenderSanitizeHtmlInText() {
-        assertEquals("<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>", doRender("This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>"));
-        // TODO: scan specifically for <script> tags in input and log as probably malicious
+        String sourcetoSanitize = "This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>";
+        RenderResult renderRes = underTest.renderWithInfo(sourcetoSanitize, "host", "site", "page", "user");
+        assertEquals("<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>", renderRes.renderedText());
+        List<String> parseErrors = (List<String>) renderRes.renderState().get(RenderResult.RENDER_STATE_KEYS.ERRORS.name());
+        assertEquals("Suspicious text at 0. Raw text =[This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>]", parseErrors.get(0));
 
         assertEquals("<div>Escape &lt;b&gt;this&lt;/b&gt; but not <a class=\"wikiLinkMissing\" href=\"/page/aLink\"> a link</a> and &lt;b&gt;escape&lt;/b&gt; again</div>", doRender("Escape <b>this</b> but not [[ aLink | a link]] and <b>escape</b> again"));
     }
@@ -657,6 +663,7 @@ public class DokuWikiRendererTest {
 
     @Test
     public void testRenderMacro() {
+
         String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
         when(macroService.renderMacro(eq("macro1: macro"), anyString(), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
         String render = underTest.renderToString(inputMacro, "", "", "page", "");
@@ -714,9 +721,10 @@ public class DokuWikiRendererTest {
                 "</tbody></table>", doRender(tableWithLink));
 
         String biggerTable = "|One|Two|Three|Four|\n|Five|Six|Seven|Eight|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td>Two</td><td>Three</td><td>Four</td></tr>\n" +
-                "<tr><td>Five</td><td>Six</td><td>Seven</td><td>Eight</td></tr>\n" +
-                "</tbody></table>", doRender(biggerTable));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td><td>Two</td><td>Three</td><td>Four</td></tr>
+                <tr><td>Five</td><td>Six</td><td>Seven</td><td>Eight</td></tr>
+                </tbody></table>""", doRender(biggerTable));
         String tableThatEnds = "|First|Line|\nIs the only line";
         assertEquals("<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Line</td></tr>\n</tbody></table>\n<div>Is the only line</div>", doRender(tableThatEnds));
     }
@@ -724,53 +732,62 @@ public class DokuWikiRendererTest {
     @Test
     public void testRenderTableWithRowspan() {
         String tableWithRowSpan = "|One|Two|\n|Three| :: |";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td rowspan=\"2\">Two</td></tr>\n" +
-                "<tr><td>Three</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td><td rowspan="2">Two</td></tr>
+                <tr><td>Three</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
 
         tableWithRowSpan = "|One|Two|\n|Three| :: |\n|Four|::|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td rowspan=\"3\">Two</td></tr>\n" +
-                "<tr><td>Three</td></tr>\n" +
-                "<tr><td>Four</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td><td rowspan="3">Two</td></tr>
+                <tr><td>Three</td></tr>
+                <tr><td>Four</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
 
         tableWithRowSpan = "|One|Two|Four|\n|Three| :: |Five|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td rowspan=\"2\">Two</td><td>Four</td></tr>\n" +
-                "<tr><td>Three</td><td>Five</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td><td rowspan="2">Two</td><td>Four</td></tr>
+                <tr><td>Three</td><td>Five</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
 
         tableWithRowSpan = "|One|Two||\n|Three| :: |Five|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td colspan=\"2\" rowspan=\"2\">Two</td></tr>\n" +
-                "<tr><td>Three</td><td>Five</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td><td colspan="2" rowspan="2">Two</td></tr>
+                <tr><td>Three</td><td>Five</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
 
         // Rowspan must be raw string
         tableWithRowSpan = "|One|Two||\n|Three|** :: **|Five|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td colspan=\"2\">Two</td></tr>\n" +
-                "<tr><td>Three</td><td><span class=\"bold\"> :: </span></td><td>Five</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td><td colspan="2">Two</td></tr>
+                <tr><td>Three</td><td><span class="bold"> :: </span></td><td>Five</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
 
         // Invalid cases. Do something reasonable rather than break
         tableWithRowSpan = "|One| :: |\n|Three| :: |"; // Spanning element on first row, just add nothing
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td></tr>\n" +
-                "<tr><td>Three</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td></tr>
+                <tr><td>Three</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
         tableWithRowSpan = "|One|Two|\n|Three|Four| :: |"; // Spanning element beyond upper row, skip
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>One</td><td>Two</td></tr>\n" +
-                "<tr><td>Three</td><td>Four</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>One</td><td>Two</td></tr>
+                <tr><td>Three</td><td>Four</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
     }
 
     @Test
     public void testRenderTableWithAlignment() {
         String tableWithRowSpan = "|Left | Center |\n| Right|None|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td class=\"tableLeft\">Left </td><td class=\"tableCenter\"> Center </td></tr>\n" +
-                "<tr><td class=\"tableRight\"> Right</td><td>None</td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td class="tableLeft">Left </td><td class="tableCenter"> Center </td></tr>
+                <tr><td class="tableRight"> Right</td><td>None</td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
         tableWithRowSpan = "|**Left** | **Center** |\n| **Right**|**None**|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td class=\"tableLeft\"><span class=\"bold\">Left</span> </td><td class=\"tableCenter\"> <span class=\"bold\">Center</span> </td></tr>\n" +
-                "<tr><td class=\"tableRight\"> <span class=\"bold\">Right</span></td><td><span class=\"bold\">None</span></td></tr>\n" +
-                "</tbody></table>", doRender(tableWithRowSpan));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td class="tableLeft"><span class="bold">Left</span> </td><td class="tableCenter"> <span class="bold">Center</span> </td></tr>
+                <tr><td class="tableRight"> <span class="bold">Right</span></td><td><span class="bold">None</span></td></tr>
+                </tbody></table>""", doRender(tableWithRowSpan));
     }
 
     @Test
@@ -788,16 +805,20 @@ public class DokuWikiRendererTest {
     @Test
     public void testRender2Tables() {
         String inputSimpleTable = "|First|Line|\n\n|Second|Line|";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Line</td></tr>\n</tbody></table>\n" +
-                "<table class=\"lazerTable\"><tbody><tr><td>Second</td><td>Line</td></tr>\n</tbody></table>", doRender(inputSimpleTable));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>First</td><td>Line</td></tr>
+                </tbody></table>
+                <table class="lazerTable"><tbody><tr><td>Second</td><td>Line</td></tr>
+                </tbody></table>""", doRender(inputSimpleTable));
     }
 
     @Test
     public void testRenderBrokenTable() {
         String inputTable = "|Cell1|Cell2|\n|Cell3|Cell4 doesn't end";
-        assertEquals("<table class=\"lazerTable\"><tbody><tr><td>Cell1</td><td>Cell2</td></tr>\n" +
-                "</tbody></table>\n" +
-                "<div>|Cell3|Cell4 doesn't end</div>", doRender(inputTable));
+        assertEquals("""
+                <table class="lazerTable"><tbody><tr><td>Cell1</td><td>Cell2</td></tr>
+                </tbody></table>
+                <div>|Cell3|Cell4 doesn't end</div>""", doRender(inputTable));
     }
 
     @Test
@@ -846,16 +867,18 @@ public class DokuWikiRendererTest {
         assertEquals("Unknown attribute \"fling\" in hidden tag at 0", parseErrors.get(0));
 
         String hiddeonOnItsOwnLine= "<hidden>\n - Hidden with list\n -A list\n</hidden>";
-        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><ol>\n" +
-                "<li>Hidden with list</li>\n" +
-                "<li>A list</li>\n" +
-                "</ol></div></div>", doRender(hiddeonOnItsOwnLine));
+        assertEquals("""
+                <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible"><ol>
+                <li>Hidden with list</li>
+                <li>A list</li>
+                </ol></div></div>""", doRender(hiddeonOnItsOwnLine));
 
         String hiddeonListStartsOnLine= "<hidden> - Hidden with list\n -A list\n</hidden>";
-        assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><ol>\n" +
-                "<li>Hidden with list</li>\n" +
-                "<li>A list</li>\n" +
-                "</ol></div></div>", doRender(hiddeonListStartsOnLine));
+        assertEquals("""
+                <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible"><ol>
+                <li>Hidden with list</li>
+                <li>A list</li>
+                </ol></div></div>""", doRender(hiddeonListStartsOnLine));
 
         String nameWSpace = "<hidden name=\"Name w Space\">Text</hidden>";
         assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\" data-named=\"true\">Name w Space</label><div class=\"collapsible\">Text</div></div>", doRender(nameWSpace));

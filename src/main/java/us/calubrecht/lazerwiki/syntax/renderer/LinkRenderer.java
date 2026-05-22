@@ -41,6 +41,11 @@ public class LinkRenderer extends ContainerRenderer{
     @Override
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
         LinkNode link = (LinkNode) node;
+        String source = node.getSourceFromContext();
+        if (suspiciousTarget(source)) {
+            String error = String.format("Suspicious link source at %s. Raw text =[%s]", node.getPosition().getLeft(), source);
+            addError(renderContext, error);
+        }
         StringBuilder buffer = new StringBuilder();
         String linkTarget = getLinkTarget(link.getDest());
         linkTarget = doOverrides(linkTarget, link, renderContext, true);
@@ -99,6 +104,13 @@ public class LinkRenderer extends ContainerRenderer{
             return pageService.getTitle(renderContext.host(), linkTarget);
         }
         return linkTarget;
+    }
+
+    boolean suspiciousTarget(String target) {
+        if (target.contains("<script>")) {
+           return true;
+        }
+        return false;
     }
 
     protected String getCssClass(String targetName, String host) {

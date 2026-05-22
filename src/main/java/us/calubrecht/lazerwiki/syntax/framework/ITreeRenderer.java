@@ -3,8 +3,11 @@ package us.calubrecht.lazerwiki.syntax.framework;
 import org.apache.commons.text.StringEscapeUtils;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.ERRORS;
 
 public interface ITreeRenderer {
     Collection<Class<? extends ITreeNode>> getTargets();
@@ -28,7 +31,12 @@ public interface ITreeRenderer {
 
         @Override
         public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
-            return new StringBuilder(sanitizeLeaveQuotes(node.asString()));
+            String text = node.asString();
+            if (text.contains("<script>")) {
+                String error = String.format("Suspicious text at %s. Raw text =[%s]", node.getPosition().getLeft(), text);
+                ((List<String>)renderContext.renderState().computeIfAbsent(ERRORS.name(), (k) -> new ArrayList<>())).add(error);
+            }
+            return new StringBuilder(sanitizeLeaveQuotes(text));
         }
 
         @Override
