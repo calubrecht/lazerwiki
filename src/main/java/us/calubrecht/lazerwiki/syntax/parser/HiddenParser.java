@@ -21,6 +21,7 @@ public class HiddenParser extends AbstractTreeParser {
     final Pattern hiddenPattern = Pattern.compile("^<hidden(( \\w*=\"(.*)\")*)>");
     final String hiddenEnd = "</hidden>";
 
+
     @Override
     public ITreeNode parse(ParseContext parseContext) {
         ParseContext blockLines = new ParseContext();
@@ -31,6 +32,7 @@ public class HiddenParser extends AbstractTreeParser {
         int lineCount = 0;
         String optionString = "";
         boolean foundLines = false;
+        int nestedCount = 0;
         while(!subparseContext.isEmpty()) {
             String nextLine = subparseContext.peekLine();
             if (!foundLines) {
@@ -42,9 +44,13 @@ public class HiddenParser extends AbstractTreeParser {
                 foundLines = true;
             }
 
+            if (canBeginParse(nextLine)) {
+                nestedCount++;
+            }
+
             lineCount++;
             subparseContext.advanceLine();
-            if (nextLine.endsWith(hiddenEnd)) {
+            if (nextLine.endsWith(hiddenEnd) && nestedCount-- == 0) {
                 // End of block
                 blockEnded = true;
                 blockLines.addLine(nextLine.substring(0, nextLine.length() - hiddenEnd.length()));

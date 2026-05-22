@@ -897,25 +897,24 @@ public class DokuWikiRendererTest {
         assertEquals("""
                 <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible">hidden closetag
                 on sameline</div></div>""", doRender(hiddenCloseInline));
-        // Other hidden cases to try
-/*
+    }
+
+    @Test
+    public void testHidden_nested() {
+        when(randomService.nextInt()).thenReturn(5,4);
         // Nested hidden doesn't work, the interior hidden is just escaped
         String nestedHidden = """
                 <hidden> Hidden with
                 <hidden>Nested hidden</hidden>
                 </hidden>""";
         assertEquals("""
-                <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible">Hidden with
-                <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible">Nexted hidden</dib></dib></div></div>""", doRender(nestedHidden));
-         */
+                <div class="hidden"><input id="hiddenToggle5" class="toggle" type="checkbox"><label for="hiddenToggle5" class="hdn-toggle">Hidden</label><div class="collapsible"><div> Hidden with</div>
+                <div class="hidden"><input id="hiddenToggle4" class="toggle" type="checkbox"><label for="hiddenToggle4" class="hdn-toggle">Hidden</label><div class="collapsible">Nested hidden</div></div></div></div>""", doRender(nestedHidden));
     }
 
     @Test
     public void testHidden_unsupportedCases() {
         when(randomService.nextInt()).thenReturn(5);
-     /*   String notAtStart = "Can <hidden> start\nin middle ofline\n</hidden>";
-        // Just escapes the hidden tag and parses as paragraph
-        assertEquals("<div>Can &lt;hidden&gt; start\nin middle ofline\n&lt;/hidden&gt;</div>", doRender(notAtStart));*/
 
         String notEnded = "<hidden>This hidden block is never closed";
         assertEquals("<div>&lt;hidden&gt;This hidden block is never closed</div>", doRender(notEnded));
