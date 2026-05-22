@@ -890,15 +890,23 @@ public class DokuWikiRendererTest {
         String codeBlockInHidden = "<hidden>  A Block</hidden>";
         assertEquals("<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\"><pre class=\"code\">A Block\n" +
                 "</pre></div></div>", doRender(codeBlockInHidden));
+
+        String hiddenCloseInline = """
+           <hidden> hidden closetag
+           on sameline</hidden>""";
+        assertEquals("""
+                <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible">hidden closetag
+                on sameline</div></div>""", doRender(hiddenCloseInline));
         // Other hidden cases to try
 /*
-
-<hidden> hidden closetag
-on sameline</hidden>
-
-<hidden> -Hidden with
-<hidden>Nested hidden</hidden>
-</hidden>
+        // Nested hidden doesn't work, the interior hidden is just escaped
+        String nestedHidden = """
+                <hidden> Hidden with
+                <hidden>Nested hidden</hidden>
+                </hidden>""";
+        assertEquals("""
+                <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible">Hidden with
+                <div class="hidden"><input id="hiddenToggle11" class="toggle" type="checkbox"><label for="hiddenToggle11" class="hdn-toggle">Hidden</label><div class="collapsible">Nexted hidden</dib></dib></div></div>""", doRender(nestedHidden));
          */
     }
 
