@@ -13,6 +13,7 @@ import us.calubrecht.lazerwiki.service.ExportService;
 import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.UserService;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class ImportExportController {
 
     @GetMapping("export/{site}")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
-    public ResponseEntity<Void> exportSite(@PathVariable("site") String site, Principal principal) {
+    public ResponseEntity<Void> exportSite(@PathVariable("site") String site, Principal principal) throws IOException {
         exportService.createExportBundle(siteService.getHostForSitename(site), principal.getName());
         return ResponseEntity.ok().build();
     }
