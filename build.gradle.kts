@@ -25,6 +25,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation ("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.apache.commons:commons-text:1.15.0")
+	implementation("org.apache.commons:commons-compress:1.28.0")
 	implementation("org.apache.commons:commons-lang3:3.20.0")
 	implementation("commons-io:commons-io:2.15.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
