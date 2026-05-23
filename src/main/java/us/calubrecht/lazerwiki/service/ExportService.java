@@ -1,18 +1,23 @@
 package us.calubrecht.lazerwiki.service;
 
-import com.redfin.sitemapgenerator.WebSitemapGenerator;
-import com.redfin.sitemapgenerator.WebSitemapUrl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.model.PageDesc;
-import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 
-import java.net.URL;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
 public class ExportService {
+    final Logger logger = LogManager.getLogger(getClass());
+    @Autowired
+    SiteService siteService;
 
     @Autowired
     PageService pageService;
@@ -20,25 +25,23 @@ public class ExportService {
     @Autowired
     MediaService mediaService;
 
-    public void createExportBundle(String hostName, String user) {
-        PageListResponse pageList = pageService.getAllPages(hostName, user);
-        WebSitemapGenerator wsg = new WebSitemapGenerator(url);
-        for (String ns : pageList.pages.keySet().stream().sorted().toList()) {
-            List<PageDesc> pages = pageList.pages.get(ns);
-            for (PageDesc page : pages) {
-                String descriptor = page.getDescriptor();
-                String path = descriptor.isEmpty() ? "" : "/page/" + descriptor;
-                WebSitemapUrl.Options options = new WebSitemapUrl.Options(sUrl + path);
-                if (page.getModified() != null) {
-                    options.lastMod(page.getModified().toString());
-                }
-                WebSitemapUrl sitemapUrl = new WebSitemapUrl(options);
-                wsg.addUrl(sitemapUrl);
-            }
-        }
+    @Value("${lazerwiki.static.file.root}")
+    String staticFileRoot;
+
+    void ensureDir() throws IOException {
+        Files.createDirectories(Paths.get(String.join("/", staticFileRoot, "tmp", "exports")));
     }
 
-    record PageMetaData(String namespace, String name, List<String> tags, String markupFormat, List<String> authors) {
-        //Metadata (Page name, Namespace, Tags, Markup Format, anything else?)
+    public void createExportBundle(String hostName, String user) {
+        PageListResponse pageList = pageService.getAllPages(hostName, user);
+        String site = siteService.getSiteForHostname(hostName);
+        logger.info("Creating export file for {}", site);
+        Path exportFile = Paths.get(String.join("/", staticFileRoot, "tmp", "exports", site + "zip"));
+
+
+    }
+
+    private Path toPath(String namespace, String pagename) {
+        return null;
     }
 }
