@@ -6,8 +6,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.UserService;
@@ -33,7 +31,6 @@ public class AdminUserControllerTest {
     @Test
     public void testCreateFromLocalhost() throws Exception {
         String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
-        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         this.mockMvc.perform(post("/specialAdmin/createNewAdmin").
                 with(request -> {request.setRemoteAddr("127.0.0.1"); return request;}).
                 contentType(MediaType.APPLICATION_JSON).
@@ -46,7 +43,6 @@ public class AdminUserControllerTest {
     @Test
     public void testCreateFromRemote() throws Exception {
         String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
-        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         this.mockMvc.perform(post("/specialAdmin/createNewAdmin").
                         with(request -> {request.setRemoteAddr("192.168.1.1"); return request;}).
                         contentType(MediaType.APPLICATION_JSON).
@@ -59,7 +55,6 @@ public class AdminUserControllerTest {
     @Test
     public void testCreateFromForwarded() throws Exception {
         String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
-        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         this.mockMvc.perform(post("/specialAdmin/createNewAdmin").
                         with(request -> {request.setRemoteAddr("127.0.0.1"); return request;}).
                         contentType(MediaType.APPLICATION_JSON).
@@ -73,7 +68,6 @@ public class AdminUserControllerTest {
     @Test
     public void testCreateFromWeirdness() throws Exception {
         String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
-        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         this.mockMvc.perform(post("/specialAdmin/createNewAdmin").
                         with(request -> {request.setRemoteAddr("invalid.invalid"); return request;}).
                         contentType(MediaType.APPLICATION_JSON).

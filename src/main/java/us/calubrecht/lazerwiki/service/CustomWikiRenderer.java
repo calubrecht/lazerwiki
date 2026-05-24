@@ -51,11 +51,7 @@ public class CustomWikiRenderer implements IMarkupRenderer {
         return renderWithInfo(markup, renderContext).renderedText();
     }
 
-    @Override
-    public String renderToPlainText(String markup, RenderContext renderContext) {
-        return renderWithInfo(markup, renderContext).plainText();
-    }
-
+    @SuppressWarnings("unchecked")
     private String renderToC(RenderContext renderContext) {
         List<HeaderRef> headers = (List<HeaderRef>)renderContext.renderState().getOrDefault(HEADERS.name(), Collections.emptyList());
         Object forceTOC = renderContext.renderState().get(TOC.name());

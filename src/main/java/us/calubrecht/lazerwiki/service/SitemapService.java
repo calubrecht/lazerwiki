@@ -1,12 +1,10 @@
 package us.calubrecht.lazerwiki.service;
 
-import com.redfin.sitemapgenerator.ChangeFreq;
 import com.redfin.sitemapgenerator.WebSitemapUrl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.redfin.sitemapgenerator.WebSitemapGenerator;
 import us.calubrecht.lazerwiki.model.MediaRecord;
-import us.calubrecht.lazerwiki.model.Page;
 import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
@@ -29,8 +27,8 @@ public class SitemapService {
         String sUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), "").toString();
         PageListResponse pageList = pageService.getAllPages(url.getHost(), null);
         WebSitemapGenerator wsg = new WebSitemapGenerator(url);
-        for (String ns : pageList.pages.keySet().stream().sorted().toList()) {
-           List<PageDesc> pages = pageList.pages.get(ns);
+        for (String ns : pageList.pages().keySet().stream().sorted().toList()) {
+           List<PageDesc> pages = pageList.pages().get(ns);
            for (PageDesc page : pages) {
                String descriptor = page.getDescriptor();
                String path = descriptor.isEmpty() ? "" : "/page/" + descriptor;
@@ -43,8 +41,8 @@ public class SitemapService {
            }
         }
         MediaListResponse mediaList = mediaService.getAllFiles(url.getHost(), null);
-        for (String ns : mediaList.media.keySet().stream().sorted().toList()) {
-            List<MediaRecord> mediaItems = mediaList.media.get(ns);
+        for (String ns : mediaList.media().keySet().stream().sorted().toList()) {
+            List<MediaRecord> mediaItems = mediaList.media().get(ns);
             for (MediaRecord media : mediaItems) {
                 String descriptor = ns.isEmpty() ? media.getFileName() : ns + ":" + media.getFileName();
                 WebSitemapUrl.Options options = new WebSitemapUrl.Options(sUrl + "/_media/" + descriptor);

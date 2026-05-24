@@ -19,7 +19,7 @@ import java.util.Iterator;
 public class ImageUtil {
 
     // Limit to to image area, to avoid excessive memory use
-    int maxImgSize;
+    final int maxImgSize;
 
     public ImageUtil(@Value("${imageutil.image.size.limit:100000000}") int maxImgSize) {
         this.maxImgSize = maxImgSize;

@@ -255,17 +255,17 @@ public class PageServiceTest {
 
         PageListResponse pageResponse = pageService.getAllPages("host1", "joe");
 
-        assertEquals("", pageResponse.namespaces.getNamespace());
-        assertEquals(1, pageResponse.namespaces.getChildren().size());
-        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getNamespace());
-        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getFullNamespace());
-        NsNode ns1 = pageResponse.namespaces.getChildren().get(0);
+        assertEquals("", pageResponse.namespaces().getNamespace());
+        assertEquals(1, pageResponse.namespaces().getChildren().size());
+        assertEquals("ns1", pageResponse.namespaces().getChildren().get(0).getNamespace());
+        assertEquals("ns1", pageResponse.namespaces().getChildren().get(0).getFullNamespace());
+        NsNode ns1 = pageResponse.namespaces().getChildren().get(0);
         assertEquals(1, ns1.getChildren().size());
         assertEquals("ns2", ns1.getChildren().get(0).getNamespace());
         assertEquals("ns1:ns2", ns1.getChildren().get(0).getFullNamespace());
         assertEquals(0, ns1.getChildren().get(0).getChildren().size());
 
-        Map<String, List<PageDesc>> pages = pageResponse.pages;
+        Map<String, List<PageDesc>> pages = pageResponse.pages();
 
         assertEquals(2, pages.get("").size());
         assertEquals("page1", pages.get("").get(0).getPagename());
@@ -293,17 +293,17 @@ public class PageServiceTest {
         when(pageRepository.getAllValid("site1")).thenReturn(allPages);
 
         PageListResponse pageResponse = pageService.getAllPages("host1", "joe");
-        assertEquals("", pageResponse.namespaces.getNamespace());
-        assertEquals(1, pageResponse.namespaces.getChildren().size());
-        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getNamespace());
-        assertEquals("ns1", pageResponse.namespaces.getChildren().get(0).getFullNamespace());
-        NsNode ns1 = pageResponse.namespaces.getChildren().get(0);
+        assertEquals("", pageResponse.namespaces().getNamespace());
+        assertEquals(1, pageResponse.namespaces().getChildren().size());
+        assertEquals("ns1", pageResponse.namespaces().getChildren().get(0).getNamespace());
+        assertEquals("ns1", pageResponse.namespaces().getChildren().get(0).getFullNamespace());
+        NsNode ns1 = pageResponse.namespaces().getChildren().get(0);
         assertEquals(1, ns1.getChildren().size());
         assertEquals("ns2", ns1.getChildren().get(0).getNamespace());
         assertEquals("ns1:ns2", ns1.getChildren().get(0).getFullNamespace());
         assertEquals(0, ns1.getChildren().get(0).getChildren().size());
 
-        Map<String, List<PageDesc>> pages = pageResponse.pages;
+        Map<String, List<PageDesc>> pages = pageResponse.pages();
 
         assertEquals(1, pages.get("").size());
         assertEquals("page1", pages.get("").get(0).getPagename());
@@ -693,17 +693,17 @@ public class PageServiceTest {
         });
         PageListResponse res = pageService.getAllNamespaces("default", "bob");
 
-        assertEquals(2, res.namespaces.getChildren().size());
-        assertEquals("a", res.namespaces.getChildren().get(0).getNamespace());
-        assertEquals("d", res.namespaces.getChildren().get(1).getNamespace());
+        assertEquals(2, res.namespaces().getChildren().size());
+        assertEquals("a", res.namespaces().getChildren().get(0).getNamespace());
+        assertEquals("d", res.namespaces().getChildren().get(1).getNamespace());
 
-        NsNode aTree = res.namespaces.getChildren().get(0);
+        NsNode aTree = res.namespaces().getChildren().get(0);
         assertEquals(3, aTree.getChildren().size());
         assertEquals("b", aTree.getChildren().get(0).getNamespace());
         assertEquals("a:b", aTree.getChildren().get(0).getFullNamespace());
         assertEquals("c", aTree.getChildren().get(1).getNamespace());
         assertEquals("d", aTree.getChildren().get(2).getNamespace());
-        NsNode dTree = res.namespaces.getChildren().get(1);
+        NsNode dTree = res.namespaces().getChildren().get(1);
         assertEquals("a", dTree.getChildren().get(0).getNamespace());
         assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, dTree.getRestriction_type());
         assertNull(dTree.getChildren().get(0).getRestriction_type());
@@ -736,6 +736,7 @@ public class PageServiceTest {
             this.pageName = pageName;
         }
 
+        @SuppressWarnings("SameParameterValue")
         PageDescImpl(String namespace, String pageName, Long revision, boolean deleted) {
             this.namespace = namespace;
             this.pageName = pageName;
@@ -797,6 +798,7 @@ public class PageServiceTest {
             this.title = title;
             this.text = text;
         }
+
         @Override
         public String getNamespace() {
             return namespace;
@@ -817,5 +819,4 @@ public class PageServiceTest {
             return text;
         }
     }
-
 }

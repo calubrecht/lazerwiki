@@ -10,11 +10,7 @@ import java.util.List;
 public interface MediaOverrideRepository extends CrudRepository<MediaOverride, Long> {
 
     List<MediaOverride> findAllBySiteAndSourcePageNSAndSourcePageNameOrderById(String site, String sourcePageNS, String sourcePageName);
-    List<MediaOverride> findAllBySiteAndTargetFileNSAndTargetFileName(String any, String ns, String pageName);
     List<MediaOverride> findAllBySiteAndNewTargetFileNSAndNewTargetFileName(String any, String ns, String fileName);
     void deleteBySiteAndSourcePageNSAndSourcePageName(String site, String sourcePageNS, String sourcePageName);
     void deleteBySiteAndNewTargetFileNSAndNewTargetFileName(String site, String newTargetFileNS, String newTargetFileName);
-
-    void deleteBySite(String site);
-
 }

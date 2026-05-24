@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
@@ -49,7 +48,7 @@ public class RegenCacheService {
         perfTracker.startTimer("All");
         perfTracker.startTimer("Fetch Page List");
         String siteKey = site.toLowerCase();
-        logger.info("Regening link table for " +siteKey);
+        logger.info("Regening link table for {}", siteKey);
         List<PageDesc> pages = pageRepository.getAllValid(siteKey);
         perfTracker.stopTimer("Fetch Page List");
         perfTracker.startTimer("Regen links");
@@ -65,10 +64,10 @@ public class RegenCacheService {
                 Collection<String> images = (Collection<String>) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
                 logger.info("Setting " + links.size() + " links for " + pd.getNamespace() + ":" + pd.getPagename());
                 linkService.setLinksFromPage(siteKey, pd.getNamespace(), pd.getPagename(), links);
-                logger.info("Setting " + links.size() + " images for " + pd.getNamespace() + ":" + pd.getPagename());
+                logger.info("Setting {} images for {}:{}", links.size(), pd.getNamespace(), pd.getPagename());
                 imageRefService.setImageRefsFromPage(siteKey, pd.getNamespace(), pd.getPagename(), images);
             } catch (Throwable throwable) {
-                logger.error("Error regening Links for " + pd.getNamespace() + ":" + pd.getPagename(), throwable);
+                logger.error("Error regening Links for {}:{}", pd.getNamespace(), pd.getPagename(), throwable);
                 failedPages.add(pd.getNamespace() + ":" + pd.getPagename());
             }
         });
@@ -86,7 +85,7 @@ public class RegenCacheService {
         perfTracker.startTimer("Fetch Page List");
         String siteKey = site.toLowerCase();
         String host = siteService.getHostForSitename(siteKey);
-        logger.info("Regening cache table for " +siteKey + " " + host);
+        logger.info("Regening cache table for {} {}", siteKey, host);
         pageCacheRepository.deleteBySite(siteKey);
         List<PageDesc> pages = pageRepository.getAllValid(siteKey);
         perfTracker.stopTimer("Fetch Page List");
@@ -98,7 +97,7 @@ public class RegenCacheService {
                 PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
                 RenderContext renderContext = new RenderContext(host, siteKey, desc.toString(), UserService.SYS_USER);
                 renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
-                logger.info("Render: " + desc.toString());
+                logger.info("Render: {}", desc);
                 RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
                 PageCache newCache = new PageCache();
                 newCache.site = siteKey;
@@ -109,10 +108,10 @@ public class RegenCacheService {
                 newCache.title = PageService.getTitle(new PageDescriptor(pd.getNamespace(), pd.getPagename()), p);
                 newCache.source = PageService.doAdjustSource(p.getText(), res);
                 newCache.useCache = !(Boolean) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
-                logger.info("Caching rendered page for " + pd.getNamespace() + ":" + pd.getPagename() + " useCache=" + newCache.useCache);
+                logger.info("Caching rendered page for {}:{} useCache={}", pd.getNamespace(), pd.getPagename(), newCache.useCache);
                 pageCacheRepository.save(newCache);
             } catch (Throwable t) {
-                logger.error("Error regening Cache for " + pd.getNamespace() + ":" + pd.getPagename(), t);
+                logger.error("Error regening Cache for {}:{}", pd.getNamespace(), pd.getPagename(), t);
                 failedPages.add(pd.getNamespace() + ":" + pd.getPagename());
             }
         });
@@ -125,7 +124,7 @@ public class RegenCacheService {
 
     public void regenCachesForBacklinks(String site, String linkedPage) {
         String host = siteService.getHostForSitename(site);
-        logger.info("Regening cache for links to " +site + "-" + linkedPage);
+        logger.info("Regenning cache for links to {}-{}", site, linkedPage);
         List<String> backlinks = linkService.getBacklinks(site, linkedPage);
         List<String> overrideBacklinks = linkOverrideService.getOverridesForNewTargetPage(host, linkedPage).stream().map(
                 LinkOverride::getSource
@@ -150,10 +149,10 @@ public class RegenCacheService {
                 newCache.title = PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
                 newCache.source = PageService.doAdjustSource(p.getText(), res);
                 newCache.useCache = !(Boolean) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
-                logger.info("Caching rendered page for " + pd.namespace() + ":" + pd.pageName() + " useCache=" + newCache.useCache);
+                logger.info("Recaching rendered page for {}:{} after link change useCache={}", pd.namespace(), pd.pageName(), newCache.useCache);
                 pageCacheRepository.save(newCache);
             } catch (Throwable t) {
-                logger.error("Error regening backlinks for " + link, t);
+                logger.error("Error regening backlinks for {}", link, t);
                 failedLinks.add(link);
             }
         });
@@ -164,7 +163,7 @@ public class RegenCacheService {
 
     public void regenCachesForImageRefs(String site, String oldImageRef, String newImageRef) {
         String host = siteService.getHostForSitename(site);
-        logger.info("Regening cache for media links to " +site + "-" + oldImageRef);
+        logger.info("Regening cache for media links to {}-{}", site, oldImageRef);
         List<String> backlinks = imageRefService.getRefsForImage(site, oldImageRef);
         List<String> overrideBacklinks = mediaOverrideService.getOverridesForImage(host, newImageRef).stream().map(
                 MediaOverride::getSource
@@ -189,10 +188,10 @@ public class RegenCacheService {
                 newCache.title = PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
                 newCache.source = PageService.doAdjustSource(p.getText(), res);
                 newCache.useCache = !(Boolean) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
-                logger.info("Caching rendered page for " + pd.namespace() + ":" + pd.pageName() + " useCache=" + newCache.useCache);
+                logger.info("Recaching rendered page for {}:{} for imageref change useCache={}", pd.namespace(), pd.pageName(), newCache.useCache);
                 pageCacheRepository.save(newCache);
             } catch (Throwable t) {
-                logger.error("Error regening imageRefs for " + link, t);
+                logger.error("Error regening imageRefs for {}", link, t);
                 failedLinks.add(link);
             }
         });

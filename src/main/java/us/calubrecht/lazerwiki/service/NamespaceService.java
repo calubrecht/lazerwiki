@@ -7,12 +7,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.*;
-import us.calubrecht.lazerwiki.repository.EntityManagerProxy;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 
-import javax.naming.Name;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;

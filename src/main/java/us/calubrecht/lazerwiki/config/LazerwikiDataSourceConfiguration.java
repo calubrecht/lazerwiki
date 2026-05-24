@@ -12,8 +12,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.sqlite.SQLiteConfig;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.Properties;
 
 @Configuration
 public class LazerwikiDataSourceConfiguration {
@@ -31,7 +29,7 @@ public class LazerwikiDataSourceConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "lazerwiki.db", name = "engine", havingValue="sqlite")
     @Primary
-    public DataSource dataSourceSqlLite() throws SQLException {
+    public DataSource dataSourceSqlLite() {
         String url = env.getProperty("lazerwiki.datasource.url");
         SQLiteConfig config = new SQLiteConfig();
         config.enforceForeignKeys(true);

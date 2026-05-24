@@ -36,6 +36,7 @@ public class ImageRenderer extends AbstractRenderer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
         ImageNode imgNode = (ImageNode)node;
         String src = imgNode.getSource();
@@ -145,6 +146,7 @@ public class ImageRenderer extends AbstractRenderer {
         return m.matches();
     }
 
+    @SuppressWarnings("unchecked")
     String doOverrides(String file, ImageNode node, RenderContext renderContext) {
         Map<String, MediaOverride> overrides = (Map<String, MediaOverride>) renderContext.renderState().get(MEDIA_OVERRIDES.name());
         if (overrides == null) {

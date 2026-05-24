@@ -8,8 +8,6 @@ import us.calubrecht.lazerwiki.syntax.nodes.LineBreakNode;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class LineBreakParser extends AbstractInnerParser {

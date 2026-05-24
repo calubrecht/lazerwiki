@@ -1,7 +1,5 @@
 package us.calubrecht.lazerwiki.macro;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.*;
 
 public abstract class Macro {
@@ -34,6 +32,7 @@ public abstract class Macro {
     }
 
 
+    @SuppressWarnings("unused")
     public interface MacroContext {
         String sanitize(String input);
 
@@ -56,7 +55,7 @@ public abstract class Macro {
 
         void addLinks(Collection<String> newLinks);
 
-        public static abstract class RenderOutput {
+        abstract class RenderOutput {
             public abstract String getHtml();
             public abstract Map<String,Object> getState();
         }

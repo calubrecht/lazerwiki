@@ -74,7 +74,8 @@ tasks.war {
 }
 
 tasks.register<Jar>("macroApiJar") {
-	manifest {
+	description = "Build API jar for Custom Macro plugins"
+    manifest {
 		attributes("Implementation-Version" to archiveVersion)
 	}
 	group="build"
@@ -89,7 +90,8 @@ tasks.processResources {
 }
 
 tasks.register<Jar>("localMacroJar") {
-	manifest {
+	description = "Build a plugin jar from locally defined macros"
+    manifest {
 		attributes("Implementation-Version" to archiveVersion)
 	}
 	group="build"
@@ -98,6 +100,7 @@ tasks.register<Jar>("localMacroJar") {
 }
 
 tasks.register<Jar>("macroApiSourceJar") {
+    description = "Sources for Macro API Jar"
     manifest {
         attributes("Implementation-Version" to archiveVersion)
     }

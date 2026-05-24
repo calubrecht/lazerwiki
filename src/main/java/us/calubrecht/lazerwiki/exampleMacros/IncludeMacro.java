@@ -1,15 +1,10 @@
 package us.calubrecht.lazerwiki.exampleMacros;
 
-import org.apache.commons.lang3.tuple.Pair;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.List;
-
-import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
 
 @CustomMacro
 public class IncludeMacro extends Macro {

@@ -21,11 +21,10 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERRIDE_STATS;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "HttpUrlsUsage"})
 @SpringBootTest(classes = { CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class})
 @ActiveProfiles("test")
 public class DokuWikiRendererTest {

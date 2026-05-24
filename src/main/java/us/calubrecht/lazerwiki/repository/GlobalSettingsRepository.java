@@ -6,9 +6,9 @@ import us.calubrecht.lazerwiki.model.GlobalSettings;
 
 @Repository
 public interface GlobalSettingsRepository extends CrudRepository<GlobalSettings, Integer>  {
-    static final Integer SINGLE_ID = 1;
+    Integer SINGLE_ID = 1;
 
-    public default GlobalSettings getSettings() {
+    default GlobalSettings getSettings() {
         return findById(SINGLE_ID).orElse(new GlobalSettings());
     }
 }

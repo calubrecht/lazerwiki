@@ -7,7 +7,6 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
 import us.calubrecht.lazerwiki.syntax.nodes.HiddenNode;
-import us.calubrecht.lazerwiki.syntax.nodes.SpecialSpanNode;
 import us.calubrecht.lazerwiki.syntax.nodes.TaggedContainerNode;
 
 import java.util.Collection;
@@ -31,7 +30,7 @@ public class HiddenRenderer extends ContainerRenderer {
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
         HiddenNode hidden = (HiddenNode)node;
         StringBuilder outBuffer = new StringBuilder();
-        outBuffer.append(String.format("<div class=\"hidden\">"));
+        outBuffer.append("<div class=\"hidden\">");
         String id = getId();
         String rawTitle = hidden.getOptions().getOrDefault("name","Hidden");
         String hiddenTitle = sanitize(rawTitle);

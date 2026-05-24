@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.AnnotatedTypeScanner;
 import org.springframework.stereotype.Service;
-import us.calubrecht.lazerwiki.plugin.EditToolbarDef;
 import us.calubrecht.lazerwiki.plugin.WikiPlugin;
 import us.calubrecht.lazerwiki.plugin.Plugin;
 

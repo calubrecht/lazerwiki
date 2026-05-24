@@ -1,7 +1,6 @@
 package us.calubrecht.lazerwiki.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

@@ -168,6 +168,7 @@ class MacroServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testMacroContextGetCachedRenders() {
         PageData notExists = new PageData("", "", null, null, new PageData.PageFlags(false, false, true, true, true, false));
         PageData cannotRead = new PageData("", "", null, null, new PageData.PageFlags(true, false, false, true, true, false));
@@ -238,6 +239,7 @@ class MacroServiceTest {
             return "Broken";
         }
 
+        @Override
         public Optional<String> getCSS() {
             throw new RuntimeException("BOOM!");
         }
@@ -255,6 +257,7 @@ class MacroServiceTest {
             return "Good";
         }
 
+        @Override
         public Optional<String> getCSS() {
             return Optional.of("div {}");
         }

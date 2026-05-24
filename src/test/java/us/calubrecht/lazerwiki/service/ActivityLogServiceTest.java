@@ -10,7 +10,6 @@ import us.calubrecht.lazerwiki.model.ActivityType;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.ActivityLogRepository;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = {ActivityLogService.class})

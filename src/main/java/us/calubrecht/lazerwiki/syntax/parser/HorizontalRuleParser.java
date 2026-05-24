@@ -5,7 +5,6 @@ import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.HorizontalRuleNode;
 
-import java.util.Set;
 import java.util.regex.Pattern;
 
 @Component

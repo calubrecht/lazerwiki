@@ -20,7 +20,6 @@ import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -147,7 +146,6 @@ public class PageControllerTest {
     @Test
     public void testListPage() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
         this.mockMvc.perform(get("/api/page/listPages").
                         principal(auth)).
                 andExpect(status().isOk());

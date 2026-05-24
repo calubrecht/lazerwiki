@@ -4,11 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.swing.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 @Entity(name = "activityLog")
 public class ActivityLog {
 

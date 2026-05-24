@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Component
 public class ControlRowParser extends AbstractTreeParser {
-    Set<String> TOKENS = Set.of("~~NOTOC~~","~~YESTOC~~");
+    final Set<String> TOKENS = Set.of("~~NOTOC~~","~~YESTOC~~");
 
     @Override
     public ITreeNode parse(ParseContext parseContext) {

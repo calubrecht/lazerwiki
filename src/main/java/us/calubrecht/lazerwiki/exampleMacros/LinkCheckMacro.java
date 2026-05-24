@@ -50,7 +50,7 @@ public class LinkCheckMacro extends Macro{
 
     boolean nsMatches(String page, Set<String> namespaces) {
         String pageNS = getNS(page);
-        return namespaces.stream().filter(ns -> pageNS.startsWith(ns)).findAny().isPresent();
+        return namespaces.stream().anyMatch(pageNS::startsWith);
     }
 
     @Override
@@ -74,7 +74,6 @@ public class LinkCheckMacro extends Macro{
         if (argsMap.containsKey("filterOrphanNS")) {
             Set<String> orphanBlacklist = Stream.of(argsMap.get("filterOrphanNS").split(",")).map(String::toLowerCase).
                     map(ns -> ns.endsWith(":") ? ns : ns + ":").collect(Collectors.toSet());
-            Predicate<String> mainFilter = nsFilter;
             orphanNsFilter = (page) -> !nsMatches(page, orphanBlacklist);
 
         }
@@ -86,7 +85,7 @@ public class LinkCheckMacro extends Macro{
         Map<String, List<String>> brokenLinks = new HashMap<>();
         allPages.stream().sorted().forEach(page -> {
             List<String> links = context.getLinksOnPage(caseInsensitiveMapping.get(page));
-            linkedTo.addAll(links.stream().map(String::toLowerCase).filter(l -> allPages.contains(l)).collect(Collectors.toList()));
+            linkedTo.addAll(links.stream().map(String::toLowerCase).filter(allPages::contains).toList());
             links.stream().filter(l -> !allPages.contains(l.toLowerCase())).filter(context::isReadable).forEach(l -> {
                 brokenLinks.computeIfAbsent(l.toLowerCase(), (k)-> new ArrayList<>()).add(page);
                 // Record case of first existence of link

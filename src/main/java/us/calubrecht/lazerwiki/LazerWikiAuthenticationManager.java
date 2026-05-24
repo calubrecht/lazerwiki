@@ -14,10 +14,6 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.UserService;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -33,10 +29,9 @@ public class    LazerWikiAuthenticationManager implements AuthenticationManager 
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (!(authentication instanceof UsernamePasswordAuthenticationToken)) {
+        if (!(authentication instanceof UsernamePasswordAuthenticationToken token)) {
             throw new BadCredentialsException("Invalid authentication");
         }
-        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
         String name = token.getName();
         try {
             User u = userService.getUser(name);

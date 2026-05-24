@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 @Entity(name = "links")
 public class Link {
 

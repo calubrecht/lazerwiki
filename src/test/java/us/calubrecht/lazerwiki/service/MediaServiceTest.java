@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.data.domain.Limit;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.*;
@@ -26,11 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
@@ -304,9 +300,9 @@ class MediaServiceTest {
         when(namespaceService.filterReadableMedia(any(), eq("default"), eq("user1"))).thenReturn(List.of(file1, file2));
 
         MediaListResponse files = underTest.getAllFiles("host.com", "user1");
-        assertEquals(0, files.namespaces.getChildren().size());
-        assertEquals("", files.namespaces.getNamespace());
-        assertEquals(2, files.media.get("").size());
+        assertEquals(0, files.namespaces().getChildren().size());
+        assertEquals("", files.namespaces().getNamespace());
+        assertEquals(2, files.media().get("").size());
     }
 
     @Test
@@ -321,12 +317,12 @@ class MediaServiceTest {
         when(namespaceService.filterReadableMedia(any(), eq("default"), eq("user1"))).thenReturn(List.of(file1, file2));
 
         MediaListResponse files = underTest.getAllFiles("host.com", "user1");
-        assertEquals(2, files.namespaces.getChildren().size());
-        assertEquals("", files.namespaces.getNamespace());
-        assertNull(files.media.get(""));
-        assertEquals(0, files.namespaces.getChildren().get(0).getChildren().size());
-        assertEquals("ns1", files.namespaces.getChildren().get(0).getNamespace());
-        assertEquals(1, files.namespaces.getChildren().get(1).getChildren().size());
+        assertEquals(2, files.namespaces().getChildren().size());
+        assertEquals("", files.namespaces().getNamespace());
+        assertNull(files.media().get(""));
+        assertEquals(0, files.namespaces().getChildren().get(0).getChildren().size());
+        assertEquals("ns1", files.namespaces().getChildren().get(0).getNamespace());
+        assertEquals(1, files.namespaces().getChildren().get(1).getChildren().size());
 
         when(namespaceService.canReadNamespace(any(), eq("ns1"), eq("user2"))).thenReturn(true);
         when(namespaceService.canReadNamespace(any(), eq(""), eq("user2"))).thenReturn(true);
@@ -334,11 +330,11 @@ class MediaServiceTest {
         when(namespaceService.filterReadableMedia(any(), eq("default"), eq("user2"))).thenReturn(List.of(file1));
 
         files = underTest.getAllFiles("host.com", "user2");
-        assertEquals(1, files.namespaces.getChildren().size());
-        assertEquals("", files.namespaces.getNamespace());
-        assertNull(files.media.get(""));
-        assertEquals(0, files.namespaces.getChildren().get(0).getChildren().size());
-        assertEquals("ns1", files.namespaces.getChildren().get(0).getNamespace());
+        assertEquals(1, files.namespaces().getChildren().size());
+        assertEquals("", files.namespaces().getNamespace());
+        assertNull(files.media().get(""));
+        assertEquals(0, files.namespaces().getChildren().get(0).getChildren().size());
+        assertEquals("ns1", files.namespaces().getChildren().get(0).getNamespace());
     }
 
     @Test

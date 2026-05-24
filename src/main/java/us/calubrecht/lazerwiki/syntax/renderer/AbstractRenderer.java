@@ -17,6 +17,7 @@ public abstract class AbstractRenderer implements ITreeRenderer {
         parserRegistrar = registrar;
     }
 
+    @SuppressWarnings("unchecked")
     protected void addError(RenderContext renderContext, String error) {
         ((List<String>)renderContext.renderState().computeIfAbsent(ERRORS.name(), (k) -> new ArrayList<>())).add(error);
     }

@@ -7,13 +7,13 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class ParseContext implements Iterable<String> {
-    StringBuilder fullText;
+    final StringBuilder fullText;
     String nextLine;
     int lineStart = 0;
     int lineIdx = 0;
     int charIdx = 0;
     int charInLine = 0;
-    List<String> lines;
+    final List<String> lines;
     boolean readonly;
     int rootIdx = 0;
     ParseContext rootContext = this;
@@ -166,11 +166,6 @@ public class ParseContext implements Iterable<String> {
     @Override
     public void forEach(Consumer<? super String> action) {
         Iterable.super.forEach(action);
-    }
-
-    @Override
-    public Spliterator<String> spliterator() {
-        return Iterable.super.spliterator();
     }
 
     public CharSequence subsequence() {

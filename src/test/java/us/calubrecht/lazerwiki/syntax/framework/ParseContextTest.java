@@ -66,13 +66,13 @@ class ParseContextTest {
     public void testIterable() {
         ParseContext context = new ParseContext("OneLine\nOr two\nThree");
         List<String> items = new ArrayList<>();
-        context.forEach(line -> items.add(line));
+        context.forEach(items::add);
         assertEquals(3, items.size());
 
         Spliterator<String> spliterator = context.spliterator();
         List<String> items2 = new ArrayList<>();
-        spliterator.trySplit().forEachRemaining(line -> items2.add(line));
-        assertEquals(3, items.size());
+        spliterator.trySplit().forEachRemaining(items2::add);
+        assertEquals(3, items2.size());
     }
 
 }

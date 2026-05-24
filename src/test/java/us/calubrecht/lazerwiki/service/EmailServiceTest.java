@@ -2,7 +2,6 @@ package us.calubrecht.lazerwiki.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
-import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,7 +28,7 @@ class EmailServiceTest {
     void sendEmail() throws MessagingException {
         MimeMessage message = new MimeMessage((Session) null);
         when(mailSender.createMimeMessage()).thenReturn(message);
-        underTest.sendEmail("host", "a@a.com", "A User", "Subject", "The body");
+        underTest.sendEmail("a@a.com", "A User", "Subject", "The body");
 
         ArgumentCaptor<MimeMessage> captor = ArgumentCaptor.forClass(MimeMessage.class);
         verify(mailSender).send(captor.capture());
@@ -38,7 +37,7 @@ class EmailServiceTest {
         assertEquals("A User <a@a.com>", captor.getValue().getRecipients(MimeMessage.RecipientType.TO)[0].toString());
 
         underTest.srcName = "";
-        underTest.sendEmail("host", "a@a.com", "A User", "Subject", "The body");
+        underTest.sendEmail( "a@a.com", "A User", "Subject", "The body");
 
         verify(mailSender, times(2)).send(captor.capture());
 

@@ -2,11 +2,8 @@ package us.calubrecht.lazerwiki.util;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 public class PasswordUtil {
 
-    final long iterationCount = 600000;
     final String versionMark = ":v1:";
 
     final PasswordEncoder encoder = new BCryptPasswordEncoder();

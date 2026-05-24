@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PerfTracker {
-    private Map<String, Long> timers = new HashMap<>();
+    private final Map<String, Long> timers = new HashMap<>();
 
     @JsonIgnore
-    private Map<String, Long> timerStarts = new HashMap<>();
+    private final Map<String, Long> timerStarts = new HashMap<>();
 
     public void startTimer(String name) {
         timerStarts.put(name, System.currentTimeMillis());

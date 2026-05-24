@@ -23,7 +23,7 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERR
 
 class ImageRendererTest {
 
-    MediaOverrideService mediaOverrideService = Mockito.mock(MediaOverrideService.class);
+    final MediaOverrideService mediaOverrideService = Mockito.mock(MediaOverrideService.class);
     final ImageRenderer renderer = new ImageRenderer(mediaOverrideService);
 
     @BeforeEach
@@ -146,6 +146,7 @@ class ImageRendererTest {
                 "<img src=\"/_media/ns2:img5.jpg\" class=\"media\" loading=\"lazy\">",
                 renderer.renderHtml(imageNode, renderContext).toString()
         );
+        @SuppressWarnings("unchecked")
         List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
         assertEquals(1, overrideStats.size());
         LinkOverrideInstance override = overrideStats.get(0);
@@ -172,6 +173,7 @@ class ImageRendererTest {
                 "<img src=\"/_media/ns2:img5.jpg\" class=\"mediaright\" title=\" alternate text\" loading=\"lazy\">",
                 renderer.renderHtml(imageNode, renderContext).toString()
         );
+        @SuppressWarnings("unchecked")
         List<LinkOverrideInstance> overrideStats = (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
         assertEquals(1, overrideStats.size());
         LinkOverrideInstance override = overrideStats.get(0);

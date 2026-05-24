@@ -7,8 +7,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import us.calubrecht.lazerwiki.service.MacroCssService;
-import us.calubrecht.lazerwiki.service.ResourceService;
 import us.calubrecht.lazerwiki.service.WarResourceService;
 
 import java.io.IOException;

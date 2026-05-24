@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.model;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
 import java.util.ArrayList;
@@ -31,6 +30,7 @@ public record PageDescriptor(String namespace, String pageName) {
         return words.stream().flatMap(a -> Arrays.stream(a.split("_")).map(w -> ("" +w.charAt(0)).toUpperCase() + w.substring(1))).collect(Collectors.joining(" "));
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isHome() {
         return (pageName + namespace).isEmpty();
     }

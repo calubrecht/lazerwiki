@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.syntax.framework;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +11,6 @@ import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.syntax.nodes.*;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -234,7 +232,7 @@ class ParserTest {
         ContainerNode container = new ContainerNode();
         container.setParseContext(parseContext);
         container.setPosition(0,0);
-        underTest.parse(parseContext, container, List.of());
+        Parser.parse(parseContext, container, List.of());
         assertEquals(1, container.getChildren().size());
         TextNode tn = (TextNode)container.getChildren().get(0);
         assertEquals("Some Text", tn.asString());

@@ -24,6 +24,7 @@ public class HeaderRenderer extends ContainerRenderer {
         HeaderNode headerNode = (HeaderNode)node;
         String hTag = "h" + headerNode.getLevel();
         String plainTextHeader = renderPlaintext(node, renderContext).toString().strip();
+        @SuppressWarnings("unchecked")
         List<HeaderRef> headers = ((List<HeaderRef>)renderContext.renderState().computeIfAbsent(HEADERS.name(), (k) -> new ArrayList<>()));
         HeaderRef headerRef = new HeaderRef(headerNode.getLevel(), plainTextHeader, toId(plainTextHeader, headers));
         headers.add(headerRef);

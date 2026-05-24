@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 
 public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProcessingFilter {
 
-    protected LazerWikiAuthenticationFilter(String defaultFilterProcessesUrl, AuthenticationManager mgr, String webserverFrontEnd, String urlPrefix)
+    protected LazerWikiAuthenticationFilter(AuthenticationManager mgr, String webserverFrontEnd, String urlPrefix)
     {
         super(
-                new MyMatcher(defaultFilterProcessesUrl));
+                new MyMatcher("/api/sessions/login"));
         setAuthenticationManager(mgr);
         setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
         setAuthenticationSuccessHandler(new ForwardSuccessHandler(webserverFrontEnd,  urlPrefix + "/api/sessions/username"));

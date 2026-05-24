@@ -11,7 +11,6 @@ import us.calubrecht.lazerwiki.model.ImageRef;
 import us.calubrecht.lazerwiki.model.MediaOverride;
 import us.calubrecht.lazerwiki.repository.ImageRefRepository;
 import us.calubrecht.lazerwiki.repository.MediaOverrideRepository;
-import us.calubrecht.lazerwiki.util.ImageUtil;
 
 import java.util.List;
 
@@ -20,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = {MediaOverrideService.class})
 @ActiveProfiles("test")
+@SuppressWarnings("unchecked")
 class MediaOverrideServiceTest {
 
     @Autowired

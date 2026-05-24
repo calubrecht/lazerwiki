@@ -10,14 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import us.calubrecht.lazerwiki.service.MacroCssService;
-import us.calubrecht.lazerwiki.service.ResourceService;
 import us.calubrecht.lazerwiki.service.WarResourceService;
 
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLConnection;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("")
@@ -27,12 +23,12 @@ public class WarfileController {
     WarResourceService resourceService;  /// Seperate version that only loads from external ui war
 
     @RequestMapping("assets/{fileName}")
-    public ResponseEntity<byte[]> getFile(@PathVariable String fileName, HttpServletRequest request) {
-        return getResponseEntity("assets/" + fileName, request);
+    public ResponseEntity<byte[]> getFile(@PathVariable String fileName) {
+        return getResponseEntity("assets/" + fileName);
     }
 
     @NotNull
-    private ResponseEntity<byte[]> getResponseEntity(String fileName, HttpServletRequest request) {
+    private ResponseEntity<byte[]> getResponseEntity(String fileName) {
         try {
             String mimeType = URLConnection.guessContentTypeFromName(fileName);
             MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
@@ -48,17 +44,17 @@ public class WarfileController {
     }
 
     @RequestMapping("")
-    public ResponseEntity<byte[]> getIndexFile(HttpServletRequest request) {
-        return getResponseEntity("index.html", request);
+    public ResponseEntity<byte[]> getIndexFile() {
+        return getResponseEntity("index.html");
     }
 
     @RequestMapping("page/{filename}")
-    public ResponseEntity<byte[]> getPageFile(HttpServletRequest request) {
-        return getResponseEntity("index.html", request);
+    public ResponseEntity<byte[]> getPageFile() {
+        return getResponseEntity("index.html");
     }
 
     @RequestMapping("{filename}")
-    public ResponseEntity<byte[]> getRootFile(@PathVariable("filename") String filename, HttpServletRequest request) {
-        return getResponseEntity(filename, request);
+    public ResponseEntity<byte[]> getRootFile(@PathVariable("filename") String filename) {
+        return getResponseEntity(filename);
     }
 }

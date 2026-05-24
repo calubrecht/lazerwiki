@@ -24,7 +24,7 @@ public class LinkRepositoryTest {
     @Test
     public void test_findAllBySiteAndSourcePageNSAndSourcePageName() {
         List<Link> fromHome = linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName("default", "", "");
-        assertEquals(Set.of("page1", "page2"), fromHome.stream().map(l -> l.getTargetPageName()).collect(Collectors.toSet()));
+        assertEquals(Set.of("page1", "page2"), fromHome.stream().map(Link::getTargetPageName).collect(Collectors.toSet()));
         List<Link> fromPage1 = linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName("default", "", "page1");
         assertEquals(Set.of(":page2", "ns:nsPage"), fromPage1.stream().map(l -> l.getTargetPageNS() + ":" + l.getTargetPageName()).collect(Collectors.toSet()));
     }
@@ -32,7 +32,7 @@ public class LinkRepositoryTest {
     @Test
     public void test_findAllBySiteAndTargetPageNSAndTargetPageName() {
         List<Link> toPage2 = linkRepository.findAllBySiteAndTargetPageNSAndTargetPageName("default", "", "page2");
-        assertEquals(Set.of("", "page1"), toPage2.stream().map(l -> l.getSourcePageName()).collect(Collectors.toSet()));
+        assertEquals(Set.of("", "page1"), toPage2.stream().map(Link::getSourcePageName).collect(Collectors.toSet()));
 
     }
 
@@ -43,7 +43,7 @@ public class LinkRepositoryTest {
         Link link2 = new Link("default", "", "newPage", "", "pageB");
         linkRepository.saveAll(List.of(link1, link2));
         List<Link> fromNewPage = linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName("default", "", "newPage");
-        assertEquals(Set.of("pageA", "pageB"), fromNewPage.stream().map(l -> l.getTargetPageName()).collect(Collectors.toSet()));
+        assertEquals(Set.of("pageA", "pageB"), fromNewPage.stream().map(Link::getTargetPageName).collect(Collectors.toSet()));
 
         linkRepository.deleteBySiteAndSourcePageNSAndSourcePageName("default","", "newPage");
         fromNewPage = linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName("default", "", "newPage");

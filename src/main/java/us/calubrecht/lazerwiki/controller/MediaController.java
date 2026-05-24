@@ -31,7 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("_media/")
 public class MediaController {
-    Logger logger = LoggerFactory.getLogger(getClass());
+    final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     MediaService mediaService;

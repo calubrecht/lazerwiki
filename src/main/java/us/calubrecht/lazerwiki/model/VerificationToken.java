@@ -1,14 +1,12 @@
 package us.calubrecht.lazerwiki.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "verificationToken")
 public class VerificationToken {
-    public enum Purpose {VERIFY_EMAIL, RESET_PASSWORD};
+    public enum Purpose {VERIFY_EMAIL, RESET_PASSWORD}
 
     public VerificationToken() {
 

@@ -10,12 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.*;
-import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Optional;
 
 @Service
 public class SiteDelService {
@@ -54,7 +50,7 @@ public class SiteDelService {
 
     @Transactional
     @CacheEvict(value = "sitesForHostname", allEntries = true)
-    public boolean deleteSiteCompletely(String siteName, String username) throws MediaWriteException, IOException {
+    public boolean deleteSiteCompletely(String siteName, String username) {
         Site site = siteRepository.findBySiteName(siteName);
         if (site == null) {
             logger.info("Could not delete site siteName=" + siteName + " not found");

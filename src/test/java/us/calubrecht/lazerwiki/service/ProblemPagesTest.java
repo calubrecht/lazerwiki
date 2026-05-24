@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.service;
 
-import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +14,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = { CustomWikiRenderer.class, ProblemPagesTest.TestConfig.class, MacroService.class})
@@ -58,8 +56,6 @@ public class ProblemPagesTest {
             byte[] bytesRead = fis.readAllBytes();
             fis.close();
             return new String(bytesRead);
-        } catch (FileNotFoundException e) {
-            return null;
         } catch (IOException e) {
             return null;
         }

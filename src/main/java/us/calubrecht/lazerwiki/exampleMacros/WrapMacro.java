@@ -16,12 +16,13 @@ public class WrapMacro extends Macro {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public String render(Macro.MacroContext context, String macroArgs) {
         String[] toks = macroArgs.split(":",2);
         if (toks.length == 1 || toks[1].isBlank()) {
             return "<div class=\"%s\"></div>".formatted(toks[0]);
         }
-        boolean multiLine = toks[1].indexOf("\n") != -1;
+        boolean multiLine = toks[1].contains("\n");
         MacroContext.RenderOutput renderOutput = context.renderMarkup(toks[1]);
         String innerText = renderOutput.getHtml();
         if (!multiLine) {

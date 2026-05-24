@@ -2,7 +2,6 @@ package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,13 +9,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.*;
-import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -57,9 +54,11 @@ public class SiteDelServiceTest {
 
 
     @Test
-    void delSite() throws MediaWriteException, IOException {
+    void delSite() throws IOException {
         when(siteRepository.findBySiteName("site1")).thenReturn(new Site("existingSite", "", "site1"));
-        Paths.get(staticFileRoot, "existingSite", "media").toFile().mkdirs();
+        if (!Paths.get(staticFileRoot, "existingSite", "media").toFile().mkdirs()) {
+            throw new IOException("Test broken");
+        }
         File f = Paths.get(staticFileRoot, "existingSite", "media", "test.write").toFile();
         try (FileOutputStream fos = new FileOutputStream(f)) {
             fos.write(1);
@@ -74,8 +73,6 @@ public class SiteDelServiceTest {
 
         assertFalse(f.exists());
         assertFalse(Paths.get(staticFileRoot, site).toFile().exists());
-
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
         verify(mediaRecordRepository).deleteBySite(site);
         verify(mediaHistoryRepository).deleteBySite(site);

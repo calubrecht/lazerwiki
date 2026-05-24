@@ -4,7 +4,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ public class EmailService {
     @Autowired
     JavaMailSender mailSender;
 
-    public void sendEmail(String host, String destEmail, String destUser, String subject, String body) throws MessagingException {
+    public void sendEmail(String destEmail, String destUser, String subject, String body) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
         String fullSrc = srcName.isBlank() ? srcEmail : "%s <%s>".formatted(srcName, srcEmail);

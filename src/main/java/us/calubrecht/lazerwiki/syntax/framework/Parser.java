@@ -13,9 +13,6 @@ import java.util.List;
 public class Parser {
     final ParserRegistrar parserRegistrar;
 
-    // XXX: TEMP
-    boolean validateNodeParsers = true;
-
     public Parser(@Autowired ParserRegistrar parserRegistrar) {
         this.parserRegistrar = parserRegistrar;
     }
@@ -98,7 +95,7 @@ public class Parser {
                     parentNode.addChild(textNode(buffer, textStart, parentNode.getParseContext()));
                     buffer = new StringBuilder();
                     parentNode.addChild(parsed.getRight());
-                    textStart  = parseContext.getPosition();;
+                    textStart  = parseContext.getPosition();
                     parseContext.advanceChars(parsed.getLeft());
                 }
             }

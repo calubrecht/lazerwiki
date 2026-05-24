@@ -19,7 +19,6 @@ import us.calubrecht.lazerwiki.util.PasswordUtil;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = UserService.class)
@@ -187,13 +186,13 @@ public class UserServiceTest {
 
         verify(tokenRepository).deleteExpired();
         verify(tokenRepository).save(new VerificationToken(user, "ABCD-EFGH", VerificationToken.Purpose.VERIFY_EMAIL, "bob@super.com"));
-        verify(emailService).sendEmail(eq("localhost"), eq("bob@super.com"), eq("Bob"), eq("Verify Email"), eq("The template"));
+        verify(emailService).sendEmail(eq("bob@super.com"), eq("Bob"), eq("Verify Email"), eq("The template"));
 
         Mockito.reset(tokenRepository);
         Mockito.reset(emailService);
         userService.requestSetEmail("Jeff", "localhost", "bob@super.com");
         verify(tokenRepository, Mockito.never()).save(any());
-        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any(), any());
+        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any());
     }
 
     @Test
@@ -209,7 +208,7 @@ public class UserServiceTest {
 
         verify(tokenRepository).deleteExpired();
         verify(tokenRepository).save(new VerificationToken(user, "ABCD-EFGH", VerificationToken.Purpose.RESET_PASSWORD, "newHash"));
-        verify(emailService).sendEmail(eq("localhost"), eq("bob@super.com"), eq("Bob"), eq("Reset Forgotten Password"), eq("The template"));
+        verify(emailService).sendEmail(eq("bob@super.com"), eq("Bob"), eq("Reset Forgotten Password"), eq("The template"));
 
         userService.requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass");
 
@@ -217,11 +216,11 @@ public class UserServiceTest {
         Mockito.reset(emailService);
         userService.requestResetForgottenPassword("Bob", "localhost", "joe@super.com", "pass");
         verify(tokenRepository, Mockito.never()).save(any());
-        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any(), any());
+        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any());
 
         userService.requestResetForgottenPassword("Jeff", "localhost", "bob@super.com", "pass");
         verify(tokenRepository, Mockito.never()).save(any());
-        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any(), any());
+        verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any());
     }
 
     @Test

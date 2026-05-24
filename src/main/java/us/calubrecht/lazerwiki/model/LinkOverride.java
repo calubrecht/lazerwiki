@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 @Entity(name = "linkOverrides")
 public class LinkOverride {
 

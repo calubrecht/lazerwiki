@@ -8,6 +8,7 @@ import us.calubrecht.lazerwiki.service.UserService;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 @Entity(name = "mediaHistory")
 public class MediaHistoryRecord {
     @Id

@@ -17,20 +17,18 @@ import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.responses.MoveStatus;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
-import us.calubrecht.lazerwiki.responses.PageLockResponse;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
-import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class MediaService {
@@ -83,7 +81,7 @@ public class MediaService {
     Pair<String, String> getNamespace(String fileName) {
         List<String> parts = new ArrayList<>(List.of(fileName.split(":")));
         String baseFile = parts.remove(parts.size() -1);
-        if (parts.size() == 0) {
+        if (parts.isEmpty()) {
             return Pair.of("", baseFile);
         }
         return Pair.of(String.join(":", parts), baseFile);
@@ -108,7 +106,7 @@ public class MediaService {
             throw new MediaReadException("Not permissioned to read this file");
         }
         IOSupplier<byte[]> byteReader = () -> {
-                String nsPath = splitFile.getLeft().replaceAll(":", "/");
+                String nsPath = splitFile.getLeft().replace(":", "/");
             File f = getFileInNS(site, nsPath, splitFile.getRight());
             ensureDir(site, nsPath);
             logger.info("Reading file " + f.getAbsoluteFile());
@@ -145,7 +143,7 @@ public class MediaService {
         if (!namespaceService.canUploadInNamespace(site, namespace, userName)) {
             throw new MediaWriteException("Not permissioned to write this file");
         }
-        String nsPath = namespace.replaceAll(":", "/");
+        String nsPath = namespace.replace(":", "/");
         String fileName = mfile.getOriginalFilename();
         MediaRecord oldRecord = mediaRecordRepository.findBySiteAndNamespaceAndFileName(site, namespace, fileName);
         Long id = null;
@@ -210,8 +208,8 @@ public class MediaService {
         }
         mediaOverrideService.createOverride(host, oldFileNS, oldFileName, newFileNS, newFileName);
         // Do move file
-        String oldNsPath = oldFileNS.replaceAll(":", "/");
-        String newNsPath = newFileNS.replaceAll(":", "/");
+        String oldNsPath = oldFileNS.replace(":", "/");
+        String newNsPath = newFileNS.replace(":", "/");
         File oldF = getFileInNS(site, oldNsPath, oldFileName);
         File newF = getFileInNS(site, newNsPath, newFileName);
         ensureDir(site, newNsPath);
@@ -234,19 +232,19 @@ public class MediaService {
     }
 
     List<String> getNamespaces(String rootNS, List<MediaRecord> mediaRecords) {
-        return mediaRecords.stream().map(p -> p.getNamespace()).distinct().flatMap(ns -> {
+        return mediaRecords.stream().map(MediaRecord::getNamespace).distinct().flatMap(ns -> {
                     List<String> parts = List.of(ns.split(":"));
                     List<String> namespaces = new ArrayList<>();
                     if (parts.size() == 1) {
-                        return List.of(ns).stream();
+                        return Stream.of(ns);
                     }
                     for ( int i = 0 ; i <= parts.size(); i++) {
-                        String namespace = parts.subList(0, i).stream().collect(Collectors.joining(":"));
+                        String namespace = String.join(":", parts.subList(0, i));
                         namespaces.add(namespace);
                     }
                     return namespaces.stream();
                 }).distinct().filter(ns -> ns.startsWith(rootNS) && !ns.equals(rootNS)).
-                filter(ns -> ns.substring(rootNS.length() + 1).indexOf(":") == -1).
+                filter(ns -> !ns.substring(rootNS.length() + 1).contains(":")).
                 sorted().toList();
     }
     NsNode getNsNode(String site, String rootNS, List<MediaRecord> mediaRecords, String userName) {
@@ -274,7 +272,7 @@ public class MediaService {
     public void deleteFile(String host, String fileName, String userName) throws IOException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
-        String nsPath = splitFile.getLeft().replaceAll(":", "/");
+        String nsPath = splitFile.getLeft().replace(":", "/");
         if (!namespaceService.canDeleteInNamespace(site, splitFile.getLeft(), userName)) {
             throw new MediaWriteException("Not permissioned to delete this file");
         }
@@ -294,7 +292,7 @@ public class MediaService {
     public long getFileLastModified(String host, String fileName) throws IOException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
-        String nsPath = splitFile.getLeft().replaceAll(":", "/");
+        String nsPath = splitFile.getLeft().replace(":", "/");
         File f = getFileInNS(site, nsPath, splitFile.getRight());
         ensureDir(site, nsPath);
         return f.lastModified();

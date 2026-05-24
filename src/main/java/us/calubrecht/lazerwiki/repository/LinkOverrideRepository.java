@@ -14,7 +14,4 @@ public interface LinkOverrideRepository extends CrudRepository<LinkOverride, Lon
     List<LinkOverride> findAllBySiteAndNewTargetPageNSAndNewTargetPageName(String any, String eq, String pageName);
     void deleteBySiteAndSourcePageNSAndSourcePageName(String site, String sourcePageNS, String sourcePageName);
     void deleteBySiteAndNewTargetPageNSAndNewTargetPageName(String site, String newTargetPageNS, String newTargetPageName);
-
-    void deleteBySite(String site);
-
 }

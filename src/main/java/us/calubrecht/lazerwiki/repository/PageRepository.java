@@ -69,7 +69,7 @@ public interface PageRepository extends CrudRepository<Page, PageKey> {
         return getByTagnameNative(site, tagName, getMaxTS(engine));
     }
 
-    default List<PageText> getAllBySiteAndNamespaceAndPagename(String engine, String site, List<String> pageDescs) {;
+    default List<PageText> getAllBySiteAndNamespaceAndPagename(String engine, String site, List<String> pageDescs) {
         return getAllBySiteAndNamespaceAndPagenameNative(site, pageDescs, getMaxTS(engine));
     }
 }

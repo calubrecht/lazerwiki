@@ -39,6 +39,7 @@ public class LinkRenderer extends ContainerRenderer{
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
         LinkNode link = (LinkNode) node;
         String source = node.getSourceFromContext();
@@ -67,8 +68,7 @@ public class LinkRenderer extends ContainerRenderer{
         LinkNode link = (LinkNode)node;
         String linkTarget = getLinkTarget(link.getDest());
         if (!link.getChildren().isEmpty()) {
-            StringBuilder rendered =  super.renderPlaintext(node, renderContext);
-            return rendered;
+            return super.renderPlaintext(node, renderContext);
         }
         linkTarget = doOverrides(linkTarget, link, renderContext, false);
         if (isInternal(linkTarget)) {
@@ -107,10 +107,7 @@ public class LinkRenderer extends ContainerRenderer{
     }
 
     boolean suspiciousTarget(String target) {
-        if (target.contains("<script>")) {
-           return true;
-        }
-        return false;
+        return target.contains("<script>");
     }
 
     protected String getCssClass(String targetName, String host) {
@@ -122,6 +119,7 @@ public class LinkRenderer extends ContainerRenderer{
         return EXTERNAL_LINK_CLASS;
     }
 
+    @SuppressWarnings("HttpUrlsUsage")
     protected boolean isInternal(String link) {
         return !(link.toLowerCase().startsWith("https://") || link.toLowerCase().startsWith("http://"));
     }
@@ -130,6 +128,7 @@ public class LinkRenderer extends ContainerRenderer{
         return PageService.validateDescriptor(target);
     }
 
+    @SuppressWarnings("unchecked")
     String doOverrides(String page, LinkNode link, RenderContext renderContext, boolean recordStats) {
         Map<String, LinkOverride> overrides = (Map<String, LinkOverride>) renderContext.renderState().get(LINK_OVERRIDES.name());
         if (overrides == null) {

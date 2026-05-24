@@ -42,7 +42,7 @@ public class RenderServiceTest {
     @MockitoBean
     MacroService macroService;
 
-    PerfTracker tracker = new PerfTracker();
+    final PerfTracker tracker = new PerfTracker();
 
     @Test
     public void testRender() {
@@ -114,9 +114,10 @@ public class RenderServiceTest {
         assertEquals("This rendered", underTest.previewPage("localhost", "thisPage", "goodSource", "Bob", tracker).rendered());
 
         when(renderer.renderToString("brokenSource", context)).thenThrow(new RuntimeException("This is broken"));
-        assertEquals("<h1>Error</h1>\n" +
-                "<div>There was an error rendering this page! Please contact an admin, or correct the markup</div>\n" +
-                "<code>brokenSource</code>", underTest.previewPage("localhost", "thisPage", "brokenSource", "Bob", tracker).rendered());
+        assertEquals("""
+                <h1>Error</h1>
+                <div>There was an error rendering this page! Please contact an admin, or correct the markup</div>
+                <code>brokenSource</code>""", underTest.previewPage("localhost", "thisPage", "brokenSource", "Bob", tracker).rendered());
 
 
     }

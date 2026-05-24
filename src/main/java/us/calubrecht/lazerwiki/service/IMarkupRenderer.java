@@ -14,8 +14,6 @@ public interface IMarkupRenderer {
 
     String  renderToString(String markup, RenderContext renderContext);
 
-    String renderToPlainText(String markup, RenderContext renderContext);
-
     default String  renderToString(String markup, String host, String site, String page, String user) {
         return renderToString(markup, new RenderContext(host, site, page, user));
     }

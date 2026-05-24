@@ -3,13 +3,12 @@ package us.calubrecht.lazerwiki.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Generated;
-import org.hibernate.generator.EventType;
 import us.calubrecht.lazerwiki.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 @Entity(name = "mediaRecord")
 public class MediaRecord {
 

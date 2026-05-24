@@ -5,7 +5,6 @@ import com.github.difflib.text.DiffRowGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.util.Pair;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -352,10 +351,10 @@ public class PageService {
             String titleSearchTerm = prepareTitleSearchTerm(searchTerms.get("text"));
             String searchLower = searchTerms.get("text").toLowerCase();
             List<SearchResult> titlePages = namespaceService.
-                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByTitle(dbEngine, site, titleSearchTerm)), site, userName).stream().
+                    filterReadablePages(new ArrayList<>(pageCacheRepository.searchByTitle(dbEngine, site, titleSearchTerm)), site, userName).stream().
                     map(pd -> new SearchResult(pd.getNamespace(), pd.getPagename(), pd.getTitle(), null)).collect(Collectors.toList());
             List<SearchResult> textPages = namespaceService.
-                    filterReadablePages(new ArrayList<PageDesc>(pageCacheRepository.searchByText(dbEngine, site, searchTerm)), site, userName).stream().
+                    filterReadablePages(new ArrayList<>(pageCacheRepository.searchByText(dbEngine, site, searchTerm)), site, userName).stream().
                     map(pc -> searchResultFromPlaintext((PageCache)pc, searchLower)).collect(Collectors.toList());
             if (!searchTerms.getOrDefault("ns", "*").equals("*")) {
                 Pattern nsPattern = Pattern.compile(searchTerms.get("ns").replaceAll("\\*", ".*"));

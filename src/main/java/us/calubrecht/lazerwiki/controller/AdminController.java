@@ -17,7 +17,6 @@ import us.calubrecht.lazerwiki.responses.CommonResponse;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.responses.SiteSettingsResponse;
 import us.calubrecht.lazerwiki.service.*;
-import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import us.calubrecht.lazerwiki.service.exception.SiteSettingsException;
 
@@ -55,11 +54,13 @@ public class AdminController {
     @Autowired
     GlobalSettingsService globalSettingsService;
 
+    @SuppressWarnings("unused")
     public boolean hasAdmin(String userName, String site)
     {
         return hasRole(userName, "ROLE_ADMIN", "ROLE_ADMIN:" + site);
     }
 
+    @SuppressWarnings("unused")
     public boolean hasAdmin(String userName)
     {
         return hasRole(userName, "ROLE_ADMIN");
@@ -76,12 +77,10 @@ public class AdminController {
         return false;
     }
 
+    @SuppressWarnings("unused")
     public boolean hasSelfReg() {
         GlobalSettings settings = globalSettingsService.getSettings();
-        if (!BooleanUtils.isTrue((Boolean) settings.settings.get(GlobalSettings.ENABLE_SELF_REG))) {
-            return false;
-        }
-        return true;
+        return BooleanUtils.isTrue((Boolean) settings.settings.get(GlobalSettings.ENABLE_SELF_REG));
     }
 
     @PostMapping("regenLinkTable/{site}")
@@ -126,7 +125,6 @@ public class AdminController {
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
     public ResponseEntity<UserDTO> setSiteRoles(Principal principal, @PathVariable("userName") String userName, @PathVariable("site") String site, @RequestBody List<String> siteRoles) {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
         if (siteRoles.stream().anyMatch(role -> {
             String[] parts = role.split(":");
             return parts.length != 3 || !parts[1].equals(site);
@@ -183,7 +181,7 @@ public class AdminController {
 
     @PostMapping("site/settings/{siteName}")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #siteName)")
-    public ResponseEntity<SiteSettingsResponse> setSiteSettings(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteSettingsRequest siteRequest) throws PageWriteException, IOException {
+    public ResponseEntity<SiteSettingsResponse> setSiteSettings(Principal principal, @PathVariable("siteName") String siteName, @RequestBody SiteSettingsRequest siteRequest) {
         User user = userService.getUser(principal.getName());
         try {
             Site site = siteService.setSiteSettings(siteName, siteRequest.hostName(), siteRequest.siteSettings(), user);
@@ -196,7 +194,7 @@ public class AdminController {
 
     @PostMapping("namespace/restrictionType")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #restrictionRequest.site())")
-    public ResponseEntity<PageListResponse> setNamespaceRestrictionType(Principal principal, @RequestBody NamespaceRestrictionRequest restrictionRequest) throws PageWriteException, IOException {
+    public ResponseEntity<PageListResponse> setNamespaceRestrictionType(Principal principal, @RequestBody NamespaceRestrictionRequest restrictionRequest) {
         User user = userService.getUser(principal.getName());
         namespaceService.setNSRestriction(restrictionRequest.site(), restrictionRequest.namespace(), restrictionRequest.restrictionType());
         return ResponseEntity.ok(pageService.getAllNamespaces(restrictionRequest.site(), user.userName));
@@ -204,9 +202,8 @@ public class AdminController {
 
     @DeleteMapping("site/{siteName}")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName())")
-    public ResponseEntity<List<Site>> deleteSite(Principal principal, @PathVariable("siteName") String siteName) throws PageWriteException, IOException, MediaWriteException {
+    public ResponseEntity<List<Site>> deleteSite(Principal principal, @PathVariable("siteName") String siteName) {
         User user = userService.getUser(principal.getName());
-        Set<String> roles = user.roles.stream().map(ur -> ur.role).collect(Collectors.toSet());
         siteDelService.deleteSiteCompletely(siteName, principal.getName());
         return ResponseEntity.ok(siteService.getAllSites(user));
     }

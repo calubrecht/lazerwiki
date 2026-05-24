@@ -62,7 +62,7 @@ public class LinkCheckMacroTest {
 
         // Broken links section. Split on 3trs will give 4 parts, so 2 broken links(page5,page8) + 1 header
         assertEquals(4, split[0].split("<tr>").length);
-        assertTrue(split[0].indexOf("HOME") != -1);
+        assertTrue(split[0].contains("HOME"));
 
         //Orphan pages section. Split on 2 trs will give 3 parts so 1 orphaned pages(page3) + 1 header
         assertEquals(3, split[1].split("<tr>").length);
@@ -160,7 +160,7 @@ public class LinkCheckMacroTest {
 
         // Broken links section. Split gives 3 parts = 2 rows, so 1 broken links(page5) + 1 header
         assertEquals(3, split[0].split("<tr>").length);
-        assertTrue(split[0].indexOf("HOME") != -1);
+        assertTrue(split[0].contains("HOME"));
     }
 
     @Test

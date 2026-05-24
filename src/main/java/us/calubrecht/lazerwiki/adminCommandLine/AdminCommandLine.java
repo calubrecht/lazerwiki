@@ -14,12 +14,13 @@ import java.util.Scanner;
 
 @Component
 public class AdminCommandLine implements CommandLineRunner {
-    private static Logger logger = LoggerFactory
+    private static  final Logger logger = LoggerFactory
             .getLogger(AdminCommandLine.class);
 
     @Autowired
     UserService userService;
 
+    @SuppressWarnings("RedundantThrows")
     @Override
     public void run(String... args) throws Exception {
         if (args.length > 0) {

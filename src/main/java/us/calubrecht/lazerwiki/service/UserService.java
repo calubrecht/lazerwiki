@@ -113,7 +113,7 @@ public class UserService {
         return u.map(user -> {
             // List<UserRole> modifiedRoles = new ArrayList<>(user.roles.stream().filter(ur -> !ur.role.equals(userRole)).toList());
             Optional<UserRole> ur = user.roles.stream().filter(role -> role.role.equals(userRole)).findFirst();
-            if (!ur.isPresent() ) {
+            if (ur.isEmpty()) {
                 user.roles.add(new UserRole(user, userRole));
                 userRepository.save(user);
             }
@@ -142,7 +142,7 @@ public class UserService {
         }
         tokenRepository.save(new VerificationToken(u.get(), randomKey, VerificationToken.Purpose.VERIFY_EMAIL, email));
         String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
-        emailService.sendEmail(host, email, userName,"Verify Email", body);
+        emailService.sendEmail(email, userName,"Verify Email", body);
     }
 
     @Transactional
@@ -157,7 +157,7 @@ public class UserService {
         String passwordHash = passwordUtil.hashPassword(password);
         tokenRepository.save(new VerificationToken(u.get(), randomKey, VerificationToken.Purpose.RESET_PASSWORD, passwordHash));
         String body = templateService.getVerifyEmailTemplate(site, email, userName, randomKey);
-        emailService.sendEmail(host, email, userName,"Reset Forgotten Password", body);
+        emailService.sendEmail(email, userName,"Reset Forgotten Password", body);
     }
 
     @Transactional
@@ -169,8 +169,10 @@ public class UserService {
             throw new VerificationException("Invalid token: Please check token and try again");
         }
         Optional<User> u = userRepository.findByUserName(userName);
-        u.get().getSettings().put("email", savedToken.getData());
-        userRepository.save(u.get());
+        u.ifPresent(user -> {
+            user.getSettings().put("email", savedToken.getData());
+            userRepository.save(user);
+        });
     }
 
     @Transactional

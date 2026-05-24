@@ -122,6 +122,7 @@ class LinkOverrideServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testMoveOverrides() {
         LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "page2");
         LinkOverride lo2 = new LinkOverride("default", "", "p1", "", "pageName", "", "page3");
@@ -131,7 +132,7 @@ class LinkOverrideServiceTest {
         underTest.moveOverrides("host", "ns1:page", "ns2:page");
 
         verify(repo).deleteBySiteAndNewTargetPageNSAndNewTargetPageName(any(), eq("ns1"), eq("page"));
-        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<LinkOverride>> listCaptor = ArgumentCaptor.forClass(List.class);
         verify(repo).saveAll(listCaptor.capture());
 
         assertEquals(2, listCaptor.getValue().size());

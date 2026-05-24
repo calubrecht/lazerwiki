@@ -30,6 +30,7 @@ public interface ITreeRenderer {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public StringBuilder renderHtml(ITreeNode node, RenderContext renderContext) {
             String text = node.asString();
             if (text.contains("<script>")) {

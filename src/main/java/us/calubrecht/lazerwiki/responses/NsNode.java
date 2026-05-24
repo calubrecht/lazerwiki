@@ -25,7 +25,7 @@ public class NsNode {
     }
 
     public List<NsNode> getChildren() {
-        return new ArrayList<NsNode>(children);
+        return new ArrayList<>(children);
     }
 
     public void setChildren(List<NsNode> children) {

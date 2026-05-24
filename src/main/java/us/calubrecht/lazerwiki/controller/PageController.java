@@ -3,10 +3,8 @@ package us.calubrecht.lazerwiki.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.model.PerfTracker;
@@ -119,7 +117,7 @@ public class PageController {
     }
 
     @RequestMapping(value = "/listNamespaces/{site}")
-    public PageListResponse listNamespaces(Principal principal, @PathVariable("site") String site, HttpServletRequest request) throws MalformedURLException {
+    public PageListResponse listNamespaces(Principal principal, @PathVariable("site") String site, HttpServletRequest request) {
         String userName = getUsername(principal);
         return pageService.getAllNamespaces(site, userName);
     }

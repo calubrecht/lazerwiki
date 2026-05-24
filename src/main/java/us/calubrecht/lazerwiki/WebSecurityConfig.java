@@ -18,7 +18,7 @@ import org.springframework.security.web.util.matcher.*;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity()
 public class WebSecurityConfig {
     @Autowired
     AuthenticationManager authenticationManager;
@@ -30,7 +30,7 @@ public class WebSecurityConfig {
     String urlPrefix;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http)  {
         CookieCsrfTokenRepository cookieRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
         cookieRepo.setCookieCustomizer(
                 c -> {
@@ -82,7 +82,7 @@ public class WebSecurityConfig {
                                             anyRequest().authenticated();
                         }
                 );
-        LazerWikiAuthenticationFilter filter = new LazerWikiAuthenticationFilter("/api/sessions/login", authenticationManager, webserverFrontEnd, urlPrefix);
+        LazerWikiAuthenticationFilter filter = new LazerWikiAuthenticationFilter(authenticationManager, webserverFrontEnd, urlPrefix);
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

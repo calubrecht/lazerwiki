@@ -59,7 +59,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void testBootTime() throws IOException {
+    void testBootTime() {
         assertTrue(underTest.getBootTime() > 0);
     }
 }

@@ -11,7 +11,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import us.calubrecht.lazerwiki.model.MediaRecord;
-import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDesc;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
@@ -105,52 +104,28 @@ public class SitemapServiceTest {
         return node.getChildNodes().item(3).getTextContent();
     }
 
-    static class SimplePageDesc implements PageDesc {
-        String pagename;
-        String namespace;
-        LocalDateTime modified;
-
-        public SimplePageDesc(String namespace, String pagename, LocalDateTime modified) {
-            this.namespace = namespace;
-            this.pagename = pagename;
-            this.modified = modified;
-        }
+    record SimplePageDesc(String getNamespace, String getPagename, LocalDateTime getModified) implements PageDesc {
 
         @Override
-        public String getNamespace() {
-            return namespace;
-        }
+            public Long getRevision() {
+                return 0L;
+            }
 
-        @Override
-        public String getPagename() {
-            return pagename;
-        }
+            @Override
+            public String getTitle() {
+                return "";
+            }
 
-        @Override
-        public Long getRevision() {
-            return 0L;
-        }
+            @Override
+            public String getModifiedByUserName() {
+                return "";
+            }
 
-        @Override
-        public String getTitle() {
-            return "";
+            @Override
+            public boolean isDeleted() {
+                return false;
+            }
         }
-
-        @Override
-        public String getModifiedByUserName() {
-            return "";
-        }
-
-        @Override
-        public LocalDateTime getModified() {
-            return modified;
-        }
-
-        @Override
-        public boolean isDeleted() {
-            return false;
-        }
-    }
 
     PageDesc getDesc(String namespace, String pagename, int date) {
         LocalDateTime dateTime = date == 0 ? null : LocalDateTime.of(2026, date/100, date%100, 0, 0);

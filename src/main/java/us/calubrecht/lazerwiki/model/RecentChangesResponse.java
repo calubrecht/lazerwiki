@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.model;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public record RecentChangesResponse(List<RecentChangeRec> changes, List<MediaHistoryRecord> mediaChanges, List<Object> merged) {

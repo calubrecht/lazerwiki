@@ -10,10 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ParserRegistrar {
-    Set<ITreeRenderer> renderers;
+    final Set<ITreeRenderer> renderers;
     Map<Class<? extends ITreeNode>, ITreeRenderer> renderersForClass;
-    Set<ITreeParser> parsers;
-    List<IInnerParser> innerParsers;
+    final Set<ITreeParser> parsers;
+    final List<IInnerParser> innerParsers;
     Map<Character, List<IInnerParser>> innerParsersForKeychar;
     final ITreeRenderer DEFAULT_RENDERER = new ITreeRenderer.DefaultRenderer();
 

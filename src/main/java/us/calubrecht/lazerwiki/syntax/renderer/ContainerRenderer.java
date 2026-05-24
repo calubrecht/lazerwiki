@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ContainerNode;
-import us.calubrecht.lazerwiki.syntax.nodes.TableNode;
 import us.calubrecht.lazerwiki.syntax.nodes.UnformatSpanNode;
 
 import java.util.Collection;

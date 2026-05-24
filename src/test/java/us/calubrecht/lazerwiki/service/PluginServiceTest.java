@@ -28,7 +28,7 @@ class PluginServiceTest {
 
     @Test
     void registerPlugins() {
-      assertTrue(underTest.plugins.size() > 0);
+        assertFalse(underTest.plugins.isEmpty());
     }
 
     @Test

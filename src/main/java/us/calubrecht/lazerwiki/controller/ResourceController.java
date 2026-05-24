@@ -14,7 +14,6 @@ import us.calubrecht.lazerwiki.service.ResourceService;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.Principal;
 
 @RestController
 @RequestMapping("_resources/")

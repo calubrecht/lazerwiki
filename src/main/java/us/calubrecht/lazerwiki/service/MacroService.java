@@ -71,7 +71,7 @@ public class MacroService {
     }
 
     protected String sanitize(String input) {
-        return StringEscapeUtils.escapeHtml4(input).replaceAll("&quot;", "\"");
+        return StringEscapeUtils.escapeHtml4(input).replace("&quot;", "\"");
     }
 
     public String renderMacro(String macroText, String fullText, RenderContext renderContext) {
@@ -79,7 +79,6 @@ public class MacroService {
         String macroName = parts[0];
         String macroArgs = parts.length > 1 ? parts[1] : "";
 
-        @SuppressWarnings("unchecked")
         boolean forCache = BooleanUtils.isTrue((Boolean)renderContext.renderState().get(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name()));
 
         Macro macro = macros.get(macroName);
@@ -102,7 +101,7 @@ public class MacroService {
         }
     }
 
-    Pattern macroPattern = Pattern.compile("~~MACRO~~(.*?)~~/MACRO~~", Pattern.MULTILINE | Pattern.DOTALL);
+    final Pattern macroPattern = Pattern.compile("~~MACRO~~(.*?)~~/MACRO~~", Pattern.MULTILINE | Pattern.DOTALL);
     public String postRender(String fullText, RenderContext context) {
         Matcher matcher = macroPattern.matcher(fullText);
         return matcher.replaceAll(matched -> {
@@ -127,7 +126,7 @@ public class MacroService {
         public RenderOutput renderPage(String pageDescriptor) {
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
             if (!page.flags().exists() || !page.flags().userCanRead()) {
-                return new RenderOutputImpl("", new HashMap<String, Object>(page.flags().toMap()));
+                return new RenderOutputImpl("", new HashMap<>(page.flags().toMap()));
             }
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             if (pageCache != null && pageCache.useCache) {
@@ -160,7 +159,7 @@ public class MacroService {
             PageData page = pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
             long fetchedPageData = System.currentTimeMillis();
             if (!page.flags().exists() || !page.flags().userCanRead()) {
-                return new RenderOutputImpl("", new HashMap<String, Object>(page.flags().toMap()));
+                return new RenderOutputImpl("", new HashMap<>(page.flags().toMap()));
             }
             PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
             long fetchedCache = System.currentTimeMillis();
@@ -169,7 +168,7 @@ public class MacroService {
                 renderState.put(RenderResult.RENDER_STATE_KEYS.TITLE.name(), page.title());
                 String rendered = postRender(pageCache.renderedCache, renderContext);
                 long end = System.currentTimeMillis();
-                logger.info("getCachedRender(" + pageDescriptor + ") total= " + (end - start) + " fetchPageData= " + (fetchedPageData - start) + " fetchCache= " + (fetchedCache - fetchedPageData) + " else=" + (end - fetchedCache));
+                logger.info("getCachedRender({}) total= {} fetchPageData= {} fetchCache= {} else={}", pageDescriptor, end - start, fetchedPageData - start, fetchedCache - fetchedPageData, end - fetchedCache);
                 return new RenderOutputImpl(rendered, renderState);
             }
             return doRender(page, pageDescriptor);
@@ -195,7 +194,7 @@ public class MacroService {
                             return;
                         }
                         if (!page.flags().exists() || !page.flags().userCanRead()) {
-                            outputMap.put(pd, new RenderOutputImpl("", new HashMap<String, Object>(page.flags().toMap())));
+                            outputMap.put(pd, new RenderOutputImpl("", new HashMap<>(page.flags().toMap())));
                             return;
                         }
                         PageCache pageCache = pageCacheMap.get(pd);
@@ -240,7 +239,7 @@ public class MacroService {
         public List<String> getLinksOnPage(String page) {
             List<String> links = linkService.getLinksOnPage(renderContext.site(), page);
             Map<String,LinkOverride> overrides = linkOverrideService.getOverrides(renderContext.host(), page).
-                    stream().collect(Collectors.toMap(link -> link.getTarget(), Function.identity()));
+                    stream().collect(Collectors.toMap(LinkOverride::getTarget, Function.identity()));
             List<String> realLinks = new ArrayList<>();
             for (String link : links ) {
                 if (overrides.containsKey(link)) {
@@ -286,8 +285,8 @@ public class MacroService {
     }
 
     public static class RenderOutputImpl extends Macro.MacroContext.RenderOutput {
-        String html;
-        Map<String, Object> state;
+        final String html;
+        final Map<String, Object> state;
 
         RenderOutputImpl(String html, Map<String, Object> state) {
             this.html = html;

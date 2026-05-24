@@ -8,7 +8,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TOCRenderServiceTest {
-    TOCRenderService service = new TOCRenderService();
+    final TOCRenderService service = new TOCRenderService();
 
     @Test
     void renderTOCSimple() {

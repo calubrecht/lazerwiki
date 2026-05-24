@@ -1,6 +1,5 @@
 package us.calubrecht.lazerwiki.syntax.parser;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
@@ -10,8 +9,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 
 @Component
 public class HeaderParser extends AbstractTreeParser {
-  final static char HEADER_CHAR = '=';
-  final static String MIN_HEADER = StringUtils.repeat(HEADER_CHAR, 2);
+    final static char HEADER_CHAR = '=';
 
     public ITreeNode parse(ParseContext parseContext) {
         String line = parseContext.peekLine().strip();
@@ -37,12 +35,13 @@ public class HeaderParser extends AbstractTreeParser {
 
     int countTrailingTokens(String s) {
         int c = 0;
-        int i = s.length() -1;
-        while(true) {
+        int i = s.length() - 1;
+        while (true) {
             if (s.charAt(i) != HEADER_CHAR) {
                 return c;
             }
-            i--; c++;
+            i--;
+            c++;
         }
     }
 

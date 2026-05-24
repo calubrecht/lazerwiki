@@ -21,11 +21,7 @@ public class IdRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(
-                new PreparedStatementCreator() {
-                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                        return connection.prepareStatement(generateIdSQL, new String[] {"id"});
-                    }
-                }, keyHolder);
+                connection -> connection.prepareStatement(generateIdSQL, new String[] {"id"}), keyHolder);
         return keyHolder.getKey().longValue();
     }
 }

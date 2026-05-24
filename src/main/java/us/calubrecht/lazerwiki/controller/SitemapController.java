@@ -24,6 +24,6 @@ public class SitemapController {
         URL url = new URL(request.getRequestURL().toString());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Disposition", "attachment;filename=sitemap.xml");
-        return new ResponseEntity<String>(service.getSitemap(url), headers, HttpStatus.OK);
+        return new ResponseEntity<>(service.getSitemap(url), headers, HttpStatus.OK);
     }
 }

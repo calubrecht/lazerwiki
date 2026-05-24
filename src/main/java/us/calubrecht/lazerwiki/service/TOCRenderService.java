@@ -3,7 +3,6 @@ package us.calubrecht.lazerwiki.service;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.HeaderRef;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,8 +12,7 @@ public class TOCRenderService {
         StringBuilder render = new StringBuilder("<div class=\"TOC\" id=\"lw_TOC" + idSuffix+ "\">\n");
         int indents = 1;
         int currentLevel = -1;
-        for (int i = 0; i < headers.size(); i++) {
-            HeaderRef header = headers.get(i);
+        for (HeaderRef header : headers) {
             if (currentLevel < header.level()) {
                 render.append(fmtIndents(indents)).append("<ol>\n");
                 currentLevel = header.level();

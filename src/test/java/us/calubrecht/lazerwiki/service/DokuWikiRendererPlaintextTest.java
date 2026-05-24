@@ -11,7 +11,6 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = { CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class})
@@ -45,7 +44,7 @@ public class DokuWikiRendererPlaintextTest {
 
     String doRender(String source) {
         RenderContext context = new RenderContext("localhost", "default", "page", "jack");
-        return underTest.renderToPlainText(source, context);
+        return underTest.renderWithInfo(source, context).plainText();
     }
 
 

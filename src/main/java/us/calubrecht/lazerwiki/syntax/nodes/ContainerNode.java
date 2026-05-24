@@ -9,7 +9,7 @@ import java.util.List;
  * A Tree node represeneting a list of nodes with no inherent meaning itself.
  */
 public class ContainerNode extends AbstractNode {
-    List<ITreeNode> children = new ArrayList<>();
+    final List<ITreeNode> children = new ArrayList<>();
 
     public void addChild(ITreeNode node) {
         if (node != null) {
