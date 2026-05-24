@@ -3,7 +3,7 @@ package us.calubrecht.lazerwiki.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = { CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class})
 @ActiveProfiles("test")
 public class DokuWikiRendererPlaintextTest {
-    @MockBean
+    @MockitoBean
     TOCRenderService tocRenderService;
 
     @Configuration
@@ -28,19 +28,19 @@ public class DokuWikiRendererPlaintextTest {
     @Autowired
     CustomWikiRenderer underTest;
 
-    @MockBean
+    @MockitoBean
     PageService pageService;
 
-    @MockBean
+    @MockitoBean
     MacroService macroService;
 
-    @MockBean
+    @MockitoBean
     RandomService randomService;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideService linkOverrideService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideService mediaOverrideService;
 
     String doRender(String source) {

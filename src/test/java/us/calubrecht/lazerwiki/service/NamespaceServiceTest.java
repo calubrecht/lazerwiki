@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.MediaRecordRepository;
 import us.calubrecht.lazerwiki.repository.NamespaceRepository;
@@ -24,16 +24,16 @@ public class NamespaceServiceTest {
     @Autowired
     NamespaceService underTest;
 
-    @MockBean
+    @MockitoBean
     NamespaceRepository namespaceRepository;
 
-    @MockBean
+    @MockitoBean
     UserService userService;
 
-    @MockBean
+    @MockitoBean
     PageRepository pageRepository;
 
-    @MockBean
+    @MockitoBean
     MediaRecordRepository mediaRecordRepository;
 
     @Test

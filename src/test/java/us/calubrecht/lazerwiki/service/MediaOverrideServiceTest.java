@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.ImageRef;
 import us.calubrecht.lazerwiki.model.MediaOverride;
 import us.calubrecht.lazerwiki.repository.ImageRefRepository;
@@ -25,13 +25,13 @@ class MediaOverrideServiceTest {
     @Autowired
     MediaOverrideService underTest;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideRepository repo;
 
-    @MockBean
+    @MockitoBean
     ImageRefRepository imageRefRepository;
 
     @BeforeEach

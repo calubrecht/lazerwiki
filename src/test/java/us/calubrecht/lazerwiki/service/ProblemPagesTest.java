@@ -4,10 +4,10 @@ import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,25 +26,25 @@ public class ProblemPagesTest {
     @Autowired
     CustomWikiRenderer underTest;
 
-    @MockBean
+    @MockitoBean
     PageService pageService;
 
-    @MockBean
+    @MockitoBean
     MacroCssService macroCssService;
 
-    @MockBean
+    @MockitoBean
     LinkService linkService;
 
-    @MockBean
+    @MockitoBean
     RandomService randomService;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideService linkOverrideService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideService mediaOverrideService;
 
-    @MockBean
+    @MockitoBean
     TOCRenderService rocRenderService;
 
     @Configuration

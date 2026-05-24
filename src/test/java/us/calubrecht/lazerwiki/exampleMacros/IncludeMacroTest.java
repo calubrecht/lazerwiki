@@ -3,7 +3,7 @@ package us.calubrecht.lazerwiki.exampleMacros;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.RenderResult;
@@ -27,28 +27,28 @@ class IncludeMacroTest {
     @Autowired
     MacroService macroService;
 
-    @MockBean
+    @MockitoBean
     PageService pageService;
 
-    @MockBean
+    @MockitoBean
     MacroCssService macroCssService;
 
     @Autowired
     CustomWikiRenderer renderer;
 
-    @MockBean
+    @MockitoBean
     LinkService linkService;
 
-    @MockBean
+    @MockitoBean
     RandomService randomService;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideService linkOverrideService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideService mediaOverrideService;
 
-    @MockBean
+    @MockitoBean
     TOCRenderService tocRenderService;
 
     @Test

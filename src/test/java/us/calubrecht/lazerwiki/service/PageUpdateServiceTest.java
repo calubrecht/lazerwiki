@@ -5,7 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.*;
@@ -29,49 +29,49 @@ public class PageUpdateServiceTest {
     @Autowired
     PageUpdateService pageUpdateService;
 
-    @MockBean
+    @MockitoBean
     PageRepository pageRepository;
 
-    @MockBean
+    @MockitoBean
     IdRepository idRepository;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     NamespaceService namespaceService;
 
-    @MockBean
+    @MockitoBean
     LinkService linkService;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideService linkOverrideService;
 
-    @MockBean
+    @MockitoBean
     ImageRefService imageRefService;
-    @MockBean
+    @MockitoBean
     PageCacheRepository pageCacheRepository;
 
-    @MockBean
+    @MockitoBean
     RegenCacheService regenCacheService;
 
-    @MockBean
+    @MockitoBean
     PageLockService pageLockService;
 
 
-    @MockBean
+    @MockitoBean
     EntityManagerProxy em;
 
-    @MockBean
+    @MockitoBean
     TagRepository tagRepository;
 
-    @MockBean
+    @MockitoBean
     UserService userService;
 
-    @MockBean
+    @MockitoBean
     ActivityLogService activityLogService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideService mediaOverrideService;
 
 

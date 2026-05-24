@@ -2,8 +2,8 @@ plugins {
 	java
 	war
 	jacoco
-	id("org.springframework.boot") version "3.3.2"
-	id("io.spring.dependency-management") version "1.1.3"
+	id("org.springframework.boot") version "4.0.6"
+	id("io.spring.dependency-management") version "1.1.7"
 	id("com.github.jk1.dependency-license-report") version "2.5"
     `maven-publish`
 }
@@ -24,7 +24,8 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation ("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.apache.commons:commons-text:1.10.0")
+	implementation("org.apache.commons:commons-text:1.15.0")
+	implementation("org.apache.commons:commons-lang3:3.20.0")
 	implementation("commons-io:commons-io:2.15.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
@@ -32,8 +33,9 @@ dependencies {
 	implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 	implementation("org.xerial:sqlite-jdbc:3.49.1.0")
 	implementation("org.hibernate.orm:hibernate-community-dialects")
+	implementation("org.hibernate.orm:hibernate-core:7.3.5.Final")
 
-
+	runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 	implementation("mysql:mysql-connector-java:8.0.33")
 	implementation("com.github.usefulness:webp-imageio:0.5.1")
 	implementation("io.gdcc:sitemapgen4j:2.1.2")
@@ -44,7 +46,9 @@ dependencies {
 	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib:1.9.24")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 
 	testImplementation ("org.junit.jupiter:junit-jupiter")
 	testImplementation("org.mockito:mockito-core")

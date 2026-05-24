@@ -4,13 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.Link;
 import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.repository.LinkOverrideRepository;
 import us.calubrecht.lazerwiki.repository.LinkRepository;
-import us.calubrecht.lazerwiki.responses.PageLockResponse;
 
 import java.util.*;
 
@@ -27,13 +26,13 @@ class LinkOverrideServiceTest {
     @Autowired
     LinkOverrideService underTest;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideRepository repo;
 
-    @MockBean
+    @MockitoBean
     LinkRepository linkRepo;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
     @Test

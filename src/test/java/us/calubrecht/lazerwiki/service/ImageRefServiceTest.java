@@ -3,7 +3,7 @@ package us.calubrecht.lazerwiki.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.ImageRef;
 import us.calubrecht.lazerwiki.repository.ImageRefRepository;
@@ -20,7 +20,7 @@ class ImageRefServiceTest {
     @Autowired
     ImageRefService underTest;
 
-    @MockBean
+    @MockitoBean
     ImageRefRepository imageRefRepository;
 
     @Test

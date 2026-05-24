@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.PageLock;
 import us.calubrecht.lazerwiki.model.User;
@@ -25,16 +25,16 @@ class PageLockServiceTest {
     @Autowired
     PageLockService underTest;
 
-    @MockBean
+    @MockitoBean
     PageLockRepository pageLockRepository;
 
-    @MockBean
+    @MockitoBean
     PageRepository pageRepository;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     UserService userService;
 
 

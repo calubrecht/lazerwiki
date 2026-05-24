@@ -1,24 +1,14 @@
 package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.Link;
-import us.calubrecht.lazerwiki.model.Page;
-import us.calubrecht.lazerwiki.model.PageDesc;
-import us.calubrecht.lazerwiki.model.RenderResult;
 import us.calubrecht.lazerwiki.repository.LinkRepository;
-import us.calubrecht.lazerwiki.repository.PageRepository;
-import us.calubrecht.lazerwiki.service.PageServiceTest.PageDescImpl;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,7 +21,7 @@ class LinkServiceTest {
     @Autowired
     LinkService underTest;
 
-    @MockBean
+    @MockitoBean
     LinkRepository linkRepository;
 
     @Test

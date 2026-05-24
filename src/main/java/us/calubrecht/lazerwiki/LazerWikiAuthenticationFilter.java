@@ -3,8 +3,10 @@ package us.calubrecht.lazerwiki;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +16,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -38,7 +40,7 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
 
     }
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+    public Authentication attemptAuthentication(HttpServletRequest request, @NonNull HttpServletResponse response) throws AuthenticationException, IOException {
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException(
                     "Authentication method not supported: " + request.getMethod());
@@ -84,8 +86,8 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
 
         }
 
-        protected String determineTargetUrl(HttpServletRequest request,
-                                            HttpServletResponse response)
+        protected @NonNull String determineTargetUrl(HttpServletRequest request,
+                                                     @NonNull HttpServletResponse response)
         {
             String oReferer = (String)request.getHeader("Referer");
 
@@ -108,17 +110,19 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
         private final RequestMatcher delegate_;
         public MyMatcher(String defaultFilterProcessesUrl)
         {
+            RequestMatcher defaultFilter = PathPatternRequestMatcher.withDefaults().matcher(defaultFilterProcessesUrl);
+            RequestMatcher optionsFilter = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.OPTIONS, defaultFilterProcessesUrl);
             delegate_= new AndRequestMatcher(
-                    new AntPathRequestMatcher(defaultFilterProcessesUrl),
-                    new NegatedRequestMatcher(new AntPathRequestMatcher(defaultFilterProcessesUrl, "OPTIONS")));
+                    defaultFilter,
+                    new NegatedRequestMatcher(optionsFilter));
         }
 
         @Override
-        public boolean matches(HttpServletRequest request)
+        public boolean matches(@NonNull HttpServletRequest request)
         {
-            // TODO Auto-generated method stub
             return delegate_.matches(request);
         }
 
     }
 }
+///

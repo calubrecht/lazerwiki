@@ -1,17 +1,16 @@
 package us.calubrecht.lazerwiki.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.util.StreamUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.json.JsonMapper;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.repository.SiteRepository;
@@ -21,7 +20,6 @@ import us.calubrecht.lazerwiki.util.DbSupport;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 @Service
 public class SiteService {
@@ -36,9 +34,9 @@ public class SiteService {
 
     @PostConstruct
     public void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
-        objectMapper.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+        objectMapper = JsonMapper.builder().
+                enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY).
+                enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS).build();
     }
 
     @Cacheable("sitesForHostname")
@@ -105,11 +103,11 @@ public class SiteService {
         if (!canAdminSite(u.getRolesString(), siteName)) {
             throw new SiteSettingsException("Cannot admin site " + siteName);
         }
-        if (!siteRepository.findById(siteName).isPresent()) {
+        if (siteRepository.findById(siteName).isEmpty()) {
             throw new SiteSettingsException("Site \"" + siteName + "\" does not exist");
         }
         try {
-           // objectMapper.readTree(settings); // validate json
+            @SuppressWarnings("unchecked")
             Map<String, Object> settingsMap = objectMapper.readValue(settings, Map.class);
             Optional<Site> site = siteRepository.findById(siteName);
             site.ifPresent(s -> {
@@ -118,9 +116,7 @@ public class SiteService {
                 siteRepository.save(s);
             });
             return site.orElse(null);
-        }
-        catch (JsonProcessingException e)
-        {
+        } catch (StreamReadException sre) {
             throw new SiteSettingsException("Settings must be set to valid json");
         }
     }

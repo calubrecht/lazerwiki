@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.plugin.EditToolbarDef;
 import us.calubrecht.lazerwiki.plugin.Plugin;
 import us.calubrecht.lazerwiki.plugin.WikiPlugin;
@@ -13,7 +13,6 @@ import us.calubrecht.lazerwiki.plugin.WikiPlugin;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {PluginService.class},
@@ -24,7 +23,7 @@ class PluginServiceTest {
     @Autowired
     PluginService underTest;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
     @Test

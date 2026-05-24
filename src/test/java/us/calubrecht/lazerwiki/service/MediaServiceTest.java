@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.Limit;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -41,34 +41,34 @@ class MediaServiceTest {
     @Autowired
     MediaService underTest;
 
-    @MockBean
+    @MockitoBean
     MediaCacheService cacheService;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     MediaRecordRepository mediaRecordRepository;
 
-    @MockBean
+    @MockitoBean
     MediaHistoryRepository mediaHistoryRepository;
 
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
 
-    @MockBean
+    @MockitoBean
     NamespaceService namespaceService;
 
-    @MockBean
+    @MockitoBean
     UserService userService;
 
-    @MockBean
+    @MockitoBean
     ActivityLogService activityLogService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideService mediaOverrideService;
 
-    @MockBean
+    @MockitoBean
     RegenCacheService regenCacheService;
 
     @Test

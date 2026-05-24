@@ -5,7 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,22 +37,22 @@ public class DokuWikiRendererTest {
     public static class TestConfig {
     }
 
-    @MockBean
+    @MockitoBean
     PageService pageService;
 
-    @MockBean
+    @MockitoBean
     MacroService macroService;
 
-    @MockBean
+    @MockitoBean
     RandomService randomService;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideService linkOverrideService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideService mediaOverrideService;
 
-    @MockBean
+    @MockitoBean
     TOCRenderService tocRenderService;
 
     String doRender(String source) {

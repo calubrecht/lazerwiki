@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ class ResourceServiceTest {
     @Autowired
     ResourceService underTest;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
     @Value("${lazerwiki.static.file.root}")

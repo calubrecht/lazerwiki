@@ -22,7 +22,7 @@ CREATE TABLE userRecord (
    userId NUMBER(11) NOT NULL  AUTO_INCREMENT,
    userName VARCHAR(150) NOT NULL,
    passwordHash VARCHAR(50) NOT NULL,
-   `settings` VARCHAR(200) NOT NULL DEFAULT '{}',
+   `settings` TEXT NOT NULL DEFAULT '{}',
    PRIMARY KEY (`userId`)
 );
 
@@ -34,8 +34,8 @@ CREATE TABLE `page` (
 	`pagename` VARCHAR(200) NOT NULL,
 	`text` TEXT NULL DEFAULT NULL,
 	`title` VARCHAR(200) NULL DEFAULT NULL,
-	`modified` DATETIME NULL DEFAULT current_timestamp(),
-	`validTS` DATETIME NULL DEFAULT '9999-12-31 00:00:00' ON UPDATE current_timestamp(),
+	`modified` TIMESTAMP NULL DEFAULT current_timestamp(),
+	`validTS` TIMESTAMP NULL DEFAULT '9999-12-31 00:00:00' ON UPDATE current_timestamp(),
 	`modifiedBy` NUMBER(11) NULL DEFAULT NULL,
 	`deleted` NUMBER(11) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`, `revision`),
@@ -130,7 +130,7 @@ CREATE TABLE mediaHistory (
 	fileName varchar(150) NOT NULL,
 	uploadedBy NUMBER(11) NOT NULL,
 	`action` int(11) NOT NULL,
-	ts DATETIME DEFAULT current_timestamp(),
+	ts TIMESTAMP DEFAULT current_timestamp(),
 	PRIMARY KEY (`id`),
 	INDEX (site,ts)
 )

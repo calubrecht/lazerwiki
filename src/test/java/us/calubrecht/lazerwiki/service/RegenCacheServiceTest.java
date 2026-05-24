@@ -3,10 +3,9 @@ package us.calubrecht.lazerwiki.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
@@ -28,28 +27,28 @@ class RegenCacheServiceTest {
     @Autowired
     RegenCacheService underTest;
 
-    @MockBean
+    @MockitoBean
     PageRepository pageRepository;
 
-    @MockBean
+    @MockitoBean
     IMarkupRenderer renderer;
 
-    @MockBean
+    @MockitoBean
     LinkService linkService;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideService linkOverrideService;
 
-    @MockBean
+    @MockitoBean
     ImageRefService imageRefService;
 
-    @MockBean
+    @MockitoBean
     PageCacheRepository pageCacheRepository;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     MediaOverrideService mediaOverrideService;
 
 

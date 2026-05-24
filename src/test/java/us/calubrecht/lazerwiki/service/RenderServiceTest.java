@@ -2,10 +2,9 @@ package us.calubrecht.lazerwiki.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PerfTracker;
 import us.calubrecht.lazerwiki.model.RenderResult;
@@ -28,19 +27,19 @@ public class RenderServiceTest {
     @Autowired
     RenderService underTest;
 
-    @MockBean
+    @MockitoBean
     PageService pageService;
 
-    @MockBean
+    @MockitoBean
     PageUpdateService pageUpdateService;
 
-    @MockBean
+    @MockitoBean
     IMarkupRenderer renderer;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     MacroService macroService;
 
     PerfTracker tracker = new PerfTracker();

@@ -7,8 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.UserRepository;
@@ -29,25 +29,25 @@ public class UserServiceTest {
     @Autowired
     UserService userService;
 
-    @MockBean
+    @MockitoBean
     UserRepository userRepository;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     VerificationTokenRepository tokenRepository;
 
-    @MockBean
+    @MockitoBean
     EmailService emailService;
 
-    @MockBean
+    @MockitoBean
     RandomService randomService;
 
-    @MockBean
+    @MockitoBean
     TemplateService templateService;
 
-    @MockBean
+    @MockitoBean
     ActivityLogService activityLogService;
 
     @BeforeEach

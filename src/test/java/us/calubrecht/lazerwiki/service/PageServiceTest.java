@@ -1,15 +1,12 @@
 package us.calubrecht.lazerwiki.service;
 
-import com.github.difflib.text.DiffRow;
-import com.github.difflib.text.DiffRowGenerator;
-import org.apache.commons.lang3.builder.ToStringExclude;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.*;
 import us.calubrecht.lazerwiki.responses.NsNode;
@@ -18,10 +15,8 @@ import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
-import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 
-import javax.naming.Name;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -32,34 +27,35 @@ import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.OVERR
 
 @SpringBootTest(classes = {PageService.class})
 @ActiveProfiles("test")
+@SuppressWarnings("unchecked")
 public class PageServiceTest {
 
     @Autowired
     PageService pageService;
 
-    @MockBean
+    @MockitoBean
     PageRepository pageRepository;
 
-    @MockBean
+    @MockitoBean
     IdRepository idRepository;
 
-    @MockBean
+    @MockitoBean
     SiteService siteService;
 
-    @MockBean
+    @MockitoBean
     NamespaceService namespaceService;
 
-    @MockBean
+    @MockitoBean
     LinkService linkService;
 
-    @MockBean
+    @MockitoBean
     LinkOverrideService linkOverrideService;
 
-    @MockBean
+    @MockitoBean
     PageCacheRepository pageCacheRepository;
 
 
-    @MockBean
+    @MockitoBean
     TagRepository tagRepository;
 
     @Test
@@ -101,12 +97,12 @@ public class PageServiceTest {
         assertEquals("Titled Page", pageService.getTitle("host2", ""));
 
         PageDescriptor pd = new PageDescriptor("ns", "page_name");
-        assertEquals("Page Name", pageService.getTitle(pd, null));
+        assertEquals("Page Name", PageService.getTitle(pd, null));
         Page pageNoTitle = new Page();
-        assertEquals("Page Name", pageService.getTitle(pd, pageNoTitle));
+        assertEquals("Page Name", PageService.getTitle(pd, pageNoTitle));
         Page pageWithTitle = new Page();
         pageWithTitle.setTitle("Other Name");
-        assertEquals("Other Name", pageService.getTitle(pd, pageWithTitle));
+        assertEquals("Other Name", PageService.getTitle(pd, pageWithTitle));
     }
 
     @Test
@@ -523,7 +519,7 @@ public class PageServiceTest {
         PageData pd = pageService.getHistoricalPageData("localhost", "page1", 1, "joe");
         // Joe can't read this page
         assertEquals("You are not permissioned to read this page", pd.rendered());
-        assertEquals(false, pd.flags().userCanRead());
+        assertFalse(pd.flags().userCanRead());
 
         Page page = new Page();
         page.setText("This is a page");
@@ -537,7 +533,7 @@ public class PageServiceTest {
         assertEquals("This page doesn't exist", pd.rendered());
         pd = pageService.getHistoricalPageData("localhost", "page1", 4, "bob");
         assertEquals("This page doesn't exist", pd.rendered());
-        assertEquals(true, pd.flags().wasDeleted());
+        assertTrue(pd.flags().wasDeleted());
         pd = pageService.getHistoricalPageData("localhost", "page1", 1, "bob");
         assertEquals("This is a page", pd.source());
 
@@ -604,9 +600,6 @@ public class PageServiceTest {
         when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
         when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
 
-        Page p = new Page();
-        p.setText("This is raw page text");
-        p.setTags(Collections.emptyList());
         PageText pt1 = new PageTextImpl("", "page1", null, "text");
         PageText pt2 = new PageTextImpl("ns_secret", "secret", "","text");
         PageText pt3 = new PageTextImpl("", "", "Home Page","text_home");

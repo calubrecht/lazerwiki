@@ -6,7 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.*;
@@ -28,23 +28,23 @@ public class SiteDelServiceTest {
 
     @Autowired
     SiteDelService underTest;
-    @MockBean
+    @MockitoBean
     SiteRepository siteRepository;
-    @MockBean
+    @MockitoBean
     MediaRecordRepository mediaRecordRepository;
-    @MockBean
+    @MockitoBean
     MediaHistoryRepository mediaHistoryRepository;
-    @MockBean
+    @MockitoBean
     ImageRefRepository imageRefRepository;
-    @MockBean
+    @MockitoBean
     LinkRepository linkRepository;
-    @MockBean
+    @MockitoBean
     NamespaceRepository namespaceRepository;
-    @MockBean
+    @MockitoBean
     PageRepository pageRepository;
-    @MockBean
+    @MockitoBean
     PageCacheRepository pageCacheRepository;
-    @MockBean
+    @MockitoBean
     PageLockRepository pageLockRepository;
 
     @Value("${lazerwiki.static.file.root}")

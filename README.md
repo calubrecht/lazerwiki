@@ -22,6 +22,8 @@ Tomcat 10
 
 MySQL (or Mariadb)
 
+JVM 25+
+
 LazerWiki
 * Static Site Based Resources
 * User-uploaded media resources.
