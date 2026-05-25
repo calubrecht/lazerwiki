@@ -12,7 +12,7 @@ group = "us.calubrecht"
 version = project.properties["version"]!!
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_24
 }
 
 repositories {
@@ -29,7 +29,6 @@ dependencies {
 	implementation("commons-io:commons-io:2.15.0")
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
-	implementation("org.jsoup:jsoup:1.16.2")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 	implementation("org.xerial:sqlite-jdbc:3.49.1.0")
 	implementation("org.hibernate.orm:hibernate-community-dialects")

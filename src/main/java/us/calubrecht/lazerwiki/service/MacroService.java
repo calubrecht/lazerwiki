@@ -279,7 +279,7 @@ public class MacroService {
                 return;
             }
             @SuppressWarnings("unchecked")
-            Collection<String> existingLinks = (Collection<String>) renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>());
+            Collection<String> existingLinks = (Collection<String>) renderContext.renderState().computeIfAbsent(LINKS.name(), (_) -> new HashSet<>());
             existingLinks.addAll(newLinks);
         }
     }
