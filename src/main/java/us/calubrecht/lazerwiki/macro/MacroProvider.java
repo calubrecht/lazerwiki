@@ -3,30 +3,36 @@ package us.calubrecht.lazerwiki.macro;
 import java.util.List;
 
 /**
- * Service Provider Interface (SPI) for loading macros from external JARs.
+ * Service Provider Interface for loading macros from external JARs.
  * 
- * Implementations should be registered in META-INF/services/us.calubrecht.lazerwiki.macro.MacroProvider
+ * Implementations of this interface allow macros to be packaged and distributed
+ * separately from the main LazerWiki application. This solves ClassLoader
+ * security issues in Tomcat by allowing external macro JARs to be loaded via
+ * Java's ServiceLoader mechanism.
  * 
- * Example META-INF/services file content:
- * com.example.macros.ExternalMacroProvider
- * 
- * This approach avoids ClassLoader security issues in Tomcat by:
- * - Not requiring annotation scanning across classloader boundaries
- * - Using Java's standard ServiceLoader mechanism
- * - Allowing external JARs to be dropped in $CATALINA_HOME/lib/ without configuration changes
+ * To use this interface:
+ * 1. Create a JAR file with macro implementations
+ * 2. Implement this interface in a provider class
+ * 3. Register the implementation in META-INF/services/us.calubrecht.lazerwiki.macro.MacroProvider
+ * 4. Add the JAR to the Tomcat classpath (e.g., CATALINA_BASE/lib)
  */
 public interface MacroProvider {
-    /**
-     * Returns a list of Macro implementations provided by this provider.
-     * 
-     * @return List of Macro instances to be registered
-     */
-    List<Macro> getMacros();
     
     /**
-     * Human-readable name for this provider (used for logging).
+     * Returns the name of this macro provider.
      * 
-     * @return Name of the provider
+     * @return A descriptive name for logging and debugging purposes
      */
     String getName();
+    
+    /**
+     * Returns a list of macro instances provided by this provider.
+     * 
+     * Each macro returned should be a new instance with no shared state
+     * between calls, as the MacroService will create instances during
+     * the registration phase.
+     * 
+     * @return A list of Macro implementations provided by this provider
+     */
+    List<Macro> getMacros();
 }
