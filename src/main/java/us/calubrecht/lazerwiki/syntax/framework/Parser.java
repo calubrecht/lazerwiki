@@ -36,7 +36,7 @@ public class Parser {
         while (!parseContext.isEmpty() ) {
             ITreeNode nextNode = null;
             for (ITreeParser parser: parsers) {
-                if (!parser.canBeginParse(parseContext.peekLine())) {
+                if (!parser.canBeginParse(parseContext.remainingLine())) {
                     continue;
                 }
                 nextNode = parser.parse(parseContext);
@@ -46,8 +46,8 @@ public class Parser {
             }
             if (nextNode == null) {
                 int nodeStart = parseContext.getPosition();
-                String nextLine = parseContext.peekLine();
-                nextNode = new TextNode(parseContext.peekLine());
+                String nextLine = parseContext.remainingLine();
+                nextNode = new TextNode(parseContext.remainingLine());
                 parseContext.advanceLine();
                 nextNode.setParseContext(parseContext);
                 nextNode.setPosition(Pair.of(nodeStart, nodeStart + nextLine.length() -1));

@@ -18,7 +18,7 @@ public class ParagraphParser extends AbstractTreeParser {
         int start = parseContext.getPosition();
         int end =  parseContext.getPosition();
         int lastEnd = end;
-        for (String nextLine = parseContext.peekLine(); !parseContext.isEmpty(); nextLine = getNext(parseContext)) {
+        for (String nextLine = parseContext.remainingLine(); !parseContext.isEmpty(); nextLine = getNext(parseContext)) {
           if (!paragraphLines.isEmpty() && nonParagraphBlock(getNext(parseContext))) {
               // End of paragraph. Preserve line for next parser
               // Always parses the first line, do not break for other parsers until this accepts first line

@@ -666,7 +666,7 @@ public class DokuWikiRendererTest {
         String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
         when(macroService.renderMacro(eq("macro1: macro"), anyString(), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
         String render = underTest.renderToString(inputMacro, "", "", "page", "");
-        assertEquals("<div><div>MACRO- Unknown Macro macro1</div></div>", render);
+        assertEquals("<div>MACRO- Unknown Macro macro1</div>", render);
 
         when(macroService.renderMacro(Mockito.startsWith("macro1: Start1"), anyString(), any())).thenReturn("<div>Inside Macro 1</div>");
         when(macroService.renderMacro(Mockito.startsWith("macro2"), anyString(), any())).thenReturn("<div>Inside Macro 2</div>");
@@ -674,11 +674,32 @@ public class DokuWikiRendererTest {
         // Outside most ~~MACRO~~ and ~~/MACRO~~ tags should be matched and pass entire thing to macroService
         String nestedMacro = "~~MACRO~~macro1: Start1 ~~MACRO~~macro2: Start2 ~~/MACRO~~ End1 ~~/MACRO~~ Outside";
         render = underTest.renderToString(nestedMacro, "", "", "page", "");
-        assertEquals("<div><div>Inside Macro 1</div> Outside</div>", render);
+        assertEquals("<div>Inside Macro 1</div><div> Outside</div>", render);
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(macroService, times(2)).renderMacro(captor.capture(), anyString(), any());
 
         assertEquals("macro1: Start1 ~~MACRO~~macro2: Start2 ~~/MACRO~~ End1 ", captor.getAllValues().get(1));
+
+        String sideBySideMacro = "~~MACRO~~macro1: Start1 ~~/MACRO~~~~MACRO~~macro2: Start2 ~~/MACRO~~ Outside";
+        render = underTest.renderToString(sideBySideMacro, "", "", "page", "");
+        assertEquals("<div>Inside Macro 1</div><div>Inside Macro 2</div><div> Outside</div>", render);
+        captor = ArgumentCaptor.forClass(String.class);
+        verify(macroService, times(4)).renderMacro(captor.capture(), anyString(), any());
+
+        assertEquals("macro1: Start1 ", captor.getAllValues().get(2));
+        assertEquals("macro2: Start2 ", captor.getAllValues().get(3));
+    }
+
+    @Test
+    public void testRenderMultilineMacro() {
+
+        String inputMacro = "~~MACRO~~macro1: macro  \n\n This is line~~/MACRO~~";
+        ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
+        when(macroService.renderMacro(textCaptor.capture(), anyString(), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
+        String render = underTest.renderToString(inputMacro, "", "", "page", "");
+        assertEquals("<div>MACRO- Unknown Macro macro1</div>", render);
+
+        assertEquals("macro1: macro  \n\n This is line", textCaptor.getValue());
     }
 
     @Test
