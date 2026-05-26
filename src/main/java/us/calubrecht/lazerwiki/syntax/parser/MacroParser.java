@@ -104,14 +104,6 @@ public class MacroParser extends AbstractTreeParser {
         return null;*/
     }
 
-    int countSubstrings(String string, String subString) {
-        int count = 0;
-        for (int idx = string.indexOf(subString); idx != -1; idx = string.indexOf(subString, idx)) {
-           count++;
-        }
-        return count;
-    }
-
     @Override
     public boolean canBeginParse(String line) {
         return line.startsWith(macroStart);

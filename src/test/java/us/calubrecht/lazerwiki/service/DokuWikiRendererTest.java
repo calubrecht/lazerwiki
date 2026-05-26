@@ -703,6 +703,20 @@ public class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderUnfinishedMacro() {
+
+        String inputMacro = "~~MACRO~~macro1: macro  \n\n This is a line";
+        ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
+        when(macroService.renderMacro(textCaptor.capture(), anyString(), any())).thenReturn("<div>MACRO- Unknown Macro macro1</div>");
+        String render = underTest.renderToString(inputMacro, "", "", "page", "");
+        assertEquals("""
+                <div>~~MACRO~~macro1: macro  </div>
+                <div> This is a line</div>""", render);
+
+        verify(macroService, never()).renderMacro(anyString(), anyString(), any());
+    }
+
+    @Test
     public void testRenderLinebreak() {
         String input = "This is a line \\\\ with a linebreak";
         assertEquals("<div>This is a line<br> with a linebreak</div>", doRender(input));
