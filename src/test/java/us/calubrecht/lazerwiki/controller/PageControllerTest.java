@@ -5,12 +5,15 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
+import us.calubrecht.lazerwiki.config.JsonConfig;
 import us.calubrecht.lazerwiki.service.PageLockService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageUpdateService;
@@ -28,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {PageController.class, VersionController.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
+@Import(JsonConfig.class)
 public class PageControllerTest {
 
     @Autowired
@@ -156,6 +160,23 @@ public class PageControllerTest {
                 andExpect(status().isOk());
 
         verify(pageService).getAllPages(eq("localhost"), eq("Guest"));
+    }
+
+
+    @Autowired
+    ObjectMapper jsonMapper;
+
+    @Test
+    public void testSaveNewPage() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\", \"revision\":null, \"force\": false}";
+        this.mockMvc.perform(post("/api/page/testPage/savePage").
+                        content(data).
+                        contentType(MediaType.APPLICATION_JSON).
+                        principal(auth)).
+                andExpect(status().isOk());
+
+        verify(renderService).savePage(eq("localhost"), eq("testPage"), eq("This is some text"), isNull(), eq(0L), eq(false), eq("Bob"));
     }
 
     @Test
