@@ -111,7 +111,7 @@ public class ImageRenderer extends AbstractRenderer {
                 String extension = getExt(source);
                 if (unscalableImageExts.contains(extension)) {
                     List<String> styles = new ArrayList<>();
-                    if (!s1.isEmpty() && !s1.equals("0")) {
+                    if (!s1.equals("0")) {
                         styles.add(String.format("width:%spx", s1));
                     }
                     if (!s2.isEmpty() && !s2.equals("0")) {
