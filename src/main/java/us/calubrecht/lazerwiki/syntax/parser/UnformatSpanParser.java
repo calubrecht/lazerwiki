@@ -15,25 +15,28 @@ import java.util.regex.Pattern;
 @Component
 public class UnformatSpanParser extends AbstractInnerParser{
     final Pattern unformatPattern = Pattern.compile("^%%(.*?)%%", Pattern.DOTALL);
+    final Pattern nowikiPattern = Pattern.compile("^<nowiki>(.*?)</nowiki>", Pattern.DOTALL);
 
     @Override
     public Collection<Character> keyCharacters() {
-        return List.of('%');
+        return List.of('%', '<');
     }
 
     @Override
     public Pair<Integer, ITreeNode> parse(ParseContext parseContext) {
         CharSequence sequence = parseContext.subsequence();
         int position = parseContext.getPosition();
-        Matcher m = unformatPattern.matcher(sequence);
+        Matcher m1 = unformatPattern.matcher(sequence);
+        Matcher m2 = nowikiPattern.matcher(sequence);
 
-        if (m.find()) {
+        if (m1.find() || m2.find()) {
+            Matcher m = m1.hasMatch() ? m1 : m2;
             UnformatSpanNode node = new UnformatSpanNode();
             int length = m.group(0).length();
             node.setPosition(Pair.of(position, position + length - 1));
             node.setParseContext(parseContext);
             TextNode innerNode = new TextNode(m.group(1));
-            innerNode.setPosition(Pair.of(position +2, position +2 + m.group(1).length() -1));
+            innerNode.setPosition(Pair.of(position + m.start(1), position + m.end(1)-1));
             innerNode.setParseContext(parseContext);
             node.addChild(innerNode);
             return Pair.of(length, node);

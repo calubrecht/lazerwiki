@@ -319,6 +319,9 @@ public class DokuWikiRendererTest {
         assertEquals("<div>Can unformats\nspan lines?</div>", doRender(input4));
         String input5 = "Can **%% be in%% bold**?";
         assertEquals("<div>Can <span class=\"bold\"> be in bold</span>?</div>", doRender(input5));
+
+        String input6 = "Also can use <nowiki>nowiki **tags**</nowiki> instead";
+        assertEquals("<div>Also can use nowiki **tags** instead</div>", doRender(input6));
     }
 
     @Test
