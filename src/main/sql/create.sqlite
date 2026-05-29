@@ -46,6 +46,10 @@ CREATE TABLE "page" (
 	PRIMARY KEY("id","revision")
 );
 
+CREATE INDEX "PageModifiedTime" ON "PAGE" (
+	"site", "deleted", "validTS", "modified"
+);
+
 CREATE TABLE "pageLock" (
 	"site"	TEXT NOT NULL,
 	"namespace"	TEXT NOT NULL DEFAULT '',
@@ -60,7 +64,6 @@ CREATE TABLE "pageLock" (
 CREATE INDEX "PAGELOCK_ID_IDX" ON "pageLock" (
 	"lockId"
 );
-
 
 
 CREATE TABLE "userRole" (

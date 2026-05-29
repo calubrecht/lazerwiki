@@ -168,3 +168,5 @@ ALTER TABLE page MODIFY COLUMN modified TIMESTAMP NULL DEFAULT current_timestamp
 ALTER TABLE pageLock MODIFY COLUMN lockTime TIMESTAMP NOT NULL;
 ALTER TABLE mediaHistory MODIFY COLUMN ts TIMESTAMP DEFAULT current_timestamp() NOT NULL;
 ALTER TABLE lazerwiki.mediaRecord ADD modified TIMESTAMP DEFAULT current_timestamp();
+
+ALTER TABLE page ADD INDEX `PageModifiedTime` (`site`, `deleted`, `validTS`, `modified`) USING BTREE;

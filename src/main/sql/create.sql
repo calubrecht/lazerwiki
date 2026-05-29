@@ -65,6 +65,7 @@ CREATE TABLE `page` (
 	`deleted` INT(11) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`, `revision`) USING BTREE,
 	UNIQUE INDEX `Uniqueness` (`site`, `namespace`, `pagename`, `validTS`) USING BTREE,
+    INDEX `PageModifiedTime` (`site`, `deleted`, `validTS`, `modified`) USING BTREE,
 	CONSTRAINT `FK_ID` FOREIGN KEY (`id`) REFERENCES `page_ids` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT page_userRecord_FK FOREIGN KEY (modifiedBy) REFERENCES userRecord(userId) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `FK_SITE` FOREIGN KEY (`site`) REFERENCES sites (`name`) ON UPDATE RESTRICT ON DELETE RESTRICT
