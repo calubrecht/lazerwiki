@@ -265,7 +265,7 @@ class MediaServiceTest {
         // Frank cannot delete, so cannot overwrite.
         assertThrows(MediaWriteException.class, () ->underTest.saveFile("localhost", "Frank", file, ""));
 
-        underTest.saveFile("localhost", "Bob", file, "");
+        underTest.saveFile("lo/calhost", "Bob", file, "");
 
         MediaRecord newRecord = new MediaRecord("small.bin", "default",  "",user, 7, 0, 0);
         newRecord.setId(10L);

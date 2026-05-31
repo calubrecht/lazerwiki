@@ -18,6 +18,7 @@ import us.calubrecht.lazerwiki.responses.PageListResponse;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -42,24 +43,23 @@ public class ExportService {
     @Autowired
     MediaService mediaService;
 
-    @Value("${lazerwiki.static.file.root}")
-    String staticFileRoot;
-
-    void ensureDir() throws IOException {
-        Files.createDirectories(Paths.get(String.join("/", staticFileRoot, "tmp", "exports")));
+    String printMetaData(PageDesc page, List<String> tags) {
+        return
+                "Name: " + page.getPagename() + "\n" +
+                "NameSpace: " + page.getNamespace() + "\n" +
+                "Tags: " + String.join(",", tags) + "\n" +
+                "Format: Doku\n";
     }
 
-    public void createExportBundle(String hostName, String user) throws IOException {
+    public byte[] createExportBundle(String hostName, String user) throws IOException {
         PageListResponse pageList = pageService.getAllPages(hostName, user);
         String site = siteService.getSiteForHostname(hostName);
         logger.info("Creating export file for {}", site);
-        Path exportFile = Paths.get(String.join("/", staticFileRoot, "tmp", "exports", site + ".tar.gz"));
-        ensureDir();
-        try (OutputStream fos = Files.newOutputStream(exportFile);
-             GzipCompressorOutputStream gos = new GzipCompressorOutputStream(fos);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             GzipCompressorOutputStream gos = new GzipCompressorOutputStream(baos);
              TarArchiveOutputStream taos = new TarArchiveOutputStream(gos)) {
-            for (String ns : pageList.pages.keySet().stream().sorted().toList()) {
-                List<PageDesc> pages = pageList.pages.get(ns);
+            for (String ns : pageList.pages().keySet().stream().sorted().toList()) {
+                List<PageDesc> pages = pageList.pages().get(ns);
                 for (PageDesc page : pages) {
                     String descriptor = page.getDescriptor();
                     Path filePath = toPath("pages", page.getNamespace(), page.getPagename() + ".txt");
@@ -74,12 +74,18 @@ public class ExportService {
                     taos.write(contentBytes);
                     taos.closeArchiveEntry();
 
-                    // Metadata entry
+                    Path metaPath = toPath("pages", page.getNamespace(), page.getPagename() + ".meta");
+                    TarArchiveEntry metaData = new TarArchiveEntry(metaPath.toString());
+                    byte[] metaDataBytes = printMetaData(page, data.tags()).getBytes(StandardCharsets.UTF_8);
+                    metaData.setSize(metaDataBytes.length);
+                    taos.putArchiveEntry(metaData);
+                    taos.write(metaDataBytes);
+                    taos.closeArchiveEntry();
                 }
             }
             MediaListResponse mediaList = mediaService.getAllFiles(hostName, null);
-            for (String ns : mediaList.media.keySet().stream().sorted().toList()) {
-                List<MediaRecord> mediaItems = mediaList.media.get(ns);
+            for (String ns : mediaList.media().keySet().stream().sorted().toList()) {
+                List<MediaRecord> mediaItems = mediaList.media().get(ns);
                 for (MediaRecord media : mediaItems) {
                     Path filePath = toPath("media", media.getNamespace(), media.getFileName());
                     try {
@@ -93,12 +99,15 @@ public class ExportService {
                         taos.closeArchiveEntry();
                     }
                     catch (NoSuchFileException nsfe) {
-                        logger.error("Missing file: {}", nsfe.getFile(), nsfe);
+                        logger.error("Missing file during export: {}", nsfe.getFile());
                     }
                 }
             }
             taos.finish();
-            logger.info("Export file created successfully: {}", exportFile);
+            gos.close();
+            taos.close();
+            logger.info("Export for {} created successfully", site);
+            return baos.toByteArray();
         } catch (IOException | MediaReadException | MediaWriteException e) {
             throw new RuntimeException(e);
         }

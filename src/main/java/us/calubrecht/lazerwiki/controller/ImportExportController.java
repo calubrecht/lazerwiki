@@ -1,7 +1,11 @@
 package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("api/io/")
 public class ImportExportController {
+    final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
     UserService userService;
@@ -54,8 +59,11 @@ public class ImportExportController {
 
     @GetMapping("export/{site}")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
-    public ResponseEntity<Void> exportSite(@PathVariable("site") String site, Principal principal) throws IOException {
-        exportService.createExportBundle(siteService.getHostForSitename(site), principal.getName());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<byte[]> exportSite(@PathVariable("site") String site, Principal principal) throws IOException {
+        byte[] output = exportService.createExportBundle(siteService.getHostForSitename(site), principal.getName());
+        logger.info("Output size: {} bytes", output.length);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Disposition", "attachment;filename=export.tar.gz"); // Include site name
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(output);
     }
 }
