@@ -100,7 +100,7 @@ class ExportServiceTest {
 
     @Test
     void createExportBundle() throws IOException, MediaReadException, MediaWriteException {
-        when(siteService.getSiteForHostname(anyString())).thenReturn("default");
+        when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
         Map<String, List<PageDesc>> pages = Map.of(
                 "", List.of(desc("", ""), desc("", "FirstPage")),
                 "ns1:nsdeep", List.of(desc("ns1:nsdeep", "OtherPage"))
@@ -129,7 +129,7 @@ class ExportServiceTest {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        underTest.createExportBundle("localhost", "george", baos);
+        underTest.createExportBundle("default", "george", baos);
         byte[] bytes = baos.toByteArray();
 
                 // Write bytes to temporary file for extraction

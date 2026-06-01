@@ -34,17 +34,9 @@ public class ImportExportController {
     @Autowired
     ExportService exportService;
 
-    @Autowired
-    SiteService siteService;
-
     public boolean hasAdmin(String userName, String site)
     {
         return hasRole(userName, "ROLE_ADMIN", "ROLE_ADMIN:" + site);
-    }
-
-    public boolean hasAdmin(String userName)
-    {
-        return hasRole(userName, "ROLE_ADMIN");
     }
 
     public boolean hasRole(String userName, String... requiredRoles) {
@@ -59,7 +51,7 @@ public class ImportExportController {
     }
 
     @GetMapping("export/{site}")
-    @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
+    @PreAuthorize("@importExportController.hasAdmin(#principal.getName(), #site)")
     public ResponseEntity<StreamingResponseBody> exportSite(@PathVariable("site") String site, Principal principal) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -67,7 +59,7 @@ public class ImportExportController {
                 .body(outputStream -> {
                     try {
                         exportService.createExportBundle(
-                                siteService.getHostForSitename(site),
+                                site,
                                 principal.getName(),
                                 outputStream
                         );

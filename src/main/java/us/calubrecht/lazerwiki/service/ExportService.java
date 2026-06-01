@@ -51,9 +51,9 @@ public class ExportService {
                 "Format: Doku\n";
     }
 
-    public void createExportBundle(String hostName, String user, OutputStream out) throws IOException {
+    public void createExportBundle(String site, String user, OutputStream out) throws IOException {
+        String hostName = siteService.getHostForSitename(site);
         PageListResponse pageList = pageService.getAllPages(hostName, user);
-        String site = siteService.getSiteForHostname(hostName);
         logger.info("Creating export file for {}", site);
         try (             GzipCompressorOutputStream gos = new GzipCompressorOutputStream(out);
              TarArchiveOutputStream taos = new TarArchiveOutputStream(gos)) {
