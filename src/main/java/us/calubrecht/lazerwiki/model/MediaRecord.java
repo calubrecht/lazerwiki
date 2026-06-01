@@ -118,6 +118,11 @@ public class MediaRecord {
 
     public void setModified(LocalDateTime modified) { this.modified = modified; }
 
+    @JsonIgnore
+    public String getPath() {
+        return getNamespace().isBlank() ? getFileName() : getNamespace() + "/" + getFileName();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -89,7 +89,7 @@ public class ExportService {
                 for (MediaRecord media : mediaItems) {
                     Path filePath = toPath("media", media.getNamespace(), media.getFileName());
                     try {
-                        byte[] data = mediaService.getBinaryFile(hostName, user, media.getFileName(), null);
+                        byte[] data = mediaService.getBinaryFile(hostName, user, media.getPath(), null);
 
                         TarArchiveEntry entry = new TarArchiveEntry(filePath.toString());
                         entry.setSize(data.length);

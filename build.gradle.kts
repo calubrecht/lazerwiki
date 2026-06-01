@@ -12,7 +12,7 @@ group = "us.calubrecht"
 version = project.properties["version"]!!
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_24
+	sourceCompatibility = JavaVersion.VERSION_25
 }
 
 repositories {
