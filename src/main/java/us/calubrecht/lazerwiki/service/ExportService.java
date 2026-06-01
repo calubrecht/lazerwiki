@@ -104,7 +104,7 @@ public class ExportService {
             }
             taos.finish();
             logger.info("Export for {} created successfully", site);
-        } catch (IOException | MediaReadException | MediaWriteException e) {
+        } catch ( MediaReadException | MediaWriteException e) {
             throw new RuntimeException(e);
         }
 

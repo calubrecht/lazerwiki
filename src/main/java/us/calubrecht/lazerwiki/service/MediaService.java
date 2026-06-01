@@ -102,7 +102,7 @@ public class MediaService {
     public byte[] getBinaryFile(String host, String userName, String fileName, String size) throws IOException, MediaReadException, MediaWriteException {
         String site = siteService.getSiteForHostname(host);
         Pair<String, String> splitFile = getNamespace(fileName);
-        if (!namespaceService.canReadNamespace(site, splitFile.getLeft(), userName)) {
+        if (namespaceService.canReadNamespace(site, splitFile.getLeft(), userName)) {
             throw new MediaReadException("Not permissioned to read this file");
         }
         IOSupplier<byte[]> byteReader = () -> {

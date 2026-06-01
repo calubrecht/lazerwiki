@@ -83,6 +83,8 @@ class ImportExportControllerTest {
                 inv -> {
                     throw new IOException("Could not read file");
                 }).when(exportService).createExportBundle(eq("site"), eq("Jack"), any());
-        this.mockMvc.perform(get("/api/io/export/site").principal(auth)).andExpect(status().is5xxServerError());
+        // Error during streaming is initially reported as OK. But connection closes before anything sent.
+        this.mockMvc.perform(get("/api/io/export/site").principal(auth)).andExpect(status().isOk()).
+                andExpect(content().bytes(new byte[]{}));
     }
 }

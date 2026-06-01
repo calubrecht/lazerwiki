@@ -64,8 +64,9 @@ public class ImportExportController {
                                 outputStream
                         );
                         logger.info("Export streaming completed for site: {}", site);
-                    } catch (IOException e) {
+                    } catch (IOException | RuntimeException e) {
                         logger.error("Error during export streaming", e);
+                        outputStream.close();
                         throw e;
                     }
                 });
