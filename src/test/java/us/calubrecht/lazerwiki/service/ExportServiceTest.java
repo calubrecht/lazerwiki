@@ -127,9 +127,12 @@ class ExportServiceTest {
         when(mediaService.getBinaryFile(anyString(), anyString(), eq("ns/circleWdot.png"), isNull())).thenReturn(
                 getBinaryFile("ns/circleWdot.png"));
 
-        byte[] bytes = underTest.createExportBundle("localhost", "george");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        // Write bytes to temporary file for extraction
+        underTest.createExportBundle("localhost", "george", baos);
+        byte[] bytes = baos.toByteArray();
+
+                // Write bytes to temporary file for extraction
         Path tempArchive = Files.createTempFile("export", ".tar.gz");
         Path extractDir = Files.createTempDirectory("export-extracted");
         try {

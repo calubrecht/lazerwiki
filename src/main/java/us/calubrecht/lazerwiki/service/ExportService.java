@@ -51,12 +51,11 @@ public class ExportService {
                 "Format: Doku\n";
     }
 
-    public byte[] createExportBundle(String hostName, String user) throws IOException {
+    public void createExportBundle(String hostName, String user, OutputStream out) throws IOException {
         PageListResponse pageList = pageService.getAllPages(hostName, user);
         String site = siteService.getSiteForHostname(hostName);
         logger.info("Creating export file for {}", site);
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             GzipCompressorOutputStream gos = new GzipCompressorOutputStream(baos);
+        try (             GzipCompressorOutputStream gos = new GzipCompressorOutputStream(out);
              TarArchiveOutputStream taos = new TarArchiveOutputStream(gos)) {
             for (String ns : pageList.pages().keySet().stream().sorted().toList()) {
                 List<PageDesc> pages = pageList.pages().get(ns);
@@ -104,10 +103,7 @@ public class ExportService {
                 }
             }
             taos.finish();
-            gos.close();
-            taos.close();
             logger.info("Export for {} created successfully", site);
-            return baos.toByteArray();
         } catch (IOException | MediaReadException | MediaWriteException e) {
             throw new RuntimeException(e);
         }

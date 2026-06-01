@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.ExportService;
 import us.calubrecht.lazerwiki.service.SiteService;
@@ -59,11 +60,22 @@ public class ImportExportController {
 
     @GetMapping("export/{site}")
     @PreAuthorize("@adminController.hasAdmin(#principal.getName(), #site)")
-    public ResponseEntity<byte[]> exportSite(@PathVariable("site") String site, Principal principal) throws IOException {
-        byte[] output = exportService.createExportBundle(siteService.getHostForSitename(site), principal.getName());
-        logger.info("Output size: {} bytes", output.length);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Disposition", "attachment;filename=export.tar.gz"); // Include site name
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers).body(output);
+    public ResponseEntity<StreamingResponseBody> exportSite(@PathVariable("site") String site, Principal principal) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header("Content-Disposition", "attachment;filename=export-" + site + ".tar.gz")
+                .body(outputStream -> {
+                    try {
+                        exportService.createExportBundle(
+                                siteService.getHostForSitename(site),
+                                principal.getName(),
+                                outputStream
+                        );
+                        logger.info("Export streaming completed for site: {}", site);
+                    } catch (IOException e) {
+                        logger.error("Error during export streaming", e);
+                        throw e;
+                    }
+                });
     }
 }
