@@ -38,6 +38,9 @@ class MacroServiceTest {
     PageService pageService;
 
     @MockitoBean
+    PageSearchService pageSearchService;
+
+    @MockitoBean
     MacroCssService macroCssService;
 
     @Autowired
@@ -90,7 +93,7 @@ class MacroServiceTest {
         List<SearchResult> pages = List.of(
                 new SearchResult("ns", "bigPage","Big Page",""),
                 new SearchResult("", "otherPage","Other Page",""));
-        when(pageService.searchPages(anyString(), anyString(), eq(Map.of("tag","aTag", "ns", "bigNS")))).thenReturn(Map.of("tag", pages));
+        when(pageSearchService.searchPages(anyString(), anyString(), eq(Map.of("tag","aTag", "ns", "bigNS")))).thenReturn(Map.of("tag", pages));
         List<String> results = macroContext.getPagesByNSAndTag("bigNS", "aTag");
         assertEquals(2, results.size());
         assertEquals("ns:bigPage", results.get(0));

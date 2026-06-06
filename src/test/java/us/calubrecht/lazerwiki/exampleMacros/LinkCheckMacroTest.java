@@ -28,6 +28,9 @@ public class LinkCheckMacroTest {
     PageService pageService;
 
     @MockitoBean
+    PageSearchService pageSearchService;
+
+    @MockitoBean
     MacroCssService macroCssService;
 
     @Autowired

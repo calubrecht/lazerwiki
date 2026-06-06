@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = { CustomWikiRenderer.class, ProblemPagesTest.TestConfig.class, MacroService.class})
-@ComponentScan("us.calubrecht.lazerwiki.service.renderhelpers.doku")
 @ActiveProfiles("test")
 public class ProblemPagesTest {
 
@@ -26,6 +25,9 @@ public class ProblemPagesTest {
 
     @MockitoBean
     PageService pageService;
+
+    @MockitoBean
+    PageSearchService pageSearchService;
 
     @MockitoBean
     MacroCssService macroCssService;

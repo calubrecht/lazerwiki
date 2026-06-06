@@ -30,6 +30,9 @@ class WrapMacroTest {
     PageService pageService;
 
     @MockitoBean
+    PageSearchService pageSearchService;
+
+    @MockitoBean
     MacroCssService macroCssService;
 
     @Autowired

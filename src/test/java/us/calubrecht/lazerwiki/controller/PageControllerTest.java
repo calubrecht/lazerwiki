@@ -14,10 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 import us.calubrecht.lazerwiki.config.JsonConfig;
-import us.calubrecht.lazerwiki.service.PageLockService;
-import us.calubrecht.lazerwiki.service.PageService;
-import us.calubrecht.lazerwiki.service.PageUpdateService;
-import us.calubrecht.lazerwiki.service.RenderService;
+import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 
@@ -39,6 +36,9 @@ public class PageControllerTest {
 
     @MockitoBean
     PageService pageService;
+
+    @MockitoBean
+    PageSearchService pageSearchService;
 
     @MockitoBean
     PageUpdateService pageUpdateService;
@@ -218,12 +218,12 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageService).searchPages(eq("localhost"), eq("Bob"), eq("tag:common"));
+        verify(pageSearchService).searchPages(eq("localhost"), eq("Bob"), eq("tag:common"));
 
         this.mockMvc.perform(get("/api/page/searchPages?search=tag:common")).
                 andExpect(status().isOk());
 
-        verify(pageService).searchPages(eq("localhost"), eq("Guest"), eq("tag:common"));
+        verify(pageSearchService).searchPages(eq("localhost"), eq("Guest"), eq("tag:common"));
 
     }
 

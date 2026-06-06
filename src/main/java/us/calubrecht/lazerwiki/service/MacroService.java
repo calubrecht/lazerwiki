@@ -41,6 +41,9 @@ public class MacroService {
     PageService pageService;
 
     @Autowired
+    PageSearchService pageSearchService;
+
+    @Autowired
     LinkService linkService;
 
     @Autowired
@@ -220,7 +223,7 @@ public class MacroService {
 
         @Override
         public List<String> getPagesByNSAndTag(String ns, String tag) {
-            return pageService.searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns)).
+            return pageSearchService.searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns)).
                     get("tag").
                     stream().map(SearchResult::getDescriptor).toList();
         }

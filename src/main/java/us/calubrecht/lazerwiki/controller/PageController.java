@@ -13,10 +13,7 @@ import us.calubrecht.lazerwiki.requests.MovePageRequest;
 import us.calubrecht.lazerwiki.responses.*;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.requests.SavePageRequest;
-import us.calubrecht.lazerwiki.service.PageLockService;
-import us.calubrecht.lazerwiki.service.PageService;
-import us.calubrecht.lazerwiki.service.PageUpdateService;
-import us.calubrecht.lazerwiki.service.RenderService;
+import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
@@ -33,6 +30,9 @@ import java.util.Optional;
 public class PageController {
     @Autowired
     PageService pageService;
+
+    @Autowired
+    PageSearchService pageSearchService;
 
     @Autowired
     PageUpdateService pageUpdateService;
@@ -133,7 +133,7 @@ public class PageController {
     public Map<String, List<SearchResult>> searchPages(Principal principal, HttpServletRequest request, @RequestParam("search") String searchTerm) throws MalformedURLException {
         URL url = new URL(request.getRequestURL().toString());
         String userName = getUsername(principal);
-        return pageService.searchPages(url.getHost(), userName, searchTerm);
+        return pageSearchService.searchPages(url.getHost(), userName, searchTerm);
     }
 
     @RequestMapping(value = "/listTags")
