@@ -70,6 +70,7 @@ public class SiteService {
         return s.settings.get(setting);
     }
 
+    @Cacheable("hostForSitename")
     public String getHostForSitename(String site) {
         Optional<Site> s =  siteRepository.findById(site);
         return s.map(ss -> ss.hostname).orElse("*");
@@ -98,7 +99,7 @@ public class SiteService {
     }
 
     @Transactional
-    @CacheEvict(value = "sitesForHostname", allEntries = true)
+    @CacheEvict(value = {"sitesForHostname", "hostsForSitename"}, allEntries = true)
     public Site setSiteSettings(String siteName, String hostName, String settings, User u) throws SiteSettingsException {
         if (!canAdminSite(u.getRolesString(), siteName)) {
             throw new SiteSettingsException("Cannot admin site " + siteName);
