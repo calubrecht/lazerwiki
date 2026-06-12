@@ -633,6 +633,12 @@ public class DokuWikiRendererTest {
     }
 
     @Test
+    public void testRenderCodeBlockWithMacro() {
+        String inputBlockquote = "  this ~~MACRO~~macroname:macro~~/MACRO~~ should not render\n";
+        assertEquals("<pre class=\"code\">this &#126;&#126;MACRO&#126;&#126;macroname:macro&#126;&#126;/MACRO&#126;&#126; should not render\n</pre>", doRender(inputBlockquote));
+    }
+
+    @Test
     public void testHeaderInBox() {
         String input1 = "  This is a block\n  ==== It has a header in it ====\n";
         assertEquals(

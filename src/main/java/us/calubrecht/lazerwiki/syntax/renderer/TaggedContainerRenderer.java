@@ -36,8 +36,16 @@ public class TaggedContainerRenderer extends ContainerRenderer  {
         StringBuilder buffer = new StringBuilder();
         Pair<String,String> tagNames = getTagNames(taggedNode.getType());
         buffer.append(tagNames.getLeft());
-        buffer.append(content);
+        buffer.append(transformMacro(taggedNode.getType(), content));
         buffer.append(tagNames.getRight());
         return buffer;
+    }
+
+    CharSequence transformMacro(TaggedContainerNode.TYPE type, CharSequence builder) {
+        if (type == TaggedContainerNode.TYPE.CODE_BLOCK) {
+            // Escape Macro characters, prevent rendering macro in postRender
+            return builder.toString().replace("~~", "&#126;&#126;");
+        }
+        return builder;
     }
 }
