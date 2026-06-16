@@ -189,7 +189,7 @@ tasks.jacocoTestReport {
 							"us/calubrecht/lazerwiki/repository/TagRepository.class",
 							"us/calubrecht/lazerwiki/repository/MediaRecordRepository.class",
 							"us/calubrecht/lazerwiki/service/IMarkupRenderer.class",
-							"us/calubrecht/lazerwiki/service/parser/doku/*",
+							"us/calubrecht/lazerwiki/service/EmailRateLimitService.class",
 							"us/calubrecht/lazerwiki/plugin/WikiPlugin.class",
 							"us/calubrecht/lazerwiki/macro/CustomMacro.class",
 							"us/calubrecht/lazerwiki/util/ImageUtil.class",
