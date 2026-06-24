@@ -2,97 +2,96 @@ package us.calubrecht.lazerwiki.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.hibernate.annotations.CreationTimestamp;
 
 @SuppressWarnings("unused")
 @Entity(name = "activityLog")
 public class ActivityLog {
 
-    public ActivityLog(ActivityType activityType, String site, String target, User user) {
-        this.activityType = activityType;
-        this.site = site;
-        this.target = target;
-        this.user = user;
-    }
+  public ActivityLog(ActivityType activityType, String site, String target, User user) {
+    this.activityType = activityType;
+    this.site = site;
+    this.target = target;
+    this.user = user;
+  }
 
-    public ActivityLog() {
+  public ActivityLog() {}
 
-    }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  public Long id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+  @ManyToOne
+  @JoinColumn(name = "activityType", referencedColumnName = "activityTypeId")
+  public ActivityType activityType;
 
-    @ManyToOne
-    @JoinColumn(name = "activityType", referencedColumnName = "activityTypeId")
-    public ActivityType activityType;
+  @Column String target;
 
-    @Column
-    String target;
+  @Column String site;
 
-    @Column
-    String site;
+  @ManyToOne
+  @JoinColumn(name = "user", referencedColumnName = "userId")
+  @JsonIgnore
+  private User user;
 
-    @ManyToOne
-    @JoinColumn(name="user", referencedColumnName = "userId")
-    @JsonIgnore
-    private User user;
+  @CreationTimestamp LocalDateTime timestamp;
 
-    @CreationTimestamp
-    LocalDateTime timestamp;
+  public Long getId() {
+    return id;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public ActivityType getActivityType() {
+    return activityType;
+  }
 
-    public ActivityType getActivityType() {
-        return activityType;
-    }
+  public void setActivityType(ActivityType activityType) {
+    this.activityType = activityType;
+  }
 
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
-    }
+  public String getTarget() {
+    return target;
+  }
 
-    public String getTarget() {
-        return target;
-    }
+  public void setTarget(String target) {
+    this.target = target;
+  }
 
-    public void setTarget(String target) {
-        this.target = target;
-    }
+  public User getUser() {
+    return user;
+  }
 
-    public User getUser() {
-        return user;
-    }
+  public void setUser(User user) {
+    this.user = user;
+  }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+  public LocalDateTime getTimestamp() {
+    return timestamp;
+  }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
+  public void setTimestamp(LocalDateTime timestamp) {
+    this.timestamp = timestamp;
+  }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    ActivityLog that = (ActivityLog) o;
+    return Objects.equals(id, that.id)
+        && Objects.equals(activityType, that.activityType)
+        && Objects.equals(site, that.site)
+        && Objects.equals(target, that.target)
+        && Objects.equals(user, that.user)
+        && Objects.equals(timestamp, that.timestamp);
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        ActivityLog that = (ActivityLog) o;
-        return Objects.equals(id, that.id) && Objects.equals(activityType, that.activityType) && Objects.equals(site, that.site) && Objects.equals(target, that.target) && Objects.equals(user, that.user) && Objects.equals(timestamp, that.timestamp);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, activityType, site, target, user, timestamp);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, activityType, site, target, user, timestamp);
+  }
 }

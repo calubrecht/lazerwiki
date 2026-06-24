@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.transaction.Transactional;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,135 +11,177 @@ import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
-import java.util.*;
-
 @Service
 public class RegenCacheService {
-    final Logger logger = LogManager.getLogger(getClass());
+  final Logger logger = LogManager.getLogger(getClass());
 
-    @Autowired
-    LinkService linkService;
+  @Autowired LinkService linkService;
 
-    @Autowired
-    LinkOverrideService linkOverrideService;
+  @Autowired LinkOverrideService linkOverrideService;
 
-    @Autowired
-    MediaOverrideService mediaOverrideService;
+  @Autowired MediaOverrideService mediaOverrideService;
 
-    @Autowired
-    ImageRefService imageRefService;
+  @Autowired ImageRefService imageRefService;
 
-    @Autowired
-    IMarkupRenderer renderer;
+  @Autowired IMarkupRenderer renderer;
 
-    @Autowired
-    PageRepository pageRepository;
+  @Autowired PageRepository pageRepository;
 
-    @Autowired
-    PageCacheRepository pageCacheRepository;
+  @Autowired PageCacheRepository pageCacheRepository;
 
-    @Autowired
-    SiteService siteService;
+  @Autowired SiteService siteService;
 
-
-    @SuppressWarnings("unchecked")
-    @Transactional
-    public void regenLinks(String site) {
-        PerfTracker perfTracker = new PerfTracker();
-        perfTracker.startTimer("All");
-        perfTracker.startTimer("Fetch Page List");
-        String siteKey = site.toLowerCase();
-        logger.info("Regening link table for {}", siteKey);
-        List<PageDesc> pages = pageRepository.getAllValid(siteKey);
-        perfTracker.stopTimer("Fetch Page List");
-        perfTracker.startTimer("Regen links");
-        List<String> failedPages = new ArrayList<>();
-        pages.forEach(pd -> {
-            try {
-                Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(siteKey, pd.getNamespace(), pd.getPagename(), false);
-                PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
-                RenderContext renderContext = new RenderContext("", siteKey, desc.toString(), UserService.SYS_USER);
-                renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
-                RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
-                Collection<String> links = (Collection<String>) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.LINKS.name(), Collections.emptySet());
-                Collection<String> images = (Collection<String>) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.IMAGES.name(), Collections.emptySet());
-                logger.info("Setting " + links.size() + " links for " + pd.getNamespace() + ":" + pd.getPagename());
-                linkService.setLinksFromPage(siteKey, pd.getNamespace(), pd.getPagename(), links);
-                logger.info("Setting {} images for {}:{}", links.size(), pd.getNamespace(), pd.getPagename());
-                imageRefService.setImageRefsFromPage(siteKey, pd.getNamespace(), pd.getPagename(), images);
-            } catch (Throwable throwable) {
-                logger.error("Error regening Links for {}:{}", pd.getNamespace(), pd.getPagename(), throwable);
-                failedPages.add(pd.getNamespace() + ":" + pd.getPagename());
-            }
+  @SuppressWarnings("unchecked")
+  @Transactional
+  public void regenLinks(String site) {
+    PerfTracker perfTracker = new PerfTracker();
+    perfTracker.startTimer("All");
+    perfTracker.startTimer("Fetch Page List");
+    String siteKey = site.toLowerCase();
+    logger.info("Regening link table for {}", siteKey);
+    List<PageDesc> pages = pageRepository.getAllValid(siteKey);
+    perfTracker.stopTimer("Fetch Page List");
+    perfTracker.startTimer("Regen links");
+    List<String> failedPages = new ArrayList<>();
+    pages.forEach(
+        pd -> {
+          try {
+            Page p =
+                pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
+                    siteKey, pd.getNamespace(), pd.getPagename(), false);
+            PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
+            RenderContext renderContext =
+                new RenderContext("", siteKey, desc.toString(), UserService.SYS_USER);
+            renderContext
+                .renderState()
+                .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+            RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
+            Collection<String> links =
+                (Collection<String>)
+                    res.renderState()
+                        .getOrDefault(
+                            RenderResult.RenderStateKeys.LINKS.name(), Collections.emptySet());
+            Collection<String> images =
+                (Collection<String>)
+                    res.renderState()
+                        .getOrDefault(
+                            RenderResult.RenderStateKeys.IMAGES.name(), Collections.emptySet());
+            logger.info(
+                "Setting "
+                    + links.size()
+                    + " links for "
+                    + pd.getNamespace()
+                    + ":"
+                    + pd.getPagename());
+            linkService.setLinksFromPage(siteKey, pd.getNamespace(), pd.getPagename(), links);
+            logger.info(
+                "Setting {} images for {}:{}", links.size(), pd.getNamespace(), pd.getPagename());
+            imageRefService.setImageRefsFromPage(
+                siteKey, pd.getNamespace(), pd.getPagename(), images);
+          } catch (Throwable throwable) {
+            logger.error(
+                "Error regening Links for {}:{}", pd.getNamespace(), pd.getPagename(), throwable);
+            failedPages.add(pd.getNamespace() + ":" + pd.getPagename());
+          }
         });
-        perfTracker.stopAll();
-        logger.info("regenLinks took: {}s. {}", perfTracker.getTimers().get("All")/1000.0, perfTracker.getTimers());
-        if (!failedPages.isEmpty()) {
-            logger.error("Error in recaling pages: {}", failedPages);
-        }
+    perfTracker.stopAll();
+    logger.info(
+        "regenLinks took: {}s. {}",
+        perfTracker.getTimers().get("All") / 1000.0,
+        perfTracker.getTimers());
+    if (!failedPages.isEmpty()) {
+      logger.error("Error in recaling pages: {}", failedPages);
     }
+  }
 
-    @Transactional
-    public void regenCache(String site) {
-        PerfTracker perfTracker = new PerfTracker();
-        perfTracker.startTimer("All");
-        perfTracker.startTimer("Fetch Page List");
-        String siteKey = site.toLowerCase();
-        String host = siteService.getHostForSitename(siteKey);
-        logger.info("Regening cache table for {} {}", siteKey, host);
-        pageCacheRepository.deleteBySite(siteKey);
-        List<PageDesc> pages = pageRepository.getAllValid(siteKey);
-        perfTracker.stopTimer("Fetch Page List");
-        perfTracker.startTimer("Render Pages");
-        List<String> failedPages = new ArrayList<>();
-        pages.forEach(pd -> {
-            try {
-                Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(siteKey, pd.getNamespace(), pd.getPagename(), false);
-                PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
-                RenderContext renderContext = new RenderContext(host, siteKey, desc.toString(), UserService.SYS_USER);
-                renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
-                logger.info("Render: {}", desc);
-                RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
-                PageCache newCache = new PageCache();
-                newCache.site = siteKey;
-                newCache.namespace = pd.getNamespace();
-                newCache.pageName = pd.getPagename();
-                newCache.renderedCache = res.renderedText();
-                newCache.plaintextCache = res.plainText();
-                newCache.title = PageService.getTitle(new PageDescriptor(pd.getNamespace(), pd.getPagename()), p);
-                newCache.source = PageService.doAdjustSource(p.getText(), res);
-                newCache.useCache = !(Boolean) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
-                logger.info("Caching rendered page for {}:{} useCache={}", pd.getNamespace(), pd.getPagename(), newCache.useCache);
-                pageCacheRepository.save(newCache);
-            } catch (Throwable t) {
-                logger.error("Error regening Cache for {}:{}", pd.getNamespace(), pd.getPagename(), t);
-                failedPages.add(pd.getNamespace() + ":" + pd.getPagename());
-            }
+  @Transactional
+  public void regenCache(String site) {
+    PerfTracker perfTracker = new PerfTracker();
+    perfTracker.startTimer("All");
+    perfTracker.startTimer("Fetch Page List");
+    String siteKey = site.toLowerCase();
+    String host = siteService.getHostForSitename(siteKey);
+    logger.info("Regening cache table for {} {}", siteKey, host);
+    pageCacheRepository.deleteBySite(siteKey);
+    List<PageDesc> pages = pageRepository.getAllValid(siteKey);
+    perfTracker.stopTimer("Fetch Page List");
+    perfTracker.startTimer("Render Pages");
+    List<String> failedPages = new ArrayList<>();
+    pages.forEach(
+        pd -> {
+          try {
+            Page p =
+                pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
+                    siteKey, pd.getNamespace(), pd.getPagename(), false);
+            PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
+            RenderContext renderContext =
+                new RenderContext(host, siteKey, desc.toString(), UserService.SYS_USER);
+            renderContext
+                .renderState()
+                .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+            logger.info("Render: {}", desc);
+            RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
+            PageCache newCache = new PageCache();
+            newCache.site = siteKey;
+            newCache.namespace = pd.getNamespace();
+            newCache.pageName = pd.getPagename();
+            newCache.renderedCache = res.renderedText();
+            newCache.plaintextCache = res.plainText();
+            newCache.title =
+                PageService.getTitle(new PageDescriptor(pd.getNamespace(), pd.getPagename()), p);
+            newCache.source = PageService.doAdjustSource(p.getText(), res);
+            newCache.useCache =
+                !(Boolean)
+                    res.renderState()
+                        .getOrDefault(
+                            RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
+            logger.info(
+                "Caching rendered page for {}:{} useCache={}",
+                pd.getNamespace(),
+                pd.getPagename(),
+                newCache.useCache);
+            pageCacheRepository.save(newCache);
+          } catch (Throwable t) {
+            logger.error("Error regening Cache for {}:{}", pd.getNamespace(), pd.getPagename(), t);
+            failedPages.add(pd.getNamespace() + ":" + pd.getPagename());
+          }
         });
-        perfTracker.stopAll();
-        logger.info("regenCache took: {}s. {}", perfTracker.getTimers().get("All")/1000.0, perfTracker.getTimers());
-        if (!failedPages.isEmpty()) {
-            logger.error("Error in rendering pages: {}", failedPages);
-        }
+    perfTracker.stopAll();
+    logger.info(
+        "regenCache took: {}s. {}",
+        perfTracker.getTimers().get("All") / 1000.0,
+        perfTracker.getTimers());
+    if (!failedPages.isEmpty()) {
+      logger.error("Error in rendering pages: {}", failedPages);
     }
+  }
 
-    public void regenCachesForBacklinks(String site, String linkedPage) {
-        String host = siteService.getHostForSitename(site);
-        logger.info("Regenning cache for links to {}-{}", site, linkedPage);
-        List<String> backlinks = linkService.getBacklinks(site, linkedPage);
-        List<String> overrideBacklinks = linkOverrideService.getOverridesForNewTargetPage(host, linkedPage).stream().map(
-                LinkOverride::getSource
-        ).toList();
-        List<String> allLinks = new ArrayList<>();
-        allLinks.addAll(backlinks);
-        allLinks.addAll(overrideBacklinks);
-        List<String> failedLinks = new ArrayList<>();
-        allLinks.stream().distinct().forEach(link -> {
-            try {
+  public void regenCachesForBacklinks(String site, String linkedPage) {
+    String host = siteService.getHostForSitename(site);
+    logger.info("Regenning cache for links to {}-{}", site, linkedPage);
+    List<String> backlinks = linkService.getBacklinks(site, linkedPage);
+    List<String> overrideBacklinks =
+        linkOverrideService.getOverridesForNewTargetPage(host, linkedPage).stream()
+            .map(LinkOverride::getSource)
+            .toList();
+    List<String> allLinks = new ArrayList<>();
+    allLinks.addAll(backlinks);
+    allLinks.addAll(overrideBacklinks);
+    List<String> failedLinks = new ArrayList<>();
+    allLinks.stream()
+        .distinct()
+        .forEach(
+            link -> {
+              try {
                 PageDescriptor pd = PageService.decodeDescriptor(link);
-                Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
-                RenderContext renderContext = new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
-                renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+                Page p =
+                    pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
+                        site, pd.namespace(), pd.pageName(), false);
+                RenderContext renderContext =
+                    new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
+                renderContext
+                    .renderState()
+                    .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
                 RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
                 PageCache newCache = new PageCache();
                 newCache.site = site;
@@ -146,38 +189,56 @@ public class RegenCacheService {
                 newCache.pageName = pd.pageName();
                 newCache.renderedCache = res.renderedText();
                 newCache.plaintextCache = res.plainText();
-                newCache.title = PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
+                newCache.title =
+                    PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
                 newCache.source = PageService.doAdjustSource(p.getText(), res);
-                newCache.useCache = !(Boolean) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
-                logger.info("Recaching rendered page for {}:{} after link change useCache={}", pd.namespace(), pd.pageName(), newCache.useCache);
+                newCache.useCache =
+                    !(Boolean)
+                        res.renderState()
+                            .getOrDefault(
+                                RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
+                logger.info(
+                    "Recaching rendered page for {}:{} after link change useCache={}",
+                    pd.namespace(),
+                    pd.pageName(),
+                    newCache.useCache);
                 pageCacheRepository.save(newCache);
-            } catch (Throwable t) {
+              } catch (Throwable t) {
                 logger.error("Error regening backlinks for {}", link, t);
                 failedLinks.add(link);
-            }
-        });
-        if (!failedLinks.isEmpty()) {
-            logger.error("Error in regenCachesForBacklinks for links {}", failedLinks);
-        }
+              }
+            });
+    if (!failedLinks.isEmpty()) {
+      logger.error("Error in regenCachesForBacklinks for links {}", failedLinks);
     }
+  }
 
-    public void regenCachesForImageRefs(String site, String oldImageRef, String newImageRef) {
-        String host = siteService.getHostForSitename(site);
-        logger.info("Regening cache for media links to {}-{}", site, oldImageRef);
-        List<String> backlinks = imageRefService.getRefsForImage(site, oldImageRef);
-        List<String> overrideBacklinks = mediaOverrideService.getOverridesForImage(host, newImageRef).stream().map(
-                MediaOverride::getSource
-        ).toList();
-        List<String> allLinks = new ArrayList<>();
-        allLinks.addAll(backlinks);
-        allLinks.addAll(overrideBacklinks);
-        List<String> failedLinks = new ArrayList<>();
-        allLinks.stream().distinct().forEach(link -> {
-            try {
+  public void regenCachesForImageRefs(String site, String oldImageRef, String newImageRef) {
+    String host = siteService.getHostForSitename(site);
+    logger.info("Regening cache for media links to {}-{}", site, oldImageRef);
+    List<String> backlinks = imageRefService.getRefsForImage(site, oldImageRef);
+    List<String> overrideBacklinks =
+        mediaOverrideService.getOverridesForImage(host, newImageRef).stream()
+            .map(MediaOverride::getSource)
+            .toList();
+    List<String> allLinks = new ArrayList<>();
+    allLinks.addAll(backlinks);
+    allLinks.addAll(overrideBacklinks);
+    List<String> failedLinks = new ArrayList<>();
+    allLinks.stream()
+        .distinct()
+        .forEach(
+            link -> {
+              try {
                 PageDescriptor pd = PageService.decodeDescriptor(link);
-                Page p = pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(site, pd.namespace(), pd.pageName(), false);
-                RenderContext renderContext = new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
-                renderContext.renderState().put(RenderResult.RENDER_STATE_KEYS.FOR_CACHE.name(), Boolean.TRUE);
+                Page p =
+                    pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
+                        site, pd.namespace(), pd.pageName(), false);
+                RenderContext renderContext =
+                    new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
+                renderContext
+                    .renderState()
+                    .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
                 RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
                 PageCache newCache = new PageCache();
                 newCache.site = site;
@@ -185,18 +246,27 @@ public class RegenCacheService {
                 newCache.pageName = pd.pageName();
                 newCache.renderedCache = res.renderedText();
                 newCache.plaintextCache = res.plainText();
-                newCache.title = PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
+                newCache.title =
+                    PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
                 newCache.source = PageService.doAdjustSource(p.getText(), res);
-                newCache.useCache = !(Boolean) res.renderState().getOrDefault(RenderResult.RENDER_STATE_KEYS.DONT_CACHE.name(), Boolean.FALSE);
-                logger.info("Recaching rendered page for {}:{} for imageref change useCache={}", pd.namespace(), pd.pageName(), newCache.useCache);
+                newCache.useCache =
+                    !(Boolean)
+                        res.renderState()
+                            .getOrDefault(
+                                RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
+                logger.info(
+                    "Recaching rendered page for {}:{} for imageref change useCache={}",
+                    pd.namespace(),
+                    pd.pageName(),
+                    newCache.useCache);
                 pageCacheRepository.save(newCache);
-            } catch (Throwable t) {
+              } catch (Throwable t) {
                 logger.error("Error regening imageRefs for {}", link, t);
                 failedLinks.add(link);
-            }
-        });
-        if (!failedLinks.isEmpty()) {
-            logger.error("Error in regenCachesForImageRefs for links {}", failedLinks);
-        }
+              }
+            });
+    if (!failedLinks.isEmpty()) {
+      logger.error("Error in regenCachesForImageRefs for links {}", failedLinks);
     }
+  }
 }

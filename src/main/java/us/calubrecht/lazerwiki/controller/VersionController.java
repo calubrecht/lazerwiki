@@ -5,26 +5,22 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/")
-public class VersionController
-{
-    public static VersionController INSTANCE;
+public class VersionController {
+  private static VersionController instance;
 
-    public VersionController()
-    {
-        INSTANCE = this;
-    }
+  public VersionController() {
+    instance = this;
+  }
 
-    @Value ( "${app.version}")
-    private String appVersion;
+  @Value("${app.version}")
+  private String appVersion;
 
-    @RequestMapping("version")
-    public String version()
-    {
-        return appVersion;
-    }
+  @RequestMapping("version")
+  public String version() {
+    return appVersion;
+  }
 
-    public static String getVersion()
-    {
-        return INSTANCE.appVersion;
-    }
+  public static String getVersion() {
+    return instance.appVersion;
+  }
 }

@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.URLConnection;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,49 +13,50 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import us.calubrecht.lazerwiki.service.WarResourceService;
 
-import java.io.IOException;
-import java.net.URLConnection;
-
 @RestController
 @RequestMapping("")
 @ConditionalOnProperty("lazerwiki.standalone.ui.warfile")
 public class WarfileController {
-    @Autowired
-    WarResourceService resourceService;  /// Seperate version that only loads from external ui war
+  @Autowired
+  WarResourceService resourceService; // / Seperate version that only loads from external ui war
 
-    @RequestMapping("assets/{fileName}")
-    public ResponseEntity<byte[]> getFile(@PathVariable String fileName) {
-        return getResponseEntity("assets/" + fileName);
+  @RequestMapping("assets/{fileName}")
+  public ResponseEntity<byte[]> getFile(@PathVariable String fileName) {
+    return getResponseEntity("assets/" + fileName);
+  }
+
+  @NotNull
+  private ResponseEntity<byte[]> getResponseEntity(String fileName) {
+    try {
+      String mimeType = URLConnection.guessContentTypeFromName(fileName);
+      MediaType mediaType =
+          mimeType != null
+              ? MediaType.parseMediaType(mimeType)
+              : MediaType.APPLICATION_OCTET_STREAM;
+
+      // IF file in jar then serve...
+      return ResponseEntity.ok()
+          .contentType(mediaType)
+          .cacheControl(CacheControl.noCache().mustRevalidate())
+          .lastModified(resourceService.getFileLastModified(fileName))
+          .body(resourceService.getBinaryFile(fileName));
+    } catch (IOException e) {
+      return ResponseEntity.notFound().build();
     }
+  }
 
-    @NotNull
-    private ResponseEntity<byte[]> getResponseEntity(String fileName) {
-        try {
-            String mimeType = URLConnection.guessContentTypeFromName(fileName);
-            MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
+  @RequestMapping("")
+  public ResponseEntity<byte[]> getIndexFile() {
+    return getResponseEntity("index.html");
+  }
 
-            // IF file in jar then serve...
-            return ResponseEntity.ok().contentType(mediaType).
-                    cacheControl(CacheControl.noCache().mustRevalidate()).
-                    lastModified(resourceService.getFileLastModified(fileName)).
-                    body(resourceService.getBinaryFile(fileName));
-        } catch (IOException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+  @RequestMapping("page/{filename}")
+  public ResponseEntity<byte[]> getPageFile() {
+    return getResponseEntity("index.html");
+  }
 
-    @RequestMapping("")
-    public ResponseEntity<byte[]> getIndexFile() {
-        return getResponseEntity("index.html");
-    }
-
-    @RequestMapping("page/{filename}")
-    public ResponseEntity<byte[]> getPageFile() {
-        return getResponseEntity("index.html");
-    }
-
-    @RequestMapping("{filename}")
-    public ResponseEntity<byte[]> getRootFile(@PathVariable("filename") String filename) {
-        return getResponseEntity(filename);
-    }
+  @RequestMapping("{filename}")
+  public ResponseEntity<byte[]> getRootFile(@PathVariable("filename") String filename) {
+    return getResponseEntity(filename);
+  }
 }

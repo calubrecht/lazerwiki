@@ -1,146 +1,144 @@
 package us.calubrecht.lazerwiki.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import org.hibernate.annotations.CreationTimestamp;
 
 @SuppressWarnings("unused")
 @Entity(name = "page")
 @IdClass(PageKey.class)
 public class Page {
-    @Id
-    @Column(name="id")
-    private Long id;
+  @Id
+  @Column(name = "id")
+  private Long id;
 
-    @Id
-    @Column(name="revision")
-    private Long revision;
-    String text;
+  @Id
+  @Column(name = "revision")
+  private Long revision;
 
-    String site;
-    String namespace;
+  String text;
 
-    String pagename;
-    String title;
+  String site;
+  String namespace;
 
-    @ManyToOne
-    @JoinColumn(name="modifiedBy", referencedColumnName = "userId")
-    @JsonIgnore
-    User modifiedBy;
+  String pagename;
+  String title;
 
-    @CreationTimestamp
-    LocalDateTime modified;
+  @ManyToOne
+  @JoinColumn(name = "modifiedBy", referencedColumnName = "userId")
+  @JsonIgnore
+  User modifiedBy;
 
-    @Column(name = "validTS")
-    LocalDateTime validts;
-    boolean deleted;
+  @CreationTimestamp LocalDateTime modified;
 
-    @OneToMany(cascade = {CascadeType.ALL})
-    @JoinColumns({
-      @JoinColumn(name = "pageId", referencedColumnName="id"),
-      @JoinColumn(name = "revision", referencedColumnName="revision")}
-    )
-    public List<PageTag> tags;
+  @Column(name = "validTS")
+  LocalDateTime validts;
 
-    public Long getId() {
-        return id;
-    }
+  boolean deleted;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  @OneToMany(cascade = {CascadeType.ALL})
+  @JoinColumns({
+    @JoinColumn(name = "pageId", referencedColumnName = "id"),
+    @JoinColumn(name = "revision", referencedColumnName = "revision")
+  })
+  public List<PageTag> tags;
 
-    public Long getRevision() {
-        return revision;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setRevision(Long revision) {
-        this.revision = revision;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public String getText() {
-        return text;
-    }
+  public Long getRevision() {
+    return revision;
+  }
 
-    public void setText(String text) {
-        this.text = text;
-    }
+  public void setRevision(Long revision) {
+    this.revision = revision;
+  }
 
-    public String getSite() {
-        return site;
-    }
+  public String getText() {
+    return text;
+  }
 
-    public void setSite(String site) {
-        this.site = site;
-    }
+  public void setText(String text) {
+    this.text = text;
+  }
 
-    public String getNamespace() {
-        return namespace;
-    }
+  public String getSite() {
+    return site;
+  }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
+  public void setSite(String site) {
+    this.site = site;
+  }
 
-    public String getPagename() {
-        return pagename;
-    }
+  public String getNamespace() {
+    return namespace;
+  }
 
-    public void setPagename(String pagename) {
-        this.pagename = pagename;
-    }
+  public void setNamespace(String namespace) {
+    this.namespace = namespace;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public String getPagename() {
+    return pagename;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public void setPagename(String pagename) {
+    this.pagename = pagename;
+  }
 
-    public boolean isDeleted() {
-        return deleted;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
+  public boolean isDeleted() {
+    return deleted;
+  }
 
-    public LocalDateTime getValidts() {
-        return validts;
-    }
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
 
-    public void setValidts(LocalDateTime validts) {
-        this.validts = validts;
-    }
+  public LocalDateTime getValidts() {
+    return validts;
+  }
 
-    @JsonIgnore
-    public String getModifiedBy() {
-        return modifiedBy.userName;
-    }
+  public void setValidts(LocalDateTime validts) {
+    this.validts = validts;
+  }
 
-    public void setModifiedBy(User modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
+  @JsonIgnore
+  public String getModifiedBy() {
+    return modifiedBy.userName;
+  }
 
-    public LocalDateTime getModified() {
-        return modified;
-    }
+  public void setModifiedBy(User modifiedBy) {
+    this.modifiedBy = modifiedBy;
+  }
 
-    public void setModified(LocalDateTime modified) {
-        this.modified = modified;
-    }
+  public LocalDateTime getModified() {
+    return modified;
+  }
 
-    public List<PageTag> getTags() {
-        return tags;
-    }
+  public void setModified(LocalDateTime modified) {
+    this.modified = modified;
+  }
 
-    public void setTags(List<PageTag> tags) {
-        this.tags = tags;
-    }
+  public List<PageTag> getTags() {
+    return tags;
+  }
+
+  public void setTags(List<PageTag> tags) {
+    this.tags = tags;
+  }
 }

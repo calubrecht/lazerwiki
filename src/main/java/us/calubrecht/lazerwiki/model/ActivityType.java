@@ -7,43 +7,38 @@ import jakarta.persistence.Id;
 @SuppressWarnings("unused")
 @Entity(name = "activityType")
 public class ActivityType {
-    public static final ActivityType ACTIVITY_PROTO_CREATE_PAGE = new ActivityType(10L);
-    public static final ActivityType ACTIVITY_PROTO_MODIFY_PAGE = new ActivityType(20L);
-    public static final ActivityType ACTIVITY_PROTO_DELETE_PAGE = new ActivityType(30L);
-    public static final ActivityType ACTIVITY_PROTO_MOVE_PAGE = new ActivityType(40L);
-    public static final ActivityType ACTIVITY_PROTO_UPLOAD_MEDIA = new ActivityType(50L);
-    public static final ActivityType ACTIVITY_PROTO_REPLACE_MEDIA = new ActivityType(60L);
-    public static final ActivityType ACTIVITY_PROTO_DELETE_MEDIA = new ActivityType(70L);
-    public static final ActivityType ACTIVITY_PROTO_MOVE_MEDIA = new ActivityType(80L);
-    public static final ActivityType ACTIVITY_PROTO_CREATE_USER = new ActivityType(90L);
-    public static final ActivityType ACTIVITY_PROTO_DELETE_USER = new ActivityType(100L);
-    public static final ActivityType ACTIVITY_PROTO_CHANGE_ROLES = new ActivityType(110L);
-    public static final ActivityType ACTIVITY_PROTO_CHANGE_SETTINGS = new ActivityType(120L);
+  public static final ActivityType ACTIVITY_PROTO_CREATE_PAGE = new ActivityType(10L);
+  public static final ActivityType ACTIVITY_PROTO_MODIFY_PAGE = new ActivityType(20L);
+  public static final ActivityType ACTIVITY_PROTO_DELETE_PAGE = new ActivityType(30L);
+  public static final ActivityType ACTIVITY_PROTO_MOVE_PAGE = new ActivityType(40L);
+  public static final ActivityType ACTIVITY_PROTO_UPLOAD_MEDIA = new ActivityType(50L);
+  public static final ActivityType ACTIVITY_PROTO_REPLACE_MEDIA = new ActivityType(60L);
+  public static final ActivityType ACTIVITY_PROTO_DELETE_MEDIA = new ActivityType(70L);
+  public static final ActivityType ACTIVITY_PROTO_MOVE_MEDIA = new ActivityType(80L);
+  public static final ActivityType ACTIVITY_PROTO_CREATE_USER = new ActivityType(90L);
+  public static final ActivityType ACTIVITY_PROTO_DELETE_USER = new ActivityType(100L);
+  public static final ActivityType ACTIVITY_PROTO_CHANGE_ROLES = new ActivityType(110L);
+  public static final ActivityType ACTIVITY_PROTO_CHANGE_SETTINGS = new ActivityType(120L);
 
-    public ActivityType() {
+  public ActivityType() {}
 
-    }
+  public ActivityType(Long activityTypeId) {
+    this.activityTypeId = activityTypeId;
+  }
 
-    public ActivityType(Long activityTypeId) {
-        this.activityTypeId = activityTypeId;
-    }
+  public ActivityType(
+      Long activityTypeId, String activityName, String simpleName, String fullDesc) {
+    this.activityTypeId = activityTypeId;
+    this.activityName = activityName;
+    this.simpleName = simpleName;
+    this.fullDesc = fullDesc;
+  }
 
-    public ActivityType(Long activityTypeId, String activityName, String simpleName, String fullDesc) {
-        this.activityTypeId = activityTypeId;
-        this.activityName = activityName;
-        this.simpleName = simpleName;
-        this.fullDesc = fullDesc;
-    }
+  @Id Long activityTypeId;
 
-    @Id
-    Long activityTypeId;
+  @Column String activityName;
 
-    @Column
-    String activityName;
+  @Column String simpleName;
 
-    @Column
-    String simpleName;
-
-    @Column
-    String fullDesc;
+  @Column String fullDesc;
 }

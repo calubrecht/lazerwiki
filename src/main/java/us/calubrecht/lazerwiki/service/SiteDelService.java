@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
+import java.io.File;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,66 +12,56 @@ import org.springframework.util.FileSystemUtils;
 import us.calubrecht.lazerwiki.model.Site;
 import us.calubrecht.lazerwiki.repository.*;
 
-import java.io.File;
-
 @Service
 public class SiteDelService {
 
-    final Logger logger = LogManager.getLogger(getClass());
+  final Logger logger = LogManager.getLogger(getClass());
 
-    @Autowired
-    SiteRepository siteRepository;
+  @Autowired SiteRepository siteRepository;
 
-    @Autowired
-    MediaRecordRepository mediaRecordRepository;
+  @Autowired MediaRecordRepository mediaRecordRepository;
 
-    @Autowired
-    MediaHistoryRepository mediaHistoryRepository;
+  @Autowired MediaHistoryRepository mediaHistoryRepository;
 
-    @Autowired
-    ImageRefRepository imageRefRepository;
+  @Autowired ImageRefRepository imageRefRepository;
 
-    @Autowired
-    LinkRepository linkRepository;
+  @Autowired LinkRepository linkRepository;
 
-    @Autowired
-    NamespaceRepository namespaceRepository;
+  @Autowired NamespaceRepository namespaceRepository;
 
-    @Autowired
-    PageRepository pageRepository;
+  @Autowired PageRepository pageRepository;
 
-    @Autowired
-    PageCacheRepository pageCacheRepository;
+  @Autowired PageCacheRepository pageCacheRepository;
 
-    @Autowired
-    PageLockRepository pageLockRepository;
+  @Autowired PageLockRepository pageLockRepository;
 
-    @Value("${lazerwiki.static.file.root}")
-    String staticFileRoot;
+  @Value("${lazerwiki.static.file.root}")
+  String staticFileRoot;
 
-    @Transactional
-    @CacheEvict(value = "sitesForHostname", allEntries = true)
-    public boolean deleteSiteCompletely(String siteName, String username) {
-        Site site = siteRepository.findBySiteName(siteName);
-        if (site == null) {
-            logger.info("Could not delete site siteName=" + siteName + " not found");
-            return false;
-        }
-        String name = site.name;
-        logger.warn("Deleting site siteName=" + siteName + " name=" + name + "  by username=" + username);
-        mediaRecordRepository.deleteBySite(name);
-        mediaHistoryRepository.deleteBySite(name);
-        imageRefRepository.deleteBySite(name);
-        linkRepository.deleteBySite(name);
-        namespaceRepository.deleteBySite(name);
-        pageCacheRepository.deleteBySite(name);
-        pageLockRepository.deleteBySite(name);
-        pageRepository.deleteBySite(name);
-
-        FileSystemUtils.deleteRecursively(new File(String.join("/", staticFileRoot, name)));
-
-        // Last Step
-        siteRepository.deleteById(name);
-        return true;
+  @Transactional
+  @CacheEvict(value = "sitesForHostname", allEntries = true)
+  public boolean deleteSiteCompletely(String siteName, String username) {
+    Site site = siteRepository.findBySiteName(siteName);
+    if (site == null) {
+      logger.info("Could not delete site siteName=" + siteName + " not found");
+      return false;
     }
+    String name = site.name;
+    logger.warn(
+        "Deleting site siteName=" + siteName + " name=" + name + "  by username=" + username);
+    mediaRecordRepository.deleteBySite(name);
+    mediaHistoryRepository.deleteBySite(name);
+    imageRefRepository.deleteBySite(name);
+    linkRepository.deleteBySite(name);
+    namespaceRepository.deleteBySite(name);
+    pageCacheRepository.deleteBySite(name);
+    pageLockRepository.deleteBySite(name);
+    pageRepository.deleteBySite(name);
+
+    FileSystemUtils.deleteRecursively(new File(String.join("/", staticFileRoot, name)));
+
+    // Last Step
+    siteRepository.deleteById(name);
+    return true;
+  }
 }

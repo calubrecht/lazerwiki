@@ -2,9 +2,12 @@ plugins {
 	java
 	war
 	jacoco
+	checkstyle
 	id("org.springframework.boot") version "4.0.6"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("com.github.jk1.dependency-license-report") version "2.5"
+	id("com.github.spotbugs") version "6.5.8"
+	id("com.diffplug.spotless") version "7.0.4"
     `maven-publish`
 }
 
@@ -13,6 +16,48 @@ version = project.properties["version"]!!
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_25
+}
+
+checkstyle {
+	toolVersion = "10.21.4"
+	configFile = file("config/checkstyle/checkstyle.xml")
+}
+
+tasks.checkstyleTest {
+	configFile = file("config/checkstyle/checkstyle-test.xml")
+}
+
+spotless {
+	java {
+		googleJavaFormat("1.35.0")
+	}
+}
+
+tasks.spotlessCheck {
+	enabled = false
+}
+
+tasks.named("spotlessJavaCheck") {
+	enabled = false
+}
+
+spotbugs {
+	ignoreFailures.set(true)
+	showStackTraces.set(true)
+	showProgress.set(true)
+}
+
+tasks.spotbugsTest {
+	enabled = false
+}
+
+tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+	auxClassPaths = configurations.compileClasspath.get()
+	logging.captureStandardOutput(LogLevel.DEBUG)
+	logging.captureStandardError(LogLevel.DEBUG)
+	reports.create("html") {
+		required.set(true)
+	}
 }
 
 repositories {
@@ -54,6 +99,9 @@ dependencies {
 	testImplementation("org.mockito:mockito-core")
 	testImplementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
 	testRuntimeOnly ("com.h2database:h2")
+
+	// Needed for SpotBugs analysis — transitively referenced by Spring Security but not on classpath
+	compileOnly("io.projectreactor:reactor-core")
 }
 
 tasks.withType<Test> {

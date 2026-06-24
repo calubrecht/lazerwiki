@@ -6,10 +6,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EntityManagerProxy {
-    @PersistenceContext
-    private EntityManager em;
+  @PersistenceContext private EntityManager em;
 
-    public void flush() {
-        em.flush();
-    }
+  public void flush() {
+    em.flush();
+  }
 }

@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplateService {
 
-
-    public String getVerifyEmailTemplate(String site, String email, String userName, String randomKey) {
-        return """
+  public String getVerifyEmailTemplate(
+      String site, String email, String userName, String randomKey) {
+    return """
                 <html>
                 <head>
                 <style>
@@ -28,6 +28,7 @@ public class TemplateService {
                 </div></div>
                 </body>
                 </html>
-                """.formatted(userName, site, email, userName, randomKey);
-    }
+                """
+        .formatted(userName, site, email, userName, randomKey);
+  }
 }

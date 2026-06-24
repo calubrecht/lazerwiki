@@ -1,14 +1,14 @@
 package us.calubrecht.lazerwiki.exampleMacros;
 
+import java.util.List;
+import java.util.Optional;
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 
-import java.util.Optional;
-import java.util.List;
-
 @CustomMacro
 public class IncludeMacro extends Macro {
-    static final String CSS = """
+  static final String CSS =
+      """
             a.includePageLink {
               border-color: black;
               border-style: outset;
@@ -27,34 +27,36 @@ public class IncludeMacro extends Macro {
             }
             """;
 
-    @Override
-    public String getName() {
-        return "include";
-    }
+  @Override
+  public String getName() {
+    return "include";
+  }
 
-    @Override
-    public Optional<String> getCSS() {
-        return Optional.of(CSS);
-    }
+  @Override
+  public Optional<String> getCSS() {
+    return Optional.of(CSS);
+  }
 
-    @Override
-    public boolean allowCache(MacroContext context, String macroArgs) {
-        String includePath = macroArgs.trim();
-        context.addLinks(List.of(includePath));
-        return false;}
+  @Override
+  public boolean allowCache(MacroContext context, String macroArgs) {
+    String includePath = macroArgs.trim();
+    context.addLinks(List.of(includePath));
+    return false;
+  }
 
-    @Override
-    public String render(MacroContext context, String macroArgs) {
-        if (context.isPlaintextRender()) {
-            return "";
-        }
-        String includePath = macroArgs.trim();
-        context.addLinks(List.of(includePath));
-        MacroContext.RenderOutput p = context.renderPage(includePath);
-        context.setPageDontCache();
-        if (p.getState().get("userCanWrite").toString().equals("true")) {
-            return "<div class=\"include\">%s<a href=\"/page/%s#Edit\" className=\"includePageLink\">Edit %s</a></div>".formatted(p.getHtml(), includePath,includePath);
-        }
-        return "<div class=\"include\">%s</div>".formatted(p.getHtml());
+  @Override
+  public String render(MacroContext context, String macroArgs) {
+    if (context.isPlaintextRender()) {
+      return "";
     }
+    String includePath = macroArgs.trim();
+    context.addLinks(List.of(includePath));
+    MacroContext.RenderOutput p = context.renderPage(includePath);
+    context.setPageDontCache();
+    if (p.getState().get("userCanWrite").toString().equals("true")) {
+      return "<div class=\"include\">%s<a href=\"/page/%s#Edit\" className=\"includePageLink\">Edit %s</a></div>"
+          .formatted(p.getHtml(), includePath, includePath);
+    }
+    return "<div class=\"include\">%s</div>".formatted(p.getHtml());
+  }
 }

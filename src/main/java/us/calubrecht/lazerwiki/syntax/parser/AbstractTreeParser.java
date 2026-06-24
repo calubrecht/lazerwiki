@@ -4,9 +4,9 @@ import us.calubrecht.lazerwiki.syntax.framework.ITreeParser;
 import us.calubrecht.lazerwiki.syntax.framework.ParserRegistrar;
 
 public abstract class AbstractTreeParser implements ITreeParser {
-    ParserRegistrar registrar;
+  ParserRegistrar registrar;
 
-    public void setRegistrar(ParserRegistrar registrar) {
-        this.registrar = registrar;
-    }
+  public void setRegistrar(ParserRegistrar registrar) {
+    this.registrar = registrar;
+  }
 }

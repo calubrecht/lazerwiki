@@ -2,37 +2,35 @@ package us.calubrecht.lazerwiki.util;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 public class PasswordUtil {
 
-    final String versionMark = ":v1:";
+  final String versionMark = ":v1:";
 
-    final PasswordEncoder encoder = new BCryptPasswordEncoder();
+  final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public String hashPassword(String password) {
-        return versionMark + encoder.encode(password);
+  public String hashPassword(String password) {
+    return versionMark + encoder.encode(password);
+  }
+
+  public boolean matches(String password, String hashedPassword) {
+    String existingCrypt = hashedPassword.substring(versionMark.length());
+    return encoder.matches(password, existingCrypt);
+  }
+
+  public static void main(String[] args) {
+    PasswordUtil util = new PasswordUtil();
+    if (args.length == 1) {
+      // Hash a password
+      String password = args[0];
+      String hashed = util.hashPassword(password);
+      System.out.println(hashed);
     }
-
-    public boolean matches(String password, String hashedPassword) {
-        String existingCrypt = hashedPassword.substring(versionMark.length());
-        return encoder.matches(password, existingCrypt);
-
+    if (args.length == 2) {
+      // compare password with hashhed password
+      String password = args[0];
+      String hash = args[1];
+      System.out.println(util.matches(password, hash) ? "Matches" : "Does not match");
     }
-
-    public static void main(String[] args)  {
-        PasswordUtil util = new PasswordUtil();
-        if (args.length == 1) {
-            // Hash a password
-            String password = args[0];
-            String hashed = util.hashPassword(password);
-            System.out.println(hashed);
-        }
-        if (args.length ==2 ) {
-            // compare password with hashhed password
-            String password = args[0];
-            String hash = args[1];
-            System.out.println(util.matches(password, hash) ? "Matches" : "Does not match");
-        }
-
-
-    }
+  }
 }

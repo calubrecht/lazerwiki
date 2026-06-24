@@ -1,11 +1,11 @@
 package us.calubrecht.lazerwiki.model;
 
 public interface PageText {
-    String getNamespace();
+  String getNamespace();
 
-    String getPagename();
+  String getPagename();
 
-    String getTitle();
+  String getTitle();
 
-    String getText();
+  String getText();
 }

@@ -10,10 +10,9 @@ import us.calubrecht.lazerwiki.repository.ActivityLogRepository;
 @Service
 public class ActivityLogService {
 
-    @Autowired
-    ActivityLogRepository repo;
+  @Autowired ActivityLogRepository repo;
 
-    public void log(ActivityType activity, String site, User user, String target) {
-        repo.save(new ActivityLog(activity, site, target, user));
-    }
+  public void log(ActivityType activity, String site, User user, String target) {
+    repo.save(new ActivityLog(activity, site, target, user));
+  }
 }

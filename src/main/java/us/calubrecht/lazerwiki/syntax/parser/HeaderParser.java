@@ -9,50 +9,50 @@ import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
 
 @Component
 public class HeaderParser extends AbstractTreeParser {
-    final static char HEADER_CHAR = '=';
+  static final char HEADER_CHAR = '=';
 
-    public ITreeNode parse(ParseContext parseContext) {
-        String line = parseContext.peekLine().strip();
-        for (int i = 0; i < line.length(); i++) {
-            if (line.charAt(i) != HEADER_CHAR) {
-                int start = parseContext.getPosition();
-                parseContext.advanceLine();
-                int end = parseContext.getPosition() - 2;
-                HeaderNode node = new HeaderNode(7 - i);
-                node.setPosition(Pair.of(start, end));
-                node.setParseContext(parseContext);
-                ParseContext innerParseContext = new ParseContext();
-                int trailingTokens = countTrailingTokens(line);
-                innerParseContext.addLine(line.substring(i, line.length() - trailingTokens));
-                innerParseContext.setRoot(parseContext, start + trailingTokens);
-                innerParseContext.lock();
-                Parser.parseInner(innerParseContext, node, registrar);
-                return node;
-            }
-        }
-        return null;
+  public ITreeNode parse(ParseContext parseContext) {
+    String line = parseContext.peekLine().strip();
+    for (int i = 0; i < line.length(); i++) {
+      if (line.charAt(i) != HEADER_CHAR) {
+        int start = parseContext.getPosition();
+        parseContext.advanceLine();
+        int end = parseContext.getPosition() - 2;
+        HeaderNode node = new HeaderNode(7 - i);
+        node.setPosition(Pair.of(start, end));
+        node.setParseContext(parseContext);
+        ParseContext innerParseContext = new ParseContext();
+        int trailingTokens = countTrailingTokens(line);
+        innerParseContext.addLine(line.substring(i, line.length() - trailingTokens));
+        innerParseContext.setRoot(parseContext, start + trailingTokens);
+        innerParseContext.lock();
+        Parser.parseInner(innerParseContext, node, registrar);
+        return node;
+      }
     }
+    return null;
+  }
 
-    int countTrailingTokens(String s) {
-        int c = 0;
-        int i = s.length() - 1;
-        while (true) {
-            if (s.charAt(i) != HEADER_CHAR) {
-                return c;
-            }
-            i--;
-            c++;
-        }
+  int countTrailingTokens(String s) {
+    int c = 0;
+    int i = s.length() - 1;
+    while (true) {
+      if (s.charAt(i) != HEADER_CHAR) {
+        return c;
+      }
+      i--;
+      c++;
     }
+  }
 
-    @Override
-    public boolean canBeginParse(String line) {
-        line = line.strip();
-        return line.startsWith("==") && line.endsWith("==");
-    }
+  @Override
+  public boolean canBeginParse(String line) {
+    line = line.strip();
+    return line.startsWith("==") && line.endsWith("==");
+  }
 
-    @Override
-    public String parserKey() {
-        return "Header";
-    }
+  @Override
+  public String parserKey() {
+    return "Header";
+  }
 }
