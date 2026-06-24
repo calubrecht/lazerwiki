@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -74,7 +75,7 @@ public class UserService {
     }
     User u = userRepository.findByUserName(userName).orElse(null);
     if (u != null) {
-      u.roles.size();
+      Hibernate.initialize(u.roles);
     }
     return u;
   }

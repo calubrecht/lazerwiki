@@ -7,6 +7,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -188,6 +192,32 @@ public class MediaCacheServiceTest {
     MediaRecord hostileFile =
         new MediaRecord("circleWdot.png", "default", "../../ns", user, 7, 20, 20);
     assertThrows(MediaReadException.class, () -> underTest.clearCache("default", hostileFile));
+  }
+
+  @Test
+  public void test_clearCache_deleteFails() throws IOException, MediaReadException {
+    mockScaleImage();
+
+    // Create cached file
+    Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache", "ns");
+    Path originalLocation = Paths.get(staticFileRoot, "default", "media", "ns");
+    User user = new User("Bob", "hash");
+    MediaRecord mediaRecord = new MediaRecord("circleWdot.png", "default", "ns", user, 7, 20, 20);
+    File f = Paths.get(cacheLocation.toString(), "circleWdot.png-10x10").toFile();
+    File origFile = Paths.get(originalLocation.toString(), "circleWdot.png").toFile();
+    Files.deleteIfExists(Path.of(f.getPath()));
+    underTest.getBinaryFile("default", mediaRecord, () -> loadFile(origFile), 10, 10, false);
+
+    try {
+      cacheLocation.toFile().setWritable(false);
+
+      underTest.clearCache("default", mediaRecord);
+      assertTrue(f.exists());
+      // TODO: Check logging
+    }
+    finally {
+      cacheLocation.toFile().setWritable(true);
+    }
   }
 
   @Test

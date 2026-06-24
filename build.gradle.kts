@@ -42,9 +42,7 @@ tasks.named("spotlessJavaCheck") {
 }
 
 spotbugs {
-	ignoreFailures.set(true)
 	showStackTraces.set(true)
-	showProgress.set(true)
 	excludeFilter.set(file("config/spotbugs/exclude.xml"))
 }
 

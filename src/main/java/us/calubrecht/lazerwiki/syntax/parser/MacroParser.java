@@ -22,24 +22,11 @@ public class MacroParser extends AbstractTreeParser {
     int start = parseContext.getPosition();
     boolean blockEnded = false;
     int lineCount = 0;
-    String optionString = "";
-    boolean foundLines = false;
-    String firstLine = subparseContext.remainingLine();
 
     // For each line, (including first), search for Macro start and Macro end tags
     // If macro start, increment macro Count, if MACRO_END decrement. If macroCount == 0, then end
     // macro
 
-    /*
-    int macroCount = countSubstrings(firstLine, MACRO_START);
-    String lastLine = "";
-    if (countSubstrings(firstLine, MACRO_END) == macroCount) {
-        lastLine = firstLine.substring(0, firstLine.lastIndexOf(MACRO_END) + 10);
-        lineCount = 0;
-        blockEnded = true;
-    }
-    blockLines.addLine(firstLine);
-    subparseContext.advanceLine();*/
     int macroCount = 0;
     String lastLine = null;
     while (!subparseContext.isEmpty()) {
@@ -70,7 +57,7 @@ public class MacroParser extends AbstractTreeParser {
       blockLines.addLine(nextLine);
     }
     if (!blockEnded) {
-      // No hiddenEnd found, abort block
+      // No MACRO_END found, abort block
       return null;
     }
     blockLines.lock();
@@ -83,19 +70,6 @@ public class MacroParser extends AbstractTreeParser {
     macroNode.setParseContext(parseContext);
     macroNode.setPosition(start, parseContext.getPosition());
     return macroNode;
-    /*CharSequence sequence = parseContext.subsequence();
-    int start = parseContext.getPosition();
-    Matcher matcher = macroPattern.matcher(sequence);
-    if (matcher.find()) {
-        String text = matcher.group(1);
-        String fullText = matcher.group();
-        int length = fullText.length();
-        MacroNode node = new MacroNode(text, fullText);
-        node.setPosition(Pair.of(start, start + length - 1));
-        node.setParseContext(parseContext);
-        return Pair.of(length, node);
-    }
-    return null;*/
   }
 
   @Override

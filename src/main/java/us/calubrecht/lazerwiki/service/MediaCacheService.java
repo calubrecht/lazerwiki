@@ -126,7 +126,9 @@ public class MediaCacheService {
       throw new MediaReadException("Invalid path");
     }
     for (File file : files) {
-      file.delete();
+      if (!file.delete()) {
+        logger.warn("Failed to delete cache file: {}", file.getPath());
+      }
     }
   }
 }

@@ -19,7 +19,7 @@ public interface ITreeNode {
   }
 
   default String getSourceFromContext() {
-    if (getParseContext() == null | getPosition() == null) {
+    if (getParseContext() == null || getPosition() == null) {
       // Node has not been fully initialized, cannot get source
       return null;
     }
