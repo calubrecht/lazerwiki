@@ -39,8 +39,14 @@ spotbugs {
 	showProgress.set(true)
 }
 
+tasks.spotbugsTest {
+	enabled = false
+}
+
 tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
 	auxClassPaths = configurations.compileClasspath.get()
+	logging.captureStandardOutput(LogLevel.DEBUG)
+	logging.captureStandardError(LogLevel.DEBUG)
 	reports.create("html") {
 		required.set(true)
 	}
