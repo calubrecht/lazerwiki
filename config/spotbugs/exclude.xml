@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!--
+        JPA model entities use shared object references by design.
+        Defensive copies would break Hibernate's identity model.
+    -->
+    <Match>
+        <Package name="us.calubrecht.lazerwiki.model"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!--
+        Response DTOs are serialized to JSON immediately after creation.
+        Request DTOs are deserialized by Jackson and not retained by callers.
+        Defensive copies in these short-lived objects provide no real benefit.
+    -->
+    <Match>
+        <Package name="us.calubrecht.lazerwiki.responses"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Package name="us.calubrecht.lazerwiki.requests"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!--
+        renderState is intentionally shared and mutable — renderers write into it
+        to pass state between components during page rendering.
+    -->
+    <Match>
+        <Class name="us.calubrecht.lazerwiki.service.renderhelpers.RenderContext"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>

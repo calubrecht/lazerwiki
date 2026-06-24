@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ public class LinkService {
     linkRepository.saveAll(links);
   }
 
+  @Transactional(readOnly = true)
   public List<String> getLinksOnPage(String site, String page) {
     PageDescriptor pd = PageService.decodeDescriptor(page);
     return linkRepository
@@ -40,6 +41,7 @@ public class LinkService {
         .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   public List<String> getBacklinks(String site, String page) {
     PageDescriptor pd = PageService.decodeDescriptor(page);
     return linkRepository

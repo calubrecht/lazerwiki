@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.repository.PageCacheRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
@@ -29,12 +30,14 @@ public class PageSearchService {
   @Value("${lazerwiki.db.engine:mysql}")
   String dbEngine;
 
+  @Transactional(readOnly = true)
   public Map<String, List<SearchResult>> searchPages(
       String host, String userName, String searchTerm) {
     String[] searchValues = searchTerm.split(":");
     return searchPages(host, userName, Map.of(searchValues[0], searchValues[1]));
   }
 
+  @Transactional(readOnly = true)
   public Map<String, List<SearchResult>> searchPages(
       String host, String userName, Map<String, String> searchTerms) {
     String site = siteService.getSiteForHostname(host);

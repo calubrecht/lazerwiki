@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ public class GlobalSettingsService {
 
   @Autowired GlobalSettingsRepository repo;
 
-  @Transactional
+  @Transactional(readOnly = true)
   public GlobalSettings getSettings() {
     return repo.getSettings();
   }

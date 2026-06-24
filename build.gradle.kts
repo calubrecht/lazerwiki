@@ -45,6 +45,7 @@ spotbugs {
 	ignoreFailures.set(true)
 	showStackTraces.set(true)
 	showProgress.set(true)
+	excludeFilter.set(file("config/spotbugs/exclude.xml"))
 }
 
 tasks.spotbugsTest {
@@ -56,6 +57,9 @@ tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
 	logging.captureStandardOutput(LogLevel.DEBUG)
 	logging.captureStandardError(LogLevel.DEBUG)
 	reports.create("html") {
+		required.set(true)
+	}
+	reports.create("xml") {
 		required.set(true)
 	}
 }

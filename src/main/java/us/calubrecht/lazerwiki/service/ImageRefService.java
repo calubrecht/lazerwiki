@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +29,7 @@ public class ImageRefService {
     imageRefRepository.saveAll(imageRefs);
   }
 
+  @Transactional(readOnly = true)
   public List<String> getImagesOnPage(String site, String page) {
     PageDescriptor pd = PageService.decodeDescriptor(page);
     return imageRefRepository
@@ -42,6 +43,7 @@ public class ImageRefService {
         .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   public List<String> getRefsForImage(String site, String imageRef) {
     PageDescriptor pd = PageService.decodeDescriptor(imageRef);
     return imageRefRepository

@@ -35,6 +35,7 @@ public class NamespaceService {
     return namespace.substring(0, namespace.lastIndexOf(":"));
   }
 
+  @Transactional(readOnly = true)
   public boolean canReadNamespace(String site, String namespace, String userName) {
     Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
     if (nsObj == null) {
@@ -69,6 +70,7 @@ public class NamespaceService {
     return !intersection.isEmpty();
   }
 
+  @Transactional(readOnly = true)
   public boolean canWriteNamespace(String site, String namespace, String userName) {
     Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
     if (nsObj == null) {
@@ -96,6 +98,7 @@ public class NamespaceService {
     return !intersection.isEmpty();
   }
 
+  @Transactional(readOnly = true)
   public boolean canDeleteInNamespace(String site, String namespace, String userName) {
     if (User.isGuest(userName)) {
       return false;
@@ -114,6 +117,7 @@ public class NamespaceService {
     return !intersection.isEmpty() && canWriteNamespace(site, namespace, userName);
   }
 
+  @Transactional(readOnly = true)
   public boolean canUploadInNamespace(String site, String namespace, String userName) {
     if (User.isGuest(userName)) {
       return false;
@@ -164,6 +168,7 @@ public class NamespaceService {
     return allValid.stream().filter(m -> !unreadableNamespaces.contains(m.getNamespace())).toList();
   }
 
+  @Transactional(readOnly = true)
   public List<String> getReadableNamespaces(String site, String userName) {
     List<String> allPageNS = pageRepository.getAllNamespaces(site);
     List<String> allMediaNS = mediaRecordRepository.getAllNamespaces(site);
@@ -172,6 +177,7 @@ public class NamespaceService {
     return allNS.stream().filter(ns -> canReadNamespace(site, ns, userName)).toList();
   }
 
+  @Transactional(readOnly = true)
   public Namespace.RestrictionType getNSRestriction(String site, String namespace) {
     Namespace nsObj = namespaceRepository.findBySiteAndNamespace(site, namespace);
     if (nsObj == null) {

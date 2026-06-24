@@ -39,6 +39,7 @@ public class SiteService {
             .build();
   }
 
+  @Transactional(readOnly = true)
   @Cacheable("sitesForHostname")
   public String getSiteForHostname(String hostname) {
     Site s = siteRepository.findByHostname(hostname.toLowerCase());
@@ -48,6 +49,7 @@ public class SiteService {
     return siteRepository.findByHostname("*").name;
   }
 
+  @Transactional(readOnly = true)
   public String getSiteNameForHostname(String hostname) {
     Site s = siteRepository.findByHostname(hostname.toLowerCase());
     if (s == null) {
@@ -59,6 +61,7 @@ public class SiteService {
     return s.siteName;
   }
 
+  @Transactional(readOnly = true)
   public Object getSettingForHostname(String hostname, String setting) {
     Site s = siteRepository.findByHostname(hostname.toLowerCase());
     if (s == null || !s.settings.containsKey(setting)) {
@@ -70,12 +73,14 @@ public class SiteService {
     return s.settings.get(setting);
   }
 
+  @Transactional(readOnly = true)
   @Cacheable("hostForSitename")
   public String getHostForSitename(String site) {
     Optional<Site> s = siteRepository.findById(site);
     return s.map(ss -> ss.hostname).orElse("*");
   }
 
+  @Transactional(readOnly = true)
   public List<Site> getAllSites(User u) {
     List<String> roles = u.getRolesString();
     return DbSupport.toStream(siteRepository.findAll())

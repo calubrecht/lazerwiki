@@ -63,7 +63,7 @@ public class UserService {
     activityLogService.log(ActivityType.ACTIVITY_PROTO_CREATE_USER, null, createdBy, msg);
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Cacheable("UserService-getUser")
   public User getUser(String userName) {
     if (userName.equals(SYS_USER)) {
@@ -79,6 +79,7 @@ public class UserService {
     return u;
   }
 
+  @Transactional(readOnly = true)
   @Cacheable("UserService-getUsers")
   public List<UserDTO> getUsers() {
     return DbSupport.toStream(userRepository.findAll())

@@ -86,6 +86,7 @@ public class MediaService {
     return height != 0 && record.getHeight() != height;
   }
 
+  @Transactional(readOnly = true)
   public byte[] getBinaryFile(String host, String userName, String fileName, String size)
       throws IOException, MediaReadException {
     String site = siteService.getSiteForHostname(host);
@@ -287,6 +288,7 @@ public class MediaService {
     return node;
   }
 
+  @Transactional(readOnly = true)
   public MediaListResponse getAllFiles(String host, String userName) {
     String site = siteService.getSiteForHostname(host);
     List<MediaRecord> mediaRecords =
@@ -335,6 +337,7 @@ public class MediaService {
     return f.lastModified();
   }
 
+  @Transactional(readOnly = true)
   public List<MediaHistoryRecord> getRecentChanges(String host, String user) {
     String site = siteService.getSiteForHostname(host);
     List<String> namespaces = namespaceService.getReadableNamespaces(site, user);
