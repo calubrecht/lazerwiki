@@ -31,4 +31,31 @@
         <Class name="us.calubrecht.lazerwiki.service.renderhelpers.RenderContext"/>
         <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
     </Match>
+
+    <!--
+        Syntax framework parse tree nodes and parsers use shared object references
+        by design — the tree is built and traversed within a single render cycle.
+    -->
+    <Match>
+        <Class name="~us\.calubrecht\.lazerwiki\.syntax\..*"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!--
+        Inner class RenderOutputImpl exposes render state intentionally —
+        callers read it to extract macro output after rendering.
+    -->
+    <Match>
+        <Class name="us.calubrecht.lazerwiki.service.MacroService$RenderOutputImpl"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <!--
+        Inner class LogoutListener stores this$0 (implicit outer class reference) —
+        unavoidable Java inner class behavior, not a real exposure.
+    -->
+    <Match>
+        <Class name="us.calubrecht.lazerwiki.LazerWikiApplication$LogoutListener"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>
