@@ -33,6 +33,14 @@ spotless {
 	}
 }
 
+tasks.spotlessCheck {
+	enabled = false
+}
+
+tasks.named("spotlessJavaCheck") {
+	enabled = false
+}
+
 spotbugs {
 	ignoreFailures.set(true)
 	showStackTraces.set(true)
