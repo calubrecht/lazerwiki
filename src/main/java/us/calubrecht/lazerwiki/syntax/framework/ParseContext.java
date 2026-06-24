@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 
-public class ParseContext implements Iterable<String> {
+public class ParseContext implements Iterable<String>, ReadOnlyParseContext {
   final StringBuilder fullText;
   String nextLine;
   int lineStart = 0;
@@ -15,7 +15,7 @@ public class ParseContext implements Iterable<String> {
   final List<String> lines;
   boolean readonly;
   int rootIdx = 0;
-  ParseContext rootContext = this;
+  ReadOnlyParseContext rootContext = this;
 
   public ParseContext(String fullText) {
     this.fullText = new StringBuilder(fullText);
@@ -30,7 +30,7 @@ public class ParseContext implements Iterable<String> {
     fullText = new StringBuilder();
   }
 
-  public ParseContext(String fullText, int rootPosition, ParseContext rootContext) {
+  public ParseContext(String fullText, int rootPosition, ReadOnlyParseContext rootContext) {
     this.fullText = new StringBuilder(fullText);
     lines = fullText.lines().toList();
     nextLine = lines.get(0);
@@ -149,7 +149,7 @@ public class ParseContext implements Iterable<String> {
     rootIdx = rootPosition;
   }
 
-  public ParseContext getRootContext() {
+  public ReadOnlyParseContext getRootContext() {
     return rootContext;
   }
 

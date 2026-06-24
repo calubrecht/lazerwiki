@@ -2,11 +2,11 @@ package us.calubrecht.lazerwiki.syntax.nodes;
 
 import org.apache.commons.lang3.tuple.Pair;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
-import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
+import us.calubrecht.lazerwiki.syntax.framework.ReadOnlyParseContext;
 
 public abstract class AbstractNode implements ITreeNode {
   Pair<Integer, Integer> position = null;
-  ParseContext fullContext = null;
+  ReadOnlyParseContext fullContext = null;
 
   @Override
   public void setPosition(Pair<Integer, Integer> position) {
@@ -19,12 +19,12 @@ public abstract class AbstractNode implements ITreeNode {
   }
 
   @Override
-  public void setParseContext(ParseContext parseContext) {
+  public void setParseContext(ReadOnlyParseContext parseContext) {
     this.fullContext = parseContext.getRootContext();
   }
 
   @Override
-  public ParseContext getParseContext() {
+  public ReadOnlyParseContext getParseContext() {
     return fullContext;
   }
 

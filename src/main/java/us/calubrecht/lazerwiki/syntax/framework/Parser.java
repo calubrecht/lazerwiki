@@ -20,13 +20,13 @@ public class Parser {
     if (markup.isEmpty()) {
       ContainerNode rootNode = new ContainerNode();
       ParseContext parseContext = new ParseContext();
-      rootNode.setParseContext(parseContext);
+      rootNode.setParseContext(parseContext.getRootContext());
       rootNode.setPosition(0, 0);
       return rootNode;
     }
     ParseContext parseContext = new ParseContext(markup);
     ContainerNode rootNode = new ContainerNode();
-    rootNode.setParseContext(parseContext);
+    rootNode.setParseContext(parseContext.getRootContext());
     rootNode.setPosition(0, markup.length() - 1);
     return parse(parseContext, rootNode, parserRegistrar.getParsers());
   }
@@ -49,7 +49,7 @@ public class Parser {
         String nextLine = parseContext.remainingLine();
         nextNode = new TextNode(parseContext.remainingLine());
         parseContext.advanceLine();
-        nextNode.setParseContext(parseContext);
+        nextNode.setParseContext(parseContext.getRootContext());
         nextNode.setPosition(Pair.of(nodeStart, nodeStart + nextLine.length() - 1));
       }
       container.addChild(nextNode);
@@ -108,13 +108,13 @@ public class Parser {
     parentNode.addChild(textNode(buffer, textStart, parentNode.getParseContext()));
   }
 
-  static TextNode textNode(StringBuilder buffer, int position, ParseContext parseContext) {
+  static TextNode textNode(StringBuilder buffer, int position, ReadOnlyParseContext parseContext) {
     if (buffer.isEmpty()) {
       return null;
     }
     TextNode node = new TextNode(buffer.toString());
     node.setPosition(Pair.of(position, position + node.asString().length() - 1));
-    node.setParseContext(parseContext.getRootContext());
+    node.setParseContext(parseContext);
     return node;
   }
 }

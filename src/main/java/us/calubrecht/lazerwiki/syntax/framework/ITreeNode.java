@@ -10,9 +10,9 @@ public interface ITreeNode {
   String asString();
 
   /** For validation and debugging reference */
-  void setParseContext(ParseContext parseContext);
+  void setParseContext(ReadOnlyParseContext parseContext);
 
-  ParseContext getParseContext();
+  ReadOnlyParseContext getParseContext();
 
   default void setPosition(int start, int end) {
     setPosition(Pair.of(start, end));
@@ -23,7 +23,7 @@ public interface ITreeNode {
       // Node has not been fully initialized, cannot get source
       return null;
     }
-    ParseContext context = getParseContext();
+    ReadOnlyParseContext context = getParseContext();
     Pair<Integer, Integer> position = getPosition();
     // Position uses inclusive endpoints, substring's end is exclusive
     return context.getFullText().substring(position.getLeft(), position.getRight() + 1);

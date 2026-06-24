@@ -1,7 +1,7 @@
 package us.calubrecht.lazerwiki.syntax.nodes;
 
 import org.apache.commons.lang3.tuple.Pair;
-import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
+import us.calubrecht.lazerwiki.syntax.framework.ReadOnlyParseContext;
 
 public class ImageNode extends AbstractNode {
   final String source;
@@ -54,7 +54,7 @@ public class ImageNode extends AbstractNode {
       // Node has not been fully initialized, cannot get source
       return null;
     }
-    ParseContext context = getParseContext();
+    ReadOnlyParseContext context = getParseContext();
     Pair<Integer, Integer> position = getSourcePosition();
     // Position uses inclusive endpoints, substring's end is exclusive
     return context.getFullText().substring(position.getLeft(), position.getRight() + 1);
