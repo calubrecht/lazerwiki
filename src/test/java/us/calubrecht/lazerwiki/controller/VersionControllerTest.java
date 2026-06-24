@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class VersionControllerTest {
 
   @Autowired MockMvc mockMvc;
+  @Autowired VersionController versionController;
 
   @Test
   public void test_version() throws Exception {
@@ -26,6 +27,6 @@ public class VersionControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().string("test.version"));
 
-    assertEquals("test.version", VersionController.getVersion());
+    assertEquals("test.version", versionController.version());
   }
 }

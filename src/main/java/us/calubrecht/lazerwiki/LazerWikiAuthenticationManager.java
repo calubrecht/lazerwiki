@@ -1,8 +1,8 @@
 package us.calubrecht.lazerwiki;
 
 import java.util.stream.Collectors;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,8 +16,8 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.UserService;
 
 @Component
-public class LazerWikiAuthenticationManager implements AuthenticationManager {
-  final Log logger = LogFactory.getLog(getClass());
+public final class LazerWikiAuthenticationManager implements AuthenticationManager {
+  final Logger logger = LogManager.getLogger(getClass());
 
   @Autowired UserService userService;
 

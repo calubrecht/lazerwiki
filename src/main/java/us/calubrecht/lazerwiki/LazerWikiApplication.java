@@ -11,16 +11,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
-import us.calubrecht.lazerwiki.controller.VersionController;
+import org.springframework.context.event.EventListener;
 
 @SpringBootApplication
 @ServletComponentScan
 public class LazerWikiApplication extends SpringBootServletInitializer {
   final Logger logger = LoggerFactory.getLogger(getClass());
+
+  @Value("${app.version}")
+  private String appVersion;
 
   public static void main(String[] args) {
     SpringApplication.run(LazerWikiApplication.class, args);
@@ -37,7 +42,11 @@ public class LazerWikiApplication extends SpringBootServletInitializer {
     servletContext.getSessionCookieConfig().setMaxAge(90 * 24 * 60 * 60);
     servletContext.getSessionCookieConfig().setSecure(true);
     servletContext.setSessionTimeout(90 * 24 * 60);
-    logger.info("Started Lazerwiki Application  v:{}", VersionController.getVersion());
+  }
+
+  @EventListener(ApplicationReadyEvent.class)
+  public void onReady(ApplicationReadyEvent event) {
+    logger.info("Started Lazerwiki Application  v:{}", appVersion);
   }
 
   @Bean
