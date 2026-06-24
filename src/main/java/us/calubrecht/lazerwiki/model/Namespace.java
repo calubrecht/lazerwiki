@@ -17,10 +17,26 @@ public class Namespace {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   public Long id;
 
-  public String site;
-  public String namespace;
+  private String site;
+  private String namespace;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "restriction_type")
   public RestrictionType restrictionType;
+
+  public String getSite() {
+    return site;
+  }
+
+  public void setSite(String site) {
+    this.site = site;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public void setNamespace(String namespace) {
+    this.namespace = namespace;
+  }
 }

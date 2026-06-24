@@ -40,7 +40,7 @@ public class NamespaceServiceTest {
     assertTrue(underTest.canReadNamespace("site1", "ns1", "bob"));
 
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
 
@@ -81,7 +81,7 @@ public class NamespaceServiceTest {
     assertTrue(underTest.canReadNamespace("site1", "ns1:subns", "user"));
 
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
     assertFalse(underTest.canReadNamespace("site1", "closed:subns", "user"));
@@ -92,7 +92,7 @@ public class NamespaceServiceTest {
     assertTrue(underTest.canReadNamespace("site1", "closed:subns", "readable"));
 
     Namespace nsWriteClosed = new Namespace();
-    nsWriteClosed.namespace = "writeClosed";
+    nsWriteClosed.setNamespace("writeClosed");
     nsWriteClosed.restrictionType = Namespace.RestrictionType.WRITE_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "writeClosed"))
         .thenReturn(nsWriteClosed);
@@ -115,7 +115,7 @@ public class NamespaceServiceTest {
     assertTrue(underTest.canWriteNamespace("site1", "ns1", "bob"));
 
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.WRITE_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
 
@@ -148,7 +148,7 @@ public class NamespaceServiceTest {
     ns1.restrictionType = Namespace.RestrictionType.OPEN;
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(ns1);
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
 
@@ -173,7 +173,7 @@ public class NamespaceServiceTest {
     ns1.restrictionType = Namespace.RestrictionType.OPEN;
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(ns1);
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
 
@@ -199,7 +199,7 @@ public class NamespaceServiceTest {
     ns1.restrictionType = Namespace.RestrictionType.OPEN;
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(ns1);
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
 
@@ -222,7 +222,7 @@ public class NamespaceServiceTest {
   public void test_canUploadInNamespace() {
     assertFalse(underTest.canUploadInNamespace("site1", "ns_unknown", "Guest"));
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.WRITE_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
     User uploadUser = new User();
@@ -241,7 +241,7 @@ public class NamespaceServiceTest {
   public void test_canDeleteInNamespace() {
     assertFalse(underTest.canDeleteInNamespace("site1", "ns_unknown", "Guest"));
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "closed";
+    nsClosed.setNamespace("closed");
     nsClosed.restrictionType = Namespace.RestrictionType.WRITE_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "closed")).thenReturn(nsClosed);
     User uploadUser = new User();
@@ -268,7 +268,7 @@ public class NamespaceServiceTest {
   public void test_readableNamespaces() {
     when(pageRepository.getAllNamespaces(eq("site1"))).thenReturn(List.of("ns1", "ns2", "ns3"));
     Namespace nsClosed = new Namespace();
-    nsClosed.namespace = "ns3";
+    nsClosed.setNamespace("ns3");
     nsClosed.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns3")).thenReturn(nsClosed);
     User bob = new User("Bob", "");
@@ -282,8 +282,8 @@ public class NamespaceServiceTest {
   @Test
   public void test_getNSRestriction() {
     Namespace nsObj = new Namespace();
-    nsObj.site = "site1";
-    nsObj.namespace = "ns1";
+    nsObj.setSite("site1");
+    nsObj.setNamespace("ns1");
     nsObj.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(nsObj);
 
@@ -296,8 +296,8 @@ public class NamespaceServiceTest {
   public void test_setNSRestriction() {
     Namespace nsObj = new Namespace();
     nsObj.id = 1L;
-    nsObj.site = "site1";
-    nsObj.namespace = "ns1";
+    nsObj.setSite("site1");
+    nsObj.setNamespace("ns1");
     nsObj.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns1")).thenReturn(nsObj);
 
@@ -308,19 +308,19 @@ public class NamespaceServiceTest {
     verify(namespaceRepository, times(2)).save(nsCaptor.capture());
 
     assertEquals(1L, nsCaptor.getAllValues().get(0).id);
-    assertEquals("ns1", nsCaptor.getAllValues().get(0).namespace);
+    assertEquals("ns1", nsCaptor.getAllValues().get(0).getNamespace());
     assertEquals(
         Namespace.RestrictionType.WRITE_RESTRICTED,
         nsCaptor.getAllValues().get(0).restrictionType);
-    assertEquals("ns2", nsCaptor.getAllValues().get(1).namespace);
+    assertEquals("ns2", nsCaptor.getAllValues().get(1).getNamespace());
     assertEquals(
         Namespace.RestrictionType.READ_RESTRICTED,
         nsCaptor.getAllValues().get(1).restrictionType);
 
     Namespace nsObj3 = new Namespace();
     nsObj3.id = 5L;
-    nsObj3.site = "site1";
-    nsObj3.namespace = "ns3";
+    nsObj3.setSite("site1");
+    nsObj3.setNamespace("ns3");
     nsObj3.restrictionType = Namespace.RestrictionType.READ_RESTRICTED;
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns3")).thenReturn(nsObj3);
 
@@ -342,15 +342,15 @@ public class NamespaceServiceTest {
   public void test_canWriteGuest() {
     Namespace nsObj3 = new Namespace();
     nsObj3.id = 5L;
-    nsObj3.site = "site1";
-    nsObj3.namespace = "ns3";
+    nsObj3.setSite("site1");
+    nsObj3.setNamespace("ns3");
     nsObj3.restrictionType = Namespace.RestrictionType.OPEN;
 
     when(namespaceRepository.findBySiteAndNamespace("site1", "ns3")).thenReturn(nsObj3);
     Namespace nsObjGuestWritable = new Namespace();
     nsObjGuestWritable.id = 5L;
-    nsObjGuestWritable.site = "site1";
-    nsObjGuestWritable.namespace = "guestWritable";
+    nsObjGuestWritable.setSite("site1");
+    nsObjGuestWritable.setNamespace("guestWritable");
     nsObjGuestWritable.restrictionType = Namespace.RestrictionType.GUEST_WRITABLE;
 
     when(namespaceRepository.findBySiteAndNamespace("site1", "guestWritable"))

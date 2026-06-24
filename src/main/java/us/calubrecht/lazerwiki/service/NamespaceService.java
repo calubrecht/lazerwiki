@@ -199,8 +199,8 @@ public class NamespaceService {
     }
     if (nsObj == null) {
       nsObj = new Namespace();
-      nsObj.site = site;
-      nsObj.namespace = namespace;
+      nsObj.setSite(site);
+      nsObj.setNamespace(namespace);
     }
     nsObj.restrictionType = restrictionType;
     namespaceRepository.save(nsObj);
