@@ -93,6 +93,14 @@ class MediaControllerTest {
     }
 
     @Test
+    void saveFileInvalidFileType() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+        MockMultipartFile mfile = new MockMultipartFile("file", "someFile.js", MediaType.TEXT_PLAIN_VALUE, "Hello, world".getBytes());
+
+        this.mockMvc.perform(multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(auth)).andExpect(status().isForbidden());
+    }
+
+    @Test
     void listFiles() throws Exception {
         Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
         User user = new User("Bob", "hash");

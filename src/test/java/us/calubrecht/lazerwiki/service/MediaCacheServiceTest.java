@@ -181,6 +181,13 @@ public class MediaCacheServiceTest {
     }
 
     @Test
+    public void testClearCache_invalidPath() throws MediaReadException, IOException {
+        User user = new User("Bob", "hash");
+        MediaRecord hostileFile = new MediaRecord("circleWdot.png", "default",  "../../ns",user, 7, 20, 20);
+        assertThrows(MediaReadException.class, () -> underTest.clearCache("default", hostileFile));
+    }
+
+    @Test
     public void testGetBinaryFileWithContains() throws IOException, MediaWriteException, MediaReadException {
         mockScaleImage();
 

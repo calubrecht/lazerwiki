@@ -12,6 +12,7 @@ import us.calubrecht.lazerwiki.service.MacroCssService;
 import us.calubrecht.lazerwiki.service.ResourceService;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -29,7 +30,7 @@ public class ResourceController {
     @RequestMapping("{fileName}")
     public ResponseEntity<byte[]> getFile(@PathVariable String fileName, HttpServletRequest request) {
         try {
-            URL url = new URL(request.getRequestURL().toString());
+            URL url = URI.create(request.getRequestURL().toString()).toURL();
             String mimeType = URLConnection.guessContentTypeFromName(fileName);
             MediaType mediaType = mimeType != null ? MediaType.parseMediaType(mimeType) : MediaType.APPLICATION_OCTET_STREAM;
             return ResponseEntity.ok().contentType(mediaType).

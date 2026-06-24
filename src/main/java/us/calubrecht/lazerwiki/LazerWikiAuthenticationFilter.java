@@ -23,6 +23,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -92,10 +94,10 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
             try {
                 if (oReferer != null)
                 {
-                    URL referredUrl = new URL(oReferer);
-                    return (new URL(referredUrl.getProtocol(), referredUrl.getHost(), referredUrl.getPort(), url)).toString();
+                    URL referredUrl = new URI(oReferer).toURL();
+                    return new URI(referredUrl.getProtocol(), null, referredUrl.getHost(), referredUrl.getPort(), url, null, null).toURL().toString();
                 }
-            } catch (MalformedURLException e) {
+            } catch (MalformedURLException | URISyntaxException e) {
                 return url;
             }
             return super.determineTargetUrl(request, response);

@@ -1,6 +1,8 @@
 package us.calubrecht.lazerwiki.service;
 
 import jakarta.mail.MessagingException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+    final Logger logger = LogManager.getLogger(getClass());
 
     public static final String SYS_USER="<SYS_USER>";
 
@@ -123,9 +126,17 @@ public class UserService {
 
     @Transactional
     @CacheEvict(value = {"UserService-getUser", "UserService-getUsers"}, allEntries = true)
-    public void resetPassword(String userName, String password) {
+    public void resetPassword(String userName, String password, User resetBy) {
         Optional<User> u = userRepository.findByUserName(userName);
         u.ifPresent((user) -> {
+            if ((user.getRolesString().contains("ROLE_ADMIN") || user.getRolesString().contains("ROLE_USERADMIN")) && !user.userName.equals(resetBy.userName)) {
+                if (!resetBy.getRolesString().contains(("ROLE_ADMIN"))) {
+                    // Only a ROLE_ADMIN can reset the password of an admin or useradmin
+                    logger.error("Unauthorized password reset attempt. USERADMIN:{} attempted to reset password of admin {}",
+                      userName, resetBy.userName);
+                    throw new RuntimeException("Invalid password reset");
+                }
+            }
             user.passwordHash = passwordUtil.hashPassword(password);
             userRepository.save(user);
         });

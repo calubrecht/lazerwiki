@@ -180,8 +180,8 @@ public class PageUpdateService {
         PageLockResponse oldPL = pageLockService.getPageLock(host, oldPageDescriptor, user, false);
         PageLockResponse newPL = pageLockService.getPageLock(host, newPageDescriptor, user, false);
         if (!oldPL.success() || !newPL.success()) {
-            pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId());
-            pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId());
+            pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId(), user);
+            pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId(), user);
             return new MoveStatus(false, "Could not acquire page locks to move page");
         }
 
@@ -195,8 +195,8 @@ public class PageUpdateService {
                 links, images, oldPage.getTitle(), user, true);
         deletePage(host, oldPageDescriptor, user);
         activityLogService.log(ActivityType.ACTIVITY_PROTO_MOVE_PAGE, site, userService.getUser(user), new PageDescriptor(oldPageNS, oldPageName) + "->" + new PageDescriptor(newPageNS, newPageName));
-        pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId());
-        pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId());
+        pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId(), user);
+        pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId(), user);
         return new MoveStatus(true, oldPageDescriptor + " move to " + newPageDescriptor);
     }
 

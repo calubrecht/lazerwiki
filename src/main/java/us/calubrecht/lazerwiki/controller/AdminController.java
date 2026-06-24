@@ -150,7 +150,8 @@ public class AdminController {
     @PostMapping("passwordReset/{userName}")
     @PreAuthorize("@adminController.hasRole(#principal.getName(), 'ROLE_ADMIN', 'ROLE_USERADMIN')")
     public ResponseEntity<Void> resetPassword(Principal principal, @PathVariable("userName") String userName, @RequestBody UserRequest userRequest) {
-        userService.resetPassword(userName, userRequest.password());
+        User user = userService.getUser(principal.getName());
+        userService.resetPassword(userName, userRequest.password(), user);
         return ResponseEntity.ok().build();
     }
 
@@ -206,11 +207,6 @@ public class AdminController {
         User user = userService.getUser(principal.getName());
         siteDelService.deleteSiteCompletely(siteName, principal.getName());
         return ResponseEntity.ok(siteService.getAllSites(user));
-    }
-
-    @GetMapping("globalSettings")
-    public ResponseEntity<GlobalSettings> getGlobalSettings(Principal principal) {
-        return ResponseEntity.ok(globalSettingsService.getSettings());
     }
 
     @PostMapping("globalSettings")

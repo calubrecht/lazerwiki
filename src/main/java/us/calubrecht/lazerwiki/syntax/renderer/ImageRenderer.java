@@ -73,7 +73,7 @@ public class ImageRenderer extends AbstractRenderer {
     }
 
     StringBuilder renderLinkOnly(String src, String title, String size) {
-        String linkText = title == null ? src : title;
+        String linkText = sanitize(title == null ? src : title);
         return new StringBuilder(String.format("<a href=\"/_media/%s%s\" class=\"media linkOnly\" target=\"_blank\">%s</a>", src, size, linkText));
     }
 

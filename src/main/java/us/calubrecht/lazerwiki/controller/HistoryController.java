@@ -11,6 +11,7 @@ import us.calubrecht.lazerwiki.service.MediaService;
 import us.calubrecht.lazerwiki.service.PageService;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class HistoryController {
 
     @RequestMapping(value = "/recentChanges")
     public RecentChangesResponse recentChanges(Principal principal, HttpServletRequest request) throws MalformedURLException {
-        URL url = new URL(request.getRequestURL().toString());
+        URL url = URI.create(request.getRequestURL().toString()).toURL();
         String userName = principal == null ? User.GUEST : principal.getName();
         RecentChangesResponse pageChanges = pageService.recentChanges(url.getHost(), userName);
         List<MediaHistoryRecord> mediaChanges = mediaService.getRecentChanges(url.getHost(), userName);

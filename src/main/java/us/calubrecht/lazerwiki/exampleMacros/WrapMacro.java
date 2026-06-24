@@ -1,4 +1,4 @@
-package us.calubrecht.lazerwiki.exampleMacros;
+    package us.calubrecht.lazerwiki.exampleMacros;
 
 import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
@@ -19,8 +19,9 @@ public class WrapMacro extends Macro {
     @SuppressWarnings("unchecked")
     public String render(Macro.MacroContext context, String macroArgs) {
         String[] toks = macroArgs.split(":",2);
+        String className = context.sanitize(toks[0]);
         if (toks.length == 1 || toks[1].isBlank()) {
-            return "<div class=\"%s\"></div>".formatted(toks[0]);
+            return "<div class=\"%s\"></div>".formatted(className);
         }
         boolean multiLine = toks[1].contains("\n");
         MacroContext.RenderOutput renderOutput = context.renderMarkup(toks[1]);
@@ -31,6 +32,6 @@ public class WrapMacro extends Macro {
                     substring(5, innerText.length() - 6);
         }
         context.addLinks((Collection<String>)(renderOutput.getState().get(LINKS.name())));
-        return "<div class=\"%s\">%s</div>".formatted(toks[0],innerText);
+        return "<div class=\"%s\">%s</div>".formatted(className,innerText);
     }
 }

@@ -64,7 +64,7 @@ public class WebSecurityConfig {
                                             getMatcher("/api/history/recentChanges", HttpMethod.GET),
                                             getMatcher("/api/site/**", HttpMethod.GET),
                                             getMatcher("/api/plugin/**", HttpMethod.GET),
-                                            getMatcher("/api/admin/globalSettings", HttpMethod.GET),
+                                            getMatcher("/api/settings/globalSettings", HttpMethod.GET),
                                             getMatcher("/api/admin/user/*", HttpMethod.PUT),
                                             getMatcher("/api/users/resetForgottenPassword", HttpMethod.POST),
                                             getMatcher("/api/users/verifyPasswordToken", HttpMethod.POST),

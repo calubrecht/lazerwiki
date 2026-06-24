@@ -152,19 +152,48 @@ public class UserServiceTest {
     @Test
     void testResetPassword() {
         User u = new User("Frank", "pass");
+        u.roles = List.of();
         when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
         when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
 
-        userService.resetPassword("Frank", "password");
+        userService.resetPassword("Frank", "password", u);
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
         assertEquals("hash", captor.getValue().passwordHash);
 
         // Reset non-existant password is noop
-        userService.resetPassword("NotThere", "password");
+        userService.resetPassword("NotThere", "password", u);
         // Only called once above
         verify(userRepository, times(1)).save(any());
+    }
+
+    @Test
+    void testResetPassword_failAdmin() {
+        User u = new User("Frank", "pass");
+        u.roles = List.of();
+        User uadmin = new User("Mary", "pass");
+        uadmin.roles = List.of(new UserRole(uadmin, "ROLE_USERADMIN"));
+        User uadmin2 = new User("Grace", "pass");
+        uadmin2.roles = List.of(new UserRole(uadmin2, "ROLE_USERADMIN"));
+        User admin = new User("Bob", "pass");
+        admin.roles = List.of(new UserRole(admin, "ROLE_ADMIN"));
+        when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
+        when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
+        when(userRepository.findByUserName("Mary")).thenReturn(Optional.of(uadmin));
+        when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(admin));
+
+        assertThrows(RuntimeException.class, () -> userService.resetPassword("Mary", "password", u));
+        verify(userRepository, never()).save(any());
+        assertThrows(RuntimeException.class, () -> userService.resetPassword("Mary", "password", uadmin2));
+        verify(userRepository, never()).save(any());
+        assertThrows(RuntimeException.class, () -> userService.resetPassword("Bob", "password", u));
+        verify(userRepository, never()).save(any());
+        assertThrows(RuntimeException.class, () -> userService.resetPassword("Bob", "password", uadmin));
+        verify(userRepository, never()).save(any());
+        userService.resetPassword("Mary", "password", admin);
+        userService.resetPassword("Bob", "password", admin);
+        verify(userRepository, times(2)).save(any());
     }
 
     @Test

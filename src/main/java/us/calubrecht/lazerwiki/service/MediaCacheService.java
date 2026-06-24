@@ -82,7 +82,7 @@ public class MediaCacheService {
         return scaledFile;
     }
 
-    public void clearCache(String site, MediaRecord record) throws IOException {
+    public void clearCache(String site, MediaRecord record) throws IOException, MediaReadException {
         String nsPath = record.getNamespace().replaceAll(":", "/");
         ensureDir(site, nsPath);
         Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
@@ -90,6 +90,11 @@ public class MediaCacheService {
                 : new File(Paths.get(cacheLocation.toString(), record.getNamespace()).toString());
         String nameMatch = record.getFileName() + "-.*";
         File[] files = cacheDir.listFiles( (dir, name) -> name.matches(nameMatch));
+        File rootFile = new File(staticFileRoot);
+        if (!cacheDir.getCanonicalPath().startsWith(Paths.get(rootFile.getCanonicalPath(), site, "media-cache").toString())) {
+            // Path traversal attempt
+            throw new MediaReadException("Invalid path");
+        }
         for (File file: files) {
             file.delete();
         }

@@ -280,15 +280,15 @@ class AdminControllerTest {
         this.mockMvc.perform(post("/api/admin/passwordReset/User").content("{\"userName\": \"User\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Bob", ""))).
                 andExpect(status().isOk());
 
-        verify(userService).resetPassword("User", "password");
+        verify(userService).resetPassword("User", "password", adminUser);
 
         this.mockMvc.perform(post("/api/admin/passwordReset/User").content("{\"userName\": \"User\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Joe", ""))).
                 andExpect(status().isOk());
 
-        verify(userService, times(2)).resetPassword("User", "password");
+        verify(userService, times(1)).resetPassword("User", "password", userAdminUser);
         // Only Admin can add user
         unauthorized(this.mockMvc, post("/api/admin/passwordReset/User").content("{\"userName\": \"User\", \"password\": \"password\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("Frank", "")));
-        verify(userService, times(2)).resetPassword("User", "password");
+        verify(userService, never()).resetPassword("User", "password", u);
     }
 
     @Test
@@ -463,22 +463,6 @@ class AdminControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"site\":\"site1\", \"namespace\":\"ns\", \"restrictionType\": \"OPEN\"}")
                         .principal(new UsernamePasswordAuthenticationToken("Frank", "")));
-    }
-
-    @Test
-    void getGlobalSettings() throws Exception {
-        User adminUser = new User();
-        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
-        when(userService.getUser("Bob")).thenReturn(adminUser);
-
-        GlobalSettings settings = new GlobalSettings();
-        settings.settings = Map.of("Setting1", "value1");
-        when(globalSettingsService.getSettings()).thenReturn(settings);
-
-        this.mockMvc.perform(get("/api/admin/globalSettings")
-                        .principal(new UsernamePasswordAuthenticationToken("Bob", "")))
-                .andExpect(status().isOk())
-                .andExpect(content().json("{\"settings\":{\"Setting1\":\"value1\"}}"));
     }
 
     @Test

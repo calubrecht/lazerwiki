@@ -150,9 +150,11 @@ class PageLockServiceTest {
     @Test
     void releasePageLock() {
         when(siteService.getSiteForHostname("host")).thenReturn("site1");
-        underTest.releasePageLock("host", "ns:page1", "lockId");
+        User user = new User("Bob", "pass");
+        when(userService.getUser("Bob")).thenReturn(user);
+        underTest.releasePageLock("host", "ns:page1", "lockId", "Bob");
 
-        verify(pageLockRepository).deleteBySiteAndNamespaceAndPagenameAndLockId("site1", "ns", "page1", "lockId");
+        verify(pageLockRepository).deleteBySiteAndNamespaceAndPagenameAndLockIdAndOwner(eq("site1"), eq("ns"), eq("page1"), eq("lockId"), any(User.class));
     }
 
     @Test

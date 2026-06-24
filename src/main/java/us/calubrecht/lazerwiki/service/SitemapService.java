@@ -10,6 +10,8 @@ import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.responses.PageListResponse;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
@@ -24,7 +26,7 @@ public class SitemapService {
     MediaService mediaService;
 
     public String getSitemap(URL url) throws MalformedURLException, ParseException {
-        String sUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), "").toString();
+        String sUrl = url.getProtocol() + "://" + url.getAuthority();
         PageListResponse pageList = pageService.getAllPages(url.getHost(), null);
         WebSitemapGenerator wsg = new WebSitemapGenerator(url);
         for (String ns : pageList.pages().keySet().stream().sorted().toList()) {

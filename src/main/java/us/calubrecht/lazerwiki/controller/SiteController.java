@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import us.calubrecht.lazerwiki.service.SiteService;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 @RestController
@@ -18,7 +19,7 @@ public class SiteController {
 
     @GetMapping
     public String getSiteName(HttpServletRequest request) throws MalformedURLException {
-        URL url = new URL(request.getRequestURL().toString());
+        URL url = URI.create(request.getRequestURL().toString()).toURL();
         return siteService.getSiteNameForHostname(url.getHost());
     }
 

@@ -14,6 +14,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 import us.calubrecht.lazerwiki.config.JsonConfig;
+import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.model.UserRole;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.exception.PageReadException;
 import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
@@ -48,6 +50,9 @@ public class PageControllerTest {
 
     @MockitoBean
     PageLockService pageLockService;
+
+    @MockitoBean
+    UserService userService;
 
     @Test
     public void testGetPage() throws Exception {
@@ -181,17 +186,38 @@ public class PageControllerTest {
 
     @Test
     public void testListNamespaces() throws Exception {
-        Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
-        this.mockMvc.perform(get("/api/page/listNamespaces/site1").
-                        principal(auth)).
-                andExpect(status().isOk());
+        User user = new User("Bob", "");
+        user.roles = List.of();
+        when(userService.getUser("Bob")).thenReturn(user);
+        User guestUser = new User(User.GUEST, "");
+        guestUser.roles = List.of();
+        when(userService.getUser(User.GUEST)).thenReturn(guestUser);
 
-        verify(pageService).getAllNamespaces(eq("site1"), eq("Bob"));
+        Authentication bobAuth = new UsernamePasswordAuthenticationToken("Bob", "password");
 
-        this.mockMvc.perform(get("/api/page/listNamespaces/site1")).
-                andExpect(status().isOk());
+        // Non-admin and guest are forbidden
+        this.mockMvc.perform(get("/api/page/listNamespaces/site1").principal(bobAuth))
+                .andExpect(status().isForbidden());
+        this.mockMvc.perform(get("/api/page/listNamespaces/site1"))
+                .andExpect(status().isForbidden());
 
-        verify(pageService).getAllNamespaces(eq("site1"), eq("Guest"));
+        // Global admin can access any site
+        User adminUser = new User("Admin", "");
+        adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
+        when(userService.getUser("Admin")).thenReturn(adminUser);
+        Authentication adminAuth = new UsernamePasswordAuthenticationToken("Admin", "password1");
+        this.mockMvc.perform(get("/api/page/listNamespaces/site1").principal(adminAuth))
+                .andExpect(status().isOk());
+        verify(pageService).getAllNamespaces(eq("site1"), eq("Admin"));
+
+        // Site admin can access their own site
+        User siteAdminUser = new User("SiteAdmin", "");
+        siteAdminUser.roles = List.of(new UserRole(siteAdminUser, "ROLE_ADMIN:site1"));
+        when(userService.getUser("SiteAdmin")).thenReturn(siteAdminUser);
+        Authentication siteAdminAuth = new UsernamePasswordAuthenticationToken("SiteAdmin", "password1");
+        this.mockMvc.perform(get("/api/page/listNamespaces/site1").principal(siteAdminAuth))
+                .andExpect(status().isOk());
+        verify(pageService).getAllNamespaces(eq("site1"), eq("SiteAdmin"));
     }
 
     @Test
@@ -314,14 +340,14 @@ public class PageControllerTest {
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageLockService).releasePageLock(eq("localhost"), eq("testPage"), eq("abcd"));
+        verify(pageLockService).releasePageLock(eq("localhost"), eq("testPage"), eq("abcd"), eq("Bob"));
 
         this.mockMvc.perform(post("/api/page/releaseLock/id/abcd").
                         contentType(MediaType.APPLICATION_JSON).
                         principal(auth)).
                 andExpect(status().isOk());
 
-        verify(pageLockService).releasePageLock(eq("localhost"), eq(""), eq("abcd"));
+        verify(pageLockService).releasePageLock(eq("localhost"), eq(""), eq("abcd"), eq("Bob"));
     }
 
     @Test

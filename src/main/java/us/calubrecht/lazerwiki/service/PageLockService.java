@@ -13,6 +13,7 @@ import us.calubrecht.lazerwiki.responses.PageLockResponse;
 import us.calubrecht.lazerwiki.repository.PageLockRepository;
 import us.calubrecht.lazerwiki.repository.PageRepository;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Random;
 
@@ -57,10 +58,11 @@ public class PageLockService {
         return new PageLockResponse(p.namespace(), p.pageName(), revision, lock.getOwner().userName, lock.getLockTime(), false, null);
     }
 
-    public synchronized void releasePageLock(String host, String sPageDescriptor, String lockId) {
+    public synchronized void releasePageLock(String host, String sPageDescriptor, String lockId, String userName) {
         String site = siteService.getSiteForHostname(host);
         PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
-        repository.deleteBySiteAndNamespaceAndPagenameAndLockId(site, p.namespace(), p.pageName(), lockId);
+        User user = userService.getUser(userName);
+        repository.deleteBySiteAndNamespaceAndPagenameAndLockIdAndOwner(site, p.namespace(), p.pageName(), lockId, user);
     }
 
     public synchronized void releaseAnyPageLock(String host, String sPageDescriptor) {
@@ -70,7 +72,7 @@ public class PageLockService {
     }
 
     String newLockId() {
-        Random r = new Random();
+        Random r = new SecureRandom();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 5; i++) {
             sb.append(String.format("%08x", r.nextInt()));

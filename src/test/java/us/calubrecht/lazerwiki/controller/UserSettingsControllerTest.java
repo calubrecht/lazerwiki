@@ -34,10 +34,11 @@ public class UserSettingsControllerTest {
 
     @Test
     void setPassword() throws Exception {
-       when(userService.getUser("bob")).thenReturn(new User("Bob", null));
+       User bob = new User("Bob", null);
+       when(userService.getUser("bob")).thenReturn(bob);
        mockMvc.perform(post("/api/users/setPassword").content("{\"userName\":\"Bob\", \"password\":\"OK\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
                andExpect(status().isOk()).andExpect(content().json("{\"success\":true, \"message\": \"\"}"));
-       verify(userService).resetPassword("Bob", "OK");
+       verify(userService).resetPassword("Bob", "OK", bob);
 
        mockMvc.perform(post("/api/users/setPassword").content("{\"userName\":\"jim\", \"password\":\"OK\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
                 andExpect(status().isForbidden());

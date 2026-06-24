@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import us.calubrecht.lazerwiki.service.SitemapService;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 
@@ -21,7 +22,7 @@ public class SitemapController {
 
     @RequestMapping(value = "/sitemap.xml", produces= MediaType.APPLICATION_XML_VALUE)
     ResponseEntity<String> sitemap(HttpServletRequest request) throws MalformedURLException, ParseException {
-        URL url = new URL(request.getRequestURL().toString());
+        URL url = URI.create(request.getRequestURL().toString()).toURL();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Disposition", "attachment;filename=sitemap.xml");
         return new ResponseEntity<>(service.getSitemap(url), headers, HttpStatus.OK);

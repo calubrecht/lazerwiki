@@ -601,7 +601,6 @@ public class PageServiceTest {
         assertEquals(Namespace.RESTRICTION_TYPE.WRITE_RESTRICTED, dTree.getChildren().get(1).getInherited_restriction_type());
     }
 
-
     public static class PageDescImpl implements PageDesc {
         final String namespace;
         final String pageName;

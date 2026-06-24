@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -23,7 +24,7 @@ public class PluginController {
 
     @GetMapping("_resources/js/pluginJS.js")
     public ResponseEntity<byte[]> getPluginJS(HttpServletRequest request ) throws MalformedURLException {
-        URL url = new URL(request.getRequestURL().toString());
+        URL url = URI.create(request.getRequestURL().toString()).toURL();
         String mimeType = URLConnection.guessContentTypeFromName("pluginJS.js");
         MediaType mediaType = MediaType.parseMediaType(mimeType);
         return ResponseEntity.ok().contentType(mediaType).body(pluginService.getEditToolbarDefs(url.getHost()).getBytes());
