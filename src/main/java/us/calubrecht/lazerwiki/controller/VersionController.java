@@ -20,10 +20,6 @@ public class VersionController {
     return appVersion;
   }
 
-  public static VersionController getInstance() {
-    return instance;
-  }
-
   public static String getVersion() {
     return instance.appVersion;
   }

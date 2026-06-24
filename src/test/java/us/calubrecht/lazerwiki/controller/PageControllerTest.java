@@ -165,6 +165,14 @@ public class PageControllerTest {
                 .principal(auth))
         .andExpect(status().isOk())
         .andExpect(content().json("{\"success\":false, \"msg\":\"Bad\"}"));
+
+    this.mockMvc
+            .perform(
+                    post("/api/page/testPage/savePage")
+                            .content(data)
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    // TODO: verify guest save is logged.
   }
 
   @Test
