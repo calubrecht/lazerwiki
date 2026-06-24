@@ -66,4 +66,13 @@
     <Match>
         <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
     </Match>
+
+    <!--
+        PageLockKey is a JPA @IdClass — its fields are populated by Hibernate via
+        reflection and are invisible to SpotBugs static analysis.
+    -->
+    <Match>
+        <Class name="us.calubrecht.lazerwiki.model.PageLockKey"/>
+        <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD"/>
+    </Match>
 </FindBugsFilter>

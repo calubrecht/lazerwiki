@@ -33,7 +33,7 @@ public class LazerWikiAuthenticationManager implements AuthenticationManager {
     try {
       User u = userService.getUser(name);
       if (u != null) {
-        if (userService.verifyPassword(u, token.getCredentials().toString())) {
+        if (token.getCredentials() != null && userService.verifyPassword(u, token.getCredentials().toString())) {
           return new UsernamePasswordAuthenticationToken(
               token.getName(),
               null,

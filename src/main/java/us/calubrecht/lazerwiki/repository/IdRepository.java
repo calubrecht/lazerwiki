@@ -16,6 +16,10 @@ public class IdRepository {
 
     jdbcTemplate.update(
         connection -> connection.prepareStatement(generateIdSQL, new String[] {"id"}), keyHolder);
-    return keyHolder.getKey().longValue();
+    Number key = keyHolder.getKey();
+    if (key == null) {
+      throw new IllegalStateException("Failed to generate page ID");
+    }
+    return key.longValue();
   }
 }
