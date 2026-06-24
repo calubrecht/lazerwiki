@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.LazerWikiAuthenticationManager;
 import us.calubrecht.lazerwiki.service.UserService;
@@ -13,6 +14,9 @@ import java.util.List;
 import java.util.Scanner;
 
 @Component
+@ConditionalOnProperty(
+        value = "admin.command-line.enabled",
+        havingValue = "true")
 public class AdminCommandLine implements CommandLineRunner {
     private static  final Logger logger = LoggerFactory
             .getLogger(AdminCommandLine.class);
