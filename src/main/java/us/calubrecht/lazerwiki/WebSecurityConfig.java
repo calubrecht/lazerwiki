@@ -75,8 +75,6 @@ public class WebSecurityConfig {
                                             getMatcher("/api/page/*/savePage", HttpMethod.POST),
                                             getMatcher("/api/page/lock/**", HttpMethod.POST),
                                             getMatcher("/sitemap.xml", HttpMethod.GET),
-                                            // Ignore for CORS requests
-                                            getMatcher("/**", HttpMethod.OPTIONS),
                                             createAdminMatcher).permitAll().
                                     // default
                                             anyRequest().authenticated();

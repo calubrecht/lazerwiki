@@ -78,8 +78,6 @@ public class LazerWikiAuthenticationFilter  extends AbstractAuthenticationProces
         public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                             Authentication authentication) throws IOException, ServletException
         {
-            response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-            response.setHeader("Access-Control-Allow-Credentials", "true");
             request.getSession(false).setMaxInactiveInterval(90 * 24 * 60 * 60);
             request.getSession(false).setAttribute("username", authentication.getPrincipal());
             super.onAuthenticationSuccess(request, response, authentication);
