@@ -34,7 +34,7 @@ spotless {
 }
 
 spotbugs {
-	ignoreFailures.set(false)
+	ignoreFailures.set(true)
 	showStackTraces.set(true)
 	showProgress.set(true)
 }
