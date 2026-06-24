@@ -10,7 +10,7 @@ class TOCRenderServiceTest {
   final TOCRenderService service = new TOCRenderService();
 
   @Test
-  void renderTOCSimple() {
+  void test_renderTOCSimple() {
     List<HeaderRef> headers =
         List.of(
             new HeaderRef(1, "Header 1", "Header_1"),
@@ -29,7 +29,7 @@ class TOCRenderServiceTest {
   }
 
   @Test
-  void renderTOCLeveld() {
+  void test_renderTOCLeveld() {
     List<HeaderRef> headers =
         List.of(
             new HeaderRef(1, "Header 1", "Header_1"),
@@ -54,7 +54,7 @@ class TOCRenderServiceTest {
   }
 
   @Test
-  void renderTOCDown2levls() {
+  void test_renderTOCDown2levls() {
     List<HeaderRef> headers =
         List.of(
             new HeaderRef(1, "Header 1", "Header_1"),
@@ -79,7 +79,7 @@ class TOCRenderServiceTest {
   }
 
   @Test
-  void renderTOCstartLow() {
+  void test_renderTOCstartLow() {
     List<HeaderRef> headers =
         List.of(
             new HeaderRef(3, "Header 1", "Header_1"),
@@ -100,7 +100,7 @@ class TOCRenderServiceTest {
   }
 
   @Test
-  void renderTOCSimpleWSuffix() {
+  void test_renderTOCSimpleWSuffix() {
     List<HeaderRef> headers =
         List.of(
             new HeaderRef(1, "Header 1", "Header_1"),

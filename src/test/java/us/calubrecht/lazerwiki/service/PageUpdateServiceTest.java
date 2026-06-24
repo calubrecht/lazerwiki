@@ -56,7 +56,7 @@ public class PageUpdateServiceTest {
   @MockitoBean MediaOverrideService mediaOverrideService;
 
   @Test
-  public void testSavePage() throws PageWriteException {
+  public void test_savePage() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
@@ -90,7 +90,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testSavePage_Existing() throws PageWriteException {
+  public void test_savePage_Existing() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
@@ -137,7 +137,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testSavePageDeleted() throws PageWriteException {
+  public void test_savePageDeleted() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
@@ -178,7 +178,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testSavePage_unauthorized() {
+  public void test_savePage_unauthorized() {
     when(idRepository.getNewId()).thenReturn(55L);
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(userService.getUser("Joe")).thenReturn(new User("someUser", "hash"));
@@ -200,7 +200,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testSavePageWithLinks() throws PageWriteException {
+  public void test_savePageWithLinks() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
@@ -223,7 +223,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testSavePageWithImages() throws PageWriteException {
+  public void test_savePageWithImages() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
@@ -247,7 +247,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testSavePageRevisionCheck() throws PageWriteException {
+  public void test_savePageRevisionCheck() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
@@ -290,7 +290,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testDeletePage() throws PageWriteException {
+  public void test_deletePage() throws PageWriteException {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("default");
     when(namespaceService.canDeleteInNamespace(eq("default"), eq(""), eq("bob"))).thenReturn(true);
     User user = new User("bob", "hash");
@@ -337,7 +337,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  public void testCreateDefaultSiteHomepage() throws PageWriteException, IOException {
+  public void test_createDefaultSiteHomepage() throws PageWriteException, IOException {
     when(pageRepository.getBySiteAndNamespaceAndPagename("existingSite", "", ""))
         .thenReturn(new Page());
     when(namespaceService.canWriteNamespace(eq("newSite"), any(), eq("Bob"))).thenReturn(true);
@@ -357,7 +357,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  void testMovePage() throws PageWriteException {
+  void test_movePage() throws PageWriteException {
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
@@ -420,7 +420,7 @@ public class PageUpdateServiceTest {
   }
 
   @Test
-  void testMovePageFails() throws PageWriteException {
+  void test_movePageFails() throws PageWriteException {
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("user"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), eq("ns1"), eq("user2"))).thenReturn(true);

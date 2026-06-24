@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 class EditToolbarDefTest {
 
   @Test
-  void toJSDefinition() {
+  void test_toJSDefinition() {
     EditToolbarDef defWithIcon = new EditToolbarDef("withIcon", "anIcon.png", "() => {}");
     assertEquals(
         "{name:\"withIcon\", icon:\"anIcon.png\", script:() => {}}", defWithIcon.toJSDefinition());

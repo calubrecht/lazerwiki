@@ -30,7 +30,7 @@ public class UserSettingsControllerTest {
   @Autowired MockMvc mockMvc;
 
   @Test
-  void setPassword() throws Exception {
+  void test_setPassword() throws Exception {
     User bob = new User("Bob", null);
     when(userService.getUser("bob")).thenReturn(bob);
     mockMvc
@@ -53,7 +53,7 @@ public class UserSettingsControllerTest {
   }
 
   @Test
-  void saveEmail() throws Exception {
+  void test_saveEmail() throws Exception {
     when(userService.getUser("bob")).thenReturn(new User("Bob", null));
     mockMvc
         .perform(
@@ -75,7 +75,7 @@ public class UserSettingsControllerTest {
   }
 
   @Test
-  void resetForgottenPassword() throws Exception {
+  void test_resetForgottenPassword() throws Exception {
     mockMvc
         .perform(
             post("/api/users/resetForgottenPassword")
@@ -88,7 +88,7 @@ public class UserSettingsControllerTest {
   }
 
   @Test
-  void verifyEmailToken() throws Exception {
+  void test_verifyEmailToken() throws Exception {
     when(userService.getUser("bob")).thenReturn(new User("Bob", null));
     mockMvc
         .perform(
@@ -112,7 +112,7 @@ public class UserSettingsControllerTest {
   }
 
   @Test
-  void verifyPasswordToken() throws Exception {
+  void test_verifyPasswordToken() throws Exception {
     mockMvc
         .perform(
             post("/api/users/verifyPasswordToken")

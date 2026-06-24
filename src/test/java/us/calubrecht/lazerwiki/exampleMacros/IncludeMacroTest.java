@@ -48,7 +48,7 @@ class IncludeMacroTest {
   @MockitoBean TOCRenderService tocRenderService;
 
   @Test
-  public void testIncludeMacro() {
+  public void test_includeMacro() {
     RenderContext renderContext =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
@@ -93,7 +93,7 @@ class IncludeMacroTest {
   }
 
   @Test
-  public void testIncludeMacroForCache() {
+  public void test_includeMacroForCache() {
     RenderContext renderContext =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);

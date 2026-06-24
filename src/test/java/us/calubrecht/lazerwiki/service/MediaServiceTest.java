@@ -57,7 +57,7 @@ class MediaServiceTest {
   @MockitoBean RegenCacheService regenCacheService;
 
   @Test
-  void getBinaryFile() throws IOException, MediaReadException, MediaWriteException {
+  void test_getBinaryFile() throws IOException, MediaReadException, MediaWriteException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     byte[] bytes = underTest.getBinaryFile("localhost", "Bob", "circle.png", null);
@@ -84,7 +84,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void getBinaryFileWrongSize() throws IOException, MediaReadException, MediaWriteException {
+  void test_getBinaryFileWrongSize() throws IOException, MediaReadException, MediaWriteException {
     User user = new User("Bob", "hash");
     when(userService.getUser("Bob")).thenReturn(user);
     MediaRecord newRecord = new MediaRecord("circle.png", "default", "", user, 7, 10, 10);
@@ -129,7 +129,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void getBinaryFileNoRecord() throws IOException, MediaReadException, MediaWriteException {
+  void test_getBinaryFileNoRecord() throws IOException, MediaReadException, MediaWriteException {
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     assertThrows(
@@ -145,7 +145,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void getBinaryFileContain() throws IOException, MediaReadException, MediaWriteException {
+  void test_getBinaryFileContain() throws IOException, MediaReadException, MediaWriteException {
     User user = new User("Bob", "hash");
     when(userService.getUser("Bob")).thenReturn(user);
     when(siteService.getSiteForHostname(any())).thenReturn("default");
@@ -183,7 +183,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void saveFile() throws IOException, MediaWriteException, MediaReadException {
+  void test_saveFile() throws IOException, MediaWriteException, MediaReadException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.joinNS("", "small.bin")).thenReturn("small.bin");
@@ -219,7 +219,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void saveFile_wNS() throws IOException, MediaWriteException, MediaReadException {
+  void test_saveFile_wNS() throws IOException, MediaWriteException, MediaReadException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     User user = new User("Bob", "hash");
@@ -252,7 +252,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void saveFile_real() throws IOException, MediaReadException, MediaWriteException {
+  void test_saveFile_real() throws IOException, MediaReadException, MediaWriteException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
@@ -268,7 +268,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void saveFile_Existing() throws IOException, MediaWriteException, MediaReadException {
+  void test_saveFile_Existing() throws IOException, MediaWriteException, MediaReadException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
@@ -299,7 +299,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void saveFile_PathTraversal() {
+  void test_saveFile_PathTraversal() {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canUploadInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
@@ -312,7 +312,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void testListFiles() {
+  void test_listFiles() {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canReadNamespace(any(), any(), eq("user1"))).thenReturn(true);
     User user = new User("Bob", "hash");
@@ -331,7 +331,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void testListFilesNestedNSes() {
+  void test_listFilesNestedNSes() {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     User user = new User("Bob", "hash");
     when(userService.getUser("Bob")).thenReturn(user);
@@ -366,7 +366,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void testDeleteFile() throws IOException, MediaWriteException, MediaReadException {
+  void test_deleteFile() throws IOException, MediaWriteException, MediaReadException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(namespaceService.canDeleteInNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
     User user = new User("bob", "hash");
@@ -402,7 +402,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void getFileLastModified() throws IOException, MediaWriteException, MediaReadException {
+  void test_getFileLastModified() throws IOException, MediaWriteException, MediaReadException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     long modifiedtime = underTest.getFileLastModified("localhost", "circle.png");
 
@@ -415,7 +415,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void getRecentChanges() {
+  void test_getRecentChanges() {
     User user = new User("Bob", "hash");
     when(mediaHistoryRepository.findAllBySiteAndNamespaceInOrderByTsDesc(
             any(), any(), eq(List.of("ns1", "ns2"))))
@@ -434,7 +434,7 @@ class MediaServiceTest {
   }
 
   @Test
-  void testMoveImage() throws MediaWriteException, MediaReadException, IOException {
+  void test_moveImage() throws MediaWriteException, MediaReadException, IOException {
     User oldUser = new User("Charlie", "");
     User newUser = new User("Bob", "");
     when(siteService.getSiteForHostname(any())).thenReturn("default");

@@ -18,7 +18,7 @@ public class CsrfControllerTest {
   @Autowired MockMvc mockMvc;
 
   @Test
-  public void testGetPage() throws Exception {
+  public void test_getPage() throws Exception {
     this.mockMvc.perform(get("/api/csrf")).andExpect(status().isOk());
   }
 }

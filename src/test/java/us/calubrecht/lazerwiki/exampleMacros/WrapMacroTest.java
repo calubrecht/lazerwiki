@@ -52,7 +52,7 @@ class WrapMacroTest {
   }
 
   @Test
-  void render() {
+  void test_render() {
     RenderContext renderContext = context();
     assertEquals(
         "<div class=\"special\">This is some special text</div>",
@@ -60,7 +60,7 @@ class WrapMacroTest {
   }
 
   @Test
-  void renderMultiline() {
+  void test_renderMultiline() {
     RenderContext renderContext = context();
     assertEquals(
         "<div class=\"special\"><div>This is some special text</div>\n<div>OnMultiple lines</div></div>",
@@ -69,7 +69,7 @@ class WrapMacroTest {
   }
 
   @Test
-  void renderSimple() {
+  void test_renderSimple() {
     RenderContext renderContext = context();
     assertEquals(
         "<div class=\"justTag\"></div>",
@@ -80,7 +80,7 @@ class WrapMacroTest {
   }
 
   @Test
-  void renderWithLinks() {
+  void test_renderWithLinks() {
     when(pageService.getTitle(anyString(), anyString())).thenReturn("title");
     RenderContext renderContext = context();
     macroService.renderMacro("wrap:withLink:[[aLink]]", "", renderContext);

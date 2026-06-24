@@ -23,7 +23,7 @@ class SiteControllerTest {
   @MockitoBean SiteService siteService;
 
   @Test
-  public void testVersion() throws Exception {
+  public void test_version() throws Exception {
     when(siteService.getSiteNameForHostname(("localhost"))).thenReturn("This wiki");
     this.mockMvc
         .perform(get("/api/site/"))

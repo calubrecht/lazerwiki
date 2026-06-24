@@ -18,7 +18,7 @@ class ImageRefRepositoryTest {
   @Autowired ImageRefRepository imageRefRepository;
 
   @Test
-  void findAllBySiteAndSourcePageNSAndSourcePageName() {
+  void test_findAllBySiteAndSourcePageNSAndSourcePageName() {
     List<ImageRef> refs =
         imageRefRepository.findAllBySiteAndSourcePageNSAndSourcePageName("site1", "ns1", "page1");
     assertEquals(2, refs.size());
@@ -26,7 +26,7 @@ class ImageRefRepositoryTest {
   }
 
   @Test
-  void findAllBySiteAndImageNSAndImageRef() {
+  void test_findAllBySiteAndImageNSAndImageRef() {
     List<ImageRef> refs =
         imageRefRepository.findAllBySiteAndImageNSAndImageRef("site1", "", "image1.jpg");
     assertEquals(2, refs.size());
@@ -35,7 +35,7 @@ class ImageRefRepositoryTest {
 
   @Test
   @Transactional
-  void deleteBySiteAndSourcePageNSAndSourcePageName() {
+  void test_deleteBySiteAndSourcePageNSAndSourcePageName() {
     List<ImageRef> refs =
         imageRefRepository.findAllBySiteAndImageNSAndImageRef("site1", "", "image3.jpg");
     assertEquals(2, refs.size());
@@ -48,7 +48,7 @@ class ImageRefRepositoryTest {
 
   @Test
   @Transactional
-  void saveAll() {
+  void test_saveAll() {
     List<ImageRef> refs =
         imageRefRepository.findAllBySiteAndSourcePageNSAndSourcePageName("site1", "ns1", "page55");
     assertEquals(0, refs.size());

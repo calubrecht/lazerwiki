@@ -38,7 +38,7 @@ public class RenderServiceTest {
   final PerfTracker tracker = new PerfTracker();
 
   @Test
-  public void testRender() {
+  public void test_render() {
     PageData pd =
         new PageData(null, "This is raw page text", null, null, null, PageData.ALL_RIGHTS, 1L);
     when(renderer.renderWithInfo(eq("This is raw page text"), any(RenderContext.class)))
@@ -88,7 +88,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testRenderError() {
+  public void test_renderError() {
     PageData pd = new PageData(null, "This is raw page text", null, null, PageData.ALL_RIGHTS);
     when(renderer.renderToString(
             eq("This is raw page text"), eq("host1"), eq("default"), anyString(), anyString()))
@@ -107,7 +107,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testRenderCantREad() {
+  public void test_renderCantREad() {
     PageData pd =
         new PageData(
             "Can't read this",
@@ -134,7 +134,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testSavePage() throws PageWriteException {
+  public void test_savePage() throws PageWriteException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(renderer.renderWithInfo(eq("text"), any(RenderContext.class)))
         .thenReturn(
@@ -158,7 +158,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testSavePageWithLinks() throws PageWriteException {
+  public void test_savePageWithLinks() throws PageWriteException {
     List<String> links = List.of("page1", "page2");
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     when(renderer.renderWithInfo(eq("text"), any(RenderContext.class)))
@@ -188,7 +188,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testPreviewPage() {
+  public void test_previewPage() {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     RenderContext context = new RenderContext("localhost", "default", "thisPage<preview>", "Bob");
     context.renderState().put("ID_SUFFIX", "_previewPage");
@@ -208,7 +208,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testGetRendererdPAge_Cached() {
+  public void test_getRendererdPAge_Cached() {
     PageData pd = new PageData(null, "This is raw page text", null, null, PageData.ALL_RIGHTS);
     when(renderer.renderWithInfo(eq("This is raw page text"), any(RenderContext.class)))
         .thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
@@ -259,7 +259,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testGetHistoricalRenderedPage() {
+  public void test_getHistoricalRenderedPage() {
     PageData pd = new PageData(null, "This is raw page text", null, null, PageData.ALL_RIGHTS);
     RenderContext context = new RenderContext("host1", "default", "ns:realPage", "Bob");
     context.renderState().put("ID_SUFFIX", "_historyView");
@@ -329,7 +329,7 @@ public class RenderServiceTest {
   }
 
   @Test
-  public void testRenderMoved() {
+  public void test_renderMoved() {
     PageData.PageFlags flags = new PageData.PageFlags(false, true, true, false, false, true);
     PageData pd = new PageData(null, "This is raw page text", null, null, null, flags, 1L);
     when(renderer.renderWithInfo(

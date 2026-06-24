@@ -23,7 +23,7 @@ class PasswordUtilTest {
   }
 
   @Test
-  void testMain() {
+  void test_main() {
     PasswordUtil.main(new String[] {"somePassword"});
     String firstHash = outContent.toString().trim();
     outContent.reset();

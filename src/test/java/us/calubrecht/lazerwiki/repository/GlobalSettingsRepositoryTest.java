@@ -17,7 +17,7 @@ public class GlobalSettingsRepositoryTest {
   @Autowired GlobalSettingsRepository globalSettingsRepository;
 
   @Test
-  public void testGetSettings() {
+  public void test_getSettings() {
     GlobalSettings settings = globalSettingsRepository.getSettings();
 
     assertEquals(Map.of("Setting1", "Value1"), settings.settings);

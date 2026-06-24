@@ -94,7 +94,7 @@ class ExportServiceTest {
   }
 
   @Test
-  void createExportBundle() throws IOException, MediaReadException, MediaWriteException {
+  void test_createExportBundle() throws IOException, MediaReadException, MediaWriteException {
     when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
     Map<String, List<PageDesc>> pages =
         Map.of(

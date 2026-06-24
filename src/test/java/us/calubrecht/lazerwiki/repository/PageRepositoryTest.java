@@ -29,7 +29,7 @@ class PageRepositoryTest {
   // static methods
 
   @Test
-  void findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted() {
+  void test_findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted() {
     Page site =
         pageRepository.findBySiteAndNamespaceAndPagenameAndValidtsAndDeleted(
             "site1", "ns", "page1", MAX_DATE, false);
@@ -37,7 +37,7 @@ class PageRepositoryTest {
   }
 
   @Test
-  void findBySiteAndNamespaceAndPagenameAndValidts() {
+  void test_findBySiteAndNamespaceAndPagenameAndValidts() {
     Page site =
         pageRepository.findBySiteAndNamespaceAndPagenameAndValidts(
             "site1", "ns", "deletedPage", MAX_DATE, Page.class);
@@ -45,20 +45,20 @@ class PageRepositoryTest {
   }
 
   @Test
-  void getBySiteAndNamespaceAndPagenameAndDeleted() {
+  void test_getBySiteAndNamespaceAndPagenameAndDeleted() {
     Page site =
         pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "ns", "page1", false);
     assertNotNull(site);
   }
 
   @Test
-  void getBySiteAndNamespaceAndPagename() {
+  void test_getBySiteAndNamespaceAndPagename() {
     Page site = pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "page1");
     assertNotNull(site);
   }
 
   @Test
-  void getLastRevisionBySiteAndNamespaceAndPagename() {
+  void test_getLastRevisionBySiteAndNamespaceAndPagename() {
     Long rev = pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1");
     assertEquals(2L, rev);
 
@@ -69,26 +69,26 @@ class PageRepositoryTest {
   }
 
   @Test
-  void getBySiteAndNamespaceAndPagenameAndValidts() {
+  void test_getBySiteAndNamespaceAndPagenameAndValidts() {
     Page site = pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "deletedPage");
     assertNotNull(site);
   }
 
   @Test
-  void getAllValid() {
+  void test_getAllValid() {
     List<PageDesc> pages = pageRepository.getAllValid("site1");
     assertEquals(2, pages.size());
   }
 
   @Test
-  void findAllBySiteAndNamespaceAndPagenameOrderByRevision() {
+  void test_findAllBySiteAndNamespaceAndPagenameOrderByRevision() {
     List<PageDesc> pageDescs =
         pageRepository.findAllBySiteAndNamespaceAndPagenameOrderByRevision("site1", "ns", "page1");
     assertEquals(2, pageDescs.size());
   }
 
   @Test
-  void getAllBySiteAndNamespaceAndPagename() {
+  void test_getAllBySiteAndNamespaceAndPagename() {
     List<PageText> pages =
         pageRepository.getAllBySiteAndNamespaceAndPagename(
             "mysql", "site1", List.of("ns:page1", "ns:page2"));
@@ -100,7 +100,7 @@ class PageRepositoryTest {
   }
 
   @Test
-  void findAllBySiteOrderByModifiedDesc() {
+  void test_findAllBySiteOrderByModifiedDesc() {
     List<PageDesc> pageDescs =
         pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(
             Limit.of(10), "site1", List.of("ns"));
@@ -119,7 +119,7 @@ class PageRepositoryTest {
   }
 
   @Test
-  void getAllActiveNamespaces() {
+  void test_getAllActiveNamespaces() {
     List<String> namespaces = pageRepository.getAllNamespaces("site2");
 
     assertEquals(2, namespaces.size());
@@ -135,7 +135,7 @@ class PageRepositoryTest {
   }
 
   @Test
-  void testGetMaxTS() {
+  void test_getMaxTS() {
     assertEquals("9999-12-31 00:00:00", pageRepository.getMaxTS("mysql"));
     assertEquals("253402232400000", pageRepository.getMaxTS("sqlite"));
   }

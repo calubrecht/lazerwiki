@@ -26,7 +26,7 @@ class ResourceServiceTest {
   String staticFileRoot;
 
   @Test
-  void getBinaryFile() throws IOException {
+  void test_getBinaryFile() throws IOException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     byte[] bytes = underTest.getBinaryFile("localhost", "bluecircle.png");
     assertTrue(bytes != null);
@@ -42,7 +42,7 @@ class ResourceServiceTest {
   }
 
   @Test
-  void getFileLastModified() throws IOException {
+  void test_getFileLastModified() throws IOException {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
     long modifiedtime = underTest.getFileLastModified("localhost", "bluecircle.png");
 
@@ -55,7 +55,7 @@ class ResourceServiceTest {
   }
 
   @Test
-  void testBootTime() {
+  void test_bootTime() {
     assertTrue(underTest.getBootTime() > 0);
   }
 }

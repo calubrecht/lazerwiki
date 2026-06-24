@@ -61,7 +61,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testGetBinaryFile() throws IOException, MediaWriteException, MediaReadException {
+  public void test_getBinaryFile() throws IOException, MediaWriteException, MediaReadException {
     mockScaleImage();
 
     Path cacheLocation = Paths.get(staticFileRoot, "default", "media-cache");
@@ -82,7 +82,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testGetBinaryFileDontUpscale() throws IOException, MediaReadException {
+  public void test_getBinaryFileDontUpscale() throws IOException, MediaReadException {
     User user = new User("Bob", "hash");
     MediaRecord mediaRecord = new MediaRecord("circle.png", "default", "", user, 7, 20, 20);
     IOSupplier<byte[]> supplier = () -> new byte[] {1, 2, 3, 4};
@@ -95,7 +95,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testGetBinaryFileKeepAspectRatio()
+  public void test_getBinaryFileKeepAspectRatio()
       throws IOException, MediaWriteException, MediaReadException {
     mockScaleImage();
 
@@ -115,7 +115,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testGetBinaryFileCropToKeepAspectRatio()
+  public void test_getBinaryFileCropToKeepAspectRatio()
       throws IOException, MediaWriteException, MediaReadException {
     mockScaleImage();
 
@@ -135,7 +135,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testGetBinaryFileWithNS()
+  public void test_getBinaryFileWithNS()
       throws IOException, MediaWriteException, MediaReadException {
     mockScaleImage();
 
@@ -153,7 +153,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testClearCache() throws IOException, MediaReadException {
+  public void test_clearCache() throws IOException, MediaReadException {
     mockScaleImage();
 
     // Create cached file
@@ -183,7 +183,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testClearCache_invalidPath() throws MediaReadException, IOException {
+  public void test_clearCache_invalidPath() throws MediaReadException, IOException {
     User user = new User("Bob", "hash");
     MediaRecord hostileFile =
         new MediaRecord("circleWdot.png", "default", "../../ns", user, 7, 20, 20);
@@ -191,7 +191,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void testGetBinaryFileWithContains()
+  public void test_getBinaryFileWithContains()
       throws IOException, MediaWriteException, MediaReadException {
     mockScaleImage();
 

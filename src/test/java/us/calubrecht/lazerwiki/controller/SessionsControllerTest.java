@@ -37,7 +37,7 @@ public class SessionsControllerTest {
   @MockitoBean SiteService siteService;
 
   @Test
-  public void testUsername() throws Exception {
+  public void test_username() throws Exception {
     User user = new User();
     user.roles = List.of(new UserRole(user, "ROLE_ADMIN"));
     when(userService.getUser(any())).thenReturn(user);
@@ -56,7 +56,7 @@ public class SessionsControllerTest {
   }
 
   @Test
-  public void testLogout() throws Exception {
+  public void test_logout() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     MockHttpSession mockSession = new MockHttpSession();
     this.mockMvc

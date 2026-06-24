@@ -24,7 +24,7 @@ class PluginControllerTest {
   @MockitoBean PluginService pluginService;
 
   @Test
-  void getPluginJS() throws Exception {
+  void test_getPluginJS() throws Exception {
     when(pluginService.getEditToolbarDefs(anyString())).thenReturn("ToolbarDefs");
     this.mockMvc
         .perform(get("/_resources/js/pluginJS.js"))

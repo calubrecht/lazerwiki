@@ -15,7 +15,7 @@ public class WarResourceServiceTest {
   @Autowired WarResourceService service;
 
   @Test
-  public void testGetBinaryFile() throws IOException {
+  public void test_getBinaryFile() throws IOException {
     byte[] indexBytes = service.getBinaryFile("index.html");
     String indexString = new String(indexBytes);
 
@@ -23,7 +23,7 @@ public class WarResourceServiceTest {
   }
 
   @Test
-  public void testgetFileLastModified() throws IOException {
+  public void test_getFileLastModified() throws IOException {
     long lastModified = service.getFileLastModified("index.html");
 
     assertTrue(lastModified > 0);

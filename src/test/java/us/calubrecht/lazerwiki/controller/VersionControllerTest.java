@@ -20,7 +20,7 @@ public class VersionControllerTest {
   @Autowired MockMvc mockMvc;
 
   @Test
-  public void testVersion() throws Exception {
+  public void test_version() throws Exception {
     this.mockMvc
         .perform(get("/api/version"))
         .andExpect(status().isOk())

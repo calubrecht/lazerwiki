@@ -38,7 +38,7 @@ class HistoryControllerTest {
   @MockitoBean PageService pageService;
 
   @Test
-  void recentChanges() throws Exception {
+  void test_recentChanges() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
 
     List<MediaHistoryRecord> medias = new ArrayList<>();
@@ -80,7 +80,7 @@ class HistoryControllerTest {
   }
 
   @Test
-  void mergePageAndMedia() {
+  void test_mergePageAndMedia() {
     // Simple Merge
     List<MediaHistoryRecord> medias = new ArrayList<>();
     User user = new User("Bob", "hash");

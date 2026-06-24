@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class PageDescriptorTest {
 
   @Test
-  public void testRenderedName() {
+  public void test_renderedName() {
     PageDescriptor plane = new PageDescriptor("", "basic");
     assertEquals("Basic", plane.renderedName());
 
@@ -31,7 +31,7 @@ public class PageDescriptorTest {
   }
 
   @Test
-  public void testToString() {
+  public void test_toString() {
     PageDescriptor pd = new PageDescriptor("", "WithoutNS");
     assertEquals("WithoutNS", pd.toString());
     pd = new PageDescriptor("with:big:ns", "page");
@@ -39,7 +39,7 @@ public class PageDescriptorTest {
   }
 
   @Test
-  public void fromFullName() {
+  public void test_fromFullName() {
     PageDescriptor pd = PageDescriptor.fromFullName("WithoutNS");
     assertEquals("", pd.namespace());
     assertEquals("WithoutNS", pd.pageName());

@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 class RandomServiceTest {
 
   @Test
-  public void testNextInt() {
+  public void test_nextInt() {
     RandomService service = new RandomService();
     service.random = Mockito.mock(Random.class);
 
@@ -21,7 +21,7 @@ class RandomServiceTest {
   }
 
   @Test
-  public void testRandomKey() {
+  public void test_randomKey() {
     RandomService service = new RandomService();
     service.secureRandom = Mockito.mock(SecureRandom.class);
 

@@ -33,7 +33,7 @@ public class PageSearchServiceTest {
   @MockitoBean PageCacheRepository pageCacheRepository;
 
   @Test
-  public void testSearchTag() {
+  public void test_searchTag() {
     PageDesc page1 = new PageServiceTest.PageDescImpl("", "page1", "Page 1", "Bob");
     PageDesc page2 = new PageServiceTest.PageDescImpl("ns1:ns2", "page3", "Page 1", "Francis");
     List<PageDesc> pages = List.of(page1, page2);
@@ -56,7 +56,7 @@ public class PageSearchServiceTest {
   }
 
   @Test
-  public void testSearchText() {
+  public void test_searchText() {
     PageCache page1 =
         new PageCache(
             "site1",
@@ -128,7 +128,7 @@ public class PageSearchServiceTest {
   }
 
   @Test
-  public void testSearchTextDeprioritizeThe() {
+  public void test_searchTextDeprioritizeThe() {
     PageCache page1 =
         new PageCache(
             "site1",
@@ -176,7 +176,7 @@ public class PageSearchServiceTest {
   }
 
   @Test
-  public void testUnsupportedSearch() {
+  public void test_unsupportedSearch() {
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     Map<String, String> searchTerms = Map.of("fullText", "Test");
     Map<String, List<SearchResult>> results =

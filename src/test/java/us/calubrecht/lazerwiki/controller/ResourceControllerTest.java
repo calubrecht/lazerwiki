@@ -29,7 +29,7 @@ class ResourceControllerTest {
   @MockitoBean MacroCssService cssService;
 
   @Test
-  void getFile() throws Exception {
+  void test_getFile() throws Exception {
     this.mockMvc.perform(get("/_resources/someFile.jpg")).andExpect(status().isOk());
 
     verify(resourceService).getBinaryFile(eq("localhost"), eq("someFile.jpg"));
@@ -43,7 +43,7 @@ class ResourceControllerTest {
   }
 
   @Test
-  void getFileInternal() throws Exception {
+  void test_getFileInternal() throws Exception {
     when(cssService.getCss()).thenReturn("someCss");
     this.mockMvc
         .perform(get("/_resources/internal/plugin.css"))

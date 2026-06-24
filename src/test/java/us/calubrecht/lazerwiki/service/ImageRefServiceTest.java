@@ -21,7 +21,7 @@ class ImageRefServiceTest {
   @MockitoBean ImageRefRepository imageRefRepository;
 
   @Test
-  void setImageRefsFromPage() {
+  void test_setImageRefsFromPage() {
     underTest.setImageRefsFromPage(
         "default", "ns", "page1", List.of("image1.jpg", "ns2:image2.jpg"));
 
@@ -35,7 +35,7 @@ class ImageRefServiceTest {
   }
 
   @Test
-  void getImagesOnPage() {
+  void test_getImagesOnPage() {
     when(imageRefRepository.findAllBySiteAndSourcePageNSAndSourcePageName(
             "default", "ns2", "page1"))
         .thenReturn(
@@ -49,7 +49,7 @@ class ImageRefServiceTest {
   }
 
   @Test
-  void getRefsForImage() {
+  void test_getRefsForImage() {
     when(imageRefRepository.findAllBySiteAndImageNSAndImageRef("default", "ns2", "image1.jpg"))
         .thenReturn(
             List.of(
@@ -61,7 +61,7 @@ class ImageRefServiceTest {
   }
 
   @Test
-  void deleteImageRefs() {
+  void test_deleteImageRefs() {
     underTest.deleteImageRefs("default", "ns2:page2");
 
     verify(imageRefRepository)

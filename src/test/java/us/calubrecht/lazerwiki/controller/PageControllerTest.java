@@ -47,7 +47,7 @@ public class PageControllerTest {
   @MockitoBean UserService userService;
 
   @Test
-  public void testGetPage() throws Exception {
+  public void test_getPage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/api/page/get/testPage").principal(auth)).andExpect(status().isOk());
 
@@ -55,14 +55,14 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testGetPageAnon() throws Exception {
+  public void test_getPageAnon() throws Exception {
     this.mockMvc.perform(get("/api/page/get/testPage")).andExpect(status().isOk());
 
     verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Guest"), any());
   }
 
   @Test
-  public void testGetPageHistory() throws Exception {
+  public void test_getPageHistory() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(get("/api/page/history/testPage").principal(auth))
@@ -82,7 +82,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testGetPageDiff() throws Exception {
+  public void test_getPageDiff() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(get("/api/page/diff/testPage/1/2").principal(auth))
@@ -102,7 +102,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testSavePage() throws Exception {
+  public void test_savePage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     String data =
         "{\"pageName\": \"thisPage\", \"text\": \"This is some text\", \"revision\": 10, \"force\": false}";
@@ -168,7 +168,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testListPage() throws Exception {
+  public void test_listPage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/api/page/listPages").principal(auth)).andExpect(status().isOk());
 
@@ -182,7 +182,7 @@ public class PageControllerTest {
   @Autowired ObjectMapper jsonMapper;
 
   @Test
-  public void testSaveNewPage() throws Exception {
+  public void test_saveNewPage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     String data =
         "{\"pageName\": \"thisPage\", \"text\": \"This is some text\", \"revision\":null, \"force\": false}";
@@ -206,7 +206,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testListNamespaces() throws Exception {
+  public void test_listNamespaces() throws Exception {
     User user = new User("Bob", "");
     user.roles = List.of();
     when(userService.getUser("Bob")).thenReturn(user);
@@ -245,7 +245,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testListTags() throws Exception {
+  public void test_listTags() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     when(pageService.getAllTags(any(), any())).thenReturn(List.of("tag1", "tag2"));
     String data = "[\"tag1\", \"tag2\"]";
@@ -265,7 +265,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testSearchPages() throws Exception {
+  public void test_searchPages() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(get("/api/page/searchPages?search=tag:common").principal(auth))
@@ -279,7 +279,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testDeletePage() throws Exception {
+  public void test_deletePage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(delete("/api/page/testPage").principal(auth)).andExpect(status().isOk());
 
@@ -287,7 +287,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testPreviewPage() throws Exception {
+  public void test_previewPage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     String data = "{\"pageName\": \"thisPage\", \"text\": \"This is some text\"}";
     this.mockMvc
@@ -313,7 +313,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testGetPageHistorical() throws Exception {
+  public void test_getPageHistorical() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(get("/api/page/getHistorical/testPage/1").principal(auth))
@@ -329,7 +329,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testGetRecentChanges() throws Exception {
+  public void test_getRecentChanges() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/api/page/recentChanges").principal(auth)).andExpect(status().isOk());
 
@@ -340,7 +340,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testGetPageLock() throws Exception {
+  public void test_getPageLock() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(
@@ -360,7 +360,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testReleasePageLock() throws Exception {
+  public void test_releasePageLock() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(
@@ -382,7 +382,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void testMovePage() throws Exception {
+  public void test_movePage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     String data =
         "{\"oldNS\": \"ns1\", \"oldPage\": \"abcPage\", \"newNS\": \"ns2\", \"newPage\": \"defPage\"}";

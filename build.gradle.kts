@@ -23,6 +23,10 @@ checkstyle {
 	configFile = file("config/checkstyle/checkstyle.xml")
 }
 
+tasks.checkstyleTest {
+	configFile = file("config/checkstyle/checkstyle-test.xml")
+}
+
 spotless {
 	java {
 		googleJavaFormat("1.35.0")

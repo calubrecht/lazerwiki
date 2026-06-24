@@ -18,14 +18,14 @@ class MediaHistoryRepositoryTest {
   @Autowired MediaHistoryRepository repo;
 
   @Test
-  void getAllNamespaces() {
+  void test_getAllNamespaces() {
     List<String> nses = repo.getAllNamespaces("site1");
 
     assertEquals(List.of("ns1", "ns4"), nses);
   }
 
   @Test
-  void findAllBySiteAndNamespaceInOrderByTsDesc() {
+  void test_findAllBySiteAndNamespaceInOrderByTsDesc() {
     List<MediaHistoryRecord> records =
         repo.findAllBySiteAndNamespaceInOrderByTsDesc(Limit.of(10), "site1", List.of("ns1"));
 

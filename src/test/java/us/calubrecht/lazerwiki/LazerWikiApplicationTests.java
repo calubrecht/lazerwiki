@@ -10,5 +10,5 @@ class LazerWikiApplicationTests {
 
   @SuppressWarnings("EmptyMethod")
   @Test
-  void contextLoads() {}
+  void test_contextLoads() {}
 }

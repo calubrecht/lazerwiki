@@ -42,7 +42,7 @@ public class SitemapServiceTest {
   @MockitoBean MediaService mediaService;
 
   @Test
-  public void testGetSitemap_pages()
+  public void test_getSitemap_pages()
       throws IOException, ParseException, ParserConfigurationException, SAXException {
     Map<String, List<PageDesc>> pageMap = new HashMap<>();
     pageMap.put("", List.of(getDesc("", "", 1010), getDesc("", "page1", 130)));
@@ -69,7 +69,7 @@ public class SitemapServiceTest {
   }
 
   @Test
-  public void testGetSitemap_media()
+  public void test_getSitemap_media()
       throws IOException, ParseException, ParserConfigurationException, SAXException {
     Map<String, List<PageDesc>> pageMap = new HashMap<>();
     PageListResponse pageResponse = new PageListResponse(pageMap, null);

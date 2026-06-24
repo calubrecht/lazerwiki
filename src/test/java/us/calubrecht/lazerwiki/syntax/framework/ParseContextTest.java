@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class ParseContextTest {
 
   @Test
-  void remainingLine() {
+  void test_remainingLine() {
     ParseContext context = new ParseContext("OneLine\nOr two\nThree");
 
     assertEquals("OneLine", context.peekLine());
@@ -22,7 +22,7 @@ class ParseContextTest {
   }
 
   @Test
-  public void testIsEmpty() {
+  public void test_isEmpty() {
     ParseContext blank = new ParseContext();
     assertTrue(blank.isEmpty());
     ParseContext context = new ParseContext("OneLine\nOr two\nThree");
@@ -43,15 +43,10 @@ class ParseContextTest {
     assertFalse(context3.isEmpty());
     context3.advanceChars(3);
     assertFalse(context3.isEmpty());
-
-    //	    public boolean isEmpty() {
-    // 129	7/8	        return nextLine == null || lineIdx >= lines.size() || (lineIdx ==
-    // lines.size() -1) && charInLine >= nextLine.length();
-    // 130		    }
   }
 
   @Test
-  public void testReadOnly() {
+  public void test_readOnly() {
     ParseContext context = new ParseContext();
     context.addLine("One Line");
     context.addLine("Two Line");
@@ -62,7 +57,7 @@ class ParseContextTest {
   }
 
   @Test
-  public void testIterable() {
+  public void test_iterable() {
     ParseContext context = new ParseContext("OneLine\nOr two\nThree");
     List<String> items = new ArrayList<>();
     context.forEach(items::add);

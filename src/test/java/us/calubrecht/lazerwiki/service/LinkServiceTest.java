@@ -20,7 +20,7 @@ class LinkServiceTest {
   @MockitoBean LinkRepository linkRepository;
 
   @Test
-  void setLinksFromPage() {
+  void test_setLinksFromPage() {
     underTest.setLinksFromPage("default", "ns", "pageName", List.of("page1", "ns:page2"));
 
     verify(linkRepository)
@@ -33,7 +33,7 @@ class LinkServiceTest {
   }
 
   @Test
-  void getLinksOnPage() {
+  void test_getLinksOnPage() {
     List<Link> links =
         List.of(
             new Link("default", "", "pageName", "", "page1"),
@@ -45,7 +45,7 @@ class LinkServiceTest {
   }
 
   @Test
-  void getBacklinks() {
+  void test_getBacklinks() {
     List<Link> links =
         List.of(
             new Link("default", "", "page1", "", "pageName"),
@@ -57,7 +57,7 @@ class LinkServiceTest {
   }
 
   @Test
-  void deleteLinks() {
+  void test_deleteLinks() {
     underTest.deleteLinks("site1", "ns:page1");
     verify(linkRepository).deleteBySiteAndSourcePageNSAndSourcePageName("site1", "ns", "page1");
   }

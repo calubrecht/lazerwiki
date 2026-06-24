@@ -31,7 +31,7 @@ class PageLockServiceTest {
   @MockitoBean UserService userService;
 
   @Test
-  void getPageLock_getCleanLock() {
+  void test_getPageLock_getCleanLock() {
     when(siteService.getSiteForHostname("host")).thenReturn("site1");
     when(pageLockRepository.findBySiteAndNamespaceAndPagename("host", "ns", "page1"))
         .thenReturn(null);
@@ -60,7 +60,7 @@ class PageLockServiceTest {
   }
 
   @Test
-  void getPageLock_ignoreExpiredLock() {
+  void test_getPageLock_ignoreExpiredLock() {
     when(siteService.getSiteForHostname("host")).thenReturn("site1");
     LocalDateTime lockTime = LocalDateTime.now().minusSeconds(1);
     User user = new User("Joe", "hash");
@@ -94,7 +94,7 @@ class PageLockServiceTest {
   }
 
   @Test
-  void getPageLock_failIfLocked() {
+  void test_getPageLock_failIfLocked() {
     when(siteService.getSiteForHostname("host")).thenReturn("site1");
     LocalDateTime lockTime = LocalDateTime.now().plusSeconds(10);
     User user = new User("Joe", "hash");
@@ -119,7 +119,7 @@ class PageLockServiceTest {
   }
 
   @Test
-  void getPageLock_overrideLock() {
+  void test_getPageLock_overrideLock() {
     when(siteService.getSiteForHostname("host")).thenReturn("site1");
     LocalDateTime lockTime = LocalDateTime.now().plusSeconds(10);
     User user = new User("Joe", "hash");
@@ -149,7 +149,7 @@ class PageLockServiceTest {
   }
 
   @Test
-  void releasePageLock() {
+  void test_releasePageLock() {
     when(siteService.getSiteForHostname("host")).thenReturn("site1");
     User user = new User("Bob", "pass");
     when(userService.getUser("Bob")).thenReturn(user);
@@ -161,7 +161,7 @@ class PageLockServiceTest {
   }
 
   @Test
-  void releaseAnyPageLock() {
+  void test_releaseAnyPageLock() {
     when(siteService.getSiteForHostname("host")).thenReturn("site1");
     underTest.releaseAnyPageLock("host", "ns:page1");
 

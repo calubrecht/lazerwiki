@@ -15,7 +15,7 @@ public class IdRepositoryTest {
   @Autowired IdRepository idRepository;
 
   @Test
-  void testGetNewId() {
+  void test_getNewId() {
     assertEquals(8L, idRepository.getNewId());
     assertEquals(9L, idRepository.getNewId());
   }

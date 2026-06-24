@@ -9,7 +9,7 @@ class MacroCssServiceTest {
   final MacroCssService service = new MacroCssService();
 
   @Test
-  void getCss() {
+  void test_getCss() {
     service.addCss("div.bold { font-weight: \"bold\"}");
 
     assertNull(service.constructedCss);

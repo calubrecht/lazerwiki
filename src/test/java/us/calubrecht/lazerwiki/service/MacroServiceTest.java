@@ -53,14 +53,14 @@ class MacroServiceTest {
 
   @Test
   @Order(1)
-  void registerMacros() {
+  void test_registerMacros() {
     // Macro was registerd and set CSS aat startup
     verify(macroCssService).addCss("div {}");
   }
 
   @Test
   @Order(2)
-  void renderMacro() {
+  void test_renderMacro() {
     RenderContext context = new RenderContext("localhost", "default", "page", "user");
     assertEquals("Good Macro", underTest.renderMacro("Good", "", context));
 
@@ -76,7 +76,7 @@ class MacroServiceTest {
 
   @Test
   @Order(3)
-  void testMacroContextImpl() {
+  void test_macroContextImpl() {
     RenderContext context = new RenderContext("localhost", "default", "page", "user");
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     assertEquals("&lt;div&gt;hi&lt;/div&gt;", macroContext.sanitize("<div>hi</div>"));
@@ -96,7 +96,7 @@ class MacroServiceTest {
 
   @Test
   @Order(4)
-  void testMacroContextImplRenderPage() {
+  void test_macroContextImplRenderPage() {
     RenderContext context =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
@@ -147,14 +147,14 @@ class MacroServiceTest {
 
   @Test
   @Order(5)
-  void testRenderPageBroken() {
+  void test_renderPageBroken() {
     RenderContext context = new RenderContext("localhost", "default", "page", "user");
     assertThrows(RuntimeException.class, () -> underTest.renderMacro("Broken", "", context));
   }
 
   @Test
   @Order(6)
-  void testMacroContextGetCachedRender() {
+  void test_macroContextGetCachedRender() {
     // (boolean exists, boolean wasDeleted, boolean userCanRead, boolean userCanWrite, boolean
     // userCanDelete) {
     PageData none =
@@ -196,7 +196,7 @@ class MacroServiceTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void testMacroContextGetCachedRenders() {
+  void test_macroContextGetCachedRenders() {
     PageData notExists =
         new PageData(
             "", "", null, null, new PageData.PageFlags(false, false, true, true, true, false));
@@ -250,7 +250,7 @@ class MacroServiceTest {
   // setPageDontCache
   @Test
   @Order(7)
-  void testSetPageDontCache() {
+  void test_setPageDontCache() {
     RenderContext context =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
@@ -260,7 +260,7 @@ class MacroServiceTest {
 
   @Test
   @Order(2)
-  void renderMacroForCache() {
+  void test_renderMacroForCache() {
     RenderContext context = new RenderContext("localhost", "default", "page", "user");
     context.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     // Renders as expected because macro is not no-cache
@@ -268,14 +268,14 @@ class MacroServiceTest {
   }
 
   @Test
-  void testPostRender() {
+  void test_postRender() {
     RenderContext context = new RenderContext("localhost", "default", "page", "user");
     String text = "THis has some ~~MACRO~~Good:very/n/ngood~~/MACRO~~ macro in it";
     assertEquals("THis has some Good Macro macro in it", underTest.postRender(text, context));
   }
 
   @Test
-  void testNoCacheMacro() {
+  void test_noCacheMacro() {
     RenderContext context = new RenderContext("localhost", "default", "page", "user");
     context.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     String fullText = "~~MACRO~~NoCache~~/MACRO~~";

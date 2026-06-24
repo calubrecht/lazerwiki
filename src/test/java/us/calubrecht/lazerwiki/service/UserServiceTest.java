@@ -46,7 +46,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testCreateUser() {
+  public void test_createUser() {
     when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
     User createdBy = new User("Admin", "");
     userService.addUser("Bob", "password", createdBy, List.of(LazerWikiAuthenticationManager.USER));
@@ -77,7 +77,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testGetUser() {
+  public void test_getUser() {
     User u = new User("Bob", "pass");
     u.roles = Collections.emptyList();
     when(userRepository.findByUserName("realUser")).thenReturn(Optional.of(u));
@@ -87,12 +87,12 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testGetSysUser() {
+  public void test_getSysUser() {
     assertEquals("ROLE_ADMIN", userService.getUser(UserService.SYS_USER).roles.get(0).role);
   }
 
   @Test
-  public void testVerifyPassword() {
+  public void test_verifyPassword() {
     when(userService.passwordUtil.matches(eq("ThisPass"), eq("cleverHash"))).thenReturn(true);
 
     User u = new User("Bob", "cleverHash");
@@ -101,7 +101,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testGetUsers() {
+  public void test_getUsers() {
     List<User> users = List.of(new User("bob", ""), new User("Joe", ""));
     users.get(0).roles = List.of(new UserRole(users.get(0), "ROLE_ADMIN"));
     users.get(1).roles = Collections.emptyList();
@@ -117,7 +117,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testDeleteRoles() {
+  public void test_deleteRoles() {
     User u = new User("Frank", "pass");
     u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
     when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
@@ -131,7 +131,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testAddRoles() {
+  public void test_addRoles() {
     User u = new User("Frank", "pass");
     u.roles = new ArrayList<>(List.of(new UserRole(u, "ROLE_ADMIN"), new UserRole(u, "ROLE_USER")));
     when(userRepository.findByUserName("Frank")).thenReturn(Optional.of(u));
@@ -151,7 +151,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void testResetPassword() {
+  void test_resetPassword() {
     User u = new User("Frank", "pass");
     u.roles = List.of();
     when(userService.passwordUtil.hashPassword(eq("password"))).thenReturn("hash");
@@ -170,7 +170,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void testResetPassword_failAdmin() {
+  void test_resetPassword_failAdmin() {
     User u = new User("Frank", "pass");
     u.roles = List.of();
     User uadmin = new User("Mary", "pass");
@@ -209,7 +209,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void requestSetEmail() throws MessagingException {
+  void test_requestSetEmail() throws MessagingException {
     when(siteService.getSiteNameForHostname("localhost")).thenReturn("Lazerwiki");
     when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
     when(templateService.getVerifyEmailTemplate(
@@ -235,7 +235,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void requestResetForgottenPassword() throws MessagingException {
+  void test_requestResetForgottenPassword() throws MessagingException {
     when(siteService.getSiteNameForHostname("localhost")).thenReturn("Lazerwiki");
     when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
     when(templateService.getVerifyEmailTemplate(
@@ -270,7 +270,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void verifyEmailToken() throws VerificationException {
+  void test_verifyEmailToken() throws VerificationException {
     User user = new User("Bob", "hash");
     user.setSettings(new HashMap<>());
     when(tokenRepository.findByUserUserNameAndTokenAndPurpose(
@@ -290,7 +290,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void verifyPasswordToken() throws VerificationException {
+  void test_verifyPasswordToken() throws VerificationException {
     User user = new User("Bob", "hash");
     when(tokenRepository.findByUserUserNameAndTokenAndPurpose(
             eq("Bob"), eq("ABCD-EFGH"), eq(VerificationToken.Purpose.RESET_PASSWORD)))
@@ -308,7 +308,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void setSiteRoles() {
+  void test_setSiteRoles() {
     User user = new User("Bob", "hash");
     user.roles =
         new ArrayList<>(

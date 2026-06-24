@@ -35,7 +35,7 @@ class MediaOverrideServiceTest {
   }
 
   @Test
-  void getOverrides() {
+  void test_getOverrides() {
     MediaOverride override =
         new MediaOverride("site", "ns1", "page1", "ns1", "img1.jpg", "ns1", "img2.jpg");
     when(repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById("default", "ns1", "page1"))
@@ -46,7 +46,7 @@ class MediaOverrideServiceTest {
   }
 
   @Test
-  void getOverridesForImage() {
+  void test_getOverridesForImage() {
     MediaOverride override =
         new MediaOverride("site", "ns1", "page1", "ns1", "img1.jpg", "ns1", "img2.jpg");
     when(repo.findAllBySiteAndNewTargetFileNSAndNewTargetFileName("default", "ns1", "img1.jpg"))
@@ -57,7 +57,7 @@ class MediaOverrideServiceTest {
   }
 
   @Test
-  void createOverride() {
+  void test_createOverride() {
     List<ImageRef> links = List.of(new ImageRef("default", "ns1", "page1", "ns1", "img1.jpg"));
     when(imageRefRepository.findAllBySiteAndImageNSAndImageRef("default", "ns1", "img1.jpg"))
         .thenReturn(links);
@@ -81,7 +81,7 @@ class MediaOverrideServiceTest {
   }
 
   @Test
-  void moveOverrides() {
+  void test_moveOverrides() {
     List<MediaOverride> existingOverrides =
         List.of(new MediaOverride("default", "ns1", "page1", "ns", "img.jpg", "ns1", "img1.jpg"));
     when(repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById("default", "ns1", "page1"))
@@ -95,7 +95,7 @@ class MediaOverrideServiceTest {
   }
 
   @Test
-  void deleteOverrides() {
+  void test_deleteOverrides() {
     underTest.deleteOverrides("localhost", "ns1:page1");
 
     verify(repo).deleteBySiteAndSourcePageNSAndSourcePageName("default", "ns1", "page1");

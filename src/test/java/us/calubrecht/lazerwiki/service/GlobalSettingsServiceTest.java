@@ -22,7 +22,7 @@ class GlobalSettingsServiceTest {
   @MockitoBean GlobalSettingsRepository repo;
 
   @Test
-  void getSettings() {
+  void test_getSettings() {
     Map<String, Object> settingsMap = Map.of("Setting1", "Value");
     GlobalSettings settings = new GlobalSettings();
     settings.settings = settingsMap;
@@ -32,7 +32,7 @@ class GlobalSettingsServiceTest {
   }
 
   @Test
-  void setSettings() {
+  void test_setSettings() {
     Map<String, Object> settingsMap = Map.of("Setting1", "Value", "Setting2", "Value2");
     GlobalSettings settings = new GlobalSettings();
     settings.settings = settingsMap;

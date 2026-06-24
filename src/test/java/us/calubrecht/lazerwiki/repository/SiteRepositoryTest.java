@@ -15,7 +15,7 @@ class SiteRepositoryTest {
   @Autowired SiteRepository siteRepository;
 
   @Test
-  void findByHostname() {
+  void test_findByHostname() {
     Site defaultSite = siteRepository.findByHostname("*");
     assertEquals("default", defaultSite.name);
     Site site1 = siteRepository.findByHostname("site1.com");

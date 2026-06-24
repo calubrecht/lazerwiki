@@ -46,7 +46,7 @@ public class LinkCheckMacroTest {
   @MockitoBean TOCRenderService tocRenderService;
 
   @Test
-  public void testChecklinks() {
+  public void test_checklinks() {
     RenderContext renderContext =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     when(pageService.getAllPagesFlat("localhost", "user"))
@@ -73,7 +73,7 @@ public class LinkCheckMacroTest {
   }
 
   @Test
-  public void testgetNS() {
+  public void test_getNS() {
     LinkCheckMacro linkCheckMacro = new LinkCheckMacro();
     assertEquals("", linkCheckMacro.getNS(""));
     assertEquals("", linkCheckMacro.getNS("noNS"));
@@ -82,7 +82,7 @@ public class LinkCheckMacroTest {
   }
 
   @Test
-  public void testChecklinks_Filering() {
+  public void test_checklinks_Filering() {
     RenderContext renderContext =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     when(pageService.getAllPagesFlat("localhost", "user"))
@@ -151,7 +151,7 @@ public class LinkCheckMacroTest {
   }
 
   @Test
-  public void testLinkCheckMacroForCache() {
+  public void test_linkCheckMacroForCache() {
     RenderContext renderContext =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
@@ -170,7 +170,7 @@ public class LinkCheckMacroTest {
   }
 
   @Test
-  public void testChecklinksForReadable() {
+  public void test_checklinksForReadable() {
     RenderContext renderContext =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     when(pageService.getAllPagesFlat("localhost", "user"))
@@ -189,7 +189,7 @@ public class LinkCheckMacroTest {
   }
 
   @Test
-  public void testChecklinksWoverrides() {
+  public void test_checklinksWoverrides() {
     RenderContext renderContext =
         new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
     when(pageService.getAllPagesFlat("localhost", "user"))

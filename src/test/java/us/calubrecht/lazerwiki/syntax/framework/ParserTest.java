@@ -38,7 +38,7 @@ class ParserTest {
   }
 
   @Test
-  void testParse_testPositionHandling() {
+  void test_parse_testPositionHandling() {
     // Very basic, 2 paragraphs;
     ContainerNode nodes = cn(underTest.parse("This is one paragraph\n\nThis is another"));
     ContainerNode p0 = cn(nodes.getChildren().get(0));
@@ -48,7 +48,7 @@ class ParserTest {
   }
 
   @Test
-  void testParse_testPositionHandling_Links() {
+  void test_parse_testPositionHandling_Links() {
     // Link context
     String testText =
         "This is one paragraph\n\nThis is a paragraph [[ link:Target|with a link ]]. All goood\nAnd more";
@@ -76,7 +76,7 @@ class ParserTest {
   }
 
   @Test
-  void testParse_testPositionHandling_Images() {
+  void test_parse_testPositionHandling_Images() {
     String imageInput =
         "This is one paragraph\n\nThis is a paragraph {{ image:target| title }}. All goood\nAnd more";
     ContainerNode nodes = cn(underTest.parse(imageInput));
@@ -87,7 +87,7 @@ class ParserTest {
   }
 
   @Test
-  void testParse_testPositionHandling_Other() {
+  void test_parse_testPositionHandling_Other() {
     // Lists
     String listInput = " - Simple List\n *List Changes Type\n   * DeepestList\n * and backout\n";
     ContainerNode nodes = cn(underTest.parse(listInput));
@@ -96,23 +96,23 @@ class ParserTest {
     assertEquals(3, list1.getItems().size());
     assertEquals(
         " *List Changes Type\n   * DeepestList\n * and backout", list1.getSourceFromContext());
-    ListNode list1_1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
+    ListNode list1Item1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
     assertEquals(
         "   * DeepestList\n",
-        list1_1.getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
+        list1Item1.getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
     // part of node
 
     String listInputWithLink =
         " - Simple List\n *List Changes Type\n   * DeepestList [[Link| with a link]]! \n";
     nodes = cn(underTest.parse(listInputWithLink));
     list1 = (ListNode) nodes.getChildren().get(1);
-    list1_1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
+    list1Item1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
     assertEquals(
         "   * DeepestList [[Link| with a link]]! ",
-        list1_1.getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
+        list1Item1.getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
     // part of node
     LinkNode link =
-        (LinkNode) ((ListChild.ListItemNode) list1_1.getItems().get(0)).getChildren().get(1);
+        (LinkNode) ((ListChild.ListItemNode) list1Item1.getItems().get(0)).getChildren().get(1);
     assertEquals("[[Link| with a link]]", link.getSourceFromContext());
     assertEquals("Link", link.getTargetSourceFromContext());
     ITreeNode descNode = link.getChildren().get(0);
@@ -141,7 +141,7 @@ class ParserTest {
   }
 
   @Test
-  public void testParse_testPositionFails() {
+  public void test_parse_testPositionFails() {
     LinkNode node = new LinkNode("OneDest");
     assertEquals(null, node.getTargetSourceFromContext());
     assertEquals(null, node.getSourceFromContext());
@@ -166,7 +166,7 @@ class ParserTest {
   }
 
   @Test
-  void testParseList() {
+  void test_parseList() {
     String listInput = " - Simple List\n *List Changes Type\n   * DeepestList\n * and backout\n";
     ContainerNode nodes = cn(underTest.parse(listInput));
     // 2 top level lists
@@ -174,18 +174,18 @@ class ParserTest {
     assertEquals(ListNode.ListType.ORDERED, ((ListNode) nodes.getChildren().get(0)).getListType());
     assertEquals(
         ListNode.ListType.UNORDERED, ((ListNode) nodes.getChildren().get(1)).getListType());
-    ListNode l1 = (ListNode) nodes.getChildren().get(1);
-    assertEquals(3, l1.getItems().size());
-    ListNode l1_1 = ((ListChild.ListChildList) l1.getItems().get(1)).list();
-    assertEquals(ListNode.ListType.UNORDERED, l1_1.getListType());
+    ListNode list1 = (ListNode) nodes.getChildren().get(1);
+    assertEquals(3, list1.getItems().size());
+    ListNode list1Item1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
+    assertEquals(ListNode.ListType.UNORDERED, list1Item1.getListType());
 
     String mixedInnerListInput =
         " - Simple List\n *List Changes Type\n   - DeepestList\n * and backout\n";
     nodes = cn(underTest.parse(mixedInnerListInput));
-    l1 = (ListNode) nodes.getChildren().get(1);
-    assertEquals(3, l1.getItems().size());
-    l1_1 = ((ListChild.ListChildList) l1.getItems().get(1)).list();
-    assertEquals(ListNode.ListType.ORDERED, l1_1.getListType());
+    list1 = (ListNode) nodes.getChildren().get(1);
+    assertEquals(3, list1.getItems().size());
+    list1Item1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
+    assertEquals(ListNode.ListType.ORDERED, list1Item1.getListType());
   }
 
   void verifySpans(TableNode.TableCellNode cell, int colSpan, int rowSpan) {
@@ -194,7 +194,7 @@ class ParserTest {
   }
 
   @Test
-  void testParseTable() {
+  void test_parseTable() {
     String inputSimpleTable = "|First|Line|\n|Second|Line|";
     ContainerNode nodes = cn(underTest.parse(inputSimpleTable));
     // 1 table
@@ -241,7 +241,7 @@ class ParserTest {
   }
 
   @Test
-  public void testParse_UnnaturalCases() {
+  public void test_parse_UnnaturalCases() {
     ParseContext parseContext = new ParseContext("Some Text");
     ContainerNode container = new ContainerNode();
     container.setParseContext(parseContext);
@@ -255,7 +255,7 @@ class ParserTest {
   static class InvalidNode extends AbstractNode {}
 
   @Test
-  public void testInvalidNode() {
+  public void test_invalidNode() {
     InvalidNode node = new InvalidNode();
     // InvalidNode does not implement a valid asString() method. Avoid
     // It being used raw in a renderer
@@ -263,7 +263,7 @@ class ParserTest {
   }
 
   @Test
-  public void testDefaultRenderer() {
+  public void test_defaultRenderer() {
     // Default Renderer does not attach directly to any node types
     assertEquals(List.of(), underTest.parserRegistrar.DEFAULT_RENDERER.getTargets());
   }

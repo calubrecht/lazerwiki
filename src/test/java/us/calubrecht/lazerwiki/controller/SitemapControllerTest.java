@@ -24,7 +24,7 @@ public class SitemapControllerTest {
   @MockitoBean SitemapService sitemapService;
 
   @Test
-  public void testSitemap() throws Exception {
+  public void test_sitemap() throws Exception {
     when(sitemapService.getSitemap(new URL("http://localhost/sitemap.xml")))
         .thenReturn("<xml>Wow</xml>");
     this.mockMvc

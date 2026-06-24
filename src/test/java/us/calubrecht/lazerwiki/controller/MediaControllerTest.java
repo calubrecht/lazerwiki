@@ -39,7 +39,7 @@ class MediaControllerTest {
   @MockitoBean MediaService mediaService;
 
   @Test
-  void getFile() throws Exception {
+  void test_getFile() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/_media/someFile.jpg").principal(auth)).andExpect(status().isOk());
 
@@ -64,7 +64,7 @@ class MediaControllerTest {
   }
 
   @Test
-  public void getFile_WithSize() throws Exception {
+  public void test_getFile_WithSize() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(get("/_media/someFile.jpg?10x10").principal(auth))
@@ -74,7 +74,7 @@ class MediaControllerTest {
   }
 
   @Test
-  void saveFile() throws Exception {
+  void test_saveFile() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     MockMultipartFile mfile =
         new MockMultipartFile(
@@ -98,7 +98,7 @@ class MediaControllerTest {
   }
 
   @Test
-  void saveFileInvalidFileType() throws Exception {
+  void test_saveFileInvalidFileType() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     MockMultipartFile mfile =
         new MockMultipartFile(
@@ -110,7 +110,7 @@ class MediaControllerTest {
   }
 
   @Test
-  void listFiles() throws Exception {
+  void test_listFiles() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     User user = new User("Bob", "hash");
     MediaRecord file1 = new MediaRecord("file1.png", "default", "", user, 0, 0, 0);
@@ -137,7 +137,7 @@ class MediaControllerTest {
   }
 
   @Test
-  void testDeleteFile() throws Exception {
+  void test_deleteFile() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(delete("/_media/delete.file.jpg").principal(auth))
@@ -154,7 +154,7 @@ class MediaControllerTest {
   }
 
   @Test
-  void testRecentChanges() throws Exception {
+  void test_recentChanges() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/_media/recentChanges").principal(auth)).andExpect(status().isOk());
 
@@ -165,7 +165,7 @@ class MediaControllerTest {
   }
 
   @Test
-  void testMoveFile() throws Exception {
+  void test_moveFile() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     String data =
         "{\"oldNS\": \"ns1\", \"oldFile\": \"img.jpg\", \"newNS\": \"ns2\", \"newFile\": \"img2.jpg\"}";

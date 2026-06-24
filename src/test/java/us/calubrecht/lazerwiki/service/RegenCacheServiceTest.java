@@ -42,7 +42,7 @@ class RegenCacheServiceTest {
   @MockitoBean MediaOverrideService mediaOverrideService;
 
   @Test
-  void regenLinks() {
+  void test_regenLinks() {
     List<PageDesc> pds =
         List.of(
             new PageServiceTest.PageDescImpl("", "page1"),
@@ -86,7 +86,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  void regenLinksWithError() {
+  void test_regenLinksWithError() {
     List<PageDesc> pds =
         List.of(
             new PageServiceTest.PageDescImpl("", "page1"),
@@ -130,7 +130,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  void regenCache() {
+  void test_regenCache() {
     List<PageDesc> pds =
         List.of(
             new PageServiceTest.PageDescImpl("", "page1"),
@@ -171,7 +171,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  void regenCacheWithhError() {
+  void test_regenCacheWithhError() {
     List<PageDesc> pds =
         List.of(
             new PageServiceTest.PageDescImpl("", "page1"),
@@ -215,7 +215,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  void regenCachesForBacklinks() {
+  void test_regenCachesForBacklinks() {
     List<PageDesc> pds =
         List.of(
             new PageServiceTest.PageDescImpl("", "page1"),
@@ -270,7 +270,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  void regenCachesForBacklinksWithErrors() {
+  void test_regenCachesForBacklinksWithErrors() {
     List<PageDesc> pds =
         List.of(
             new PageServiceTest.PageDescImpl("", "page1"),
@@ -327,7 +327,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  public void testRegenCacheForBacklinksWithNoCache() {
+  public void test_regenCacheForBacklinksWithNoCache() {
     List<PageDesc> pds =
         List.of(
             new PageServiceTest.PageDescImpl("", "page1"),
@@ -366,7 +366,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  public void regenCacheWithNoCache() {
+  public void test_regenCacheWithNoCache() {
     List<PageDesc> pds = List.of(new PageServiceTest.PageDescImpl("", "page1"));
     when(pageRepository.getAllValid("default")).thenReturn(pds);
     Page page1 = new Page();
@@ -401,7 +401,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  void regenCachesForImageRefs() {
+  void test_regenCachesForImageRefs() {
     List<String> irs = List.of("page2", "ns1:page5");
     when(imageRefService.getRefsForImage("default", "ns1:img1.jpg")).thenReturn(irs);
     List<MediaOverride> overrides =
@@ -452,7 +452,7 @@ class RegenCacheServiceTest {
   }
 
   @Test
-  void regenCachesForImageRefsWithErrors() {
+  void test_regenCachesForImageRefsWithErrors() {
     List<String> irs = List.of("page2", "ns1:page5");
     when(imageRefService.getRefsForImage("default", "ns1:img1.jpg")).thenReturn(irs);
     List<MediaOverride> overrides =

@@ -45,7 +45,7 @@ public class PageServiceTest {
   @MockitoBean TagRepository tagRepository;
 
   @Test
-  public void testExists() {
+  public void test_exists() {
     assertFalse(pageService.exists("site1", "nonExistentPage"));
 
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
@@ -56,7 +56,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void getTitle() {
+  public void test_getTitle() {
     assertEquals("Non Existent Page", pageService.getTitle("site1", "some:ns:nonExistentPage"));
 
     Page p = new Page();
@@ -96,7 +96,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetPageData() {
+  public void test_getPageData() {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -139,7 +139,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetPageDataWithBacklinks() {
+  public void test_getPageDataWithBacklinks() {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -165,7 +165,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetPageDataWithOverrideBacklinks() {
+  public void test_getPageDataWithOverrideBacklinks() {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -199,7 +199,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetPageDataDeleted() {
+  public void test_getPageDataDeleted() {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -223,7 +223,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetPageDataMoved() {
+  public void test_getPageDataMoved() {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -250,7 +250,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetPageDataHome() {
+  public void test_getPageDataHome() {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -278,14 +278,14 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testDecodeDescriptor() {
+  public void test_decodeDescriptor() {
     assertEquals(new PageDescriptor("", "noNS"), PageService.decodeDescriptor("noNS"));
     assertEquals(new PageDescriptor("ns", "withNS"), PageService.decodeDescriptor("ns:withNS"));
     assertEquals("ns:withNS", PageService.decodeDescriptor("ns:withNS").toString());
   }
 
   @Test
-  public void testListPages() {
+  public void test_listPages() {
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
@@ -324,7 +324,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testListPages_wEmptyNamespaces() {
+  public void test_listPages_wEmptyNamespaces() {
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
@@ -356,14 +356,14 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetAllTags() {
+  public void test_getAllTags() {
     when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(tagRepository.getAllActiveTags("site1")).thenReturn(List.of("tag1", "tag2"));
     assertEquals(2, pageService.getAllTags("host1", "joe").size());
   }
 
   @Test
-  public void testGetTemplate() {
+  public void test_getTemplate() {
     Page ns1Template = new Page();
     ns1Template.setText("== Page: %NAME%==\nIn %NAMESPACE%");
     when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
@@ -385,7 +385,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetCachedPage() {
+  public void test_getCachedPage() {
     when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     PageCache cached = new PageCache();
     cached.renderedCache = "Rendered";
@@ -396,7 +396,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetCachedPages() {
+  public void test_getCachedPages() {
     when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     PageCache cache1 = new PageCache();
     cache1.renderedCache = "Text 1";
@@ -416,7 +416,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testSavePage() {
+  public void test_savePage() {
     when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     RenderResult rendered = new RenderResult("rendered", "notRendered", Map.of("DONT_CACHE", true));
     Page p = new Page();
@@ -451,7 +451,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testHistoricalPageData() {
+  public void test_historicalPageData() {
     when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
 
@@ -480,7 +480,7 @@ public class PageServiceTest {
   }
 
   @Test
-  void testGetPageHistory() throws PageReadException {
+  void test_getPageHistory() throws PageReadException {
     when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     PageDesc v1 = new PageDescImpl("ns", "page1", 1L);
     PageDesc v2 = new PageDescImpl("ns", "page1", 1L);
@@ -497,7 +497,7 @@ public class PageServiceTest {
   }
 
   @Test
-  void testGetPageDiff() throws PageReadException {
+  void test_getPageDiff() throws PageReadException {
     when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
     Page page = new Page();
@@ -535,7 +535,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGenerateDiffs() {
+  public void test_generateDiffs() {
     List<Pair<Integer, String>> out =
         pageService.generateDiffs(
             "This is a line\nAnd another", "This is a line\nWith an extra one\nAnd another");
@@ -546,7 +546,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void testGetPageData_bulk() {
+  public void test_getPageData_bulk() {
     when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -591,7 +591,7 @@ public class PageServiceTest {
   }
 
   @Test
-  void recentChanges() {
+  void test_recentChanges() {
     when(siteService.getSiteForHostname(eq("theHost"))).thenReturn("site1");
     when(pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(any(), eq("site1"), any()))
         .thenReturn(
@@ -614,7 +614,7 @@ public class PageServiceTest {
   }
 
   @Test
-  void adjustSource() {
+  void test_adjustSource() {
     RenderResult renderResult = new RenderResult("", "", new HashMap<>());
     List<LinkOverrideInstance> overrides =
         List.of(
@@ -627,7 +627,7 @@ public class PageServiceTest {
   }
 
   @Test
-  void testIsReadable() {
+  void test_isReadable() {
     when(namespaceService.canReadNamespace("default", "ns", "Bob")).thenReturn(true);
     when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     assertTrue(pageService.isReadable("localhost", "ns:page1", "Bob"));

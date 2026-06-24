@@ -42,7 +42,7 @@ public class SiteDelServiceTest {
   }
 
   @Test
-  void delSite() throws IOException {
+  void test_delSite() throws IOException {
     when(siteRepository.findBySiteName("site1")).thenReturn(new Site("existingSite", "", "site1"));
     if (!Paths.get(staticFileRoot, "existingSite", "media").toFile().mkdirs()) {
       throw new IOException("Test broken");

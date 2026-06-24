@@ -21,7 +21,7 @@ public class UserRepositoryTest {
 
   @Test
   @Transactional
-  public void testQueryUser() {
+  public void test_queryUser() {
     User bob = userRepository.findByUserName("Bob").get();
 
     assertNotNull(bob);
@@ -30,7 +30,7 @@ public class UserRepositoryTest {
 
   @Test
   @Transactional
-  public void testSave() {
+  public void test_save() {
     User newUser = new User("Loser", "hashed");
     newUser.roles = Arrays.asList(new UserRole(newUser, "Role1"), new UserRole(newUser, "Role2"));
     newUser.setSettings(Map.of());

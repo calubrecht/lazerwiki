@@ -50,7 +50,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  void testRenderHeader() {
+  void test_renderHeader() {
     String source = "====== Big header ======\n ==== Smaller Header ====";
 
     assertEquals(
@@ -67,7 +67,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  void testRenderHeaderBlanBetween() {
+  void test_renderHeaderBlanBetween() {
     String source = "====== Big header ======\n\n ==== Smaller Header ====";
 
     assertEquals(
@@ -76,7 +76,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  void testRenderHeaderImbalance() {
+  void test_renderHeaderImbalance() {
     // Imbalanced header tokens? Just use the opening tokens for size
     String source = "====== Header with unmatching tokens =====";
     assertEquals(
@@ -98,7 +98,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  void testRenderHeaderSanitize() {
+  void test_renderHeaderSanitize() {
     String source = "====== <script>doAlert(\"Gotcha\");</script> ======";
 
     assertEquals(
@@ -107,7 +107,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  void testRenderLink() {
+  void test_renderLink() {
     when(pageService.exists(eq("localhost"), eq("exists"))).thenReturn(true);
     assertEquals(
         "<div><a class=\"wikiLinkMissing\" href=\"/page/missing\">This link is missing</a></div>",
@@ -152,7 +152,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderLinkSanitizesLinks() {
+  public void test_renderLinkSanitizesLinks() {
     String linkEmbeddingJS = "[[what \" onclick=\"doEvil|This link may be evil]]";
     assertEquals(
         "<div>[[what \" onclick=\"doEvil|This link may be evil]]</div>",
@@ -165,7 +165,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderLinkToHome() {
+  public void test_renderLinkToHome() {
     when(pageService.getTitle(eq("localhost"), eq(""))).thenReturn("Home");
     when(pageService.exists(eq("localhost"), eq(""))).thenReturn(true);
     assertEquals("<div><a class=\"wikiLink\" href=\"/\">Home</a></div>", doRender("[[]]"));
@@ -175,7 +175,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderLinkOtherSite() {
+  public void test_renderLinkOtherSite() {
     when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
     assertEquals(
         "<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>",
@@ -183,7 +183,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderLinkRecordsLinks() {
+  public void test_renderLinkRecordsLinks() {
     when(pageService.getTitle(anyString(), anyString())).thenReturn("");
     RenderResult result =
         underTest.renderWithInfo(
@@ -198,7 +198,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderLinkWithOverrides() {
+  public void test_renderLinkWithOverrides() {
     when(pageService.getTitle(anyString(), eq("new"))).thenReturn("new");
     when(pageService.getTitle(anyString(), eq("ns2:wns2"))).thenReturn("with ns");
     when(pageService.exists(eq("otherHost"), eq("new"))).thenReturn(true);
@@ -246,7 +246,7 @@ public class DokuWikiRendererTest {
   @Autowired LinkRenderer linkRenderer;
 
   @Test
-  public void testRenderLinkeSanitize() {
+  public void test_renderLinkeSanitize() {
     String maliciousText = "[[ns:page|<script>someScript</script>]]";
     RenderResult renderRes =
         underTest.renderWithInfo(maliciousText, "host", "site", "page", "user");
@@ -282,7 +282,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderMalformedURL() {
+  public void test_renderMalformedURL() {
     assertEquals("<div>[[http://bad%link]]</div>", doRender("[[http://bad%link]]"));
     assertEquals(
         "<div><a class=\"wikiLinkExternal\" href=\"http://malformed.invalid\">http://malformed.invalid</a></div>",
@@ -290,7 +290,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderSanitizeHtmlInText() {
+  public void test_renderSanitizeHtmlInText() {
     String sourcetoSanitize =
         "This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>";
     RenderResult renderRes =
@@ -310,7 +310,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testLinebreaks() {
+  public void test_linebreaks() {
     String input1 = "A single linebreak in the source\nwill not break in the output";
     assertEquals(
         "<div>A single linebreak in the source\nwill not break in the output</div>",
@@ -323,7 +323,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderBold() {
+  public void test_renderBold() {
     String input1 = "Some words are **meant to **be bold.";
     assertEquals(
         "<div>Some words are <span class=\"bold\">meant to </span>be bold.</div>",
@@ -341,7 +341,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderItalic() {
+  public void test_renderItalic() {
     String input1 = "Some words are //meant to //be italic.";
     assertEquals(
         "<div>Some words are <span class=\"italic\">meant to </span>be italic.</div>",
@@ -368,7 +368,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderUnderline() {
+  public void test_renderUnderline() {
     String input1 = "__This__ should be underlined.";
     assertEquals(
         "<div><span class=\"underline\">This</span> should be underlined.</div>", doRender(input1));
@@ -394,7 +394,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderUnformat() {
+  public void test_renderUnformat() {
     String input1 = "%%This **should not be bold**%%";
     assertEquals("<div>This **should not be bold**</div>", doRender(input1));
     String input2 = "%%This [[underline|under line]]__ should not have a link%%";
@@ -413,7 +413,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderMonospace() {
+  public void test_renderMonospace() {
     String input1 = "''This'' should be monospace.";
     assertEquals(
         "<div><span class=\"monospace\">This</span> should be monospace.</div>", doRender(input1));
@@ -438,7 +438,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderSuperSubDel() {
+  public void test_renderSuperSubDel() {
     String input1 = "<sup>This</sup> should be superscript.";
     assertEquals("<div><sup>This</sup> should be superscript.</div>", doRender(input1));
     String input2 = "<sub>This</sub> should be subscript.";
@@ -454,7 +454,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderUnknownSpan() {
+  public void test_renderUnknownSpan() {
     String input1 = "<unknown>What is this tag?</unknown>";
     assertEquals("<div>&lt;unknown&gt;What is this tag?&lt;/unknown&gt;</div>", doRender(input1));
     String input2 = "<sub>This one is mispatched</sup>";
@@ -462,7 +462,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderSpanStartsSpace() {
+  public void test_renderSpanStartsSpace() {
     String input = " __//**UnderItaliBold **//__";
     assertEquals(
         "<div> <span class=\"underline\"><span class=\"italic\"><span class=\"bold\">UnderItaliBold </span></span></span></div>",
@@ -470,7 +470,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderImage() {
+  public void test_renderImage() {
     String input1 = "{{img.jpg}}";
     assertEquals(
         "<div><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"></div>",
@@ -526,7 +526,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderImageAlignments() {
+  public void test_renderImageAlignments() {
     String input1 = "{{img.jpg}}";
     assertEquals(
         "<div><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"></div>",
@@ -549,7 +549,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderWeirdImage() {
+  public void test_renderWeirdImage() {
     String linkEmbeddingJS = "{{ thisLinkHastooMany&&options}}";
     assertEquals(
         "<div><img src=\"/_media/thisLinkHastooMany&&options\" class=\"mediaright\" loading=\"lazy\"></div>",
@@ -557,7 +557,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderImageRecordsRefs() {
+  public void test_renderImageRecordsRefs() {
     String imageInput = "{{image.jpg}}";
     RenderResult renderRes = underTest.renderWithInfo(imageInput, "host", "site", "page", "user");
     assertEquals(
@@ -571,7 +571,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderImageSanitize() {
+  public void test_renderImageSanitize() {
     String maliciousTitle = "Check {{file.jpg|\" onerror=\"alert(1)\"}}";
     RenderResult renderRes =
         underTest.renderWithInfo(maliciousTitle, "host", "site", "page", "user");
@@ -604,7 +604,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderUList() {
+  public void test_renderUList() {
     String input1 = " * Simple List\n *With 2 rows\nThen * non-matching\n";
     assertEquals(
         "<ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>\n<div>Then * non-matching</div>",
@@ -629,13 +629,13 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderUList_startsDeeper() {
+  public void test_renderUList_startsDeeper() {
     String input1 = "  * Simple List\n  *With 2 rows\n";
     assertEquals("<ul>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ul>", doRender(input1));
   }
 
   @Test
-  public void testRenderOList() {
+  public void test_renderOList() {
     String input1 = " - Simple List\n -With 2 rows\nThen * non-matching\n";
     assertEquals(
         "<ol>\n<li>Simple List</li>\n<li>With 2 rows</li>\n</ol>\n<div>Then * non-matching</div>",
@@ -643,7 +643,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderOListWithValues() {
+  public void test_renderOListWithValues() {
     String input1 = " - Simple List\n -{{5}}With one row value defined\n -One follow\n";
     assertEquals(
         "<ol>\n<li>Simple List</li>\n<li value=\"5\">With one row value defined</li>\n<li>One follow</li>\n</ol>",
@@ -651,7 +651,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderNestedLists() {
+  public void test_renderNestedLists() {
     String input1 = " - Simple List\n  -Deeper List\n   * DeepestList\n";
     assertEquals(
         """
@@ -683,7 +683,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testCodeBlock() {
+  public void test_codeBlock() {
     String input1 = "  This is a block\n  Should all be one block\n   with more spaces?\n";
     assertEquals(
         "<pre class=\"code\">This is a block\nShould all be one block\n with more spaces?\n</pre>",
@@ -702,7 +702,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testCodeBlockThenSpace() {
+  public void test_codeBlockThenSpace() {
     String input1 = "  This is a block\n\n  andAnotherBlock\n";
     assertEquals(
         "<pre class=\"code\">This is a block\n</pre><pre class=\"code\">andAnotherBlock\n</pre>",
@@ -710,7 +710,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testCodeBlockSanitize() {
+  public void test_codeBlockSanitize() {
     String input1 = "  This is a block <script>doAlert(\"Gotcha\");</script>";
     assertEquals(
         "<pre class=\"code\">This is a block &lt;script&gt;doAlert(\"Gotcha\");&lt;/script&gt;\n"
@@ -719,7 +719,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderCodeBlockWithMacro() {
+  public void test_renderCodeBlockWithMacro() {
     String inputBlockquote = "  this ~~MACRO~~macroname:macro~~/MACRO~~ should not render\n";
     assertEquals(
         "<pre class=\"code\">this &#126;&#126;MACRO&#126;&#126;macroname:macro&#126;&#126;/MACRO&#126;&#126; should not render\n</pre>",
@@ -727,7 +727,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testHeaderInBox() {
+  public void test_headerInBox() {
     String input1 = "  This is a block\n  ==== It has a header in it ====\n";
     assertEquals(
         "<pre class=\"code\">This is a block\n==== It has a header in it ====\n</pre>",
@@ -735,7 +735,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderTitles() {
+  public void test_renderTitles() {
     String input1 = "=== Here's a title===\n";
     RenderResult result = underTest.renderWithInfo(input1, "host", "site", "page", "");
     assertEquals("Here's a title", result.getTitle());
@@ -757,7 +757,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderMacro() {
+  public void test_renderMacro() {
 
     String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
     when(macroService.renderMacro(eq("macro1: macro"), anyString(), any()))
@@ -794,7 +794,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderMultilineMacro() {
+  public void test_renderMultilineMacro() {
 
     String inputMacro = "~~MACRO~~macro1: macro  \n\n This is line~~/MACRO~~";
     ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
@@ -807,7 +807,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderUnfinishedMacro() {
+  public void test_renderUnfinishedMacro() {
 
     String inputMacro = "~~MACRO~~macro1: macro  \n\n This is a line";
     ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
@@ -824,7 +824,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderLinebreak() {
+  public void test_renderLinebreak() {
     String input = "This is a line \\\\ with a linebreak";
     assertEquals("<div>This is a line<br> with a linebreak</div>", doRender(input));
     String inputBreakSymbolInHeader = "====This is \\\\ a header====";
@@ -838,7 +838,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderWithContext() {
+  public void test_renderWithContext() {
     RenderContext context = new RenderContext("site", "localhost", "page", "user");
     context.renderState().put("rememberedState", "State");
     RenderResult res = underTest.renderWithInfo("===Some Header===", context);
@@ -848,7 +848,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderTable() {
+  public void test_renderTable() {
     String inputSimpleTable = "|First|Line|\n|Second|Line|";
     assertEquals(
         "<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Line</td></tr>\n<tr><td>Second</td><td>Line</td></tr>\n</tbody></table>",
@@ -890,7 +890,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderTableWithRowspan() {
+  public void test_renderTableWithRowspan() {
     String tableWithRowSpan = "|One|Two|\n|Three| :: |";
     assertEquals(
         """
@@ -952,7 +952,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderTableWithAlignment() {
+  public void test_renderTableWithAlignment() {
     String tableWithRowSpan = "|Left | Center |\n| Right|None|";
     assertEquals(
         """
@@ -970,7 +970,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderTableWithBraces() {
+  public void test_renderTableWithBraces() {
     String inputTable = "|<some thing>|<or else>|";
     assertEquals(
         "<table class=\"lazerTable\"><tbody><tr><td>&lt;some thing&gt;</td><td>&lt;or else&gt;</td></tr>\n</tbody></table>",
@@ -978,7 +978,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderTableWithLink() {
+  public void test_renderTableWithLink() {
     String inputTableWithLink = "|First|Cell [[Link| with a link]]|";
     assertEquals(
         "<table class=\"lazerTable\"><tbody><tr><td>First</td><td>Cell <a class=\"wikiLinkMissing\" href=\"/page/Link\"> with a link</a></td></tr>\n</tbody></table>",
@@ -986,7 +986,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRender2Tables() {
+  public void test_render2Tables() {
     String inputSimpleTable = "|First|Line|\n\n|Second|Line|";
     assertEquals(
         """
@@ -998,7 +998,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderBrokenTable() {
+  public void test_renderBrokenTable() {
     String inputTable = "|Cell1|Cell2|\n|Cell3|Cell4 doesn't end";
     assertEquals(
         """
@@ -1009,7 +1009,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderBlockquote() {
+  public void test_renderBlockquote() {
     String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
     assertEquals(
         "<blockquote> One quote <span class=\"bold\">with some bold</span>\n"
@@ -1034,7 +1034,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderBlockquoteSpaceIMage() {
+  public void test_renderBlockquoteSpaceIMage() {
     String inputBlockquote = "> {{animage}}";
     assertEquals(
         "<blockquote> <img src=\"/_media/animage\" class=\"media\" loading=\"lazy\"></blockquote>",
@@ -1042,7 +1042,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testHidden() {
+  public void test_hidden() {
     when(randomService.nextInt()).thenReturn(5, 8, 7, 11);
     String hidden = "<hidden>simple</hidden>";
     assertEquals(
@@ -1125,7 +1125,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testHidden_nested() {
+  public void test_hidden_nested() {
     when(randomService.nextInt()).thenReturn(5, 4);
     // Nested hidden doesn't work, the interior hidden is just escaped
     String nestedHidden =
@@ -1141,7 +1141,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testHidden_unsupportedCases() {
+  public void test_hidden_unsupportedCases() {
     when(randomService.nextInt()).thenReturn(5);
 
     String notEnded = "<hidden>This hidden block is never closed";
@@ -1149,7 +1149,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderTOC() {
+  public void test_renderTOC() {
     String source =
         "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n";
     String headerRender =
@@ -1166,7 +1166,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderNoTOC() {
+  public void test_renderNoTOC() {
     String source =
         "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n  ~~NOTOC~~";
     String headerRender =
@@ -1182,7 +1182,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderYesTOC() {
+  public void test_renderYesTOC() {
     String source = "====== Header 1 ======\n ==== Header 2 ====\n  ~~YESTOC~~";
     String headerRender =
         """
@@ -1198,7 +1198,7 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderHR() {
+  public void test_renderHR() {
     String source = "----";
 
     assertEquals("<hr>", doRender(source));
@@ -1207,12 +1207,12 @@ public class DokuWikiRendererTest {
   }
 
   @Test
-  public void testRenderEmptyPage() {
+  public void test_renderEmptyPage() {
     assertEquals("", doRender(""));
   }
 
   @Test
-  public void testRenderUnknownTokens() {
+  public void test_renderUnknownTokens() {
     String source = "~~WHATTHIS";
     assertEquals("<div>~~WHATTHIS</div>", doRender(source));
   }

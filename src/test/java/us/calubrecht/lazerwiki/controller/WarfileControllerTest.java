@@ -26,7 +26,7 @@ class WarfileControllerTest {
   @MockitoBean WarResourceService resourceService;
 
   @Test
-  void getFile() throws Exception {
+  void test_getFile() throws Exception {
     this.mockMvc.perform(get("/assets/someFile.jpg")).andExpect(status().isOk());
 
     verify(resourceService).getBinaryFile(eq("assets/someFile.jpg"));
@@ -39,7 +39,7 @@ class WarfileControllerTest {
   }
 
   @Test
-  void getIndexFile() throws Exception {
+  void test_getIndexFile() throws Exception {
     when(resourceService.getBinaryFile("index.html")).thenReturn("Some bytes".getBytes());
     this.mockMvc
         .perform(get("/"))
@@ -58,7 +58,7 @@ class WarfileControllerTest {
   }
 
   @Test
-  void getRootFile() throws Exception {
+  void test_getRootFile() throws Exception {
     when(resourceService.getBinaryFile("ding.txt")).thenReturn("Ding".getBytes());
     this.mockMvc
         .perform(get("/ding.txt"))

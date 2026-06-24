@@ -44,7 +44,7 @@ class LinkOverrideServiceTest {
   }
 
   @Test
-  void testCreateOverride() {
+  void test_createOverride() {
 
     LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "changedPage");
     LinkOverride lo2 = new LinkOverride("default", "ns", "p1", "", "pageName", "", "changedPage");
@@ -69,7 +69,7 @@ class LinkOverrideServiceTest {
   }
 
   @Test
-  void testCreateOverride2ndOverride() {
+  void test_createOverride2ndOverride() {
 
     LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "page2");
     LinkOverride lo2 = new LinkOverride("default", "", "p1", "", "pageName", "", "page3");
@@ -118,7 +118,7 @@ class LinkOverrideServiceTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testMoveOverrides() {
+  public void test_moveOverrides() {
     LinkOverride lo1 = new LinkOverride("default", "", "p1", "", "pageName", "", "page2");
     LinkOverride lo2 = new LinkOverride("default", "", "p1", "", "pageName", "", "page3");
     List<LinkOverride> links = List.of(lo1, lo2);
@@ -138,7 +138,7 @@ class LinkOverrideServiceTest {
   }
 
   @Test
-  public void testDeleteOverrides() {
+  public void test_deleteOverrides() {
     when(siteService.getSiteForHostname(eq("host"))).thenReturn("default");
     underTest.deleteOverrides("host", "ns1:page");
 

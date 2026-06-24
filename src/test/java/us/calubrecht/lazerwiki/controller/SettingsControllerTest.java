@@ -26,7 +26,7 @@ class SettingsControllerTest {
   @MockitoBean GlobalSettingsService globalSettingsService;
 
   @Test
-  void getGlobalSettings() throws Exception {
+  void test_getGlobalSettings() throws Exception {
     GlobalSettings settings = new GlobalSettings();
     settings.settings = Map.of("Setting1", "value1");
     when(globalSettingsService.getSettings()).thenReturn(settings);

@@ -26,7 +26,7 @@ public class AdminUserControllerTest {
   @MockitoBean UserService userService;
 
   @Test
-  public void testCreateFromLocalhost() throws Exception {
+  public void test_createFromLocalhost() throws Exception {
     String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
     this.mockMvc
         .perform(
@@ -44,7 +44,7 @@ public class AdminUserControllerTest {
   }
 
   @Test
-  public void testCreateFromRemote() throws Exception {
+  public void test_createFromRemote() throws Exception {
     String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
     this.mockMvc
         .perform(
@@ -62,7 +62,7 @@ public class AdminUserControllerTest {
   }
 
   @Test
-  public void testCreateFromForwarded() throws Exception {
+  public void test_createFromForwarded() throws Exception {
     String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
     this.mockMvc
         .perform(
@@ -81,7 +81,7 @@ public class AdminUserControllerTest {
   }
 
   @Test
-  public void testCreateFromWeirdness() throws Exception {
+  public void test_createFromWeirdness() throws Exception {
     String requestJson = "{\"userName\": \"Bob\", \"password\": \"BigSecret\"}";
     this.mockMvc
         .perform(

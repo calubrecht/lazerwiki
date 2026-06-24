@@ -36,7 +36,7 @@ class ImageRendererTest {
    * descriptor, scale by using inline css styling.
    */
   @Test
-  void applyInlineStylesForUnscalable() {
+  void test_applyInlineStylesForUnscalable() {
     String noScale = "";
     ImageNode imageNode = new ImageNode("img.avif", null, noScale, ImageNode.AlignType.NONE);
     RenderContext renderContext = new RenderContext("host", "site", "page", "user");
@@ -90,7 +90,7 @@ class ImageRendererTest {
   }
 
   @Test
-  void testParseOptions() {
+  void test_parseOptions() {
     assertEquals(Map.of(), renderer.parseOptions("", "a.jpg"));
     assertEquals(Map.of("size", "?30"), renderer.parseOptions("30", "a.jpg"));
     assertEquals(Map.of("size", "?30x30"), renderer.parseOptions("30x30", "a.jpg"));
@@ -105,7 +105,7 @@ class ImageRendererTest {
   }
 
   @Test
-  void testFileNameWithSpace() {
+  void test_fileNameWithSpace() {
     ImageNode imageNode = new ImageNode("img 1.jpg?30", null, "", ImageNode.AlignType.NONE);
     RenderContext renderContext = new RenderContext("host", "site", "page", "user");
     assertEquals(
@@ -114,7 +114,7 @@ class ImageRendererTest {
   }
 
   @Test
-  public void testOverrides() {
+  public void test_overrides() {
     String input1 = "img.jpg";
     List<MediaOverride> overrides =
         List.of(new MediaOverride("default", "", "page", "", "img.jpg", "ns2", "img5.jpg"));
@@ -146,7 +146,7 @@ class ImageRendererTest {
   }
 
   @Test
-  public void testOverridesWithComplexInputs() {
+  public void test_overridesWithComplexInputs() {
     String input1 = "img.jpg";
     ImageNode imageNode = new ImageNode(input1, " alternate text", "", ImageNode.AlignType.RIGHT);
     imageNode.setPosition(8, 21);

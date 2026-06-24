@@ -48,7 +48,7 @@ class AdminControllerTest {
   @MockitoBean GlobalSettingsService globalSettingsService;
 
   @Test
-  void regenLinkTable() throws Exception {
+  void test_regenLinkTable() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     User siteAdmin = new User();
@@ -79,7 +79,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void regenCacheTable() throws Exception {
+  void test_regenCacheTable() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     User siteAdmin = new User();
@@ -109,7 +109,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void getUsers() throws Exception {
+  void test_getUsers() throws Exception {
     when(userService.getUsers())
         .thenReturn(
             List.of(
@@ -152,7 +152,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void deleteRole() throws Exception {
+  void test_deleteRole() throws Exception {
     when(userService.deleteRole(eq("Frank"), eq("ROLE_ADMIN"), any()))
         .thenReturn(new UserDTO("Frank", null, List.of("ROLE_USER"), Map.of()));
     when(userService.deleteRole(eq("Bob"), eq("ROLE_EXTRA"), any()))
@@ -195,7 +195,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void addRoles() throws Exception {
+  void test_addRoles() throws Exception {
     when(userService.addRole(eq("Frank"), eq("ROLE_ADMIN"), any()))
         .thenReturn(new UserDTO("Frank", null, List.of("ROLE_USER"), Map.of()));
     User adminUser = new User();
@@ -222,7 +222,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void setRoles() throws Exception {
+  void test_setRoles() throws Exception {
     when(userService.setSiteRoles(eq("Frank"), eq("site1"), anyList(), any()))
         .thenReturn(new UserDTO("Frank", null, List.of("ROLE_USER"), Map.of()));
     User adminUser = new User();
@@ -292,7 +292,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void addUser() throws Exception {
+  void test_addUser() throws Exception {
     User u = new User("NewUser", null);
     u.roles = List.of(new UserRole(u, "ROLE_USER"));
     when(userService.getUser(eq("NewUser"))).thenReturn(null, u, null, u);
@@ -366,7 +366,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void passwordReset() throws Exception {
+  void test_passwordReset() throws Exception {
     User u = new User("User", null);
     u.roles = List.of(new UserRole(u, "ROLE_USER"));
     when(userService.getUser(eq("NewUser"))).thenReturn(u);
@@ -412,7 +412,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void deleteUser() throws Exception {
+  void test_deleteUser() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     adminUser.userName = "Bob";
@@ -437,7 +437,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void getSites() throws Exception {
+  void test_getSites() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     adminUser.userName = "Bob";
@@ -458,7 +458,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void addSite() throws Exception {
+  void test_addSite() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     adminUser.userName = "Bob";
@@ -516,7 +516,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void delSite() throws Exception {
+  void test_delSite() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     adminUser.userName = "Bob";
@@ -551,7 +551,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void setSiteSettings() throws Exception {
+  void test_setSiteSettings() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     when(userService.getUser("Bob")).thenReturn(adminUser);
@@ -613,7 +613,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void setNamespaceRestrictionType() throws Exception {
+  void test_setNamespaceRestrictionType() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     when(userService.getUser("Bob")).thenReturn(adminUser);
@@ -667,7 +667,7 @@ class AdminControllerTest {
   }
 
   @Test
-  void setGlobalSettings() throws Exception {
+  void test_setGlobalSettings() throws Exception {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     when(userService.getUser("Bob")).thenReturn(adminUser);

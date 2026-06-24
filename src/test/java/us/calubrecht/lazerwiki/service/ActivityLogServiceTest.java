@@ -21,7 +21,7 @@ class ActivityLogServiceTest {
   @MockitoBean ActivityLogRepository repo;
 
   @Test
-  void log() {
+  void test_log() {
     User user = new User("Bob", "hash");
     service.log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, "default", user, "newPage");
 

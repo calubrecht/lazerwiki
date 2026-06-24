@@ -43,7 +43,7 @@ class ImportExportControllerTest {
   @MockitoBean UserService userService;
 
   @Test
-  void exportSite() throws Exception {
+  void test_exportSite() throws Exception {
     User jack = new User("Jack", "");
     jack.roles = List.of(new UserRole(jack, "ROLE_ADMIN:site"));
     when(userService.getUser(eq("Jack"))).thenReturn(jack);
@@ -65,7 +65,7 @@ class ImportExportControllerTest {
   }
 
   @Test
-  void exportSiteNoAuth() throws Exception {
+  void test_exportSiteNoAuth() throws Exception {
     User jack = new User("Jack", "");
     jack.roles = List.of(new UserRole(jack, "ROLE_USER"));
     when(userService.getUser(eq("Jack"))).thenReturn(jack);
@@ -75,7 +75,7 @@ class ImportExportControllerTest {
   }
 
   @Test
-  void exportSiteError() throws Exception {
+  void test_exportSiteError() throws Exception {
     User jack = new User("Jack", "");
     jack.roles = List.of(new UserRole(jack, "ROLE_ADMIN:site"));
     when(userService.getUser(eq("Jack"))).thenReturn(jack);

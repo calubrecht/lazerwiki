@@ -19,7 +19,10 @@
         </module>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>
-        <module name="MethodName"/>
+        <!-- Test methods allow underscores: test_method or testMethod_scenario -->
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
+        </module>
         <module name="PackageName"/>
         <module name="ParameterName"/>
         <module name="StaticVariableName"/>

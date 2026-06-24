@@ -23,7 +23,7 @@ class EmailServiceTest {
   @MockitoBean JavaMailSender mailSender;
 
   @Test
-  void sendEmail() throws MessagingException {
+  void test_sendEmail() throws MessagingException {
     MimeMessage message = new MimeMessage((Session) null);
     when(mailSender.createMimeMessage()).thenReturn(message);
     underTest.sendEmail("a@a.com", "A User", "Subject", "The body");

@@ -40,7 +40,7 @@ public class DokuWikiRendererPlaintextTest {
   }
 
   @Test
-  void testRenderLink() {
+  void test_renderLink() {
 
     when(pageService.exists(eq("localhost"), eq("exists"))).thenReturn(true);
     when(pageService.getTitle(eq("localhost"), eq("exists"))).thenReturn("This Page Exists");
@@ -55,70 +55,70 @@ public class DokuWikiRendererPlaintextTest {
   }
 
   @Test
-  void testRenderList() {
+  void test_renderList() {
     assertEquals("Item 1\nItem2", doRender("  *Item 1\n  *Item2"));
   }
 
   @Test
-  void testRenderHeader() {
+  void test_renderHeader() {
     assertEquals("The Header", doRender("===The Header==="));
 
     assertEquals("The Header with a link", doRender("===The Header with a [[goHere|link]]==="));
   }
 
   @Test
-  void testRenderImg() {
+  void test_renderImg() {
     assertEquals("thisImage.jpg", doRender("{{thisImage.jpg}}"));
 
     assertEquals("Image with a title", doRender("{{thisImage.jpg|Image with a title}}"));
   }
 
   @Test
-  void testRenderCodeBox() {
+  void test_renderCodeBox() {
     assertEquals("This is in the code block", doRender("  This is in the code block"));
   }
 
   @Test
-  void testRenderMacro() {
+  void test_renderMacro() {
     when(macroService.renderMacro(anyString(), anyString(), any()))
         .thenReturn("Something that won't show in plaintext");
     assertEquals("", doRender("~~MACRO~~This could be any macro~~/MACRO~~"));
   }
 
   @Test
-  void testRenderSpans() {
+  void test_renderSpans() {
     assertEquals(
         "Bold, italic, none of it is rendered",
         doRender("**Bold, //italic//**, none of it is rendered"));
   }
 
   @Test
-  public void testRenderUnformat() {
+  public void test_renderUnformat() {
     String input1 = "%%This **should not be bold**%%";
     assertEquals("This **should not be bold**", doRender(input1));
   }
 
   @Test
-  public void testRenderLinebreak() {
+  public void test_renderLinebreak() {
     String input = "This is a line \\\\ with a linebreak";
     assertEquals("This is a line\n with a linebreak", doRender(input));
   }
 
   @Test
-  public void testRenderTable() {
+  public void test_renderTable() {
     String inputSimpleTable = "| First | Line |\n|Second | Line|";
     assertEquals("| First | Line |\n" + "|Second | Line|", doRender(inputSimpleTable));
   }
 
   @Test
-  public void testRenderBlockquote() {
+  public void test_renderBlockquote() {
     String inputBlockquote = "> One quote **with some bold**\n>And\n>>Another layer of quote";
     assertEquals(
         " One quote with some bold\nAnd\nAnother layer of quote", doRender(inputBlockquote));
   }
 
   @Test
-  public void testHidden() {
+  public void test_hidden() {
     when(randomService.nextInt()).thenReturn(5, 8);
     String inputBlockquote = "<hidden>simple</hidden>";
     assertEquals("simple", doRender(inputBlockquote));
@@ -132,7 +132,7 @@ public class DokuWikiRendererPlaintextTest {
   }
 
   @Test
-  public void testRenderNoTOC() {
+  public void test_renderNoTOC() {
     String source =
         "====== Header 1 ======\n ==== Header 2 ====\n====== Header 3 ======\n===== Header 2 =====\n  ~~NOTOC~~";
     String headerRender =
@@ -146,14 +146,14 @@ public class DokuWikiRendererPlaintextTest {
   }
 
   @Test
-  public void testRenderBrokenInput() {
+  public void test_renderBrokenInput() {
     String source = "---";
     // If can't figure it out, just print it raw
     assertEquals("---", doRender(source));
   }
 
   @Test
-  public void testRenderHR() {
+  public void test_renderHR() {
     String source = "----";
 
     assertEquals("----", doRender(source));
@@ -162,7 +162,7 @@ public class DokuWikiRendererPlaintextTest {
   }
 
   @Test
-  public void testHtmlEntities() {
+  public void test_htmlEntities() {
     String source = "<Ä   #";
 
     // Plaintext renderer should not replace with entities

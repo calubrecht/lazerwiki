@@ -30,7 +30,7 @@ public class SiteServiceTest {
   @MockitoBean SiteRepository repository;
 
   @Test
-  public void test() {
+  public void test_() {
     Site defaultSite = new Site();
     defaultSite.name = "normal";
     defaultSite.hostname = "*";
@@ -90,7 +90,7 @@ public class SiteServiceTest {
   }
 
   @Test
-  void getHostForSitename() {
+  void test_getHostForSitename() {
     Site blue = new Site();
     blue.hostname = "water.com";
     when(repository.findById("blue")).thenReturn(Optional.of(blue));
@@ -98,7 +98,7 @@ public class SiteServiceTest {
   }
 
   @Test
-  void getAllSites() {
+  void test_getAllSites() {
     User adminUser = new User();
     adminUser.roles = List.of(new UserRole(adminUser, "ROLE_ADMIN"));
     adminUser.userName = "Bob";
@@ -128,7 +128,7 @@ public class SiteServiceTest {
   }
 
   @Test
-  void addSite() {
+  void test_addSite() {
     when(repository.findById("existingSite"))
         .thenReturn(Optional.of(new Site("existingSite", "", "")));
 
@@ -146,7 +146,7 @@ public class SiteServiceTest {
   }
 
   @Test
-  void setSiteSettings() throws SiteSettingsException {
+  void test_setSiteSettings() throws SiteSettingsException {
     when(repository.findById("existingSite"))
         .thenReturn(Optional.of(new Site("existingSite", "", "")));
     User adminUser = new User();

@@ -14,7 +14,7 @@ class TemplateServiceTest {
   @Autowired TemplateService underTest;
 
   @Test
-  void getVerifyEmailTemplate() {
+  void test_getVerifyEmailTemplate() {
     String res = underTest.getVerifyEmailTemplate("Site1", "bob@super.com", "Bob", "ABC");
     assertTrue(res.contains("Site1"));
     assertTrue(res.contains("bob@super.com"));

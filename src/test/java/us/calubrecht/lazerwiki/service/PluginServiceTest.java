@@ -25,12 +25,12 @@ class PluginServiceTest {
   @MockitoBean SiteService siteService;
 
   @Test
-  void registerPlugins() {
+  void test_registerPlugins() {
     assertFalse(underTest.plugins.isEmpty());
   }
 
   @Test
-  void testGetEditToolbarDefs() {
+  void test_getEditToolbarDefs() {
     assertEquals(
         "var LAZERWIKI_PLUGINS=[{name:\"name\", icon:\"icon.png\", script:()=> {doSomething()}}];",
         underTest.getEditToolbarDefs("site1"));
