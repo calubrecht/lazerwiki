@@ -57,7 +57,7 @@ public class UserService {
         roles.stream()
             .map(role -> new UserRole(newUser, role.getAuthority()))
             .collect(Collectors.toList());
-    newUser.settings = Map.of();
+    newUser.setSettings(Map.of());
     userRepository.save(newUser);
     String msg = createdBy == null ? "Self-register: " + newUser.userName : newUser.userName;
     activityLogService.log(ActivityType.ACTIVITY_PROTO_CREATE_USER, null, createdBy, msg);

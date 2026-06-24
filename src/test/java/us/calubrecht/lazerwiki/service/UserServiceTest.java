@@ -61,7 +61,7 @@ public class UserServiceTest {
     assertNotEquals("password", u.passwordHash);
     assertEquals(1, u.roles.size());
     assertEquals("ROLE_USER", u.roles.get(0).role);
-    assertEquals(Map.of(), u.settings);
+    assertEquals(Map.of(), u.getSettings());
 
     verify(activityLogService)
         .log(eq(ActivityType.ACTIVITY_PROTO_CREATE_USER), isNull(), eq(createdBy), eq("Bob"));
@@ -105,8 +105,8 @@ public class UserServiceTest {
     List<User> users = List.of(new User("bob", ""), new User("Joe", ""));
     users.get(0).roles = List.of(new UserRole(users.get(0), "ROLE_ADMIN"));
     users.get(1).roles = Collections.emptyList();
-    users.get(0).settings = Map.of();
-    users.get(1).settings = Map.of();
+    users.get(0).setSettings(Map.of());
+    users.get(1).setSettings(Map.of());
     when(userRepository.findAll()).thenReturn(users);
 
     assertEquals(

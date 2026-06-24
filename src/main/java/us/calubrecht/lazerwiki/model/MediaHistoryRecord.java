@@ -23,7 +23,7 @@ public class MediaHistoryRecord {
   @ManyToOne()
   @JoinColumn(name = "uploadedBy", referencedColumnName = "userId")
   @JsonIgnore
-  public User uploadedByUser;
+  private User uploadedByUser;
 
   @ManyToOne()
   @JoinColumn(name = "action", referencedColumnName = "activityTypeId")

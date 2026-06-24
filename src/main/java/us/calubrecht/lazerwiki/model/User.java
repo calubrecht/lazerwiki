@@ -31,7 +31,7 @@ public class User {
   public String passwordHash;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  public Map<String, Object> settings;
+  private Map<String, Object> settings;
 
   @OneToMany(
       cascade = {CascadeType.ALL},

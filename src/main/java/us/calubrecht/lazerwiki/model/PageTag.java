@@ -6,16 +6,16 @@ import jakarta.persistence.*;
 public class PageTag {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  public Long id;
+  private Long id;
 
   @ManyToOne()
   @JoinColumns({
     @JoinColumn(name = "pageId", referencedColumnName = "id"),
     @JoinColumn(name = "revision", referencedColumnName = "revision")
   })
-  public Page page;
+  private Page page;
 
-  public String tag;
+  private String tag;
 
   public PageTag() {}
 

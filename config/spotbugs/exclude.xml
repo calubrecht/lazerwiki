@@ -58,4 +58,12 @@
         <Class name="us.calubrecht.lazerwiki.LazerWikiApplication$LogoutListener"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
+
+    <!--
+        \n is the correct line separator for HTTP-served HTML output.
+        %n produces platform-specific separators (\r\n on Windows), which is wrong here.
+    -->
+    <Match>
+        <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+    </Match>
 </FindBugsFilter>

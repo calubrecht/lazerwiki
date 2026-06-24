@@ -43,7 +43,7 @@ public class Page {
     @JoinColumn(name = "pageId", referencedColumnName = "id"),
     @JoinColumn(name = "revision", referencedColumnName = "revision")
   })
-  public List<PageTag> tags;
+  private List<PageTag> tags;
 
   public Long getId() {
     return id;

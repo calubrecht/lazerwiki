@@ -21,11 +21,11 @@ public class ActivityLog {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  public Long id;
+  private Long id;
 
   @ManyToOne
   @JoinColumn(name = "activityType", referencedColumnName = "activityTypeId")
-  public ActivityType activityType;
+  private ActivityType activityType;
 
   @Column String target;
 
