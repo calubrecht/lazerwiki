@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki;
 
+import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,42 +15,40 @@ import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.service.UserService;
 
-import java.util.stream.Collectors;
-
-
 @Component
 public class LazerWikiAuthenticationManager implements AuthenticationManager {
-    final Log logger = LogFactory.getLog(getClass());
+  final Log logger = LogFactory.getLog(getClass());
 
-    @Autowired
-    UserService userService;
+  @Autowired UserService userService;
 
-    public static final GrantedAuthority USER = new SimpleGrantedAuthority("ROLE_USER");
-    public static final GrantedAuthority ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
+  public static final GrantedAuthority USER = new SimpleGrantedAuthority("ROLE_USER");
+  public static final GrantedAuthority ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (!(authentication instanceof UsernamePasswordAuthenticationToken token)) {
-            throw new BadCredentialsException("Invalid authentication");
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    if (!(authentication instanceof UsernamePasswordAuthenticationToken token)) {
+      throw new BadCredentialsException("Invalid authentication");
+    }
+    String name = token.getName();
+    try {
+      User u = userService.getUser(name);
+      if (u != null) {
+        if (userService.verifyPassword(u, token.getCredentials().toString())) {
+          return new UsernamePasswordAuthenticationToken(
+              token.getName(),
+              null,
+              u.roles.stream()
+                  .map(role -> new SimpleGrantedAuthority(role.role))
+                  .collect(Collectors.toList()));
         }
-        String name = token.getName();
-        try {
-            User u = userService.getUser(name);
-            if (u != null ) {
-                if (userService.verifyPassword(u, token.getCredentials().toString())) {
-                    return new UsernamePasswordAuthenticationToken(token.getName(), null, u.roles.stream().map(role -> new SimpleGrantedAuthority(role.role)).collect(Collectors.toList()));
-                }
-            }
-        }
-        catch (BadCredentialsException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            logger.error("Exception during authentication", e);
-            throw new BadCredentialsException("Invalid authentication");
-        }
-
-        throw new BadCredentialsException("Invalid authentication");
+      }
+    } catch (BadCredentialsException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("Exception during authentication", e);
+      throw new BadCredentialsException("Invalid authentication");
     }
 
+    throw new BadCredentialsException("Invalid authentication");
+  }
 }

@@ -1,11 +1,10 @@
 package us.calubrecht.lazerwiki.util;
 
+import java.io.IOException;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 
-import java.io.IOException;
-
 @FunctionalInterface
-public interface IOSupplier<T>  {
+public interface IOSupplier<T> {
 
-    T get() throws IOException, MediaReadException;
+  T get() throws IOException, MediaReadException;
 }

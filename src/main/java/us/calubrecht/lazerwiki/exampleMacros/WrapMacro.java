@@ -1,37 +1,35 @@
-    package us.calubrecht.lazerwiki.exampleMacros;
+package us.calubrecht.lazerwiki.exampleMacros;
 
-import us.calubrecht.lazerwiki.macro.CustomMacro;
-import us.calubrecht.lazerwiki.macro.Macro;
+import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.LINKS;
 
 import java.util.Collection;
-
-import static us.calubrecht.lazerwiki.model.RenderResult.RENDER_STATE_KEYS.LINKS;
+import us.calubrecht.lazerwiki.macro.CustomMacro;
+import us.calubrecht.lazerwiki.macro.Macro;
 
 @CustomMacro
 public class WrapMacro extends Macro {
 
-    @Override
-    public String getName() {
-        return "wrap";
-    }
+  @Override
+  public String getName() {
+    return "wrap";
+  }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public String render(Macro.MacroContext context, String macroArgs) {
-        String[] toks = macroArgs.split(":",2);
-        String className = context.sanitize(toks[0]);
-        if (toks.length == 1 || toks[1].isBlank()) {
-            return "<div class=\"%s\"></div>".formatted(className);
-        }
-        boolean multiLine = toks[1].contains("\n");
-        MacroContext.RenderOutput renderOutput = context.renderMarkup(toks[1]);
-        String innerText = renderOutput.getHtml();
-        if (!multiLine) {
-            // Strip the div that comes from the renderer.
-            innerText = innerText.
-                    substring(5, innerText.length() - 6);
-        }
-        context.addLinks((Collection<String>)(renderOutput.getState().get(LINKS.name())));
-        return "<div class=\"%s\">%s</div>".formatted(className,innerText);
+  @Override
+  @SuppressWarnings("unchecked")
+  public String render(Macro.MacroContext context, String macroArgs) {
+    String[] toks = macroArgs.split(":", 2);
+    String className = context.sanitize(toks[0]);
+    if (toks.length == 1 || toks[1].isBlank()) {
+      return "<div class=\"%s\"></div>".formatted(className);
     }
+    boolean multiLine = toks[1].contains("\n");
+    MacroContext.RenderOutput renderOutput = context.renderMarkup(toks[1]);
+    String innerText = renderOutput.getHtml();
+    if (!multiLine) {
+      // Strip the div that comes from the renderer.
+      innerText = innerText.substring(5, innerText.length() - 6);
+    }
+    context.addLinks((Collection<String>) (renderOutput.getState().get(LINKS.name())));
+    return "<div class=\"%s\">%s</div>".formatted(className, innerText);
+  }
 }

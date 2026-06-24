@@ -10,23 +10,23 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-    @Value("${lazerwiki.email.smtp.src.email}")
-    String srcEmail;
+  @Value("${lazerwiki.email.smtp.src.email}")
+  String srcEmail;
 
-    @Value("${lazerwiki.email.smtp.src.name}")
-    String srcName;
+  @Value("${lazerwiki.email.smtp.src.name}")
+  String srcName;
 
-    @Autowired
-    JavaMailSender mailSender;
+  @Autowired JavaMailSender mailSender;
 
-    public void sendEmail(String destEmail, String destUser, String subject, String body) throws MessagingException {
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-        String fullSrc = srcName.isBlank() ? srcEmail : "%s <%s>".formatted(srcName, srcEmail);
-        helper.setFrom(fullSrc);
-        helper.setTo("%s <%s>".formatted(destUser, destEmail));
-        helper.setText(body, true);
-        helper.setSubject(subject);
-        mailSender.send(mimeMessage);
-    }
+  public void sendEmail(String destEmail, String destUser, String subject, String body)
+      throws MessagingException {
+    MimeMessage mimeMessage = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+    String fullSrc = srcName.isBlank() ? srcEmail : "%s <%s>".formatted(srcName, srcEmail);
+    helper.setFrom(fullSrc);
+    helper.setTo("%s <%s>".formatted(destUser, destEmail));
+    helper.setText(body, true);
+    helper.setSubject(subject);
+    mailSender.send(mimeMessage);
+  }
 }

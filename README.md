@@ -75,6 +75,20 @@ If you have macros in `src/main/java/localMacros/`, package them as a separate j
 
 Tests use an in-memory H2 database and do not require MySQL.
 
+### Code style
+
+Before opening a pull request, please run the formatter and style checks:
+
+```bash
+# Auto-format all Java source files
+./gradlew spotlessApply
+
+# Check for remaining style violations (naming, braces, etc.)
+./gradlew checkstyleMain checkstyleTest
+```
+
+`spotlessApply` uses google-java-format to fix whitespace and formatting automatically. `checkstyle` catches naming conventions and structural issues that require manual fixes. Both should be clean before merging.
+
 ---
 
 ## Configuration

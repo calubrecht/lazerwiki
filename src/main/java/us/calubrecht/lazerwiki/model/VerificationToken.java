@@ -1,86 +1,91 @@
 package us.calubrecht.lazerwiki.model;
 
 import jakarta.persistence.*;
-
 import java.util.Objects;
 
 @Entity(name = "verificationToken")
 public class VerificationToken {
-    public enum Purpose {VERIFY_EMAIL, RESET_PASSWORD}
+  public enum Purpose {
+    VERIFY_EMAIL,
+    RESET_PASSWORD
+  }
 
-    public VerificationToken() {
+  public VerificationToken() {}
 
-    }
+  public VerificationToken(User user, String token, Purpose purpose, String data) {
+    this.user = user;
+    this.token = token;
+    this.purpose = purpose;
+    this.data = data;
+  }
 
-    public VerificationToken(User user, String token, Purpose purpose, String data) {
-        this.user = user;
-        this.token = token;
-        this.purpose = purpose;
-        this.data = data;
-    }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @ManyToOne
-    @JoinColumn(name="user", referencedColumnName = "userId")
-    private User user;
-    private String token;
-    private String data;
+  @ManyToOne
+  @JoinColumn(name = "user", referencedColumnName = "userId")
+  private User user;
 
-    @Column(columnDefinition = "ENUM('VERIFY_EMAIL', 'RESET_PASSWORD')")
-    @Enumerated(EnumType.STRING)
-    private Purpose purpose;
+  private String token;
+  private String data;
 
-    public Long getId() {
-        return id;
-    }
+  @Column(columnDefinition = "ENUM('VERIFY_EMAIL', 'RESET_PASSWORD')")
+  @Enumerated(EnumType.STRING)
+  private Purpose purpose;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public User getUser() {
-        return user;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+  public User getUser() {
+    return user;
+  }
 
-    public String getToken() {
-        return token;
-    }
+  public void setUser(User user) {
+    this.user = user;
+  }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+  public String getToken() {
+    return token;
+  }
 
-    public Purpose getPurpose() {
-        return purpose;
-    }
+  public void setToken(String token) {
+    this.token = token;
+  }
 
-    public void setPurpose(Purpose purpose) {
-        this.purpose = purpose;
-    }
+  public Purpose getPurpose() {
+    return purpose;
+  }
 
-    public String getData() {
-        return data;
-    }
+  public void setPurpose(Purpose purpose) {
+    this.purpose = purpose;
+  }
 
-    public void setData(String data) {
-        this.data = data;
-    }
+  public String getData() {
+    return data;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        VerificationToken that = (VerificationToken) o;
-        return Objects.equals(user, that.user) && Objects.equals(token, that.token) && Objects.equals(data, that.data) && purpose == that.purpose;
-    }
+  public void setData(String data) {
+    this.data = data;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(user, token, data, purpose);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    VerificationToken that = (VerificationToken) o;
+    return Objects.equals(user, that.user)
+        && Objects.equals(token, that.token)
+        && Objects.equals(data, that.data)
+        && purpose == that.purpose;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(user, token, data, purpose);
+  }
 }

@@ -1,15 +1,19 @@
 package us.calubrecht.lazerwiki.syntax.nodes;
 
 public class SpecialSpanNode extends ContainerNode {
-    public enum SPAN_TYPE {SUP, SUB, DEL}
+  public enum SpanType {
+    SUP,
+    SUB,
+    DEL
+  }
 
-    final SPAN_TYPE type;
+  final SpanType type;
 
-    public SpecialSpanNode(SPAN_TYPE type) {
-        this.type = type;
-    }
+  public SpecialSpanNode(SpanType type) {
+    this.type = type;
+  }
 
-    public SPAN_TYPE getType() {
-        return type;
-    }
+  public SpanType getType() {
+    return type;
+  }
 }

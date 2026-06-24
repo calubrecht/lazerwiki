@@ -6,20 +6,19 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 @Component
 public class Renderer {
-    final ParserRegistrar parserRegistrar;
+  final ParserRegistrar parserRegistrar;
 
-    public Renderer(@Autowired ParserRegistrar parserRegistrar) {
-        this.parserRegistrar = parserRegistrar;
-    }
+  public Renderer(@Autowired ParserRegistrar parserRegistrar) {
+    this.parserRegistrar = parserRegistrar;
+  }
 
+  public String render(ITreeNode node, RenderContext renderContext) {
+    ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
+    return renderer.renderHtml(node, renderContext).toString().strip();
+  }
 
-    public String render(ITreeNode node, RenderContext renderContext) {
-        ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
-        return renderer.renderHtml(node, renderContext).toString().strip();
-    }
-
-    public String renderPlaintext(ITreeNode node, RenderContext renderContext) {
-        ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
-        return renderer.renderPlaintext(node, renderContext).toString().stripTrailing();
-    }
+  public String renderPlaintext(ITreeNode node, RenderContext renderContext) {
+    ITreeRenderer renderer = parserRegistrar.getRenderer(node.getClass());
+    return renderer.renderPlaintext(node, renderContext).toString().stripTrailing();
+  }
 }

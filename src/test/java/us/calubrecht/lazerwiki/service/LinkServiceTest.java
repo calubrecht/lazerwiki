@@ -1,5 +1,9 @@
 package us.calubrecht.lazerwiki.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,46 +12,53 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.Link;
 import us.calubrecht.lazerwiki.repository.LinkRepository;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
 @SpringBootTest(classes = {LinkService.class})
 @ActiveProfiles("test")
 class LinkServiceTest {
-    @Autowired
-    LinkService underTest;
+  @Autowired LinkService underTest;
 
-    @MockitoBean
-    LinkRepository linkRepository;
+  @MockitoBean LinkRepository linkRepository;
 
-    @Test
-    void setLinksFromPage() {
-        underTest.setLinksFromPage("default", "ns", "pageName", List.of("page1", "ns:page2"));
+  @Test
+  void setLinksFromPage() {
+    underTest.setLinksFromPage("default", "ns", "pageName", List.of("page1", "ns:page2"));
 
-        verify(linkRepository).deleteBySiteAndSourcePageNSAndSourcePageName("default", "ns", "pageName");
-        List<Link> links = List.of(new Link("default", "ns", "pageName", "", "page1"), new Link("default", "ns", "pageName", "ns", "page2"));
-        verify(linkRepository).saveAll(eq(links));
-    }
+    verify(linkRepository)
+        .deleteBySiteAndSourcePageNSAndSourcePageName("default", "ns", "pageName");
+    List<Link> links =
+        List.of(
+            new Link("default", "ns", "pageName", "", "page1"),
+            new Link("default", "ns", "pageName", "ns", "page2"));
+    verify(linkRepository).saveAll(eq(links));
+  }
 
-    @Test
-    void getLinksOnPage() {
-        List<Link> links = List.of(new Link("default", "", "pageName", "", "page1"), new Link("default", "", "pageName", "ns:ns:inner", "page5"));
-        when(linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName(any(), any(), any())).thenReturn(links);
-        assertEquals(List.of("page1", "ns:ns:inner:page5"), underTest.getLinksOnPage("default","pageName"));
-    }
+  @Test
+  void getLinksOnPage() {
+    List<Link> links =
+        List.of(
+            new Link("default", "", "pageName", "", "page1"),
+            new Link("default", "", "pageName", "ns:ns:inner", "page5"));
+    when(linkRepository.findAllBySiteAndSourcePageNSAndSourcePageName(any(), any(), any()))
+        .thenReturn(links);
+    assertEquals(
+        List.of("page1", "ns:ns:inner:page5"), underTest.getLinksOnPage("default", "pageName"));
+  }
 
-    @Test
-    void getBacklinks() {
-        List<Link> links = List.of(new Link("default", "", "page1", "", "pageName"), new Link("default", "ns:ns:inner", "page5", "ns:ns:inner", "pageName"));
-        when(linkRepository.findAllBySiteAndTargetPageNSAndTargetPageName(any(), any(), any())).thenReturn(links);
-        assertEquals(List.of("page1", "ns:ns:inner:page5"), underTest.getBacklinks("default","pageName"));
-    }
+  @Test
+  void getBacklinks() {
+    List<Link> links =
+        List.of(
+            new Link("default", "", "page1", "", "pageName"),
+            new Link("default", "ns:ns:inner", "page5", "ns:ns:inner", "pageName"));
+    when(linkRepository.findAllBySiteAndTargetPageNSAndTargetPageName(any(), any(), any()))
+        .thenReturn(links);
+    assertEquals(
+        List.of("page1", "ns:ns:inner:page5"), underTest.getBacklinks("default", "pageName"));
+  }
 
-    @Test
-    void deleteLinks() {
-        underTest.deleteLinks("site1", "ns:page1");
-        verify(linkRepository).deleteBySiteAndSourcePageNSAndSourcePageName("site1", "ns", "page1");
-    }
+  @Test
+  void deleteLinks() {
+    underTest.deleteLinks("site1", "ns:page1");
+    verify(linkRepository).deleteBySiteAndSourcePageNSAndSourcePageName("site1", "ns", "page1");
+  }
 }

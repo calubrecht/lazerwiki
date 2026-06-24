@@ -5,5 +5,4 @@ import org.springframework.stereotype.Repository;
 import us.calubrecht.lazerwiki.model.ActivityLog;
 
 @Repository
-public interface ActivityLogRepository extends CrudRepository<ActivityLog, Long> {
-}
+public interface ActivityLogRepository extends CrudRepository<ActivityLog, Long> {}

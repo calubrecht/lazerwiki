@@ -1,5 +1,10 @@
 package us.calubrecht.lazerwiki.service;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,92 +16,117 @@ import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
-import org.apache.commons.io.FilenameUtils;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-
 @Service
 public class MediaCacheService {
-    final Logger logger = LogManager.getLogger(getClass());
+  final Logger logger = LogManager.getLogger(getClass());
 
-    @Value("${lazerwiki.static.file.root}")
-    String staticFileRoot;
+  @Value("${lazerwiki.static.file.root}")
+  String staticFileRoot;
 
-    @Autowired
-    ImageUtil imageUtil;
+  @Autowired ImageUtil imageUtil;
 
-    void ensureDir(String site, String nsPath) throws IOException {
-        if (nsPath.isBlank()) {
-            Files.createDirectories(Paths.get(String.join("/", staticFileRoot, site, "media-cache")));
-            return;
-        }
-        Files.createDirectories(Paths.get(String.join("/", staticFileRoot, site, "media-cache", nsPath)));
+  void ensureDir(String site, String nsPath) throws IOException {
+    if (nsPath.isBlank()) {
+      Files.createDirectories(Paths.get(String.join("/", staticFileRoot, site, "media-cache")));
+      return;
     }
+    Files.createDirectories(
+        Paths.get(String.join("/", staticFileRoot, site, "media-cache", nsPath)));
+  }
 
-
-    public int[] containedDimensions(int initialWidth, int initialHeight, int width, int height) {
-        double initialRatio = ((double)initialWidth)/initialHeight;
-        double newAspectRatio = ((double)width)/height;
-        if (newAspectRatio > initialRatio) {
-            width = (int)(height * initialRatio);
-        } else {
-            height = (int)(width / initialRatio);
-        }
-        return new int[] {width, height};
+  public int[] containedDimensions(int initialWidth, int initialHeight, int width, int height) {
+    double initialRatio = ((double) initialWidth) / initialHeight;
+    double newAspectRatio = ((double) width) / height;
+    if (newAspectRatio > initialRatio) {
+      width = (int) (height * initialRatio);
+    } else {
+      height = (int) (width / initialRatio);
     }
+    return new int[] {width, height};
+  }
 
-    public byte[] getBinaryFile(String site, MediaRecord record, IOSupplier<byte[]> fileLoad, int width, int height, boolean contain) throws IOException , MediaReadException {
-        StopWatch sw = new StopWatch();
-        sw.start();
-        Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
-        // refuse to scale up
-        if (record.getWidth() < width || record.getHeight() < height) {
-            return fileLoad.get();
-        }
-        if (contain) {
-            int[] dimensions = containedDimensions(record.getWidth(), record.getHeight(), width, height);
-            width = dimensions[0];
-            height = dimensions[1];
-        }
-        File cachedFile = record.getNamespace().isBlank() ? new File(Paths.get(cacheLocation.toString(), record.getFileName() + "-%sx%s".formatted(width, height)).toString())
-                : new File(Paths.get(cacheLocation.toString(), record.getNamespace(),record.getFileName() + "-%sx%s".formatted(width, height)).toString());
-        String nsPath = record.getNamespace().replaceAll(":", "/");
-        ensureDir(site, nsPath);
-        if (cachedFile.exists()) {
-            logger.info("Reading scaled image " + record.getFileName() + " from cache");
-            try (FileInputStream fin = new FileInputStream(cachedFile)) {
-                return fin.readAllBytes();
-            }
-        }
-        byte[] originalFile = fileLoad.get();
-        byte[] scaledFile = imageUtil.scaleImage(new ByteArrayInputStream(originalFile), FilenameUtils.getExtension(record.getFileName()),width, height);
-        try (FileOutputStream fout = new FileOutputStream(cachedFile)) {
-            fout.write(scaledFile);
-        }
-        sw.stop();
-        logger.info("Scaled image " + record.getFileName() + " and wrote " + cachedFile + " elapsed " + sw.getTotalTimeMillis() + "ms");
-        return scaledFile;
+  public byte[] getBinaryFile(
+      String site,
+      MediaRecord record,
+      IOSupplier<byte[]> fileLoad,
+      int width,
+      int height,
+      boolean contain)
+      throws IOException, MediaReadException {
+    StopWatch sw = new StopWatch();
+    sw.start();
+    Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
+    // refuse to scale up
+    if (record.getWidth() < width || record.getHeight() < height) {
+      return fileLoad.get();
     }
+    if (contain) {
+      int[] dimensions = containedDimensions(record.getWidth(), record.getHeight(), width, height);
+      width = dimensions[0];
+      height = dimensions[1];
+    }
+    File cachedFile =
+        record.getNamespace().isBlank()
+            ? new File(
+                Paths.get(
+                        cacheLocation.toString(),
+                        record.getFileName() + "-%sx%s".formatted(width, height))
+                    .toString())
+            : new File(
+                Paths.get(
+                        cacheLocation.toString(),
+                        record.getNamespace(),
+                        record.getFileName() + "-%sx%s".formatted(width, height))
+                    .toString());
+    String nsPath = record.getNamespace().replaceAll(":", "/");
+    ensureDir(site, nsPath);
+    if (cachedFile.exists()) {
+      logger.info("Reading scaled image " + record.getFileName() + " from cache");
+      try (FileInputStream fin = new FileInputStream(cachedFile)) {
+        return fin.readAllBytes();
+      }
+    }
+    byte[] originalFile = fileLoad.get();
+    byte[] scaledFile =
+        imageUtil.scaleImage(
+            new ByteArrayInputStream(originalFile),
+            FilenameUtils.getExtension(record.getFileName()),
+            width,
+            height);
+    try (FileOutputStream fout = new FileOutputStream(cachedFile)) {
+      fout.write(scaledFile);
+    }
+    sw.stop();
+    logger.info(
+        "Scaled image "
+            + record.getFileName()
+            + " and wrote "
+            + cachedFile
+            + " elapsed "
+            + sw.getTotalTimeMillis()
+            + "ms");
+    return scaledFile;
+  }
 
-    public void clearCache(String site, MediaRecord record) throws IOException, MediaReadException {
-        String nsPath = record.getNamespace().replaceAll(":", "/");
-        ensureDir(site, nsPath);
-        Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
-        File cacheDir = record.getNamespace().isBlank() ? new File(Paths.get(cacheLocation.toString()).toString())
-                : new File(Paths.get(cacheLocation.toString(), record.getNamespace()).toString());
-        String nameMatch = record.getFileName() + "-.*";
-        File[] files = cacheDir.listFiles( (dir, name) -> name.matches(nameMatch));
-        File rootFile = new File(staticFileRoot);
-        if (!cacheDir.getCanonicalPath().startsWith(Paths.get(rootFile.getCanonicalPath(), site, "media-cache").toString())) {
-            // Path traversal attempt
-            throw new MediaReadException("Invalid path");
-        }
-        for (File file: files) {
-            file.delete();
-        }
+  public void clearCache(String site, MediaRecord record) throws IOException, MediaReadException {
+    String nsPath = record.getNamespace().replaceAll(":", "/");
+    ensureDir(site, nsPath);
+    Path cacheLocation = Paths.get(staticFileRoot, site, "media-cache");
+    File cacheDir =
+        record.getNamespace().isBlank()
+            ? new File(Paths.get(cacheLocation.toString()).toString())
+            : new File(Paths.get(cacheLocation.toString(), record.getNamespace()).toString());
+    String nameMatch = record.getFileName() + "-.*";
+    File[] files = cacheDir.listFiles((dir, name) -> name.matches(nameMatch));
+    File rootFile = new File(staticFileRoot);
+    if (!cacheDir
+        .getCanonicalPath()
+        .startsWith(Paths.get(rootFile.getCanonicalPath(), site, "media-cache").toString())) {
+      // Path traversal attempt
+      throw new MediaReadException("Invalid path");
     }
+    for (File file : files) {
+      file.delete();
+    }
+  }
 }

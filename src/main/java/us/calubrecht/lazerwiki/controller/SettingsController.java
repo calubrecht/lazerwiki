@@ -12,11 +12,10 @@ import us.calubrecht.lazerwiki.service.GlobalSettingsService;
 @RequestMapping("api/settings/")
 public class SettingsController {
 
-    @Autowired
-    GlobalSettingsService globalSettingsService;
+  @Autowired GlobalSettingsService globalSettingsService;
 
-    @GetMapping("globalSettings")
-    public ResponseEntity<GlobalSettings> getGlobalSettings() {
-        return ResponseEntity.ok(globalSettingsService.getSettings());
-    }
+  @GetMapping("globalSettings")
+  public ResponseEntity<GlobalSettings> getGlobalSettings() {
+    return ResponseEntity.ok(globalSettingsService.getSettings());
+  }
 }

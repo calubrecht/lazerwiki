@@ -1,38 +1,44 @@
 package us.calubrecht.lazerwiki.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import us.calubrecht.lazerwiki.service.UserService;
-
 import java.time.LocalDateTime;
+import us.calubrecht.lazerwiki.service.UserService;
 
 public interface PageDesc {
 
-    String getNamespace();
+  String getNamespace();
 
-    String getPagename();
+  String getPagename();
 
-    Long getRevision();
+  Long getRevision();
 
-    String getTitle();
+  String getTitle();
 
-    @JsonIgnore
-    String getModifiedByUserName();
-    
-    LocalDateTime getModified();
+  @JsonIgnore
+  String getModifiedByUserName();
 
-    boolean isDeleted();
+  LocalDateTime getModified();
 
-    @JsonIgnore
-    default String getDescriptor() {
-        return getNamespace().isBlank() ? getPagename() : getNamespace() + ":" + getPagename();
-    }
+  boolean isDeleted();
 
-    @JsonIgnore
-    default String getString() {
-        return getDescriptor() + "#" + getRevision() + "-" + getModifiedByUserName() + "-" + getModified() + (isDeleted() ? "-Deleted" : "");
-    }
+  @JsonIgnore
+  default String getDescriptor() {
+    return getNamespace().isBlank() ? getPagename() : getNamespace() + ":" + getPagename();
+  }
 
-    default String getModifiedBy() {
-        return getModifiedByUserName() == null ? UserService.MISSING_USER : getModifiedByUserName();
-    }
+  @JsonIgnore
+  default String getString() {
+    return getDescriptor()
+        + "#"
+        + getRevision()
+        + "-"
+        + getModifiedByUserName()
+        + "-"
+        + getModified()
+        + (isDeleted() ? "-Deleted" : "");
+  }
+
+  default String getModifiedBy() {
+    return getModifiedByUserName() == null ? UserService.MISSING_USER : getModifiedByUserName();
+  }
 }

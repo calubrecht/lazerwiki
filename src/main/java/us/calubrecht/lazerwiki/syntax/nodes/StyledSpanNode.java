@@ -1,15 +1,20 @@
 package us.calubrecht.lazerwiki.syntax.nodes;
 
 public class StyledSpanNode extends ContainerNode {
-    public enum SPAN_TYPE {BOLD, ITALIC, UNDERLINE, MONOSPACE}
+  public enum SpanType {
+    BOLD,
+    ITALIC,
+    UNDERLINE,
+    MONOSPACE
+  }
 
-    final SPAN_TYPE type;
+  final SpanType type;
 
-    public StyledSpanNode(SPAN_TYPE type) {
-        this.type = type;
-    }
+  public StyledSpanNode(SpanType type) {
+    this.type = type;
+  }
 
-    public SPAN_TYPE getType() {
-        return type;
-    }
+  public SpanType getType() {
+    return type;
+  }
 }

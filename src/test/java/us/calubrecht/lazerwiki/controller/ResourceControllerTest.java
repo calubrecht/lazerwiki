@@ -1,5 +1,13 @@
 package us.calubrecht.lazerwiki.controller;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -10,53 +18,40 @@ import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.MacroCssService;
 import us.calubrecht.lazerwiki.service.ResourceService;
 
-import java.io.IOException;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(controllers = {ResourceController.class, VersionController.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
 class ResourceControllerTest {
-    @Autowired
-    MockMvc mockMvc;
+  @Autowired MockMvc mockMvc;
 
-    @MockitoBean
-    ResourceService resourceService;
+  @MockitoBean ResourceService resourceService;
 
-    @MockitoBean
-    MacroCssService cssService;
+  @MockitoBean MacroCssService cssService;
 
-    @Test
-    void getFile() throws Exception {
-        this.mockMvc.perform(get("/_resources/someFile.jpg")).
-                andExpect(status().isOk());
+  @Test
+  void getFile() throws Exception {
+    this.mockMvc.perform(get("/_resources/someFile.jpg")).andExpect(status().isOk());
 
-        verify(resourceService).getBinaryFile(eq("localhost"), eq("someFile.jpg"));
+    verify(resourceService).getBinaryFile(eq("localhost"), eq("someFile.jpg"));
 
-        this.mockMvc.perform(get("/_resources/some.unknown_filetype")).
-                andExpect(status().isOk());
-        verify(resourceService).getBinaryFile(eq("localhost"), eq("some.unknown_filetype"));
+    this.mockMvc.perform(get("/_resources/some.unknown_filetype")).andExpect(status().isOk());
+    verify(resourceService).getBinaryFile(eq("localhost"), eq("some.unknown_filetype"));
 
-        when(resourceService.getBinaryFile(eq("localhost"), eq("explosive.file"))).thenThrow(
-                new IOException(""));
-        this.mockMvc.perform(get("/_resources/explosive.file")).
-                andExpect(status().isNotFound());
-    }
+    when(resourceService.getBinaryFile(eq("localhost"), eq("explosive.file")))
+        .thenThrow(new IOException(""));
+    this.mockMvc.perform(get("/_resources/explosive.file")).andExpect(status().isNotFound());
+  }
 
-    @Test
-    void getFileInternal() throws Exception {
-        when(cssService.getCss()).thenReturn("someCss");
-        this.mockMvc.perform(get("/_resources/internal/plugin.css")).
-                andExpect(status().isOk()).andExpect(content().string("someCss"));
+  @Test
+  void getFileInternal() throws Exception {
+    when(cssService.getCss()).thenReturn("someCss");
+    this.mockMvc
+        .perform(get("/_resources/internal/plugin.css"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("someCss"));
 
-        this.mockMvc.perform(get("/_resources/internal/anything.else")).
-                andExpect(status().isNotFound());
-    }
-
+    this.mockMvc
+        .perform(get("/_resources/internal/anything.else"))
+        .andExpect(status().isNotFound());
+  }
 }

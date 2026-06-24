@@ -7,11 +7,14 @@ import org.springframework.stereotype.Repository;
 import us.calubrecht.lazerwiki.model.VerificationToken;
 
 @Repository
-public interface VerificationTokenRepository  extends CrudRepository<VerificationToken, Integer> {
+public interface VerificationTokenRepository extends CrudRepository<VerificationToken, Integer> {
 
-    VerificationToken findByUserUserNameAndTokenAndPurpose(String userName, String token, VerificationToken.Purpose purpose);
+  VerificationToken findByUserUserNameAndTokenAndPurpose(
+      String userName, String token, VerificationToken.Purpose purpose);
 
-    @Modifying
-    @Query(value="delete from verificationToken  where expiry < CURRENT_TIMESTAMP", nativeQuery=true)
-    void deleteExpired();
+  @Modifying
+  @Query(
+      value = "delete from verificationToken  where expiry < CURRENT_TIMESTAMP",
+      nativeQuery = true)
+  void deleteExpired();
 }

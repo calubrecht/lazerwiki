@@ -4,60 +4,65 @@ import java.util.*;
 
 public abstract class Macro {
 
-    public abstract String getName();
+  public abstract String getName();
 
-    public Optional<String> getCSS() {
-        return Optional.empty();
+  public Optional<String> getCSS() {
+    return Optional.empty();
+  }
+
+  public abstract String render(MacroContext context, String macroArgs);
+
+  public boolean allowCache(MacroContext context, String macroArgs) {
+    return true;
+  }
+
+  /**
+   * If macroArgs is of the format "key1=val1&key2=val2", will split the argument into a Map<String,
+   * String> If macroArgs is in some other format, macro is responsible for parsing it itself.
+   */
+  public Map<String, String> toArgsMap(String macroArgs) {
+    if (macroArgs.isBlank()) {
+      return Collections.emptyMap();
     }
-
-    public abstract String render(MacroContext context, String macroArgs);
-
-    public boolean allowCache(MacroContext context, String macroArgs) { return true;}
-
-    /**
-     * If macroArgs is of the format "key1=val1&key2=val2", will split the argument into a Map<String, String>
-     * If macroArgs is in some other format, macro is responsible for parsing it itself.
-     */
-    public Map<String, String> toArgsMap(String macroArgs) {
-        if (macroArgs.isBlank()) {
-            return Collections.emptyMap();
-        }
-        Map<String, String> argsMap = new HashMap<>();
-        String[] argVals = macroArgs.split("&");
-        for (String argVal : argVals) {
-            String[] keyVal = argVal.split("=");
-            argsMap.put(keyVal[0], keyVal[1]);
-        }
-        return argsMap;
+    Map<String, String> argsMap = new HashMap<>();
+    String[] argVals = macroArgs.split("&");
+    for (String argVal : argVals) {
+      String[] keyVal = argVal.split("=");
+      argsMap.put(keyVal[0], keyVal[1]);
     }
+    return argsMap;
+  }
 
+  @SuppressWarnings("unused")
+  public interface MacroContext {
+    String sanitize(String input);
 
-    @SuppressWarnings("unused")
-    public interface MacroContext {
-        String sanitize(String input);
+    RenderOutput renderPage(String pageDescriptor);
 
-        RenderOutput renderPage(String pageDescriptor);
-        RenderOutput getCachedRender(String pageDescriptor);
-        Map<String, RenderOutput> getCachedRenders(List<String> pageDescriptors);
+    RenderOutput getCachedRender(String pageDescriptor);
 
-        List<String> getPagesByNSAndTag(String ns, String tag);
-        List<String> getAllPages();
+    Map<String, RenderOutput> getCachedRenders(List<String> pageDescriptors);
 
-        boolean isReadable(String pageDescriptor);
+    List<String> getPagesByNSAndTag(String ns, String tag);
 
-        List<String> getLinksOnPage(String page);
+    List<String> getAllPages();
 
-        RenderOutput renderMarkup(String markup);
+    boolean isReadable(String pageDescriptor);
 
-        void setPageDontCache();
+    List<String> getLinksOnPage(String page);
 
-        boolean isPlaintextRender();
+    RenderOutput renderMarkup(String markup);
 
-        void addLinks(Collection<String> newLinks);
+    void setPageDontCache();
 
-        abstract class RenderOutput {
-            public abstract String getHtml();
-            public abstract Map<String,Object> getState();
-        }
+    boolean isPlaintextRender();
+
+    void addLinks(Collection<String> newLinks);
+
+    abstract class RenderOutput {
+      public abstract String getHtml();
+
+      public abstract Map<String, Object> getState();
     }
+  }
 }

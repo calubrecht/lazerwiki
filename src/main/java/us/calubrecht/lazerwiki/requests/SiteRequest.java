@@ -1,4 +1,3 @@
 package us.calubrecht.lazerwiki.requests;
 
-public record SiteRequest(String name, String siteName, String hostName) {
-}
+public record SiteRequest(String name, String siteName, String hostName) {}

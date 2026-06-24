@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/csrf")
 public class CsrfController {
 
-    @GetMapping
-    public void getCsrfToken(HttpServletRequest request, HttpServletResponse response) {
-        // https://github.com/spring-projects/spring-security/issues/12094#issuecomment-1294150717
-        request.getAttribute(CsrfToken.class.getName());
-    }
-
+  @GetMapping
+  public void getCsrfToken(HttpServletRequest request, HttpServletResponse response) {
+    // https://github.com/spring-projects/spring-security/issues/12094#issuecomment-1294150717
+    request.getAttribute(CsrfToken.class.getName());
+  }
 }

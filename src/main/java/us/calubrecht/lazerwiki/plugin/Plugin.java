@@ -4,7 +4,7 @@ import java.util.List;
 
 public abstract class Plugin {
 
-    public abstract String getName();
+  public abstract String getName();
 
-    public abstract List<EditToolbarDef> getEditToolbarDefinitions();
+  public abstract List<EditToolbarDef> getEditToolbarDefinitions();
 }
