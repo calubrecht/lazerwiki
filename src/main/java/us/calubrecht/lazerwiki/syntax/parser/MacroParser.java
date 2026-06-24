@@ -9,8 +9,8 @@ import us.calubrecht.lazerwiki.syntax.nodes.MacroNode;
 
 @Component
 public class MacroParser extends AbstractTreeParser {
-  final String macroStart = "~~MACRO~~";
-  final String macroEnd = "~~/MACRO~~";
+  static final String MACRO_START = "~~MACRO~~";
+  static final String MACRO_END = "~~/MACRO~~";
 
   final Pattern macroTokenPattern = Pattern.compile("~~(/)?MACRO~~");
 
@@ -27,14 +27,14 @@ public class MacroParser extends AbstractTreeParser {
     String firstLine = subparseContext.remainingLine();
 
     // For each line, (including first), search for Macro start and Macro end tags
-    // If macro start, increment macro Count, if macroEnd decrement. If macroCount == 0, then end
+    // If macro start, increment macro Count, if MACRO_END decrement. If macroCount == 0, then end
     // macro
 
     /*
-    int macroCount = countSubstrings(firstLine, macroStart);
+    int macroCount = countSubstrings(firstLine, MACRO_START);
     String lastLine = "";
-    if (countSubstrings(firstLine, macroEnd) == macroCount) {
-        lastLine = firstLine.substring(0, firstLine.lastIndexOf(macroEnd) + 10);
+    if (countSubstrings(firstLine, MACRO_END) == macroCount) {
+        lastLine = firstLine.substring(0, firstLine.lastIndexOf(MACRO_END) + 10);
         lineCount = 0;
         blockEnded = true;
     }
@@ -47,10 +47,10 @@ public class MacroParser extends AbstractTreeParser {
       Matcher macroMatcher = macroTokenPattern.matcher(nextLine);
       while (macroMatcher.find()) {
         String f = macroMatcher.group();
-        if (f.equals(macroStart)) {
+        if (f.equals(MACRO_START)) {
           macroCount++;
         } else {
-          // macroEnd
+          // MACRO_END
           macroCount--;
           if (macroCount == 0) {
             // Done
@@ -100,7 +100,7 @@ public class MacroParser extends AbstractTreeParser {
 
   @Override
   public boolean canBeginParse(String line) {
-    return line.startsWith(macroStart);
+    return line.startsWith(MACRO_START);
   }
 
   @Override

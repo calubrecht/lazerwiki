@@ -9,7 +9,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
 @Component
 public class CodeBlockParser extends AbstractTreeParser {
-  final String doubleSpace = "  ";
+  static final String DOUBLE_SPACE = "  ";
 
   @Override
   public ITreeNode parse(ParseContext parseContext) {
@@ -19,7 +19,7 @@ public class CodeBlockParser extends AbstractTreeParser {
     int start = parseContext.getPosition();
     while (!parseContext.isEmpty()) {
       String nextLine = parseContext.peekLine();
-      if (nextLine.startsWith(doubleSpace)) {
+      if (nextLine.startsWith(DOUBLE_SPACE)) {
         blockLines.addLine(nextLine);
         parseContext.advanceLine();
       } else {
@@ -44,7 +44,7 @@ public class CodeBlockParser extends AbstractTreeParser {
 
   @Override
   public boolean canBeginParse(String line) {
-    return line.startsWith(doubleSpace);
+    return line.startsWith(DOUBLE_SPACE);
   }
 
   @Override

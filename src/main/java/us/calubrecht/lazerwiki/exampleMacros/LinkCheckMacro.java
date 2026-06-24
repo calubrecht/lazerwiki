@@ -11,7 +11,7 @@ import us.calubrecht.lazerwiki.macro.Macro;
 @CustomMacro
 public class LinkCheckMacro extends Macro {
 
-  final String css =
+  static final String CSS =
       """
             table.linksTable, table.linksTable td, table.linksTable th {
               border: 1px solid;
@@ -40,7 +40,7 @@ public class LinkCheckMacro extends Macro {
   }
 
   public Optional<String> getCSS() {
-    return Optional.of(css);
+    return Optional.of(CSS);
   }
 
   String getNS(String page) {

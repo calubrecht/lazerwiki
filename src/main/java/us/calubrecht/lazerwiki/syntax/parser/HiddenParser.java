@@ -13,7 +13,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.HiddenNode;
 @Component
 public class HiddenParser extends AbstractTreeParser {
   final Pattern hiddenPattern = Pattern.compile("^<hidden(( \\w*=\"(.*)\")*)>");
-  final String hiddenEnd = "</hidden>";
+  static final String HIDDEN_END = "</hidden>";
 
   @Override
   public ITreeNode parse(ParseContext parseContext) {
@@ -43,17 +43,17 @@ public class HiddenParser extends AbstractTreeParser {
 
       lineCount++;
       subparseContext.advanceLine();
-      if (nextLine.endsWith(hiddenEnd) && nestedCount-- == 0) {
+      if (nextLine.endsWith(HIDDEN_END) && nestedCount-- == 0) {
         // End of block
         blockEnded = true;
-        blockLines.addLine(nextLine.substring(0, nextLine.length() - hiddenEnd.length()));
+        blockLines.addLine(nextLine.substring(0, nextLine.length() - HIDDEN_END.length()));
         break;
       } else {
         blockLines.addLine(nextLine);
       }
     }
     if (!blockEnded) {
-      // No hiddenEnd found, abort block
+      // No HIDDEN_END found, abort block
       return null;
     }
     blockLines.lock();

@@ -16,7 +16,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.SpecialSpanNode.SpanType;
 
 @Component
 public class SpecialSpanParser extends AbstractInnerParser {
-  final String patternFormat = "<%s>(.*?)</%s>";
+  static final String PATTERN_FORMAT = "<%s>(.*?)</%s>";
 
   final Pattern tagPattern = Pattern.compile("^<(sup|sub|del)>");
   final Map<String, Pattern> patternMap = new ConcurrentHashMap<>();
@@ -42,7 +42,7 @@ public class SpecialSpanParser extends AbstractInnerParser {
 
     Pattern pattern =
         patternMap.computeIfAbsent(
-            tagName, (t) -> Pattern.compile(String.format(patternFormat, t, t), Pattern.DOTALL));
+            tagName, (t) -> Pattern.compile(String.format(PATTERN_FORMAT, t, t), Pattern.DOTALL));
 
     Matcher m = pattern.matcher(sequence);
 

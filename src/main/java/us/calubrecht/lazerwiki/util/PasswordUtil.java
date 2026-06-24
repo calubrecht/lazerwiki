@@ -5,16 +5,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class PasswordUtil {
 
-  final String versionMark = ":v1:";
+  static final String VERSION_MARK = ":v1:";
 
   final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
   public String hashPassword(String password) {
-    return versionMark + encoder.encode(password);
+    return VERSION_MARK + encoder.encode(password);
   }
 
   public boolean matches(String password, String hashedPassword) {
-    String existingCrypt = hashedPassword.substring(versionMark.length());
+    String existingCrypt = hashedPassword.substring(VERSION_MARK.length());
     return encoder.matches(password, existingCrypt);
   }
 
