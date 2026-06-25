@@ -1,5 +1,6 @@
 package us.calubrecht.lazerwiki.controller;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -9,8 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -32,6 +36,7 @@ import us.calubrecht.lazerwiki.service.exception.PageRevisionException;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
 @Import(JsonConfig.class)
+@ExtendWith(OutputCaptureExtension.class)
 public class PageControllerTest {
 
   @Autowired MockMvc mockMvc;
@@ -111,7 +116,7 @@ public class PageControllerTest {
   }
 
   @Test
-  public void test_savePage() throws Exception {
+  public void test_savePage(CapturedOutput output) throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     String data =
         "{\"pageName\": \"thisPage\", \"text\": \"This is some text\", \"revision\": 10, \"force\": false}";
@@ -181,7 +186,7 @@ public class PageControllerTest {
                 .content(data)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-    // TODO: verify guest save is logged.
+    assertTrue(output.getAll().contains("Guest user"));
   }
 
   @Test

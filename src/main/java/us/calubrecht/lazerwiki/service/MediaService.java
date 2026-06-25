@@ -175,7 +175,6 @@ public class MediaService {
     try (FileOutputStream fos = new FileOutputStream(f)) {
       IOUtils.copy(mfile.getInputStream(), fos);
     }
-    // XXX: Delete scaled images if exist
   }
 
   @NotNull
@@ -316,6 +315,9 @@ public class MediaService {
     ensureDir(site, nsPath);
     logger.info("Deleting file " + f.getAbsoluteFile());
     User user = userService.getUser(userName);
+    MediaRecord record = mediaRecordRepository.findBySiteAndNamespaceAndFileName(
+        site, splitFile.getLeft(), splitFile.getRight());
+    mediaCacheService.clearCache(site, record);
     mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(
         site, splitFile.getRight(), splitFile.getLeft());
     MediaHistoryRecord historyRecord =
@@ -324,7 +326,6 @@ public class MediaService {
     mediaHistoryRepository.save(historyRecord);
     activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_MEDIA, site, user, fileName);
     Files.delete(f.toPath());
-    // XXX: Delete scaled images if exist
   }
 
   public long getFileLastModified(String host, String fileName)

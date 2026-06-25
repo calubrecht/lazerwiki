@@ -8,9 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.MediaRecord;
@@ -23,6 +26,7 @@ import us.calubrecht.lazerwiki.util.ImageUtil;
 @SuppressWarnings("unchecked")
 @SpringBootTest(classes = {MediaCacheService.class})
 @ActiveProfiles("test")
+@ExtendWith(OutputCaptureExtension.class)
 public class MediaCacheServiceTest {
 
   @Autowired MediaCacheService underTest;
@@ -191,7 +195,7 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void test_clearCache_deleteFails() throws IOException, MediaReadException {
+  public void test_clearCache_deleteFails(CapturedOutput output) throws IOException, MediaReadException {
     mockScaleImage();
 
     // Create cached file
@@ -209,7 +213,7 @@ public class MediaCacheServiceTest {
 
       underTest.clearCache("default", mediaRecord);
       assertTrue(f.exists());
-      // TODO: Check logging
+      assertTrue(output.getAll().contains("Failed to delete cache file"));
     } finally {
       cacheLocation.toFile().setWritable(true);
     }
