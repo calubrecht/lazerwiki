@@ -39,9 +39,6 @@ public class RenderService {
     PageData d = pageService.getPageData(site, sPageDescriptor, userName);
     d = d.addTracker(perfTracker);
     perfTracker.stopTimer("FetchPage");
-    /*
-     XXX:Could make these renderable templates;
-    */
     if (!d.flags().userCanRead()) {
       return d;
     }
