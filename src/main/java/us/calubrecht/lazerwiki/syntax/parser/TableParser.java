@@ -47,8 +47,7 @@ public class TableParser extends AbstractTreeParser {
       lineStart += line.length() + 1;
     }
     // Count and process ROWSPAN_MARKERS
-    final TableNode.TableCellNode.CellType marker =
-        TableNode.TableCellNode.CellType.ROWSPAN_MARKER;
+    final TableNode.TableCellNode.CellType marker = TableNode.TableCellNode.CellType.ROWSPAN_MARKER;
     for (int i = cellMatrix.size() - 1; i >= 0; i--) {
       List<ITreeNode> currRow = cellMatrix.get(i);
       for (int j = 0; j < currRow.size(); j++) {

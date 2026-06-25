@@ -11,7 +11,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.BlockQuoteNode;
 
 @Component
 public class BlockQuoteParser extends AbstractTreeParser {
-  final static char KEY_CHAR = '>';
+  static final char KEY_CHAR = '>';
 
   @Override
   public ITreeNode parse(ParseContext parseContext) {

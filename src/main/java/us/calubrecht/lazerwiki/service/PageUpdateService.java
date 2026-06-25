@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -176,7 +175,8 @@ public class PageUpdateService {
       pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId(), user);
       return new MoveStatus(false, "Could not acquire page locks to move page");
     }
-    Pair<List<String>, List<String>> linksAndImages = pageMetaService.moveMetaData(host, site, oldPageDescriptor, newPageDescriptor);
+    Pair<List<String>, List<String>> linksAndImages =
+        pageMetaService.moveMetaData(host, site, oldPageDescriptor, newPageDescriptor);
     Page oldPage = pageRepository.getBySiteAndNamespaceAndPagename(site, oldPageNS, oldPageName);
     List<String> links = linksAndImages.getLeft();
     List<String> images = linksAndImages.getRight();

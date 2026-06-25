@@ -317,8 +317,7 @@ public class PageService {
                 .renderState()
                 .getOrDefault(RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
     newCache.source = adjustSource(source, rendered);
-    newCache.title =
-        (String) rendered.renderState().get(RenderResult.RenderStateKeys.TITLE.name());
+    newCache.title = (String) rendered.renderState().get(RenderResult.RenderStateKeys.TITLE.name());
     pageCacheRepository.save(newCache);
   }
 

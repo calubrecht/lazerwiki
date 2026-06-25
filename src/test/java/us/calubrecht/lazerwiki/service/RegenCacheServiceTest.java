@@ -155,9 +155,7 @@ class RegenCacheServiceTest {
               List<String> links = new ArrayList<>();
               String text = inv.getArgument(0, String.class);
               return new RenderResult(
-                  text + " rendered",
-                  "",
-                  Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
             });
 
     underTest.regenCache("default");
@@ -199,9 +197,7 @@ class RegenCacheServiceTest {
                 throw new RuntimeException("oops");
               }
               return new RenderResult(
-                  text + " rendered",
-                  "",
-                  Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
             });
 
     underTest.regenCache("default");
@@ -252,9 +248,7 @@ class RegenCacheServiceTest {
               List<String> links = new ArrayList<>();
               String text = inv.getArgument(0, String.class);
               return new RenderResult(
-                  text + " rendered",
-                  "",
-                  Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
             });
     when(siteService.getHostForSitename("default")).thenReturn("host");
 
@@ -310,9 +304,7 @@ class RegenCacheServiceTest {
                 throw new RuntimeException("oops");
               }
               return new RenderResult(
-                  text + " rendered",
-                  "",
-                  Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
             });
     when(siteService.getHostForSitename("default")).thenReturn("host");
 

@@ -29,7 +29,7 @@ public class IdRepositoryTest {
   }
 
   @Test
-  @Order(2)  // Run last, it ruins the IdResository object
+  @Order(2) // Run last, it ruins the IdResository object
   void test_getNewId_failure() {
     JdbcTemplate mockTemplate = Mockito.mock(JdbcTemplate.class);
 

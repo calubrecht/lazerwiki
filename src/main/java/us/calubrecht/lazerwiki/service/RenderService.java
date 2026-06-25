@@ -103,9 +103,7 @@ public class RenderService {
     }
     try {
       RenderContext renderContext = new RenderContext(host, site, sPageDescriptor, userName);
-      renderContext
-          .renderState()
-          .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+      renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
       perfTracker.startTimer("Render");
       RenderResult cacheRender = renderer.renderWithInfo(d.source(), renderContext);
       perfTracker.stopTimer("Render");

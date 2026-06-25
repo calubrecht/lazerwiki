@@ -310,12 +310,10 @@ public class NamespaceServiceTest {
     assertEquals(1L, nsCaptor.getAllValues().get(0).id);
     assertEquals("ns1", nsCaptor.getAllValues().get(0).getNamespace());
     assertEquals(
-        Namespace.RestrictionType.WRITE_RESTRICTED,
-        nsCaptor.getAllValues().get(0).restrictionType);
+        Namespace.RestrictionType.WRITE_RESTRICTED, nsCaptor.getAllValues().get(0).restrictionType);
     assertEquals("ns2", nsCaptor.getAllValues().get(1).getNamespace());
     assertEquals(
-        Namespace.RestrictionType.READ_RESTRICTED,
-        nsCaptor.getAllValues().get(1).restrictionType);
+        Namespace.RestrictionType.READ_RESTRICTED, nsCaptor.getAllValues().get(1).restrictionType);
 
     Namespace nsObj3 = new Namespace();
     nsObj3.id = 5L;

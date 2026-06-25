@@ -7,7 +7,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -211,8 +210,7 @@ public class MediaCacheServiceTest {
       underTest.clearCache("default", mediaRecord);
       assertTrue(f.exists());
       // TODO: Check logging
-    }
-    finally {
+    } finally {
       cacheLocation.toFile().setWritable(true);
     }
   }

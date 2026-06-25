@@ -8,7 +8,7 @@ import us.calubrecht.lazerwiki.syntax.nodes.ControlRowNode;
 
 @Component
 public class ControlRowParser extends AbstractTreeParser {
-  final static Set<String> TOKENS = Set.of("~~NOTOC~~", "~~YESTOC~~");
+  static final Set<String> TOKENS = Set.of("~~NOTOC~~", "~~YESTOC~~");
 
   @Override
   public ITreeNode parse(ParseContext parseContext) {

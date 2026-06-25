@@ -68,8 +68,7 @@ public class LinkCheckMacroTest {
     assertEquals(3, split[1].split("<tr>").length);
 
     assertTrue(
-        (Boolean)
-            renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
   }
 
   @Test
@@ -165,8 +164,7 @@ public class LinkCheckMacroTest {
             renderContext));
     // Did not render macro, safe to cache.
     assertNull(
-        (Boolean)
-            renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
   }
 
   @Test
@@ -207,7 +205,6 @@ public class LinkCheckMacroTest {
     assertTrue(split[1].split("<tr>")[2].contains("page3"));
 
     assertTrue(
-        (Boolean)
-            renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
   }
 }

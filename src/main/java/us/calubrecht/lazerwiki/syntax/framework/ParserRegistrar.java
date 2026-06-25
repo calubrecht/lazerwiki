@@ -14,7 +14,7 @@ public class ParserRegistrar {
   final Set<ITreeParser> parsers;
   final List<IInnerParser> innerParsers;
   Map<Character, List<IInnerParser>> innerParsersForKeychar;
-  final static ITreeRenderer DEFAULT_RENDERER = new ITreeRenderer.DefaultRenderer();
+  static final ITreeRenderer DEFAULT_RENDERER = new ITreeRenderer.DefaultRenderer();
 
   List<ITreeParser> sortedParsers;
 

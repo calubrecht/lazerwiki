@@ -99,7 +99,8 @@ class ParserTest {
     ListNode list1Item1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
     assertEquals(
         "   * DeepestList\n",
-        list1Item1.getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
+        list1Item1
+            .getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
     // part of node
 
     String listInputWithLink =
@@ -109,7 +110,8 @@ class ParserTest {
     list1Item1 = ((ListChild.ListChildList) list1.getItems().get(1)).list();
     assertEquals(
         "   * DeepestList [[Link| with a link]]! ",
-        list1Item1.getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
+        list1Item1
+            .getSourceFromContext()); // Suspicious that newline sometimes is and sometimes isn't
     // part of node
     LinkNode link =
         (LinkNode) ((ListChild.ListItemNode) list1Item1.getItems().get(0)).getChildren().get(1);

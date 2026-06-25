@@ -1,11 +1,11 @@
 package us.calubrecht.lazerwiki.service;
 
-import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.ImageRef;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.repository.ImageRefRepository;
