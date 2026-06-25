@@ -33,4 +33,6 @@
     <JarScanner>
         <JarScanFilter defaultPluggabilityScan="true" defaultTldScan="false"/>
     </JarScanner>
+    <CookieProcessor className="org.apache.tomcat.util.http.Rfc6265CookieProcessor"
+                     sameSiteCookies="Strict" />
 </Context>
