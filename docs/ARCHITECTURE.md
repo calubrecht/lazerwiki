@@ -87,7 +87,8 @@ Key services and their roles:
 | `MediaService` | File upload/download/metadata |
 | `MediaCacheService` | Scaled image caching |
 | `LinkService` | Track inter-page links |
-| `LinkOverrideService` | Redirect/alias one page name to another |
+| `LinkOverrideService` | Redirect/alias one page name to another — see [Link and Media Override Systems](link-override-system.md) |
+| `MediaOverrideService` | Redirect/alias one media file reference to another — see [Link and Media Override Systems](link-override-system.md) |
 | `ImageRefService` | Track image usage per page |
 | `RegenCacheService` | Rebuild the rendered-page cache in bulk |
 | `ExportService` | Produce archive exports |
