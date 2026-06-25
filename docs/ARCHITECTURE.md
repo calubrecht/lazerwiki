@@ -24,7 +24,7 @@ lazerwiki-ui (React)
 us.calubrecht.lazerwiki
 ├── controller/        REST controllers — one per feature area
 ├── service/           Business logic; injected into controllers
-│   ├── renderhelpers/ RenderContext passed through the rendering pipeline
+│   ├── renderhelpers/ RenderContext (site, page, user, renderer, state) passed through the rendering pipeline
 │   └── exception/     Checked exceptions thrown by services
 ├── repository/        Spring Data JPA repositories
 ├── model/             JPA entities and value types
@@ -110,7 +110,7 @@ A single deployed instance serves multiple wikis. Each wiki is identified by:
 
 The `sites` database table maps hostname → site name. The wildcard hostname `*` matches any hostname not explicitly mapped.
 
-`SiteService.getSiteForHostname(host)` performs the lookup on every request. All page, media, and ACL lookups are scoped to the resolved site name.
+`SiteService.getSiteForHostname(host)` resolves the hostname to a site name. This translation happens **once at the controller boundary** (via the `LazerWikiController` base class helpers `getHost` and `getSite`). All services below the controller layer receive the site name directly — no service translates host → site internally.
 
 Per-site configuration (e.g. plugin blocklist, custom settings) is stored as a JSON blob in the `sites.settings` column and accessed via `SiteService.getSettingForHostname`.
 

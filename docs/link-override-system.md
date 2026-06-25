@@ -42,17 +42,17 @@ The `image_ref` table (managed by `ImageRefService`) records the live image-usag
 
 Both services are called in the same sequence:
 
-1. **`createOverride(host, oldPage, newPage)`** *(link)* — Queries `links` for every page that currently points at `oldPage`. For each source page, writes a `LinkOverride` redirecting `oldPage → newPage`. Also chains multi-hop moves: any existing override whose `newTarget` was `oldPage` is updated to point to `newPage` instead.
+1. **`createOverride(site, oldPage, newPage)`** *(link)* — Queries `links` for every page that currently points at `oldPage`. For each source page, writes a `LinkOverride` redirecting `oldPage → newPage`. Also chains multi-hop moves: any existing override whose `newTarget` was `oldPage` is updated to point to `newPage` instead.
 
-2. **`moveOverrides(host, oldPage, newPage)`** *(both)* — Transfers overrides *owned by* the moved page. If `oldPage` itself had outbound overrides (because its links were rewritten by a prior move), those overrides are reattached under `newPage`'s identity.
+2. **`moveOverrides(site, oldPage, newPage)`** *(both)* — Transfers overrides *owned by* the moved page. If `oldPage` itself had outbound overrides (because its links were rewritten by a prior move), those overrides are reattached under `newPage`'s identity.
 
 ### On media file move (`MediaService.moveMedia`)
 
-**`MediaOverrideService.createOverride(host, oldFileNS, oldFileName, newFileNS, newFileName)`** — Queries `image_ref` for every page that currently references the old file. For each source page, writes a `MediaOverride` redirecting the old file reference to the new location. Also chains multi-hop moves the same way as the link equivalent. Note: `createOverride` for media takes explicit namespace/name parameters rather than a page descriptor string, because media is moved by `MediaService` directly rather than through `PageMetaService`.
+**`MediaOverrideService.createOverride(site, oldFileNS, oldFileName, newFileNS, newFileName)`** — Queries `image_ref` for every page that currently references the old file. For each source page, writes a `MediaOverride` redirecting the old file reference to the new location. Also chains multi-hop moves the same way as the link equivalent. Note: `createOverride` for media takes explicit namespace/name parameters rather than a page descriptor string, because media is moved by `MediaService` directly rather than through `PageMetaService`.
 
 ### On page save or delete (`PageMetaService.updateMetaData` / `deleteMetaData`)
 
-**`deleteOverrides(host, page)`** *(both)* — Removes all overrides sourced from the given page. When a page is saved, its markup is fresh and any stale redirect rules from it are no longer needed.
+**`deleteOverrides(site, page)`** *(both)* — Removes all overrides sourced from the given page. When a page is saved, its markup is fresh and any stale redirect rules from it are no longer needed.
 
 ---
 
@@ -62,7 +62,7 @@ Both services are called in the same sequence:
 
 When `LinkRenderer` renders an internal wiki link:
 
-1. On the first link in a page, calls `LinkOverrideService.getOverrides(host, page)` and caches the result in `RenderContext.renderState` under `LINK_OVERRIDES` (one DB query per page render, not per link).
+1. On the first link in a page, calls `LinkOverrideService.getOverrides(site, page)` and caches the result in `RenderContext.renderState` under `LINK_OVERRIDES` (one DB query per page render, not per link).
 2. If the link target matches an override rule, the target is silently replaced with `newTarget` before the `<a>` tag is emitted.
 3. Each applied override is recorded in `renderState` under `OVERRIDE_STATS` as a `LinkOverrideInstance` (old target, new target, source position), so callers can surface in-page warnings about rewritten links.
 
@@ -70,7 +70,7 @@ When `LinkRenderer` renders an internal wiki link:
 
 ### Images (`ImageRenderer.doOverrides`)
 
-Identical pattern: on the first image in a page, `MediaOverrideService.getOverrides(host, page)` is called and cached in `renderState` under `MEDIA_OVERRIDES`. Matching image references are silently replaced and also recorded in `OVERRIDE_STATS` as `LinkOverrideInstance` records (the same type is reused for both link and media stats).
+Identical pattern: on the first image in a page, `MediaOverrideService.getOverrides(site, page)` is called and cached in `renderState` under `MEDIA_OVERRIDES`. Matching image references are silently replaced and also recorded in `OVERRIDE_STATS` as `LinkOverrideInstance` records (the same type is reused for both link and media stats).
 
 ---
 
