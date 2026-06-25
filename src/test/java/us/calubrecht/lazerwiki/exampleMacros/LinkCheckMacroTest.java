@@ -48,10 +48,10 @@ public class LinkCheckMacroTest {
   @Test
   public void test_checklinks() {
     RenderContext renderContext =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
-    when(pageService.getAllPagesFlat("localhost", "user"))
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    when(pageService.getAllPagesFlat("default", "user"))
         .thenReturn(List.of("", "page2", "page3"));
-    when(pageService.isReadable(eq("localhost"), anyString(), anyString())).thenReturn(true);
+    when(pageService.isReadable(eq("default"), anyString(), anyString())).thenReturn(true);
     when(linkService.getLinksOnPage("default", "")).thenReturn(List.of("page2", "page5"));
     when(linkService.getLinksOnPage("default", "page2")).thenReturn(List.of("ns:page8"));
     when(linkService.getLinksOnPage("default", "page3")).thenReturn(List.of("page2"));
@@ -83,8 +83,8 @@ public class LinkCheckMacroTest {
   @Test
   public void test_checklinks_Filering() {
     RenderContext renderContext =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
-    when(pageService.getAllPagesFlat("localhost", "user"))
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    when(pageService.getAllPagesFlat("default", "user"))
         .thenReturn(
             List.of(
                 "_meta:metaPage",
@@ -102,7 +102,7 @@ public class LinkCheckMacroTest {
     when(linkService.getLinksOnPage("default", "ns2:ns2Page")).thenReturn(List.of("noPage3"));
     when(linkService.getLinksOnPage("default", "notOrphan:notorpahn"))
         .thenReturn(List.of("noPage10", "missingPage"));
-    when(pageService.isReadable(eq("localhost"), anyString(), anyString())).thenReturn(true);
+    when(pageService.isReadable(eq("default"), anyString(), anyString())).thenReturn(true);
 
     String rendered = macroService.renderMacro("linkCheck", "", renderContext);
     String[] split = rendered.split("Orphaned Pages");
@@ -152,7 +152,7 @@ public class LinkCheckMacroTest {
   @Test
   public void test_linkCheckMacroForCache() {
     RenderContext renderContext =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
     renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
@@ -170,10 +170,10 @@ public class LinkCheckMacroTest {
   @Test
   public void test_checklinksForReadable() {
     RenderContext renderContext =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
-    when(pageService.getAllPagesFlat("localhost", "user"))
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    when(pageService.getAllPagesFlat("default", "user"))
         .thenReturn(List.of("", "page2", "page3"));
-    when(pageService.isReadable(eq("localhost"), eq("page5"), anyString())).thenReturn(true);
+    when(pageService.isReadable(eq("default"), eq("page5"), anyString())).thenReturn(true);
     when(linkService.getLinksOnPage("default", "")).thenReturn(List.of("page2", "page5"));
     when(linkService.getLinksOnPage("default", "page2")).thenReturn(List.of("ns:page8"));
     when(linkService.getLinksOnPage("default", "page3")).thenReturn(List.of("page2"));
@@ -189,12 +189,12 @@ public class LinkCheckMacroTest {
   @Test
   public void test_checklinksWoverrides() {
     RenderContext renderContext =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
-    when(pageService.getAllPagesFlat("localhost", "user"))
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    when(pageService.getAllPagesFlat("default", "user"))
         .thenReturn(List.of("", "ns1:movePage2", "page3"));
-    when(pageService.isReadable(eq("localhost"), anyString(), anyString())).thenReturn(true);
+    when(pageService.isReadable(eq("default"), anyString(), anyString())).thenReturn(true);
     when(linkService.getLinksOnPage("default", "")).thenReturn(List.of("page2", "page5"));
-    when(linkOverrideService.getOverrides("localhost", ""))
+    when(linkOverrideService.getOverrides("default", ""))
         .thenReturn(List.of(new LinkOverride("default", "", "", "", "page2", "ns1", "MovePage2")));
 
     String rendered = macroService.renderMacro("linkCheck", "", renderContext);

@@ -46,8 +46,7 @@ public class ExportService {
   }
 
   public void createExportBundle(String site, String user, OutputStream out) throws IOException {
-    String hostName = siteService.getHostForSitename(site);
-    PageListResponse pageList = pageService.getAllPages(hostName, user);
+    PageListResponse pageList = pageService.getAllPages(site, user);
     logger.info("Creating export file for {}", site);
     try (GzipCompressorOutputStream gos = new GzipCompressorOutputStream(out);
         TarArchiveOutputStream taos = new TarArchiveOutputStream(gos)) {
@@ -56,7 +55,7 @@ public class ExportService {
         for (PageDesc page : pages) {
           String descriptor = page.getDescriptor();
           Path filePath = toPath("pages", page.getNamespace(), page.getPagename() + ".txt");
-          PageData data = pageService.getPageData(hostName, descriptor, user);
+          PageData data = pageService.getPageData(site, descriptor, user);
           String pageText = data.source();
           TarArchiveEntry entry = new TarArchiveEntry(filePath.toString());
 
@@ -76,6 +75,7 @@ public class ExportService {
           taos.closeArchiveEntry();
         }
       }
+      String hostName = siteService.getHostForSitename(site);
       MediaListResponse mediaList = mediaService.getAllFiles(hostName, null);
       for (String ns : mediaList.media().keySet().stream().sorted().toList()) {
         List<MediaRecord> mediaItems = mediaList.media().get(ns);

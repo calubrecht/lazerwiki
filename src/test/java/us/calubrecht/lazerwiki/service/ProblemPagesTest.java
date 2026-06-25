@@ -55,7 +55,7 @@ public class ProblemPagesTest {
   @Test
   public void test_aboutPage_wasFatal() {
     String s = loadPage("about.page") + '\n';
-    String rendered = underTest.renderToString(s, "localhost", "default", "page", "");
+    String rendered = underTest.renderToString(s, "default", "page", "");
 
     assertTrue(rendered != null);
   }
@@ -63,7 +63,7 @@ public class ProblemPagesTest {
   @Test
   public void test_wrapMacro_wasFatal() {
     String s = loadPage("wrapMacro.page") + '\n';
-    String rendered = underTest.renderToString(s, "localhost", "default", "page", "");
+    String rendered = underTest.renderToString(s, "default", "page", "");
 
     assertTrue(rendered != null);
   }

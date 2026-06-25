@@ -32,8 +32,6 @@ public class PageService {
 
   @Autowired PageRepository pageRepository;
 
-  @Autowired SiteService siteService;
-
   @Autowired NamespaceService namespaceService;
 
   @Autowired LinkService linkService;
@@ -48,8 +46,7 @@ public class PageService {
   String dbEngine;
 
   @Transactional(readOnly = true)
-  public boolean exists(String host, String pageName) {
-    String site = siteService.getSiteForHostname(host);
+  public boolean exists(String site, String pageName) {
     PageDescriptor pageDescriptor = decodeDescriptor(pageName);
     Page p =
         pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
@@ -58,8 +55,7 @@ public class PageService {
   }
 
   @Transactional(readOnly = true)
-  public String getTitle(String host, String pageName) {
-    String site = siteService.getSiteForHostname(host);
+  public String getTitle(String site, String pageName) {
     PageDescriptor pageDescriptor = decodeDescriptor(pageName);
     Page p =
         pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
@@ -74,15 +70,14 @@ public class PageService {
   }
 
   @Transactional(readOnly = true)
-  public PageData getPageData(String host, String sPageDescriptor, String userName) {
+  public PageData getPageData(String site, String sPageDescriptor, String userName) {
     logger.info(
-        "fetch page: host="
-            + host
+        "fetch page: site="
+            + site
             + " sPageDescriptor="
             + sPageDescriptor
             + " userName="
             + userName);
-    String site = siteService.getSiteForHostname(host);
     PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
     boolean canWrite =
         namespaceService.canWriteNamespace(site, pageDescriptor.namespace(), userName);
@@ -94,7 +89,7 @@ public class PageService {
       return new PageData(
           "You are not permissioned to read this page",
           "",
-          getTitle(host, sPageDescriptor),
+          getTitle(site, sPageDescriptor),
           Collections.emptyList(),
           Collections.emptyList(),
           PageData.EMPTY_FLAGS);
@@ -104,7 +99,7 @@ public class PageService {
             site, pageDescriptor.namespace(), pageDescriptor.pageName());
     List<String> backlinks = linkService.getBacklinks(site, sPageDescriptor);
     List<String> overrideBacklinks =
-        linkOverrideService.getOverridesForNewTargetPage(host, sPageDescriptor).stream()
+        linkOverrideService.getOverridesForNewTargetPage(site, sPageDescriptor).stream()
             .map(LinkOverride::getSource)
             .toList();
     List<String> allBackLnks =
@@ -123,14 +118,14 @@ public class PageService {
       return new PageData(
           "This page doesn't exist",
           getTemplate(site, pageDescriptor),
-          getTitle(host, sPageDescriptor),
+          getTitle(site, sPageDescriptor),
           Collections.emptyList(),
           visibleBacklinks,
           new PageFlags(false, false, true, canWrite, false, false));
     }
     if (p.isDeleted()) {
       List<LinkOverride> overrideInstances =
-          linkOverrideService.getOverridesForTargetPage(host, sPageDescriptor);
+          linkOverrideService.getOverridesForTargetPage(site, sPageDescriptor);
       if (!overrideInstances.isEmpty()) {
         String newPD = overrideInstances.get(0).getNewTarget();
         return new PageData(
@@ -144,7 +139,7 @@ public class PageService {
       return new PageData(
           "This page doesn't exist",
           getTemplate(site, pageDescriptor),
-          getTitle(host, sPageDescriptor),
+          getTitle(site, sPageDescriptor),
           Collections.emptyList(),
           visibleBacklinks,
           new PageFlags(false, true, true, canWrite, false, false));
@@ -164,8 +159,7 @@ public class PageService {
   /** Bulk page get, does not retrieve backlinks or tags */
   @Transactional(readOnly = true)
   public Map<PageDescriptor, PageData> getPageData(
-      String host, List<String> pageDescriptors, String userName) {
-    String site = siteService.getSiteForHostname(host);
+      String site, List<String> pageDescriptors, String userName) {
     List<String> keys =
         pageDescriptors.stream()
             .map(
@@ -217,24 +211,23 @@ public class PageService {
 
   @Transactional(readOnly = true)
   public PageData getHistoricalPageData(
-      String host, String sPageDescriptor, long revision, String userName) {
+      String site, String sPageDescriptor, long revision, String userName) {
     logger.info(
-        "fetch page: host="
-            + host
+        "fetch page: site="
+            + site
             + " sPageDescriptor="
             + sPageDescriptor
             + " revision= "
             + revision
             + " userName="
             + userName);
-    String site = siteService.getSiteForHostname(host);
     PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
     boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
     if (!canRead) {
       return new PageData(
           "You are not permissioned to read this page",
           "",
-          getTitle(host, sPageDescriptor),
+          getTitle(site, sPageDescriptor),
           Collections.emptyList(),
           Collections.emptyList(),
           PageData.EMPTY_FLAGS);
@@ -249,7 +242,7 @@ public class PageService {
       return new PageData(
           "This page doesn't exist",
           getTemplate(site, pageDescriptor),
-          getTitle(host, sPageDescriptor),
+          getTitle(site, sPageDescriptor),
           Collections.emptyList(),
           null,
           PageData.EMPTY_FLAGS);
@@ -258,7 +251,7 @@ public class PageService {
       return new PageData(
           "This page doesn't exist",
           getTemplate(site, pageDescriptor),
-          getTitle(host, sPageDescriptor),
+          getTitle(site, sPageDescriptor),
           Collections.emptyList(),
           null,
           new PageFlags(false, true, true, false, false, false));
@@ -274,16 +267,14 @@ public class PageService {
   }
 
   @Transactional(readOnly = true)
-  public PageCache getCachedPage(String host, String sPageDescriptor) {
-    String site = siteService.getSiteForHostname(host);
+  public PageCache getCachedPage(String site, String sPageDescriptor) {
     PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
     PageCache.PageCacheKey key =
         new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
     return pageCacheRepository.findById(key).orElse(null);
   }
 
-  List<PageCache> getCachedPages(String host, List<String> pageDescriptors) {
-    String site = siteService.getSiteForHostname(host);
+  List<PageCache> getCachedPages(String site, List<String> pageDescriptors) {
     List<PageCache.PageCacheKey> keys =
         pageDescriptors.stream()
             .map(
@@ -297,8 +288,7 @@ public class PageService {
   }
 
   @Transactional
-  public void saveCache(String host, String sPageDescriptor, String source, RenderResult rendered) {
-    String site = siteService.getSiteForHostname(host);
+  public void saveCache(String site, String sPageDescriptor, String source, RenderResult rendered) {
     PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
     Page p =
         pageRepository.getBySiteAndNamespaceAndPagename(
@@ -433,8 +423,7 @@ public class PageService {
   }
 
   @Transactional(readOnly = true)
-  public PageListResponse getAllPages(String host, String userName) {
-    String site = siteService.getSiteForHostname(host);
+  public PageListResponse getAllPages(String site, String userName) {
     List<PageDesc> pages =
         namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
     NsNode node = getNsNode("", pages);
@@ -453,8 +442,7 @@ public class PageService {
   }
 
   @Transactional(readOnly = true)
-  public RecentChangesResponse recentChanges(String host, String userName) {
-    String site = siteService.getSiteForHostname(host);
+  public RecentChangesResponse recentChanges(String site, String userName) {
     List<String> namespaces = namespaceService.getReadableNamespaces(site, userName);
     List<PageDesc> pages =
         pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(
@@ -464,23 +452,20 @@ public class PageService {
   }
 
   @Transactional(readOnly = true)
-  public List<String> getAllPagesFlat(String host, String userName) {
-    String site = siteService.getSiteForHostname(host);
+  public List<String> getAllPagesFlat(String site, String userName) {
     List<PageDesc> pages =
         namespaceService.filterReadablePages(pageRepository.getAllValid(site), site, userName);
     return pages.stream().map(PageDesc::getDescriptor).toList();
   }
 
   @Transactional(readOnly = true)
-  public boolean isReadable(String host, String pageDescriptor, String userName) {
-    String site = siteService.getSiteForHostname(host);
+  public boolean isReadable(String site, String pageDescriptor, String userName) {
     PageDescriptor pd = PageDescriptor.fromFullName(pageDescriptor);
     return namespaceService.canReadNamespace(site, pd.namespace(), userName);
   }
 
   @Transactional(readOnly = true)
-  public List<String> getAllTags(String host, String userName) {
-    String site = siteService.getSiteForHostname(host);
+  public List<String> getAllTags(String site, String userName) {
     return tagRepository.getAllActiveTags(site);
   }
 
@@ -514,9 +499,8 @@ public class PageService {
   }
 
   @Transactional(readOnly = true)
-  public List<PageDesc> getPageHistory(String host, String sPageDescriptor, String userName)
+  public List<PageDesc> getPageHistory(String site, String sPageDescriptor, String userName)
       throws PageReadException {
-    String site = siteService.getSiteForHostname(host);
     PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
     boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
     if (!canRead) {
@@ -528,9 +512,8 @@ public class PageService {
 
   @Transactional(readOnly = true)
   public List<Pair<Integer, String>> getPageDiff(
-      String host, String sPageDescriptor, Long rev1, Long rev2, String userName)
+      String site, String sPageDescriptor, Long rev1, Long rev2, String userName)
       throws PageReadException {
-    String site = siteService.getSiteForHostname(host);
     PageDescriptor pageDescriptor = decodeDescriptor(sPageDescriptor);
     boolean canRead = namespaceService.canReadNamespace(site, pageDescriptor.namespace(), userName);
     if (!canRead) {

@@ -104,13 +104,13 @@ class ExportServiceTest {
     PageData firstPage =
         new PageData("", "This is the first page", List.of("first", "example"), null, null);
     PageData otherPage = new PageData("", "This is the other page", List.of(), null, null);
-    when(pageService.getPageData(eq("localhost"), eq(""), eq("george"))).thenReturn(rootPage);
-    when(pageService.getPageData(eq("localhost"), eq("FirstPage"), eq("george")))
+    when(pageService.getPageData(eq("default"), eq(""), eq("george"))).thenReturn(rootPage);
+    when(pageService.getPageData(eq("default"), eq("FirstPage"), eq("george")))
         .thenReturn(firstPage);
-    when(pageService.getPageData(eq("localhost"), eq("ns1:nsdeep:OtherPage"), eq("george")))
+    when(pageService.getPageData(eq("default"), eq("ns1:nsdeep:OtherPage"), eq("george")))
         .thenReturn(otherPage);
     PageListResponse response = new PageListResponse(pages, null);
-    when(pageService.getAllPages(eq("localhost"), eq("george"))).thenReturn(response);
+    when(pageService.getAllPages(eq("default"), eq("george"))).thenReturn(response);
 
     MediaRecord circle = new MediaRecord("circle.png", "default", "", null, 0, 0, 0);
     MediaRecord circleDot = new MediaRecord("circleWdot.png", "default", "ns", null, 0, 0, 0);
@@ -197,9 +197,9 @@ class ExportServiceTest {
     when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
     Map<String, List<PageDesc>> pages = Map.of("", List.of(desc("", "")));
     PageData rootPage = new PageData("", "This is the root page", List.of("root"), null, null);
-    when(pageService.getPageData(eq("localhost"), eq(""), eq("george"))).thenReturn(rootPage);
+    when(pageService.getPageData(eq("default"), eq(""), eq("george"))).thenReturn(rootPage);
     PageListResponse response = new PageListResponse(pages, null);
-    when(pageService.getAllPages(eq("localhost"), eq("george"))).thenReturn(response);
+    when(pageService.getAllPages(eq("default"), eq("george"))).thenReturn(response);
 
     MediaRecord circle = new MediaRecord("circle.png", "default", "", null, 0, 0, 0);
     MediaRecord circleDot = new MediaRecord("circleWdot.png", "default", "ns", null, 0, 0, 0);
@@ -253,9 +253,9 @@ class ExportServiceTest {
     when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
     Map<String, List<PageDesc>> pages = Map.of("", List.of(desc("", "")));
     PageData rootPage = new PageData("", "This is the root page", List.of("root"), null, null);
-    when(pageService.getPageData(eq("localhost"), eq(""), eq("george"))).thenReturn(rootPage);
+    when(pageService.getPageData(eq("default"), eq(""), eq("george"))).thenReturn(rootPage);
     PageListResponse response = new PageListResponse(pages, null);
-    when(pageService.getAllPages(eq("localhost"), eq("george"))).thenReturn(response);
+    when(pageService.getAllPages(eq("default"), eq("george"))).thenReturn(response);
 
     MediaRecord circle = new MediaRecord("circle.png", "default", "", null, 0, 0, 0);
     MediaRecord circleDot = new MediaRecord("circleWdot.png", "default", "ns", null, 0, 0, 0);

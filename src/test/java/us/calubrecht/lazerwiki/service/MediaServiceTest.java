@@ -457,7 +457,7 @@ class MediaServiceTest {
         underTest.moveImage("localhost", "Bob", "ns1", "img1.jpg", "ns2", "img2.jpg");
     assertTrue(status.success());
 
-    verify(mediaOverrideService).createOverride("localhost", "ns1", "img1.jpg", "ns2", "img2.jpg");
+    verify(mediaOverrideService).createOverride("default", "ns1", "img1.jpg", "ns2", "img2.jpg");
     MediaRecord newRecord = new MediaRecord("img2.jpg", "default", "ns2", newUser, 10000L, 10, 10);
     verify(mediaRecordRepository).save(newRecord);
     verify(mediaRecordRepository).deleteById(12L);

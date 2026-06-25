@@ -26,8 +26,6 @@ public class PageSearchServiceTest {
 
   @MockitoBean PageRepository pageRepository;
 
-  @MockitoBean SiteService siteService;
-
   @MockitoBean NamespaceService namespaceService;
 
   @MockitoBean PageCacheRepository pageCacheRepository;
@@ -38,20 +36,19 @@ public class PageSearchServiceTest {
     PageDesc page2 = new PageServiceTest.PageDescImpl("ns1:ns2", "page3", "Page 1", "Francis");
     List<PageDesc> pages = List.of(page1, page2);
     when(pageRepository.getByTagname("mysql", "site1", "tag1")).thenReturn(pages);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pages);
     when(namespaceService.filterReadablePages(any(), eq("site1"), eq("joe")))
         .thenReturn(List.of(page1));
 
     List<SearchResult> results =
-        pageSearchService.searchPages("host1", "bob", "tag:tag1").get("tag");
+        pageSearchService.searchPages("site1", "bob", "tag:tag1").get("tag");
     assertEquals(2, results.size());
 
-    results = pageSearchService.searchPages("host1", "joe", "tag:tag1").get("tag");
+    results = pageSearchService.searchPages("site1", "joe", "tag:tag1").get("tag");
     assertEquals(1, results.size());
 
     Map<String, String> searchTerms = Map.of("tag", "tag1", "ns", "ns1:ns2");
-    results = pageSearchService.searchPages("host1", "bob", searchTerms).get("tag");
+    results = pageSearchService.searchPages("site1", "bob", searchTerms).get("tag");
     assertEquals(1, results.size());
   }
 
@@ -81,29 +78,28 @@ public class PageSearchServiceTest {
         .thenReturn(List.of(page1, page2));
     when(pageCacheRepository.searchByText(any(), eq("site1"), eq("banana*")))
         .thenReturn(List.of(page1, page2));
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob"))).thenReturn(pagesDesc);
 
     Map<String, List<SearchResult>> results =
-        pageSearchService.searchPages("host1", "bob", "text:banana");
+        pageSearchService.searchPages("site1", "bob", "text:banana");
     assertEquals(2, results.get("title").size());
     assertEquals(2, results.get("text").size());
 
     assertEquals("With some bananas", results.get("text").get(0).resultLine());
     assertEquals("All your bananas", results.get("text").get(1).resultLine());
 
-    results = pageSearchService.searchPages("host1", "bob", Map.of("text", "banana", "ns", "ns"));
+    results = pageSearchService.searchPages("site1", "bob", Map.of("text", "banana", "ns", "ns"));
     assertEquals(1, results.get("title").size());
     assertEquals(1, results.get("text").size());
     assertEquals("All your bananas", results.get("text").get(0).resultLine());
 
     // If asterix specifically applied
-    results = pageSearchService.searchPages("host1", "bob", "text:banana*");
+    results = pageSearchService.searchPages("site1", "bob", "text:banana*");
     assertEquals(2, results.get("title").size());
     assertEquals(2, results.get("text").size());
 
     // If full search term exists
-    results = pageSearchService.searchPages("host1", "bob", "text:banana thief");
+    results = pageSearchService.searchPages("site1", "bob", "text:banana thief");
     assertEquals(2, results.get("title").size());
     assertEquals(2, results.get("text").size());
     assertEquals("The banana thief", results.get("text").get(1).resultLine());
@@ -121,7 +117,7 @@ public class PageSearchServiceTest {
         .thenReturn(List.of(page3));
     when(pageCacheRepository.searchByText(any(), eq("site1"), eq("the cow")))
         .thenReturn(List.of(page3));
-    results = pageSearchService.searchPages("host1", "jay", "text:the cow");
+    results = pageSearchService.searchPages("site1", "jay", "text:the cow");
     assertEquals(1, results.get("title").size());
     assertEquals(1, results.get("text").size());
     assertEquals("The cow lives", results.get("text").get(0).resultLine());
@@ -142,7 +138,6 @@ public class PageSearchServiceTest {
     List<PageDesc> pagesDesc = List.of(page1);
     when(pageCacheRepository.searchByTitle(any(), any(), any())).thenReturn(List.of());
     when(pageCacheRepository.searchByText(any(), any(), any())).thenReturn(pages);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.filterReadablePages(any(), eq("site1"), eq("bob")))
         .thenAnswer(
             inv -> {
@@ -150,37 +145,36 @@ public class PageSearchServiceTest {
             });
 
     Map<String, List<SearchResult>> results =
-        pageSearchService.searchPages("host1", "bob", "text:The granite");
+        pageSearchService.searchPages("site1", "bob", "text:The granite");
     assertEquals(0, results.get("title").size());
     assertEquals(1, results.get("text").size());
     assertEquals("might be a granite", results.get("text").get(0).resultLine());
 
-    results = pageSearchService.searchPages("host1", "bob", "text:The");
+    results = pageSearchService.searchPages("site1", "bob", "text:The");
     assertEquals(1, results.get("text").size());
     assertEquals("The rock is old", results.get("text").get(0).resultLine());
 
-    results = pageSearchService.searchPages("host1", "bob", "text:The cowboy");
+    results = pageSearchService.searchPages("site1", "bob", "text:The cowboy");
     assertEquals(1, results.get("text").size());
     assertEquals("The rock is old", results.get("text").get(0).resultLine());
 
-    results = pageSearchService.searchPages("host1", "bob", "text:The cowboy");
+    results = pageSearchService.searchPages("site1", "bob", "text:The cowboy");
     assertEquals(1, results.get("text").size());
     assertEquals("The rock is old", results.get("text").get(0).resultLine());
 
-    pageSearchService.searchPages("host1", "bob", "text:The sword");
+    pageSearchService.searchPages("site1", "bob", "text:The sword");
     verify(pageCacheRepository).searchByTitle(any(), any(), eq("sword*"));
 
     verify(pageCacheRepository, times(1)).searchByTitle(any(), any(), eq("The*"));
-    pageSearchService.searchPages("host1", "bob", "text:The");
+    pageSearchService.searchPages("site1", "bob", "text:The");
     verify(pageCacheRepository, times(2)).searchByTitle(any(), any(), eq("The*"));
   }
 
   @Test
   public void test_unsupportedSearch() {
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     Map<String, String> searchTerms = Map.of("fullText", "Test");
     Map<String, List<SearchResult>> results =
-        pageSearchService.searchPages("host1", "bob", searchTerms);
+        pageSearchService.searchPages("site1", "bob", searchTerms);
     assertEquals(0, results.size());
 
     verify(pageRepository, never()).getByTagname(anyString(), anyString(), anyString());

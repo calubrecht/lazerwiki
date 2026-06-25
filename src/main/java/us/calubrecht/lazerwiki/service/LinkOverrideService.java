@@ -12,36 +12,30 @@ import us.calubrecht.lazerwiki.repository.LinkRepository;
 
 @Service
 public class LinkOverrideService {
-  @Autowired SiteService siteService;
-
   @Autowired LinkOverrideRepository repo;
 
   @Autowired LinkRepository linkRepo;
 
-  public List<LinkOverride> getOverrides(String host, String pageName) {
-    String site = siteService.getSiteForHostname(host);
+  public List<LinkOverride> getOverrides(String site, String pageName) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(pageName);
     return repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById(
         site, pageDescriptor.namespace(), pageDescriptor.pageName());
   }
 
-  public List<LinkOverride> getOverridesForTargetPage(String host, String pageName) {
-    String site = siteService.getSiteForHostname(host);
+  public List<LinkOverride> getOverridesForTargetPage(String site, String pageName) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(pageName);
     return repo.findAllBySiteAndTargetPageNSAndTargetPageName(
         site, pageDescriptor.namespace(), pageDescriptor.pageName());
   }
 
-  public List<LinkOverride> getOverridesForNewTargetPage(String host, String pageName) {
-    String site = siteService.getSiteForHostname(host);
+  public List<LinkOverride> getOverridesForNewTargetPage(String site, String pageName) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(pageName);
     return repo.findAllBySiteAndNewTargetPageNSAndNewTargetPageName(
         site, pageDescriptor.namespace(), pageDescriptor.pageName());
   }
 
   @Transactional
-  public void createOverride(String host, String pageName, String changedPage) {
-    String site = siteService.getSiteForHostname(host);
+  public void createOverride(String site, String pageName, String changedPage) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(pageName);
     PageDescriptor newPageDescriptor = PageService.decodeDescriptor(changedPage);
     List<LinkOverride> existingLinkOverride =
@@ -83,8 +77,7 @@ public class LinkOverrideService {
   }
 
   @Transactional
-  public void moveOverrides(String host, String oldPage, String newPage) {
-    String site = siteService.getSiteForHostname(host);
+  public void moveOverrides(String site, String oldPage, String newPage) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(oldPage);
     PageDescriptor newPageDescriptor = PageService.decodeDescriptor(newPage);
     List<LinkOverride> linkOverridesToCopy =
@@ -109,8 +102,7 @@ public class LinkOverrideService {
   }
 
   @Transactional
-  public void deleteOverrides(String host, String page) {
-    String site = siteService.getSiteForHostname(host);
+  public void deleteOverrides(String site, String page) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(page);
     repo.deleteBySiteAndSourcePageNSAndSourcePageName(
         site, pageDescriptor.namespace(), pageDescriptor.pageName());

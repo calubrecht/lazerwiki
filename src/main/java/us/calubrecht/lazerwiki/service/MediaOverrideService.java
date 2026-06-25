@@ -12,21 +12,17 @@ import us.calubrecht.lazerwiki.repository.MediaOverrideRepository;
 
 @Service
 public class MediaOverrideService {
-  @Autowired SiteService siteService;
-
   @Autowired MediaOverrideRepository repo;
 
   @Autowired ImageRefRepository imageRefRepository;
 
-  public List<MediaOverride> getOverrides(String host, String pageName) {
-    String site = siteService.getSiteForHostname(host);
+  public List<MediaOverride> getOverrides(String site, String pageName) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(pageName);
     return repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById(
         site, pageDescriptor.namespace(), pageDescriptor.pageName());
   }
 
-  public List<MediaOverride> getOverridesForImage(String host, String imageName) {
-    String site = siteService.getSiteForHostname(host);
+  public List<MediaOverride> getOverridesForImage(String site, String imageName) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(imageName);
     return repo.findAllBySiteAndNewTargetFileNSAndNewTargetFileName(
         site, pageDescriptor.namespace(), pageDescriptor.pageName());
@@ -34,8 +30,7 @@ public class MediaOverrideService {
 
   @Transactional
   public void createOverride(
-      String host, String oldFileNS, String oldFileName, String newFileNS, String newFileName) {
-    String site = siteService.getSiteForHostname(host);
+      String site, String oldFileNS, String oldFileName, String newFileNS, String newFileName) {
     List<MediaOverride> existingLinkOverride =
         repo.findAllBySiteAndNewTargetFileNSAndNewTargetFileName(site, oldFileNS, oldFileName);
     repo.deleteBySiteAndNewTargetFileNSAndNewTargetFileName(site, oldFileNS, oldFileName);
@@ -72,8 +67,7 @@ public class MediaOverrideService {
   }
 
   @Transactional
-  public void moveOverrides(String host, String oldPage, String newPage) {
-    String site = siteService.getSiteForHostname(host);
+  public void moveOverrides(String site, String oldPage, String newPage) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(oldPage);
     PageDescriptor newPageDescriptor = PageService.decodeDescriptor(newPage);
     List<MediaOverride> linkOverridesToCopy =
@@ -98,8 +92,7 @@ public class MediaOverrideService {
   }
 
   @Transactional
-  public void deleteOverrides(String host, String page) {
-    String site = siteService.getSiteForHostname(host);
+  public void deleteOverrides(String site, String page) {
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(page);
     repo.deleteBySiteAndSourcePageNSAndSourcePageName(
         site, pageDescriptor.namespace(), pageDescriptor.pageName());

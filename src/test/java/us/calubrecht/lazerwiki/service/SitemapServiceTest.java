@@ -41,6 +41,8 @@ public class SitemapServiceTest {
 
   @MockitoBean MediaService mediaService;
 
+  @MockitoBean SiteService siteService;
+
   @Test
   public void test_getSitemap_pages()
       throws IOException, ParseException, ParserConfigurationException, SAXException {
@@ -48,7 +50,8 @@ public class SitemapServiceTest {
     pageMap.put("", List.of(getDesc("", "", 1010), getDesc("", "page1", 130)));
     pageMap.put("ns1", List.of(getDesc("ns1", "page3", 0), getDesc("ns1", "page4", 130)));
     PageListResponse pageResponse = new PageListResponse(pageMap, null);
-    when(pageService.getAllPages(eq("localhost"), isNull())).thenReturn(pageResponse);
+    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("default");
+    when(pageService.getAllPages(eq("default"), isNull())).thenReturn(pageResponse);
     Map<String, List<MediaRecord>> mediaMap = new HashMap<>();
     MediaListResponse mediaResponse = new MediaListResponse(mediaMap, null);
     when(mediaService.getAllFiles(eq("localhost"), isNull())).thenReturn(mediaResponse);
@@ -73,7 +76,8 @@ public class SitemapServiceTest {
       throws IOException, ParseException, ParserConfigurationException, SAXException {
     Map<String, List<PageDesc>> pageMap = new HashMap<>();
     PageListResponse pageResponse = new PageListResponse(pageMap, null);
-    when(pageService.getAllPages(eq("localhost"), isNull())).thenReturn(pageResponse);
+    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("default");
+    when(pageService.getAllPages(eq("default"), isNull())).thenReturn(pageResponse);
     Map<String, List<MediaRecord>> mediaMap = new HashMap<>();
     mediaMap.put("", List.of(mediaRecord("", "file.jpg", 1010)));
     mediaMap.put("ns1", List.of(mediaRecord("ns1", "file2.jpg", 0)));

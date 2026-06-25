@@ -45,15 +45,14 @@ public class PageMetaService {
   }
 
   public void updateMetaData(
-      String host,
       String site,
       PageDescriptor pageDescriptor,
       Page p,
       Collection<String> links,
       Collection<String> images) {
     String sPageDescriptor = pageDescriptor.toString();
-    linkOverrideService.deleteOverrides(host, sPageDescriptor);
-    mediaOverrideService.deleteOverrides(host, sPageDescriptor);
+    linkOverrideService.deleteOverrides(site, sPageDescriptor);
+    mediaOverrideService.deleteOverrides(site, sPageDescriptor);
     linkService.setLinksFromPage(
         site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
     imageRefService.setImageRefsFromPage(
@@ -64,7 +63,7 @@ public class PageMetaService {
     }
   }
 
-  public void deleteMetaData(String host, String site, PageDescriptor pageDescriptor) {
+  public void deleteMetaData(String site, PageDescriptor pageDescriptor) {
     String sPageDescriptor = pageDescriptor.toString();
     PageCache.PageCacheKey key =
         new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
@@ -72,15 +71,15 @@ public class PageMetaService {
     linkService.deleteLinks(site, sPageDescriptor);
     em.flush(); // Flush so regen can work?
     regenCacheService.regenCachesForBacklinks(site, sPageDescriptor);
-    linkOverrideService.deleteOverrides(host, sPageDescriptor);
-    mediaOverrideService.deleteOverrides(host, sPageDescriptor);
+    linkOverrideService.deleteOverrides(site, sPageDescriptor);
+    mediaOverrideService.deleteOverrides(site, sPageDescriptor);
   }
 
   public Pair<List<String>, List<String>> moveMetaData(
-      String host, String site, String oldPageDescriptor, String newPageDescriptor) {
-    linkOverrideService.createOverride(host, oldPageDescriptor, newPageDescriptor);
-    linkOverrideService.moveOverrides(host, oldPageDescriptor, newPageDescriptor);
-    mediaOverrideService.moveOverrides(host, oldPageDescriptor, newPageDescriptor);
+      String site, String oldPageDescriptor, String newPageDescriptor) {
+    linkOverrideService.createOverride(site, oldPageDescriptor, newPageDescriptor);
+    linkOverrideService.moveOverrides(site, oldPageDescriptor, newPageDescriptor);
+    mediaOverrideService.moveOverrides(site, oldPageDescriptor, newPageDescriptor);
     List<String> links = linkService.getLinksOnPage(site, oldPageDescriptor);
     List<String> images = imageRefService.getImagesOnPage(site, oldPageDescriptor);
     return Pair.of(links, images);

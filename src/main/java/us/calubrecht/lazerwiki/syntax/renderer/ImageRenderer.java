@@ -172,7 +172,7 @@ public class ImageRenderer extends AbstractRenderer {
         (Map<String, MediaOverride>) renderContext.renderState().get(MEDIA_OVERRIDES.name());
     if (overrides == null) {
       List<MediaOverride> mediaOverrideList =
-          mediaOverrideService.getOverrides(renderContext.host(), renderContext.page());
+          mediaOverrideService.getOverrides(renderContext.site(), renderContext.page());
       overrides =
           mediaOverrideList.stream()
               .collect(

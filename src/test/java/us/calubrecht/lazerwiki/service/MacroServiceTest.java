@@ -61,7 +61,7 @@ class MacroServiceTest {
   @Test
   @Order(2)
   void test_renderMacro() {
-    RenderContext context = new RenderContext("localhost", "default", "page", "user");
+    RenderContext context = new RenderContext("default", "page", "user");
     assertEquals("Good Macro", underTest.renderMacro("Good", "", context));
 
     // Unknown Macros give warning, macro name is sanitized
@@ -70,14 +70,14 @@ class MacroServiceTest {
         underTest.renderMacro("<div>hi</div>:other text", "", context));
 
     // Recursive Macro does not continue to render itself
-    context = new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+    context = new RenderContext("default", "page", "user", renderer, new HashMap<>());
     assertEquals("Start:", underTest.renderMacro("Recursive", "", context));
   }
 
   @Test
   @Order(3)
   void test_macroContextImpl() {
-    RenderContext context = new RenderContext("localhost", "default", "page", "user");
+    RenderContext context = new RenderContext("default", "page", "user");
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     assertEquals("&lt;div&gt;hi&lt;/div&gt;", macroContext.sanitize("<div>hi</div>"));
 
@@ -98,7 +98,7 @@ class MacroServiceTest {
   @Order(4)
   void test_macroContextImplRenderPage() {
     RenderContext context =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     PageData page = new PageData(null, "**Hi**", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("existsPage"), anyString())).thenReturn(page);
@@ -130,7 +130,7 @@ class MacroServiceTest {
     PageCache cached = new PageCache();
     cached.useCache = true;
     cached.renderedCache = "This is from Cache";
-    when(pageService.getCachedPage("localhost", "cachedPage")).thenReturn(cached);
+    when(pageService.getCachedPage("default", "cachedPage")).thenReturn(cached);
     PageData renderedPage = new PageData(null, "Rendered now", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("cachedPage"), anyString()))
         .thenReturn(renderedPage);
@@ -139,7 +139,7 @@ class MacroServiceTest {
     PageCache ignoredCache = new PageCache();
     ignoredCache.useCache = false;
     ignoredCache.renderedCache = "This is from Cache";
-    when(pageService.getCachedPage("localhost", "ignoredCache")).thenReturn(ignoredCache);
+    when(pageService.getCachedPage("default", "ignoredCache")).thenReturn(ignoredCache);
     when(pageService.getPageData(anyString(), eq("ignoredCache"), anyString()))
         .thenReturn(renderedPage);
     assertEquals("<div>Rendered now</div>", macroContext.renderPage("ignoredCache").getHtml());
@@ -148,7 +148,7 @@ class MacroServiceTest {
   @Test
   @Order(5)
   void test_renderPageBroken() {
-    RenderContext context = new RenderContext("localhost", "default", "page", "user");
+    RenderContext context = new RenderContext("default", "page", "user");
     assertThrows(RuntimeException.class, () -> underTest.renderMacro("Broken", "", context));
   }
 
@@ -166,7 +166,7 @@ class MacroServiceTest {
     when(pageService.getPageData(any(), eq("noPage"), any())).thenReturn(none);
     when(pageService.getPageData(any(), eq("forbiddenPage"), any())).thenReturn(forbidden);
     RenderContext context =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     assertEquals("", macroContext.getCachedRender("noPage").getHtml());
     assertEquals("", macroContext.getCachedRender("forbiddenPage").getHtml());
@@ -181,13 +181,13 @@ class MacroServiceTest {
     PageCache cached = new PageCache();
     cached.useCache = true;
     cached.renderedCache = "From cache";
-    when(pageService.getCachedPage("localhost", "cachedPage")).thenReturn(cached);
+    when(pageService.getCachedPage("default", "cachedPage")).thenReturn(cached);
     assertEquals("From cache", macroContext.getCachedRender("cachedPage").getHtml());
     when(pageService.getPageData(any(), eq("ignorableCache"), any())).thenReturn(ok);
     PageCache ignorableCache = new PageCache();
     ignorableCache.useCache = false;
     ignorableCache.renderedCache = "From cache but transient";
-    when(pageService.getCachedPage("localhost", "ignorableCache")).thenReturn(ignorableCache);
+    when(pageService.getCachedPage("default", "ignorableCache")).thenReturn(ignorableCache);
     assertEquals(
         "From cache but transient", macroContext.getCachedRender("ignorableCache").getHtml());
     when(pageService.getPageData(any(), eq("nonCached"), any())).thenReturn(ok);
@@ -233,7 +233,7 @@ class MacroServiceTest {
                     true)));
 
     RenderContext context =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     Map<String, Macro.MacroContext.RenderOutput> res =
         macroContext.getCachedRenders(
@@ -252,7 +252,7 @@ class MacroServiceTest {
   @Order(7)
   void test_setPageDontCache() {
     RenderContext context =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     macroContext.setPageDontCache();
     assertEquals(true, context.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
@@ -261,7 +261,7 @@ class MacroServiceTest {
   @Test
   @Order(2)
   void test_renderMacroForCache() {
-    RenderContext context = new RenderContext("localhost", "default", "page", "user");
+    RenderContext context = new RenderContext("default", "page", "user");
     context.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     // Renders as expected because macro is not no-cache
     assertEquals("Good Macro", underTest.renderMacro("Good", "", context));
@@ -269,14 +269,14 @@ class MacroServiceTest {
 
   @Test
   void test_postRender() {
-    RenderContext context = new RenderContext("localhost", "default", "page", "user");
+    RenderContext context = new RenderContext("default", "page", "user");
     String text = "THis has some ~~MACRO~~Good:very/n/ngood~~/MACRO~~ macro in it";
     assertEquals("THis has some Good Macro macro in it", underTest.postRender(text, context));
   }
 
   @Test
   void test_noCacheMacro() {
-    RenderContext context = new RenderContext("localhost", "default", "page", "user");
+    RenderContext context = new RenderContext("default", "page", "user");
     context.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     String fullText = "~~MACRO~~NoCache~~/MACRO~~";
     String cached = underTest.renderMacro("NoCache", fullText, context);

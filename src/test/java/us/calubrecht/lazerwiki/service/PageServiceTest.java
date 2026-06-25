@@ -32,8 +32,6 @@ public class PageServiceTest {
 
   @MockitoBean IdRepository idRepository;
 
-  @MockitoBean SiteService siteService;
-
   @MockitoBean NamespaceService namespaceService;
 
   @MockitoBean LinkService linkService;
@@ -48,11 +46,10 @@ public class PageServiceTest {
   public void test_exists() {
     assertFalse(pageService.exists("site1", "nonExistentPage"));
 
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
             "site1", "ns", "realPage", false))
         .thenReturn(new Page());
-    assertTrue(pageService.exists("host1", "ns:realPage"));
+    assertTrue(pageService.exists("site1", "ns:realPage"));
   }
 
   @Test
@@ -62,11 +59,10 @@ public class PageServiceTest {
     Page p = new Page();
     p.setTitle("Titled Page");
     p.setTags(Collections.emptyList());
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
             "site1", "some:ns", "realPage", false))
         .thenReturn(p);
-    assertEquals("Titled Page", pageService.getTitle("host1", "some:ns:realPage"));
+    assertEquals("Titled Page", pageService.getTitle("site1", "some:ns:realPage"));
 
     Page p2 = new Page();
     p2.setTags(Collections.emptyList());
@@ -74,17 +70,16 @@ public class PageServiceTest {
             "site1", "some:ns", "nonTitledRealPage", false))
         .thenReturn(p2);
     assertEquals(
-        "Non Titled Real Page", pageService.getTitle("host1", "some:ns:nonTitledRealPage"));
+        "Non Titled Real Page", pageService.getTitle("site1", "some:ns:nonTitledRealPage"));
 
     // If no title, then title of "" should be home
     when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site1", "", "", false))
         .thenReturn(p2);
-    assertEquals("Home", pageService.getTitle("host1", ""));
+    assertEquals("Home", pageService.getTitle("site1", ""));
 
-    when(siteService.getSiteForHostname(eq("host2"))).thenReturn("site2");
     when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted("site2", "", "", false))
         .thenReturn(p);
-    assertEquals("Titled Page", pageService.getTitle("host2", ""));
+    assertEquals("Titled Page", pageService.getTitle("site2", ""));
 
     PageDescriptor pd = new PageDescriptor("ns", "page_name");
     assertEquals("Page Name", PageService.getTitle(pd, null));
@@ -97,7 +92,6 @@ public class PageServiceTest {
 
   @Test
   public void test_getPageData() {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -109,12 +103,11 @@ public class PageServiceTest {
             Collections.emptyList(),
             Collections.emptyList(),
             new PageFlags(false, false, true, true, false, false)),
-        pageService.getPageData("localhost", "nonExistantPage", "Bob"));
+        pageService.getPageData("site1", "nonExistantPage", "Bob"));
 
     Page p = new Page();
     p.setText("This is raw page text");
     p.setTags(Collections.emptyList());
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "realPage")).thenReturn(p);
 
     assertEquals(
@@ -125,7 +118,7 @@ public class PageServiceTest {
             Collections.emptyList(),
             Collections.emptyList(),
             PageData.ALL_RIGHTS),
-        pageService.getPageData("host1", "ns:realPage", "Bob"));
+        pageService.getPageData("site1", "ns:realPage", "Bob"));
 
     assertEquals(
         new PageData(
@@ -135,19 +128,17 @@ public class PageServiceTest {
             Collections.emptyList(),
             Collections.emptyList(),
             PageData.EMPTY_FLAGS),
-        pageService.getPageData("host1", "ns:realPage", "Joe"));
+        pageService.getPageData("site1", "ns:realPage", "Joe"));
   }
 
   @Test
   public void test_getPageDataWithBacklinks() {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
 
     Page p = new Page();
     p.setText("This is raw page text");
     p.setTags(Collections.emptyList());
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "realPage")).thenReturn(p);
     when(linkService.getBacklinks("site1", "ns:realPage")).thenReturn(List.of("page1", "page2"));
     when(namespaceService.filterReadablePageDescriptors(any(), any(), any()))
@@ -161,22 +152,20 @@ public class PageServiceTest {
             Collections.emptyList(),
             List.of("page1", "page2"),
             new PageFlags(true, false, true, true, false, false)),
-        pageService.getPageData("host1", "ns:realPage", "Bob"));
+        pageService.getPageData("site1", "ns:realPage", "Bob"));
   }
 
   @Test
   public void test_getPageDataWithOverrideBacklinks() {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
 
     Page p = new Page();
     p.setText("This is raw page text");
     p.setTags(Collections.emptyList());
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns", "realPage")).thenReturn(p);
     when(linkService.getBacklinks("site1", "ns:realPage")).thenReturn(List.of("page1", "page2"));
-    when(linkOverrideService.getOverridesForNewTargetPage("host1", "nd:realPage"))
+    when(linkOverrideService.getOverridesForNewTargetPage("site1", "nd:realPage"))
         .thenReturn(
             List.of(
                 new LinkOverride("site1", "", "page1", "", "oldPage", "ns", "realPage"),
@@ -195,12 +184,11 @@ public class PageServiceTest {
             Collections.emptyList(),
             List.of("page1", "page2"),
             new PageFlags(true, false, true, true, false, false)),
-        pageService.getPageData("host1", "ns:realPage", "Bob"));
+        pageService.getPageData("site1", "ns:realPage", "Bob"));
   }
 
   @Test
   public void test_getPageDataDeleted() {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -208,7 +196,6 @@ public class PageServiceTest {
     Page p = new Page();
     p.setDeleted(true);
     p.setTags(Collections.emptyList());
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "", "deletedPage")).thenReturn(p);
 
     assertEquals(
@@ -219,12 +206,11 @@ public class PageServiceTest {
             Collections.emptyList(),
             Collections.emptyList(),
             new PageFlags(false, true, true, true, false, false)),
-        pageService.getPageData("host1", "deletedPage", "Bob"));
+        pageService.getPageData("site1", "deletedPage", "Bob"));
   }
 
   @Test
   public void test_getPageDataMoved() {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -232,11 +218,10 @@ public class PageServiceTest {
     Page p = new Page();
     p.setDeleted(true);
     p.setTags(Collections.emptyList());
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "", "movedPage")).thenReturn(p);
     List<LinkOverride> overrides =
-        List.of(new LinkOverride("host", "ns1", "page", "ns2", "page2", "ns3", "page3"));
-    when(linkOverrideService.getOverridesForTargetPage("host1", "movedPage")).thenReturn(overrides);
+        List.of(new LinkOverride("site1", "ns1", "page", "ns2", "page2", "ns3", "page3"));
+    when(linkOverrideService.getOverridesForTargetPage("site1", "movedPage")).thenReturn(overrides);
 
     assertEquals(
         new PageData(
@@ -246,12 +231,11 @@ public class PageServiceTest {
             Collections.emptyList(),
             Collections.emptyList(),
             new PageFlags(false, true, true, false, false, true)),
-        pageService.getPageData("host1", "movedPage", "Bob"));
+        pageService.getPageData("site1", "movedPage", "Bob"));
   }
 
   @Test
   public void test_getPageDataHome() {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -261,7 +245,6 @@ public class PageServiceTest {
     p.setTags(Collections.emptyList());
     p.setId(1L);
     p.setRevision(12L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "", "")).thenReturn(p);
 
     assertEquals(
@@ -274,7 +257,7 @@ public class PageServiceTest {
             new PageFlags(true, false, true, true, false, false),
             1L,
             12L),
-        pageService.getPageData("host1", "", "Bob"));
+        pageService.getPageData("site1", "", "Bob"));
   }
 
   @Test
@@ -286,7 +269,6 @@ public class PageServiceTest {
 
   @Test
   public void test_listPages() {
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
     PageDesc page1 = new PageDescImpl("", "page1", "Page 1", "Bob");
@@ -298,7 +280,7 @@ public class PageServiceTest {
 
     when(pageRepository.getAllValid("site1")).thenReturn(allPages);
 
-    PageListResponse pageResponse = pageService.getAllPages("host1", "joe");
+    PageListResponse pageResponse = pageService.getAllPages("site1", "joe");
 
     assertEquals("", pageResponse.namespaces().getNamespace());
     assertEquals(1, pageResponse.namespaces().getChildren().size());
@@ -319,13 +301,12 @@ public class PageServiceTest {
     assertEquals(1, pages.get("ns1:ns2").size());
     assertEquals("page3", pages.get("ns1:ns2").get(0).getPagename());
 
-    List<String> pageList = pageService.getAllPagesFlat("host1", "joe");
+    List<String> pageList = pageService.getAllPagesFlat("site1", "joe");
     assertEquals(List.of("page1", "page2", "ns1:page1", "ns1:ns2:page3"), pageList);
   }
 
   @Test
   public void test_listPages_wEmptyNamespaces() {
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("joe"))).thenReturn(true);
     PageDesc page1 = new PageDescImpl("", "page1", "Page 1", "Bob");
@@ -335,7 +316,7 @@ public class PageServiceTest {
 
     when(pageRepository.getAllValid("site1")).thenReturn(allPages);
 
-    PageListResponse pageResponse = pageService.getAllPages("host1", "joe");
+    PageListResponse pageResponse = pageService.getAllPages("site1", "joe");
     assertEquals("", pageResponse.namespaces().getNamespace());
     assertEquals(1, pageResponse.namespaces().getChildren().size());
     assertEquals("ns1", pageResponse.namespaces().getChildren().get(0).getNamespace());
@@ -357,9 +338,8 @@ public class PageServiceTest {
 
   @Test
   public void test_getAllTags() {
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(tagRepository.getAllActiveTags("site1")).thenReturn(List.of("tag1", "tag2"));
-    assertEquals(2, pageService.getAllTags("host1", "joe").size());
+    assertEquals(2, pageService.getAllTags("site1", "joe").size());
   }
 
   @Test
@@ -386,25 +366,23 @@ public class PageServiceTest {
 
   @Test
   public void test_getCachedPage() {
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     PageCache cached = new PageCache();
     cached.renderedCache = "Rendered";
     PageCache.PageCacheKey key = new PageCache.PageCacheKey("default", "ns", "cached");
     when(pageCacheRepository.findById(key)).thenReturn(Optional.of(cached));
-    PageCache ret = pageService.getCachedPage("localhost", "ns:cached");
+    PageCache ret = pageService.getCachedPage("default", "ns:cached");
     assertEquals("Rendered", ret.renderedCache);
   }
 
   @Test
   public void test_getCachedPages() {
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     PageCache cache1 = new PageCache();
     cache1.renderedCache = "Text 1";
     PageCache cache2 = new PageCache();
     cache2.renderedCache = "Text 2";
     ArgumentCaptor<List<PageCache.PageCacheKey>> captor = ArgumentCaptor.forClass(List.class);
     when(pageCacheRepository.findAllById(captor.capture())).thenReturn(List.of(cache1, cache2));
-    List<PageCache> ret = pageService.getCachedPages("localhost", List.of("page1", "ns:page2"));
+    List<PageCache> ret = pageService.getCachedPages("default", List.of("page1", "ns:page2"));
     assertEquals(2, ret.size());
 
     List<PageCache.PageCacheKey> arg = captor.getValue();
@@ -417,13 +395,12 @@ public class PageServiceTest {
 
   @Test
   public void test_savePage() {
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     RenderResult rendered = new RenderResult("rendered", "notRendered", Map.of("DONT_CACHE", true));
     Page p = new Page();
     p.setPagename("TOCACHE");
     p.setNamespace("ns");
     when(pageRepository.getBySiteAndNamespaceAndPagename("default", "ns", "toCache")).thenReturn(p);
-    pageService.saveCache("localhost", "ns:toCache", "some source", rendered);
+    pageService.saveCache("default", "ns:toCache", "some source", rendered);
     PageCache cached = new PageCache();
     cached.site = "default";
     cached.namespace = "ns";
@@ -438,7 +415,7 @@ public class PageServiceTest {
     // Save and Cache
     RenderResult rendered2 = new RenderResult("rendered", "notRendered", new HashMap<>());
     when(pageRepository.getBySiteAndNamespaceAndPagename("default", "ns", "toCache")).thenReturn(p);
-    pageService.saveCache("localhost", "ns:toCache", "source", rendered2);
+    pageService.saveCache("default", "ns:toCache", "source", rendered2);
     PageCache cached2 = new PageCache();
     cached2.site = "default";
     cached2.namespace = "ns";
@@ -452,10 +429,9 @@ public class PageServiceTest {
 
   @Test
   public void test_historicalPageData() {
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
 
-    PageData pd = pageService.getHistoricalPageData("localhost", "page1", 1, "joe");
+    PageData pd = pageService.getHistoricalPageData("default", "page1", 1, "joe");
     // Joe can't read this page
     assertEquals("You are not permissioned to read this page", pd.rendered());
     assertFalse(pd.flags().userCanRead());
@@ -470,18 +446,17 @@ public class PageServiceTest {
         .thenReturn(page);
     when(pageRepository.findBySiteAndNamespaceAndPagenameAndRevision("default", "", "page1", 4))
         .thenReturn(deletedPage);
-    pd = pageService.getHistoricalPageData("localhost", "page1", 123, "bob");
+    pd = pageService.getHistoricalPageData("default", "page1", 123, "bob");
     assertEquals("This page doesn't exist", pd.rendered());
-    pd = pageService.getHistoricalPageData("localhost", "page1", 4, "bob");
+    pd = pageService.getHistoricalPageData("default", "page1", 4, "bob");
     assertEquals("This page doesn't exist", pd.rendered());
     assertTrue(pd.flags().wasDeleted());
-    pd = pageService.getHistoricalPageData("localhost", "page1", 1, "bob");
+    pd = pageService.getHistoricalPageData("default", "page1", 1, "bob");
     assertEquals("This is a page", pd.source());
   }
 
   @Test
   void test_getPageHistory() throws PageReadException {
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     PageDesc v1 = new PageDescImpl("ns", "page1", 1L);
     PageDesc v2 = new PageDescImpl("ns", "page1", 1L);
     PageDesc v3 = new PageDescImpl("ns", "page1", 3L);
@@ -490,15 +465,14 @@ public class PageServiceTest {
         .thenReturn(List.of(v1, v2, v3));
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
 
-    assertEquals(3, pageService.getPageHistory("localhost", "ns:page1", "Bob").size());
+    assertEquals(3, pageService.getPageHistory("default", "ns:page1", "Bob").size());
     assertThrows(
         PageReadException.class,
-        () -> pageService.getPageHistory("localhost", "ns:page1", "Frank"));
+        () -> pageService.getPageHistory("default", "ns:page1", "Frank"));
   }
 
   @Test
   void test_getPageDiff() throws PageReadException {
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
     Page page = new Page();
     page.setText("THis is\ntext");
@@ -516,17 +490,17 @@ public class PageServiceTest {
     // Joe can't read
     assertThrows(
         PageReadException.class,
-        () -> pageService.getPageDiff("localhost", "thisPage", 1L, 2L, "joe"));
+        () -> pageService.getPageDiff("default", "thisPage", 1L, 2L, "joe"));
     // These revisions don't exist
     assertThrows(
         PageReadException.class,
-        () -> pageService.getPageDiff("localhost", "thisPage", 8L, 20L, "bob"));
+        () -> pageService.getPageDiff("default", "thisPage", 8L, 20L, "bob"));
     assertThrows(
         PageReadException.class,
-        () -> pageService.getPageDiff("localhost", "thisPage", 1L, 20L, "bob"));
+        () -> pageService.getPageDiff("default", "thisPage", 1L, 20L, "bob"));
 
     List<Pair<Integer, String>> out =
-        pageService.getPageDiff("localhost", "thisPage", 1L, 5L, "bob");
+        pageService.getPageDiff("default", "thisPage", 1L, 5L, "bob");
 
     assertEquals(2, out.size());
     assertEquals(1, out.get(0).getFirst());
@@ -547,7 +521,6 @@ public class PageServiceTest {
 
   @Test
   public void test_getPageData_bulk() {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("site1"), any(), eq("Bob"))).thenReturn(true);
@@ -555,7 +528,6 @@ public class PageServiceTest {
     PageText pt1 = new PageTextImpl("", "page1", null, "text");
     PageText pt2 = new PageTextImpl("ns_secret", "secret", "", "text");
     PageText pt3 = new PageTextImpl("", "", "Home Page", "text_home");
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
 
     ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
     when(pageRepository.getAllBySiteAndNamespaceAndPagename(
@@ -564,7 +536,7 @@ public class PageServiceTest {
 
     Map<PageDescriptor, PageData> res =
         pageService.getPageData(
-            "localhost", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Bob");
+            "site1", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Bob");
 
     assertEquals(":page1", captor.getValue().get(0));
     assertEquals("ns:notPage", captor.getValue().get(1));
@@ -579,7 +551,7 @@ public class PageServiceTest {
         .thenReturn(false);
     res =
         pageService.getPageData(
-            "localhost", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Frank");
+            "site1", List.of("page1", "ns:notPage", "ns_secret:secret", ""), "Frank");
 
     assertEquals("text", res.get(new PageDescriptor("", "page1")).source());
     assertEquals("page1", res.get(new PageDescriptor("", "page1")).title());
@@ -592,14 +564,13 @@ public class PageServiceTest {
 
   @Test
   void test_recentChanges() {
-    when(siteService.getSiteForHostname(eq("theHost"))).thenReturn("site1");
     when(pageRepository.findAllBySiteAndNamespaceInOrderByModifiedDesc(any(), eq("site1"), any()))
         .thenReturn(
             List.of(
                 new PageDescImpl("ns", "page1", 2L),
                 new PageDescImpl("ns", "page2", 1L),
                 new PageDescImpl("ns", "page4", 3L, true)));
-    RecentChangesResponse changes = pageService.recentChanges("theHost", "Bob");
+    RecentChangesResponse changes = pageService.recentChanges("site1", "Bob");
 
     assertEquals(3, changes.changes().size());
     RecentChangesResponse.RecentChangeRec rec1 = changes.changes().get(0);
@@ -629,9 +600,8 @@ public class PageServiceTest {
   @Test
   void test_isReadable() {
     when(namespaceService.canReadNamespace("default", "ns", "Bob")).thenReturn(true);
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
-    assertTrue(pageService.isReadable("localhost", "ns:page1", "Bob"));
-    assertFalse(pageService.isReadable("localhost", "ns2:page1", "Bob"));
+    assertTrue(pageService.isReadable("default", "ns:page1", "Bob"));
+    assertFalse(pageService.isReadable("default", "ns2:page1", "Bob"));
   }
 
   @Test

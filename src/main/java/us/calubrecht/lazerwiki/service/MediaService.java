@@ -221,7 +221,7 @@ public class MediaService {
     if (oldRecord == null) {
       return new MoveStatus(false, oldFileName + " does not exist");
     }
-    mediaOverrideService.createOverride(host, oldFileNS, oldFileName, newFileNS, newFileName);
+    mediaOverrideService.createOverride(site, oldFileNS, oldFileName, newFileNS, newFileName);
     // Do move file
     String oldNsPath = oldFileNS.replace(":", "/");
     String newNsPath = newFileNS.replace(":", "/");

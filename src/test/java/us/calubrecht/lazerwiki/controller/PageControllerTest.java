@@ -1,11 +1,13 @@
 package us.calubrecht.lazerwiki.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,13 @@ public class PageControllerTest {
 
   @MockitoBean UserService userService;
 
+  @MockitoBean SiteService siteService;
+
+  @BeforeEach
+  void setUp() {
+    when(siteService.getSiteForHostname(any())).thenReturn("default");
+  }
+
   @Test
   public void test_getPage() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
@@ -68,9 +77,9 @@ public class PageControllerTest {
         .perform(get("/api/page/history/testPage").principal(auth))
         .andExpect(status().isOk());
 
-    verify(pageService).getPageHistory(eq("localhost"), eq("testPage"), eq("Bob"));
+    verify(pageService).getPageHistory(eq("default"), eq("testPage"), eq("Bob"));
 
-    when(pageService.getPageHistory(eq("localhost"), eq("testPage"), eq("Jack")))
+    when(pageService.getPageHistory(eq("default"), eq("testPage"), eq("Jack")))
         .thenThrow(new PageReadException(""));
     Authentication auth2 = new UsernamePasswordAuthenticationToken("Jack", "password1");
     this.mockMvc
@@ -78,7 +87,7 @@ public class PageControllerTest {
         .andExpect(status().isForbidden());
 
     this.mockMvc.perform(get("/api/page/history/testPage")).andExpect(status().isOk());
-    verify(pageService).getPageHistory(eq("localhost"), eq("testPage"), eq("Guest"));
+    verify(pageService).getPageHistory(eq("default"), eq("testPage"), eq("Guest"));
   }
 
   @Test
@@ -88,9 +97,9 @@ public class PageControllerTest {
         .perform(get("/api/page/diff/testPage/1/2").principal(auth))
         .andExpect(status().isOk());
 
-    verify(pageService).getPageDiff(eq("localhost"), eq("testPage"), eq(1L), eq(2L), eq("Bob"));
+    verify(pageService).getPageDiff(eq("default"), eq("testPage"), eq(1L), eq(2L), eq("Bob"));
 
-    when(pageService.getPageDiff(eq("localhost"), eq("testPage"), eq(1L), eq(2L), eq("Jack")))
+    when(pageService.getPageDiff(eq("default"), eq("testPage"), eq(1L), eq(2L), eq("Jack")))
         .thenThrow(new PageReadException(""));
     Authentication auth2 = new UsernamePasswordAuthenticationToken("Jack", "password1");
     this.mockMvc
@@ -98,7 +107,7 @@ public class PageControllerTest {
         .andExpect(status().isForbidden());
 
     this.mockMvc.perform(get("/api/page/diff/testPage/1/2")).andExpect(status().isOk());
-    verify(pageService).getPageDiff(eq("localhost"), eq("testPage"), eq(1L), eq(2L), eq("Guest"));
+    verify(pageService).getPageDiff(eq("default"), eq("testPage"), eq(1L), eq(2L), eq("Guest"));
   }
 
   @Test
@@ -180,11 +189,11 @@ public class PageControllerTest {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/api/page/listPages").principal(auth)).andExpect(status().isOk());
 
-    verify(pageService).getAllPages(eq("localhost"), eq("Bob"));
+    verify(pageService).getAllPages(eq("default"), eq("Bob"));
 
     this.mockMvc.perform(get("/api/page/listPages")).andExpect(status().isOk());
 
-    verify(pageService).getAllPages(eq("localhost"), eq("Guest"));
+    verify(pageService).getAllPages(eq("default"), eq("Guest"));
   }
 
   @Autowired ObjectMapper jsonMapper;
@@ -262,14 +271,14 @@ public class PageControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().json(data));
 
-    verify(pageService).getAllTags(eq("localhost"), eq("Bob"));
+    verify(pageService).getAllTags(eq("default"), eq("Bob"));
 
     this.mockMvc
         .perform(get("/api/page/listTags"))
         .andExpect(status().isOk())
         .andExpect(content().json(data));
 
-    verify(pageService).getAllTags(eq("localhost"), eq("Guest"));
+    verify(pageService).getAllTags(eq("default"), eq("Guest"));
   }
 
   @Test
@@ -279,11 +288,11 @@ public class PageControllerTest {
         .perform(get("/api/page/searchPages?search=tag:common").principal(auth))
         .andExpect(status().isOk());
 
-    verify(pageSearchService).searchPages(eq("localhost"), eq("Bob"), eq("tag:common"));
+    verify(pageSearchService).searchPages(eq("default"), eq("Bob"), eq("tag:common"));
 
     this.mockMvc.perform(get("/api/page/searchPages?search=tag:common")).andExpect(status().isOk());
 
-    verify(pageSearchService).searchPages(eq("localhost"), eq("Guest"), eq("tag:common"));
+    verify(pageSearchService).searchPages(eq("default"), eq("Guest"), eq("tag:common"));
   }
 
   @Test
@@ -341,10 +350,10 @@ public class PageControllerTest {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/api/page/recentChanges").principal(auth)).andExpect(status().isOk());
 
-    verify(pageService).recentChanges(eq("localhost"), eq("Bob"));
+    verify(pageService).recentChanges(eq("default"), eq("Bob"));
 
     this.mockMvc.perform(get("/api/page/recentChanges")).andExpect(status().isOk());
-    verify(pageService).recentChanges(eq("localhost"), eq("Guest"));
+    verify(pageService).recentChanges(eq("default"), eq("Guest"));
   }
 
   @Test

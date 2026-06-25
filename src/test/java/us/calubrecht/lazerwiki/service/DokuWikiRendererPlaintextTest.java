@@ -35,15 +35,15 @@ public class DokuWikiRendererPlaintextTest {
   @MockitoBean MediaOverrideService mediaOverrideService;
 
   String doRender(String source) {
-    RenderContext context = new RenderContext("localhost", "default", "page", "jack");
+    RenderContext context = new RenderContext("default", "page", "jack");
     return underTest.renderWithInfo(source, context).plainText();
   }
 
   @Test
   void test_renderLink() {
 
-    when(pageService.exists(eq("localhost"), eq("exists"))).thenReturn(true);
-    when(pageService.getTitle(eq("localhost"), eq("exists"))).thenReturn("This Page Exists");
+    when(pageService.exists(eq("default"), eq("exists"))).thenReturn(true);
+    when(pageService.getTitle(eq("default"), eq("exists"))).thenReturn("This Page Exists");
 
     assertEquals("This Page Exists", doRender("[[exists]]"));
     assertEquals(

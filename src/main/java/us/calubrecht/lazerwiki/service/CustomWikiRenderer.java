@@ -38,7 +38,6 @@ public class CustomWikiRenderer implements IMarkupRenderer {
     ITreeNode node = parser.parse(markup);
     RenderContext htmlContext =
         new RenderContext(
-            renderContext.host(),
             renderContext.site(),
             renderContext.page(),
             renderContext.user(),
@@ -48,7 +47,6 @@ public class CustomWikiRenderer implements IMarkupRenderer {
     String toc = renderToC(renderContext);
     RenderContext plaintextContext =
         new RenderContext(
-            renderContext.host(),
             renderContext.site(),
             renderContext.page(),
             renderContext.user(),

@@ -39,7 +39,7 @@ class ImageRendererTest {
   void test_applyInlineStylesForUnscalable() {
     String noScale = "";
     ImageNode imageNode = new ImageNode("img.avif", null, noScale, ImageNode.AlignType.NONE);
-    RenderContext renderContext = new RenderContext("host", "site", "page", "user");
+    RenderContext renderContext = new RenderContext("site", "page", "user");
     assertEquals(
         "<img src=\"/_media/img.avif\" class=\"media\" loading=\"lazy\">",
         renderer.renderHtml(imageNode, renderContext).toString());
@@ -107,7 +107,7 @@ class ImageRendererTest {
   @Test
   void test_fileNameWithSpace() {
     ImageNode imageNode = new ImageNode("img 1.jpg?30", null, "", ImageNode.AlignType.NONE);
-    RenderContext renderContext = new RenderContext("host", "site", "page", "user");
+    RenderContext renderContext = new RenderContext("site", "page", "user");
     assertEquals(
         "<img src=\"/_media/img 1.jpg?30\" class=\"media\" loading=\"lazy\">",
         renderer.renderHtml(imageNode, renderContext).toString());
@@ -118,7 +118,7 @@ class ImageRendererTest {
     String input1 = "img.jpg";
     List<MediaOverride> overrides =
         List.of(new MediaOverride("default", "", "page", "", "img.jpg", "ns2", "img5.jpg"));
-    when(mediaOverrideService.getOverrides("host", "page")).thenReturn(overrides);
+    when(mediaOverrideService.getOverrides("site", "page")).thenReturn(overrides);
 
     ParseContext parseContext = new ParseContext("0123456789{{img.jpg}}");
     ImageNode imageNode = new ImageNode(input1, null, "", ImageNode.AlignType.NONE);
@@ -130,7 +130,7 @@ class ImageRendererTest {
     assertEquals("{{img.jpg}}", imgString);
     String srcString = imageNode.getSourceSourceFromContext();
     assertEquals("img.jpg", srcString);
-    RenderContext renderContext = new RenderContext("host", "site", "page", "user");
+    RenderContext renderContext = new RenderContext("site", "page", "user");
     assertEquals(
         "<img src=\"/_media/ns2:img5.jpg\" class=\"media\" loading=\"lazy\">",
         renderer.renderHtml(imageNode, renderContext).toString());
@@ -153,9 +153,9 @@ class ImageRendererTest {
     imageNode.setSourcePosition(Pair.of(11, 17));
     List<MediaOverride> overrides =
         List.of(new MediaOverride("default", "", "page", "", "img.jpg", "ns2", "img5.jpg"));
-    when(mediaOverrideService.getOverrides("host", "page")).thenReturn(overrides);
+    when(mediaOverrideService.getOverrides("site", "page")).thenReturn(overrides);
 
-    RenderContext renderContext = new RenderContext("host", "site", "page", "user");
+    RenderContext renderContext = new RenderContext("site", "page", "user");
     assertEquals(
         "<img src=\"/_media/ns2:img5.jpg\" class=\"mediaright\" title=\" alternate text\" loading=\"lazy\">",
         renderer.renderHtml(imageNode, renderContext).toString());

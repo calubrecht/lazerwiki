@@ -90,8 +90,7 @@ public class RenderServiceTest {
   @Test
   public void test_renderError() {
     PageData pd = new PageData(null, "This is raw page text", null, null, PageData.ALL_RIGHTS);
-    when(renderer.renderToString(
-            eq("This is raw page text"), eq("host1"), eq("default"), anyString(), anyString()))
+    when(renderer.renderWithInfo(eq("This is raw page text"), any(RenderContext.class)))
         .thenThrow(new NullPointerException());
     when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
     when(siteService.getSiteForHostname(any())).thenReturn("default");
@@ -190,7 +189,7 @@ public class RenderServiceTest {
   @Test
   public void test_previewPage() {
     when(siteService.getSiteForHostname(any())).thenReturn("default");
-    RenderContext context = new RenderContext("localhost", "default", "thisPage<preview>", "Bob");
+    RenderContext context = new RenderContext("default", "thisPage<preview>", "Bob");
     context.renderState().put("ID_SUFFIX", "_previewPage");
     when(renderer.renderToString("goodSource", context)).thenReturn("This rendered");
     assertEquals(
@@ -220,7 +219,7 @@ public class RenderServiceTest {
     cached.useCache = true;
     cached.renderedCache = "This is from rendered Cache";
     cached.source = "Cached source";
-    when(pageService.getCachedPage("host1", "ns:realPage")).thenReturn(cached);
+    when(pageService.getCachedPage("default", "ns:realPage")).thenReturn(cached);
 
     assertEquals(
         new PageData(
@@ -239,7 +238,7 @@ public class RenderServiceTest {
     PageCache ignoreCache = new PageCache();
     ignoreCache.useCache = false;
     ignoreCache.renderedCache = "This is from rendered Cache";
-    when(pageService.getCachedPage("host1", "ns:realPage2")).thenReturn(ignoreCache);
+    when(pageService.getCachedPage("default", "ns:realPage2")).thenReturn(ignoreCache);
     when(pageService.adjustSource(anyString(), any())).thenReturn("adjusted Text");
 
     assertEquals(
@@ -261,7 +260,7 @@ public class RenderServiceTest {
   @Test
   public void test_getHistoricalRenderedPage() {
     PageData pd = new PageData(null, "This is raw page text", null, null, PageData.ALL_RIGHTS);
-    RenderContext context = new RenderContext("host1", "default", "ns:realPage", "Bob");
+    RenderContext context = new RenderContext("default", "ns:realPage", "Bob");
     context.renderState().put("ID_SUFFIX", "_historyView");
     when(renderer.renderWithInfo(eq("This is raw page text"), eq(context)))
         .thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
@@ -312,7 +311,7 @@ public class RenderServiceTest {
     PageData badRender = new PageData(null, "BAD", null, null, PageData.ALL_RIGHTS);
     when(pageService.getHistoricalPageData(any(), eq("badRender"), anyLong(), any()))
         .thenReturn(badRender);
-    context = new RenderContext("host1", "default", "badRender", "Bob");
+    context = new RenderContext("default", "badRender", "Bob");
     context.renderState().put("ID_SUFFIX", "_historyView");
     when(renderer.renderWithInfo(eq("BAD"), eq(context))).thenThrow(new RuntimeException("OUTCH"));
     assertEquals(
@@ -332,12 +331,7 @@ public class RenderServiceTest {
   public void test_renderMoved() {
     PageData.PageFlags flags = new PageData.PageFlags(false, true, true, false, false, true);
     PageData pd = new PageData(null, "This is raw page text", null, null, null, flags, 1L);
-    when(renderer.renderWithInfo(
-            eq("This is raw page text"),
-            eq("host1"),
-            eq("default"),
-            eq("ns:realPage"),
-            anyString()))
+    when(renderer.renderWithInfo(eq("This is raw page text"), any(RenderContext.class)))
         .thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
     when(pageService.getPageData(any(), eq("ns:realPage"), any())).thenReturn(pd);
     when(siteService.getSiteForHostname(any())).thenReturn("default");

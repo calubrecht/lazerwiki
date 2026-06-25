@@ -231,7 +231,7 @@ class RegenCacheServiceTest {
         new LinkOverride("default", "", "page3", "", "oldlinkedPage", "", "linkedPage");
 
     when(linkService.getBacklinks(any(), any())).thenReturn(List.of("page1", "page2"));
-    when(linkOverrideService.getOverridesForNewTargetPage("host", "linkedPage"))
+    when(linkOverrideService.getOverridesForNewTargetPage("default", "linkedPage"))
         .thenReturn(List.of(lo));
     when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
             any(), any(), eq("page1"), eq(false)))
@@ -284,7 +284,7 @@ class RegenCacheServiceTest {
         new LinkOverride("default", "", "page3", "", "oldlinkedPage", "", "linkedPage");
 
     when(linkService.getBacklinks(any(), any())).thenReturn(List.of("page1", "page2"));
-    when(linkOverrideService.getOverridesForNewTargetPage("host", "linkedPage"))
+    when(linkOverrideService.getOverridesForNewTargetPage("default", "linkedPage"))
         .thenReturn(List.of(lo));
     when(pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
             any(), any(), eq("page1"), eq(false)))
@@ -398,7 +398,7 @@ class RegenCacheServiceTest {
     when(imageRefService.getRefsForImage("default", "ns1:img1.jpg")).thenReturn(irs);
     List<MediaOverride> overrides =
         List.of(new MediaOverride("default", "ns1", "page33", "", "img1.jpg", "ns2", "img2.jpg"));
-    when(mediaOverrideService.getOverridesForImage("host", "ns2:img2.jpg")).thenReturn(overrides);
+    when(mediaOverrideService.getOverridesForImage("default", "ns2:img2.jpg")).thenReturn(overrides);
     Page page2 = new Page();
     page2.setPagename("page2");
     page2.setText("text2");
@@ -449,7 +449,7 @@ class RegenCacheServiceTest {
     when(imageRefService.getRefsForImage("default", "ns1:img1.jpg")).thenReturn(irs);
     List<MediaOverride> overrides =
         List.of(new MediaOverride("default", "ns1", "page33", "", "img1.jpg", "ns2", "img2.jpg"));
-    when(mediaOverrideService.getOverridesForImage("host", "ns2:img2.jpg")).thenReturn(overrides);
+    when(mediaOverrideService.getOverridesForImage("default", "ns2:img2.jpg")).thenReturn(overrides);
     Page page2 = new Page();
     page2.setPagename("page2");
     page2.setText("text2");

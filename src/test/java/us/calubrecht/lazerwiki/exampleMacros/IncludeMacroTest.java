@@ -50,7 +50,7 @@ class IncludeMacroTest {
   @Test
   public void test_includeMacro() {
     RenderContext renderContext =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
     PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
     assertEquals(
@@ -80,7 +80,6 @@ class IncludeMacroTest {
 
     RenderContext plaintextContext =
         new RenderContext(
-            "localhost",
             "default",
             "page",
             "user",
@@ -92,7 +91,7 @@ class IncludeMacroTest {
   @Test
   public void test_includeMacroForCache() {
     RenderContext renderContext =
-        new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+        new RenderContext("default", "page", "user", renderer, new HashMap<>());
     renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);

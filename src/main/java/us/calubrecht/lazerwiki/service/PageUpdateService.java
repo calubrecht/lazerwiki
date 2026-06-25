@@ -97,7 +97,7 @@ public class PageUpdateService {
     pageRepository.save(newP);
     activityLogService.log(action, site, user, sPageDescriptor);
     pageLockService.releaseAnyPageLock(host, sPageDescriptor);
-    pageMetaService.updateMetaData(host, site, pageDescriptor, p, links, images);
+    pageMetaService.updateMetaData(site, pageDescriptor, p, links, images);
   }
 
   protected long getNewId() {
@@ -141,7 +141,7 @@ public class PageUpdateService {
     newP.setDeleted(true);
     pageRepository.save(newP);
     activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, site, user, sPageDescriptor);
-    pageMetaService.deleteMetaData(host, site, pageDescriptor);
+    pageMetaService.deleteMetaData(site, pageDescriptor);
   }
 
   @Transactional
@@ -176,7 +176,7 @@ public class PageUpdateService {
       return new MoveStatus(false, "Could not acquire page locks to move page");
     }
     Pair<List<String>, List<String>> linksAndImages =
-        pageMetaService.moveMetaData(host, site, oldPageDescriptor, newPageDescriptor);
+        pageMetaService.moveMetaData(site, oldPageDescriptor, newPageDescriptor);
     Page oldPage = pageRepository.getBySiteAndNamespaceAndPagename(site, oldPageNS, oldPageName);
     List<String> links = linksAndImages.getLeft();
     List<String> images = linksAndImages.getRight();

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +22,9 @@ class MediaOverrideServiceTest {
 
   @Autowired MediaOverrideService underTest;
 
-  @MockitoBean SiteService siteService;
-
   @MockitoBean MediaOverrideRepository repo;
 
   @MockitoBean ImageRefRepository imageRefRepository;
-
-  @BeforeEach
-  void init() {
-    when(siteService.getSiteForHostname("localhost")).thenReturn("default");
-  }
 
   @Test
   void test_getOverrides() {
@@ -41,7 +33,7 @@ class MediaOverrideServiceTest {
     when(repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById("default", "ns1", "page1"))
         .thenReturn(List.of(override));
 
-    List<MediaOverride> overrides = underTest.getOverrides("localhost", "ns1:page1");
+    List<MediaOverride> overrides = underTest.getOverrides("default", "ns1:page1");
     assertEquals(1, overrides.size());
   }
 
@@ -52,7 +44,7 @@ class MediaOverrideServiceTest {
     when(repo.findAllBySiteAndNewTargetFileNSAndNewTargetFileName("default", "ns1", "img1.jpg"))
         .thenReturn(List.of(override));
 
-    List<MediaOverride> overrides = underTest.getOverridesForImage("localhost", "ns1:img1.jpg");
+    List<MediaOverride> overrides = underTest.getOverridesForImage("default", "ns1:img1.jpg");
     assertEquals(1, overrides.size());
   }
 
@@ -67,7 +59,7 @@ class MediaOverrideServiceTest {
         .thenReturn(existingOverrides);
     when(imageRefRepository.findAllBySiteAndImageNSAndImageRef("default", "ns1", "img1.jpg"))
         .thenReturn(links);
-    underTest.createOverride("localhost", "ns1", "img1.jpg", "ns2", "img2.jpg");
+    underTest.createOverride("default", "ns1", "img1.jpg", "ns2", "img2.jpg");
 
     verify(repo).deleteBySiteAndNewTargetFileNSAndNewTargetFileName("default", "ns1", "img1.jpg");
     ArgumentCaptor<List<MediaOverride>> overrides = ArgumentCaptor.forClass(List.class);
@@ -86,7 +78,7 @@ class MediaOverrideServiceTest {
         List.of(new MediaOverride("default", "ns1", "page1", "ns", "img.jpg", "ns1", "img1.jpg"));
     when(repo.findAllBySiteAndSourcePageNSAndSourcePageNameOrderById("default", "ns1", "page1"))
         .thenReturn(existingOverrides);
-    underTest.moveOverrides("localhost", "ns1:page1", "ns2:page2");
+    underTest.moveOverrides("default", "ns1:page1", "ns2:page2");
 
     verify(repo).deleteBySiteAndSourcePageNSAndSourcePageName("default", "ns1", "page1");
     List<MediaOverride> newOverrides =
@@ -96,7 +88,7 @@ class MediaOverrideServiceTest {
 
   @Test
   void test_deleteOverrides() {
-    underTest.deleteOverrides("localhost", "ns1:page1");
+    underTest.deleteOverrides("default", "ns1:page1");
 
     verify(repo).deleteBySiteAndSourcePageNSAndSourcePageName("default", "ns1", "page1");
   }

@@ -31,7 +31,7 @@ public class DokuWikiRendererTest {
 
   @Configuration
   @ComponentScan({"us.calubrecht.lazerwiki.syntax"})
-  public static class TestConfig {}
+  public static class TestConfig {} 
 
   @MockitoBean PageService pageService;
 
@@ -46,7 +46,7 @@ public class DokuWikiRendererTest {
   @MockitoBean TOCRenderService tocRenderService;
 
   String doRender(String source) {
-    return underTest.renderToString(source, "localhost", "default", "page", "");
+    return underTest.renderToString(source, "default", "page", "");
   }
 
   @Test
@@ -108,7 +108,7 @@ public class DokuWikiRendererTest {
 
   @Test
   void test_renderLink() {
-    when(pageService.exists(eq("localhost"), eq("exists"))).thenReturn(true);
+    when(pageService.exists(eq("default"), eq("exists"))).thenReturn(true);
     assertEquals(
         "<div><a class=\"wikiLinkMissing\" href=\"/page/missing\">This link is missing</a></div>",
         doRender("[[missing|This link is missing]]"));
@@ -116,8 +116,8 @@ public class DokuWikiRendererTest {
         "<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>",
         doRender("[[exists|This link exists]]"));
 
-    when(pageService.getTitle(eq("localhost"), eq("exists"))).thenReturn("This Page Exists");
-    when(pageService.getTitle(eq("localhost"), eq("someNamespace:missing"))).thenReturn("missing");
+    when(pageService.getTitle(eq("default"), eq("exists"))).thenReturn("This Page Exists");
+    when(pageService.getTitle(eq("default"), eq("someNamespace:missing"))).thenReturn("missing");
     // Without link description
     assertEquals(
         "<div><a class=\"wikiLinkMissing\" href=\"/page/someNamespace:missing\">missing</a></div>",
@@ -166,8 +166,8 @@ public class DokuWikiRendererTest {
 
   @Test
   public void test_renderLinkToHome() {
-    when(pageService.getTitle(eq("localhost"), eq(""))).thenReturn("Home");
-    when(pageService.exists(eq("localhost"), eq(""))).thenReturn(true);
+    when(pageService.getTitle(eq("default"), eq(""))).thenReturn("Home");
+    when(pageService.exists(eq("default"), eq(""))).thenReturn(true);
     assertEquals("<div><a class=\"wikiLink\" href=\"/\">Home</a></div>", doRender("[[]]"));
     assertEquals(
         "<div><a class=\"wikiLink\" href=\"/\">Name of Home</a></div>",
@@ -176,10 +176,10 @@ public class DokuWikiRendererTest {
 
   @Test
   public void test_renderLinkOtherSite() {
-    when(pageService.exists(eq("otherHost"), eq("exists"))).thenReturn(true);
+    when(pageService.exists(eq("default"), eq("exists"))).thenReturn(true);
     assertEquals(
         "<div><a class=\"wikiLink\" href=\"/page/exists\">This link exists</a></div>",
-        underTest.renderToString("[[exists|This link exists]]", "otherHost", "default", "", ""));
+        underTest.renderToString("[[exists|This link exists]]", "default", "", ""));
   }
 
   @Test
@@ -188,7 +188,6 @@ public class DokuWikiRendererTest {
     RenderResult result =
         underTest.renderWithInfo(
             "[[oneLink]]\n[[oneLinkWithText|The text]] [[http://external.link]] \n[[ns:ThirdLink]]",
-            "host",
             "site",
             "page",
             "user");
@@ -201,15 +200,15 @@ public class DokuWikiRendererTest {
   public void test_renderLinkWithOverrides() {
     when(pageService.getTitle(anyString(), eq("new"))).thenReturn("new");
     when(pageService.getTitle(anyString(), eq("ns2:wns2"))).thenReturn("with ns");
-    when(pageService.exists(eq("otherHost"), eq("new"))).thenReturn(true);
-    when(pageService.exists(eq("otherHost"), eq("ns2:wns2"))).thenReturn(true);
+    when(pageService.exists(eq("default"), eq("new"))).thenReturn(true);
+    when(pageService.exists(eq("default"), eq("ns2:wns2"))).thenReturn(true);
     List<LinkOverride> overrides =
         List.of(
             new LinkOverride("default", "", "source", "", "overridden", "", "old"),
             new LinkOverride("default", "", "source", "", "overridden", "", "new"),
             new LinkOverride("default", "", "source", "ns1", "wns", "ns2", "wns2"));
     when(linkOverrideService.getOverrides(anyString(), anyString())).thenReturn(overrides);
-    RenderContext context = new RenderContext("otherHost", "default", "page", "");
+    RenderContext context = new RenderContext("default", "page", "");
     String source = "[[overridden]] [[ns1:wns|wtitle]]";
     assertEquals(
         "<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>",
@@ -226,7 +225,7 @@ public class DokuWikiRendererTest {
     assertEquals("[[new]] [[ns2:wns2|wtitle]]", fixedSource);
 
     // Try w/ multiline doc
-    context = new RenderContext("otherHost", "default", "page", "");
+    context = new RenderContext("default", "page", "");
     String source2 = "AnotherParagraph\n\n[[overridden]] [[ns1:wns|wtitle]]";
     assertEquals(
         "<div>AnotherParagraph</div>\n<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>",
@@ -249,7 +248,7 @@ public class DokuWikiRendererTest {
   public void test_renderLinkeSanitize() {
     String maliciousText = "[[ns:page|<script>someScript</script>]]";
     RenderResult renderRes =
-        underTest.renderWithInfo(maliciousText, "host", "site", "page", "user");
+        underTest.renderWithInfo(maliciousText, "site", "page", "user");
     assertEquals(
         "<div><a class=\"wikiLinkMissing\" href=\"/page/ns:page\">&lt;script&gt;someScript&lt;/script&gt;</a></div>",
         renderRes.renderedText());
@@ -260,7 +259,7 @@ public class DokuWikiRendererTest {
         parseErrors.get(0));
 
     String maliciousHref = "[[ page\" onerror=\"alert(1)\"| text}}";
-    renderRes = underTest.renderWithInfo(maliciousHref, "host", "site", "page", "user");
+    renderRes = underTest.renderWithInfo(maliciousHref, "site", "page", "user");
     assertEquals(
         "<div>[[ page\" onerror=\"alert(1)\"| text}}</div>",
         renderRes.renderedText()); // Fails at parsing level, outputs safe html
@@ -269,12 +268,12 @@ public class DokuWikiRendererTest {
     LinkNode badNode = new LinkNode("page\" onerror=\"alert(1)\"");
     badNode.setParseContext(new ParseContext("[[page\" onerror=\"alert(1)\"]]"));
     badNode.setPosition(0, 10);
-    RenderContext renderContext = new RenderContext("host", "site", "page", "user");
+    RenderContext renderContext = new RenderContext("site", "page", "user");
     String html = linkRenderer.renderHtml(badNode, renderContext).toString();
     assertEquals("<a class=\"wikiLinkMissing\" href=\"/page/none:invalidPage\">null</a>", html);
 
     String maliciousProtocol = "[[javascript:ortext| text]]";
-    renderRes = underTest.renderWithInfo(maliciousProtocol, "host", "site", "page", "user");
+    renderRes = underTest.renderWithInfo(maliciousProtocol, "site", "page", "user");
     assertEquals(
         "<div><a class=\"wikiLinkMissing\" href=\"/page/javascript:ortext\"> text</a></div>",
         renderRes.renderedText());
@@ -294,7 +293,7 @@ public class DokuWikiRendererTest {
     String sourcetoSanitize =
         "This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>";
     RenderResult renderRes =
-        underTest.renderWithInfo(sourcetoSanitize, "host", "site", "page", "user");
+        underTest.renderWithInfo(sourcetoSanitize, "site", "page", "user");
     assertEquals(
         "<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>",
         renderRes.renderedText());
@@ -559,12 +558,12 @@ public class DokuWikiRendererTest {
   @Test
   public void test_renderImageRecordsRefs() {
     String imageInput = "{{image.jpg}}";
-    RenderResult renderRes = underTest.renderWithInfo(imageInput, "host", "site", "page", "user");
+    RenderResult renderRes = underTest.renderWithInfo(imageInput, "site", "page", "user");
     assertEquals(
         Set.of("image.jpg"),
         renderRes.renderState().get(RenderResult.RenderStateKeys.IMAGES.name()));
     String linkOnlyInput = "{{image.jpg?linkonly}}";
-    renderRes = underTest.renderWithInfo(linkOnlyInput, "host", "site", "page", "user");
+    renderRes = underTest.renderWithInfo(linkOnlyInput, "site", "page", "user");
     assertEquals(
         Set.of("image.jpg"),
         renderRes.renderState().get(RenderResult.RenderStateKeys.IMAGES.name()));
@@ -574,7 +573,7 @@ public class DokuWikiRendererTest {
   public void test_renderImageSanitize() {
     String maliciousTitle = "Check {{file.jpg|\" onerror=\"alert(1)\"}}";
     RenderResult renderRes =
-        underTest.renderWithInfo(maliciousTitle, "host", "site", "page", "user");
+        underTest.renderWithInfo(maliciousTitle, "site", "page", "user");
     assertEquals(
         "<div>Check <img src=\"/_media/file.jpg\" class=\"media\" title=\"&quot; onerror=&quot;alert(1)&quot;\" loading=\"lazy\"></div>",
         renderRes.renderedText());
@@ -584,7 +583,7 @@ public class DokuWikiRendererTest {
         "Suspicious img tag title at 6. Raw text =[\" onerror=\"alert(1)\"]", parseErrors.get(0));
 
     String maliciousSource = "Check {{\" onerror=\"alert(1)\"| text}}";
-    renderRes = underTest.renderWithInfo(maliciousSource, "host", "site", "page", "user");
+    renderRes = underTest.renderWithInfo(maliciousSource, "site", "page", "user");
     assertEquals(
         "<div>Check <img src=\"/_media/invalidSource.none\" class=\"media\" title=\"text\" loading=\"lazy\"></div>",
         renderRes.renderedText());
@@ -594,7 +593,7 @@ public class DokuWikiRendererTest {
         "Suspicious img tag src at 6. Raw text =[\" onerror=\"alert(1)\"]", parseErrors.get(0));
 
     String maliciousProtocol = "{{javascript:ortext| text}}";
-    renderRes = underTest.renderWithInfo(maliciousProtocol, "host", "site", "page", "user");
+    renderRes = underTest.renderWithInfo(maliciousProtocol, "site", "page", "user");
     assertEquals(
         "<div><img src=\"/_media/javascript:ortext\" class=\"media\" title=\"text\" loading=\"lazy\"></div>",
         renderRes.renderedText());
@@ -737,22 +736,22 @@ public class DokuWikiRendererTest {
   @Test
   public void test_renderTitles() {
     String input1 = "=== Here's a title===\n";
-    RenderResult result = underTest.renderWithInfo(input1, "host", "site", "page", "");
+    RenderResult result = underTest.renderWithInfo(input1, "site", "page", "");
     assertEquals("Here's a title", result.getTitle());
     String input2 = "==== A title [[WithSomeLink|With Some Link]] ====\n";
-    result = underTest.renderWithInfo(input2, "host", "site", "page", "");
+    result = underTest.renderWithInfo(input2, "site", "page", "");
     assertEquals("A title With Some Link", result.getTitle());
 
     String input3 = "Title may not be on first line\n== But you'll find it==\n";
-    result = underTest.renderWithInfo(input3, "host", "site", "page", "");
+    result = underTest.renderWithInfo(input3, "site", "page", "");
     assertEquals("But you'll find it", result.getTitle());
 
     String input4 = "This has no title\n";
-    result = underTest.renderWithInfo(input4, "host", "site", "page", "");
+    result = underTest.renderWithInfo(input4, "site", "page", "");
     assertNull(result.getTitle());
 
     String input5 = "=== This is the title===\n==== This is just another header ====\n";
-    result = underTest.renderWithInfo(input5, "host", "site", "page", "");
+    result = underTest.renderWithInfo(input5, "site", "page", "");
     assertEquals("This is the title", result.getTitle());
   }
 
@@ -762,7 +761,7 @@ public class DokuWikiRendererTest {
     String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
     when(macroService.renderMacro(eq("macro1: macro"), anyString(), any()))
         .thenReturn("<div>MACRO- Unknown Macro macro1</div>");
-    String render = underTest.renderToString(inputMacro, "", "", "page", "");
+    String render = underTest.renderToString(inputMacro, "", "page", "");
     assertEquals("<div>MACRO- Unknown Macro macro1</div>", render);
 
     when(macroService.renderMacro(Mockito.startsWith("macro1: Start1"), anyString(), any()))
@@ -774,7 +773,7 @@ public class DokuWikiRendererTest {
     // macroService
     String nestedMacro =
         "~~MACRO~~macro1: Start1 ~~MACRO~~macro2: Start2 ~~/MACRO~~ End1 ~~/MACRO~~ Outside";
-    render = underTest.renderToString(nestedMacro, "", "", "page", "");
+    render = underTest.renderToString(nestedMacro, "", "page", "");
     assertEquals("<div>Inside Macro 1</div><div> Outside</div>", render);
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(macroService, times(2)).renderMacro(captor.capture(), anyString(), any());
@@ -784,7 +783,7 @@ public class DokuWikiRendererTest {
 
     String sideBySideMacro =
         "~~MACRO~~macro1: Start1 ~~/MACRO~~~~MACRO~~macro2: Start2 ~~/MACRO~~ Outside";
-    render = underTest.renderToString(sideBySideMacro, "", "", "page", "");
+    render = underTest.renderToString(sideBySideMacro, "", "page", "");
     assertEquals("<div>Inside Macro 1</div><div>Inside Macro 2</div><div> Outside</div>", render);
     captor = ArgumentCaptor.forClass(String.class);
     verify(macroService, times(4)).renderMacro(captor.capture(), anyString(), any());
@@ -800,7 +799,7 @@ public class DokuWikiRendererTest {
     ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
     when(macroService.renderMacro(textCaptor.capture(), anyString(), any()))
         .thenReturn("<div>MACRO- Unknown Macro macro1</div>");
-    String render = underTest.renderToString(inputMacro, "", "", "page", "");
+    String render = underTest.renderToString(inputMacro, "", "page", "");
     assertEquals("<div>MACRO- Unknown Macro macro1</div>", render);
 
     assertEquals("macro1: macro  \n\n This is line", textCaptor.getValue());
@@ -813,7 +812,7 @@ public class DokuWikiRendererTest {
     ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
     when(macroService.renderMacro(textCaptor.capture(), anyString(), any()))
         .thenReturn("<div>MACRO- Unknown Macro macro1</div>");
-    String render = underTest.renderToString(inputMacro, "", "", "page", "");
+    String render = underTest.renderToString(inputMacro, "", "page", "");
     assertEquals(
         """
                 <div>~~MACRO~~macro1: macro  </div>
@@ -839,7 +838,7 @@ public class DokuWikiRendererTest {
 
   @Test
   public void test_renderWithContext() {
-    RenderContext context = new RenderContext("site", "localhost", "page", "user");
+    RenderContext context = new RenderContext("localhost", "page", "user");
     context.renderState().put("rememberedState", "State");
     RenderResult res = underTest.renderWithInfo("===Some Header===", context);
     assertEquals("Some Header", res.renderState().get(RenderResult.RenderStateKeys.TITLE.name()));
@@ -870,7 +869,7 @@ public class DokuWikiRendererTest {
         "<table class=\"lazerTable\"><tbody><tr><td><img src=\"/_media/img.jpg\" class=\"media\" loading=\"lazy\"><br> Some text after</td></tr>\n</tbody></table>",
         doRender(tableWithImg));
     String tableWithLink = "|[[LinkToSomePage]] \\\\ Some text after|";
-    when(pageService.getTitle(eq("localhost"), eq("LinkToSomePage"))).thenReturn("LinkToSomePage");
+    when(pageService.getTitle(eq("default"), eq("LinkToSomePage"))).thenReturn("LinkToSomePage");
     assertEquals(
         "<table class=\"lazerTable\"><tbody><tr><td><a class=\"wikiLinkMissing\" href=\"/page/LinkToSomePage\">LinkToSomePage</a><br> Some text after</td></tr>\n"
             + "</tbody></table>",
@@ -1059,7 +1058,7 @@ public class DokuWikiRendererTest {
         doRender(namedHidden));
     String maliciousName = "<hidden name=\"<script>runsomething</script>\">Hidden</hidden>";
     RenderResult renderRes =
-        underTest.renderWithInfo(maliciousName, "host", "site", "page", "user");
+        underTest.renderWithInfo(maliciousName, "site", "page", "user");
     assertEquals(
         "<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\" data-named=\"true\">&lt;script&gt;runsomething&lt;/script&gt;</label><div class=\"collapsible\">Hidden</div></div>",
         renderRes.renderedText());
@@ -1070,7 +1069,7 @@ public class DokuWikiRendererTest {
         parseErrors.get(0));
 
     String unknownAttr = "<hidden fling=\"Bark\">Something in  here</hidden>";
-    renderRes = underTest.renderWithInfo(unknownAttr, "host", "site", "page", "user");
+    renderRes = underTest.renderWithInfo(unknownAttr, "site", "page", "user");
     assertEquals(
         "<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">Something in  here</div></div>",
         renderRes.renderedText());

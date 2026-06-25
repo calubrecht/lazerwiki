@@ -61,7 +61,7 @@ public class LinkRenderer extends ContainerRenderer {
         linkTarget.isBlank() ? "/" : (isInternal(linkTarget) ? "/page/" + linkTarget : linkTarget);
     buffer
         .append("<a class=\"")
-        .append(getCssClass(linkTarget, renderContext.host()))
+        .append(getCssClass(linkTarget, renderContext.site()))
         .append("\" href=\"")
         .append(linkURL)
         .append("\">");
@@ -79,7 +79,7 @@ public class LinkRenderer extends ContainerRenderer {
     }
     linkTarget = doOverrides(linkTarget, link, renderContext, false);
     if (isInternal(linkTarget)) {
-      return new StringBuilder(pageService.getTitle(renderContext.host(), linkTarget));
+      return new StringBuilder(pageService.getTitle(renderContext.site(), linkTarget));
     }
     return new StringBuilder(linkTarget);
   }
@@ -108,7 +108,7 @@ public class LinkRenderer extends ContainerRenderer {
       return super.renderHtml(node, renderContext);
     }
     if (isInternal(linkTarget)) {
-      return pageService.getTitle(renderContext.host(), linkTarget);
+      return pageService.getTitle(renderContext.site(), linkTarget);
     }
     return linkTarget;
   }
@@ -117,9 +117,9 @@ public class LinkRenderer extends ContainerRenderer {
     return target.contains("<script>");
   }
 
-  protected String getCssClass(String targetName, String host) {
+  protected String getCssClass(String targetName, String site) {
     if (isInternal(targetName)) {
-      boolean exists = pageService.exists(host, targetName);
+      boolean exists = pageService.exists(site, targetName);
       return exists ? LINK_CLASS : MISSING_LINK_CLASS;
     }
     return EXTERNAL_LINK_CLASS;
@@ -140,7 +140,7 @@ public class LinkRenderer extends ContainerRenderer {
         (Map<String, LinkOverride>) renderContext.renderState().get(LINK_OVERRIDES.name());
     if (overrides == null) {
       List<LinkOverride> overrideList =
-          linkOverrideService.getOverrides(renderContext.host(), renderContext.page());
+          linkOverrideService.getOverrides(renderContext.site(), renderContext.page());
       overrides =
           overrideList.stream()
               .collect(Collectors.toMap(LinkOverride::getTarget, Function.identity(), (a, b) -> b));

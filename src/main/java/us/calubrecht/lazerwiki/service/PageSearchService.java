@@ -21,8 +21,6 @@ public class PageSearchService {
 
   @Autowired PageRepository pageRepository;
 
-  @Autowired SiteService siteService;
-
   @Autowired NamespaceService namespaceService;
 
   @Autowired PageCacheRepository pageCacheRepository;
@@ -32,15 +30,14 @@ public class PageSearchService {
 
   @Transactional(readOnly = true)
   public Map<String, List<SearchResult>> searchPages(
-      String host, String userName, String searchTerm) {
+      String site, String userName, String searchTerm) {
     String[] searchValues = searchTerm.split(":");
-    return searchPages(host, userName, Map.of(searchValues[0], searchValues[1]));
+    return searchPages(site, userName, Map.of(searchValues[0], searchValues[1]));
   }
 
   @Transactional(readOnly = true)
   public Map<String, List<SearchResult>> searchPages(
-      String host, String userName, Map<String, String> searchTerms) {
-    String site = siteService.getSiteForHostname(host);
+      String site, String userName, Map<String, String> searchTerms) {
     if (searchTerms.containsKey("tag")) {
       String tagName = searchTerms.get("tag");
       List<SearchResult> tagPages =

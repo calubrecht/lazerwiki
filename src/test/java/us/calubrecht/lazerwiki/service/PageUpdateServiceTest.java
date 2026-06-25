@@ -72,7 +72,6 @@ public class PageUpdateServiceTest {
     verify(pageRepository).save(pageCaptor.capture());
     verify(pageMetaService)
         .updateMetaData(
-            eq("host1"),
             eq("site1"),
             eq(pd),
             isNull(),
@@ -121,7 +120,6 @@ public class PageUpdateServiceTest {
     verify(pageRepository, times(2)).save(pageCaptor.capture());
     verify(pageMetaService)
         .updateMetaData(
-            eq("host1"),
             eq("site1"),
             eq(PageDescriptor.fromFullName("ns:realPage")),
             any(Page.class),
@@ -177,7 +175,6 @@ public class PageUpdateServiceTest {
     ArgumentCaptor<Page> metaPageCaptor = ArgumentCaptor.forClass(Page.class);
     verify(pageMetaService)
         .updateMetaData(
-            eq("host1"),
             eq("site1"),
             eq(PageDescriptor.fromFullName("deletedPage")),
             metaPageCaptor.capture(),
@@ -239,7 +236,6 @@ public class PageUpdateServiceTest {
     verify(pageMetaService)
         .updateMetaData(
             anyString(),
-            anyString(),
             any(),
             any(),
             linksCaptor.capture(),
@@ -269,7 +265,7 @@ public class PageUpdateServiceTest {
 
     ArgumentCaptor<List<String>> imageCaptor = ArgumentCaptor.forClass(List.class);
     verify(pageMetaService)
-        .updateMetaData(anyString(), anyString(), any(), any(), any(), imageCaptor.capture());
+        .updateMetaData(anyString(), any(), any(), any(), imageCaptor.capture());
     assertEquals(List.of("image1.jpg", "image2.jpg"), imageCaptor.getValue());
   }
 
@@ -340,15 +336,15 @@ public class PageUpdateServiceTest {
         PageWriteException.class, () -> pageUpdateService.deletePage("localhost", "", "bob"));
 
     verify(pageMetaService, never())
-        .deleteMetaData(anyString(), anyString(), any(PageDescriptor.class));
+        .deleteMetaData(anyString(), any(PageDescriptor.class));
 
     pageUpdateService.deletePage("localhost", "unknownPage", "bob");
     verify(pageMetaService, never())
-        .deleteMetaData(anyString(), anyString(), any(PageDescriptor.class));
+        .deleteMetaData(anyString(), any(PageDescriptor.class));
 
     pageUpdateService.deletePage("localhost", "testPage", "bob");
     verify(pageMetaService)
-        .deleteMetaData(anyString(), eq("default"), eq(PageDescriptor.fromFullName(("testPage"))));
+        .deleteMetaData(eq("default"), eq(PageDescriptor.fromFullName(("testPage"))));
     ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
     verify(pageRepository, times(2)).save(captor.capture());
     verify(activityLogService)
@@ -391,7 +387,7 @@ public class PageUpdateServiceTest {
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("site1"), any(), any())).thenReturn(true);
-    when(pageMetaService.moveMetaData(anyString(), anyString(), anyString(), anyString()))
+    when(pageMetaService.moveMetaData(anyString(), anyString(), anyString()))
         .thenReturn(Pair.of(Collections.emptyList(), Collections.emptyList()));
 
     PageLockResponse lockSuccess = new PageLockResponse("", "", null, "", null, true, "");
@@ -413,7 +409,7 @@ public class PageUpdateServiceTest {
 
     pageUpdateService.movePage("host1", "someUser", "ns1", "page1", "ns2", "page2");
 
-    verify(pageMetaService).moveMetaData("host1", "site1", "ns1:page1", "ns2:page2");
+    verify(pageMetaService).moveMetaData("site1", "ns1:page1", "ns2:page2");
 
     ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
     verify(pageRepository, times(3)).save(captor.capture());

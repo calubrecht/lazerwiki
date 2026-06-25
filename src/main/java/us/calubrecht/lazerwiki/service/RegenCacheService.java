@@ -29,8 +29,6 @@ public class RegenCacheService {
 
   @Autowired PageCacheRepository pageCacheRepository;
 
-  @Autowired SiteService siteService;
-
   @SuppressWarnings("unchecked")
   @Transactional
   public void regenLinks(String site) {
@@ -51,7 +49,7 @@ public class RegenCacheService {
                     siteKey, pd.getNamespace(), pd.getPagename(), false);
             PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
             RenderContext renderContext =
-                new RenderContext("", siteKey, desc.toString(), UserService.SYS_USER);
+                new RenderContext(siteKey, desc.toString(), UserService.SYS_USER);
             renderContext
                 .renderState()
                 .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
@@ -100,8 +98,7 @@ public class RegenCacheService {
     perfTracker.startTimer("All");
     perfTracker.startTimer("Fetch Page List");
     String siteKey = site.toLowerCase();
-    String host = siteService.getHostForSitename(siteKey);
-    logger.info("Regening cache table for {} {}", siteKey, host);
+    logger.info("Regening cache table for {}", siteKey);
     pageCacheRepository.deleteBySite(siteKey);
     List<PageDesc> pages = pageRepository.getAllValid(siteKey);
     perfTracker.stopTimer("Fetch Page List");
@@ -115,7 +112,7 @@ public class RegenCacheService {
                     siteKey, pd.getNamespace(), pd.getPagename(), false);
             PageDescriptor desc = new PageDescriptor(pd.getNamespace(), pd.getPagename());
             RenderContext renderContext =
-                new RenderContext(host, siteKey, desc.toString(), UserService.SYS_USER);
+                new RenderContext(siteKey, desc.toString(), UserService.SYS_USER);
             renderContext
                 .renderState()
                 .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
@@ -157,11 +154,10 @@ public class RegenCacheService {
   }
 
   public void regenCachesForBacklinks(String site, String linkedPage) {
-    String host = siteService.getHostForSitename(site);
     logger.info("Regenning cache for links to {}-{}", site, linkedPage);
     List<String> backlinks = linkService.getBacklinks(site, linkedPage);
     List<String> overrideBacklinks =
-        linkOverrideService.getOverridesForNewTargetPage(host, linkedPage).stream()
+        linkOverrideService.getOverridesForNewTargetPage(site, linkedPage).stream()
             .map(LinkOverride::getSource)
             .toList();
     List<String> allLinks = new ArrayList<>();
@@ -178,7 +174,7 @@ public class RegenCacheService {
                     pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
                         site, pd.namespace(), pd.pageName(), false);
                 RenderContext renderContext =
-                    new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
+                    new RenderContext(site, pd.toString(), UserService.SYS_USER);
                 renderContext
                     .renderState()
                     .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
@@ -214,11 +210,10 @@ public class RegenCacheService {
   }
 
   public void regenCachesForImageRefs(String site, String oldImageRef, String newImageRef) {
-    String host = siteService.getHostForSitename(site);
     logger.info("Regening cache for media links to {}-{}", site, oldImageRef);
     List<String> backlinks = imageRefService.getRefsForImage(site, oldImageRef);
     List<String> overrideBacklinks =
-        mediaOverrideService.getOverridesForImage(host, newImageRef).stream()
+        mediaOverrideService.getOverridesForImage(site, newImageRef).stream()
             .map(MediaOverride::getSource)
             .toList();
     List<String> allLinks = new ArrayList<>();
@@ -235,7 +230,7 @@ public class RegenCacheService {
                     pageRepository.getBySiteAndNamespaceAndPagenameAndDeleted(
                         site, pd.namespace(), pd.pageName(), false);
                 RenderContext renderContext =
-                    new RenderContext(host, site, pd.toString(), UserService.SYS_USER);
+                    new RenderContext(site, pd.toString(), UserService.SYS_USER);
                 renderContext
                     .renderState()
                     .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);

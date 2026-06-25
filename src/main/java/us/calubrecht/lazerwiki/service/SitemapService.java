@@ -20,9 +20,12 @@ public class SitemapService {
 
   @Autowired MediaService mediaService;
 
+  @Autowired SiteService siteService;
+
   public String getSitemap(URL url) throws MalformedURLException, ParseException {
     String sUrl = url.getProtocol() + "://" + url.getAuthority();
-    PageListResponse pageList = pageService.getAllPages(url.getHost(), null);
+    String site = siteService.getSiteForHostname(url.getHost());
+    PageListResponse pageList = pageService.getAllPages(site, null);
     WebSitemapGenerator wsg = new WebSitemapGenerator(url);
     for (String ns : pageList.pages().keySet().stream().sorted().toList()) {
       List<PageDesc> pages = pageList.pages().get(ns);

@@ -36,7 +36,7 @@ public class RenderService {
     perfTracker.startTimer("All");
     perfTracker.startTimer("FetchPage");
     String site = siteService.getSiteForHostname(host);
-    PageData d = pageService.getPageData(host, sPageDescriptor, userName);
+    PageData d = pageService.getPageData(site, sPageDescriptor, userName);
     d = d.addTracker(perfTracker);
     perfTracker.stopTimer("FetchPage");
     /*
@@ -48,7 +48,7 @@ public class RenderService {
     if (d.flags().moved()) {
       perfTracker.startTimer("Render");
       RenderResult rendered =
-          renderer.renderWithInfo(d.source(), host, site, sPageDescriptor, userName);
+          renderer.renderWithInfo(d.source(), new RenderContext(site, sPageDescriptor, userName));
       perfTracker.stopTimer("Render");
       return new PageData(
           rendered.renderedText(),
@@ -69,11 +69,11 @@ public class RenderService {
     sw.split();
     long queryMillis = (long) (sw.getSplitNanoTime() / 1e6);
     perfTracker.startTimer("GetCache");
-    PageCache cachedPage = pageService.getCachedPage(host, sPageDescriptor);
+    PageCache cachedPage = pageService.getCachedPage(site, sPageDescriptor);
     perfTracker.stopTimer("GetCache");
     if (cachedPage != null && cachedPage.useCache) {
       RenderContext macroRenderContext =
-          new RenderContext(host, site, sPageDescriptor, userName, renderer, new HashMap<>());
+          new RenderContext(site, sPageDescriptor, userName, renderer, new HashMap<>());
       perfTracker.startTimer("PostRender");
       String rendered = macroService.postRender(cachedPage.renderedCache, macroRenderContext);
       perfTracker.stopTimer("PostRender");
@@ -102,13 +102,13 @@ public class RenderService {
       return pd;
     }
     try {
-      RenderContext renderContext = new RenderContext(host, site, sPageDescriptor, userName);
+      RenderContext renderContext = new RenderContext(site, sPageDescriptor, userName);
       renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
       perfTracker.startTimer("Render");
       RenderResult cacheRender = renderer.renderWithInfo(d.source(), renderContext);
       perfTracker.stopTimer("Render");
       RenderContext macroRenderContext =
-          new RenderContext(host, site, sPageDescriptor, userName, renderer, new HashMap<>());
+          new RenderContext(site, sPageDescriptor, userName, renderer, new HashMap<>());
       perfTracker.startTimer("PostRender");
       String rendered = macroService.postRender(cacheRender.renderedText(), macroRenderContext);
       perfTracker.stopTimer("PostRender");
@@ -131,7 +131,7 @@ public class RenderService {
       sw.stop();
       long totalMillis = sw.getTime();
       perfTracker.startTimer("SaveCache");
-      pageService.saveCache(host, sPageDescriptor, d.source(), cacheRender);
+      pageService.saveCache(site, sPageDescriptor, d.source(), cacheRender);
       perfTracker.stopTimer("SaveCache");
       logger.info(
           "Render {} took ({},{},{})ms (Total,Query,Render)",
@@ -162,7 +162,7 @@ public class RenderService {
   public PageData getHistoricalRenderedPage(
       String host, String sPageDescriptor, long revision, String userName) {
     String site = siteService.getSiteForHostname(host);
-    PageData d = pageService.getHistoricalPageData(host, sPageDescriptor, revision, userName);
+    PageData d = pageService.getHistoricalPageData(site, sPageDescriptor, revision, userName);
     if (!d.flags().exists()) {
       return d;
     }
@@ -170,7 +170,7 @@ public class RenderService {
       return d;
     }
     try {
-      RenderContext context = new RenderContext(host, site, sPageDescriptor, userName);
+      RenderContext context = new RenderContext(site, sPageDescriptor, userName);
       context.renderState().put(ID_SUFFIX.name(), "_historyView");
       RenderResult rendered = renderer.renderWithInfo(d.source(), context);
       return new PageData(
@@ -205,7 +205,7 @@ public class RenderService {
       String userName)
       throws PageWriteException {
     String site = siteService.getSiteForHostname(host);
-    RenderContext renderContext = new RenderContext(host, site, sPageDescriptor, userName);
+    RenderContext renderContext = new RenderContext(site, sPageDescriptor, userName);
     renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     RenderResult res = renderer.renderWithInfo(text, renderContext);
     Collection<String> links =
@@ -227,7 +227,7 @@ public class RenderService {
         res.getTitle(),
         userName,
         force);
-    pageService.saveCache(host, sPageDescriptor, text, res);
+    pageService.saveCache(site, sPageDescriptor, text, res);
   }
 
   public PageData previewPage(
@@ -237,7 +237,7 @@ public class RenderService {
     String site = siteService.getSiteForHostname(host);
     try {
       RenderContext context =
-          new RenderContext(host, site, sPageDescriptor + "<preview>", userName);
+          new RenderContext(site, sPageDescriptor + "<preview>", userName);
       context.renderState().put(ID_SUFFIX.name(), "_previewPage");
       perfTracker.startTimer("Render");
       PageData pd =

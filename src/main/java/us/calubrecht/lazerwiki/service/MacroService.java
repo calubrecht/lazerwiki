@@ -129,11 +129,11 @@ public class MacroService {
     @Override
     public RenderOutput renderPage(String pageDescriptor) {
       PageData page =
-          pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
+          pageService.getPageData(renderContext.site(), pageDescriptor, renderContext.user());
       if (!page.flags().exists() || !page.flags().userCanRead()) {
         return new RenderOutputImpl("", new HashMap<>(page.flags().toMap()));
       }
-      PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
+      PageCache pageCache = pageService.getCachedPage(renderContext.site(), pageDescriptor);
       if (pageCache != null && pageCache.useCache) {
         Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
         renderState.put(RenderResult.RenderStateKeys.TITLE.name(), page.title());
@@ -148,7 +148,6 @@ public class MacroService {
     private RenderOutput doRender(PageData page, String pageDescriptor) {
       RenderContext subrenderContext =
           new RenderContext(
-              renderContext.host(),
               renderContext.site(),
               pageDescriptor,
               renderContext.user(),
@@ -167,12 +166,12 @@ public class MacroService {
     public RenderOutput getCachedRender(String pageDescriptor) {
       long start = System.currentTimeMillis();
       PageData page =
-          pageService.getPageData(renderContext.host(), pageDescriptor, renderContext.user());
+          pageService.getPageData(renderContext.site(), pageDescriptor, renderContext.user());
       long fetchedPageData = System.currentTimeMillis();
       if (!page.flags().exists() || !page.flags().userCanRead()) {
         return new RenderOutputImpl("", new HashMap<>(page.flags().toMap()));
       }
-      PageCache pageCache = pageService.getCachedPage(renderContext.host(), pageDescriptor);
+      PageCache pageCache = pageService.getCachedPage(renderContext.site(), pageDescriptor);
       long fetchedCache = System.currentTimeMillis();
       if (pageCache != null) { // In this case, ignore useCache flag
         Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
@@ -195,10 +194,10 @@ public class MacroService {
     public Map<String, RenderOutput> getCachedRenders(List<String> pageDescriptors) {
       long start = System.currentTimeMillis();
       Map<PageDescriptor, PageData> pages =
-          pageService.getPageData(renderContext.host(), pageDescriptors, renderContext.user());
+          pageService.getPageData(renderContext.site(), pageDescriptors, renderContext.user());
       long gotPageData = System.currentTimeMillis();
       List<PageCache> pageCaches =
-          pageService.getCachedPages(renderContext.host(), pageDescriptors);
+          pageService.getCachedPages(renderContext.site(), pageDescriptors);
       long gotCacheData = System.currentTimeMillis();
       Map<String, PageData> pageMap =
           pages.entrySet().stream()
@@ -252,7 +251,7 @@ public class MacroService {
     @Override
     public List<String> getPagesByNSAndTag(String ns, String tag) {
       return pageSearchService
-          .searchPages(renderContext.host(), renderContext.user(), Map.of("tag", tag, "ns", ns))
+          .searchPages(renderContext.site(), renderContext.user(), Map.of("tag", tag, "ns", ns))
           .get("tag")
           .stream()
           .map(SearchResult::getDescriptor)
@@ -261,19 +260,19 @@ public class MacroService {
 
     @Override
     public List<String> getAllPages() {
-      return pageService.getAllPagesFlat(renderContext.host(), renderContext.user());
+      return pageService.getAllPagesFlat(renderContext.site(), renderContext.user());
     }
 
     @Override
     public boolean isReadable(String pageDescriptor) {
-      return pageService.isReadable(renderContext.host(), pageDescriptor, renderContext.user());
+      return pageService.isReadable(renderContext.site(), pageDescriptor, renderContext.user());
     }
 
     @Override
     public List<String> getLinksOnPage(String page) {
       List<String> links = linkService.getLinksOnPage(renderContext.site(), page);
       Map<String, LinkOverride> overrides =
-          linkOverrideService.getOverrides(renderContext.host(), page).stream()
+          linkOverrideService.getOverrides(renderContext.site(), page).stream()
               .collect(Collectors.toMap(LinkOverride::getTarget, Function.identity()));
       List<String> realLinks = new ArrayList<>();
       for (String link : links) {
@@ -290,7 +289,6 @@ public class MacroService {
     public RenderOutput renderMarkup(String markup) {
       RenderContext subrenderContext =
           new RenderContext(
-              renderContext.host(),
               renderContext.site(),
               renderContext.page(),
               renderContext.user(),

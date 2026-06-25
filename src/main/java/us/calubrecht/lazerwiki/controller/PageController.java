@@ -2,8 +2,6 @@ package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +24,7 @@ import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 
 @RestController
 @RequestMapping(value = {"api/page/", "app/api/page/"})
-public class PageController {
+public class PageController extends LazerWikiController {
   @Autowired PageService pageService;
 
   @Autowired PageSearchService pageSearchService;
@@ -47,11 +45,11 @@ public class PageController {
       Principal principal,
       HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
     PerfTracker tracker = new PerfTracker();
     PageData pd =
-        renderService.getRenderedPage(url.getHost(), pageDescriptor.orElse(""), userName, tracker);
+        renderService.getRenderedPage(
+            getHost(request), pageDescriptor.orElse(""), userName, tracker);
     tracker.stopAll();
     return pd;
   }
@@ -66,11 +64,11 @@ public class PageController {
       Principal principal,
       HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
     try {
       return ResponseEntity.ok(
-          pageService.getPageHistory(url.getHost(), pageDescriptor.orElse(""), userName));
+          pageService.getPageHistory(
+              getSite(request), pageDescriptor.orElse(""), userName));
     } catch (PageReadException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -84,10 +82,9 @@ public class PageController {
       Principal principal,
       HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
     return renderService.getHistoricalRenderedPage(
-        url.getHost(), pageDescriptor.orElse(""), revision, userName);
+        getHost(request), pageDescriptor.orElse(""), revision, userName);
   }
 
   @RequestMapping(value = {"/diff/{pageDescriptor}/{rev1}/{rev2}", "/diff/{rev1}/{rev2}"})
@@ -98,11 +95,11 @@ public class PageController {
       Principal principal,
       HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
     try {
       return ResponseEntity.ok(
-          pageService.getPageDiff(url.getHost(), pageDescriptor.orElse(""), rev1, rev2, userName));
+          pageService.getPageDiff(
+              getSite(request), pageDescriptor.orElse(""), rev1, rev2, userName));
     } catch (PageReadException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -115,7 +112,7 @@ public class PageController {
       HttpServletRequest request,
       @RequestBody SavePageRequest body)
       throws MalformedURLException, PageWriteException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
+    String host = getHost(request);
     String userName = getUsername(principal);
     if (userName.equals(User.GUEST)) {
       logger.info(
@@ -124,7 +121,7 @@ public class PageController {
     try {
       PerfTracker tracker = new PerfTracker();
       renderService.savePage(
-          url.getHost(),
+          host,
           pageDescriptor.orElse(""),
           body.getText(),
           body.getTags(),
@@ -132,8 +129,7 @@ public class PageController {
           body.isForce(),
           userName);
       PageData pd =
-          renderService.getRenderedPage(
-              url.getHost(), pageDescriptor.orElse(""), userName, tracker);
+          renderService.getRenderedPage(host, pageDescriptor.orElse(""), userName, tracker);
       tracker.stopAll();
       return pd;
     } catch (PageRevisionException pre) {
@@ -145,17 +141,15 @@ public class PageController {
   public void deletePage(
       @PathVariable String pageDescriptor, Principal principal, HttpServletRequest request)
       throws MalformedURLException, PageWriteException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = principal.getName();
-    pageUpdateService.deletePage(url.getHost(), pageDescriptor, userName);
+    pageUpdateService.deletePage(getHost(request), pageDescriptor, userName);
   }
 
   @RequestMapping(value = "/listPages")
   public PageListResponse listPages(Principal principal, HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
-    return pageService.getAllPages(url.getHost(), userName);
+    return pageService.getAllPages(getSite(request), userName);
   }
 
   @RequestMapping(value = "/listNamespaces/{site}")
@@ -173,26 +167,23 @@ public class PageController {
   @RequestMapping(value = "/recentChanges")
   public RecentChangesResponse recentChanges(Principal principal, HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
-    return pageService.recentChanges(url.getHost(), userName);
+    return pageService.recentChanges(getSite(request), userName);
   }
 
   @RequestMapping(value = "/searchPages")
   public Map<String, List<SearchResult>> searchPages(
       Principal principal, HttpServletRequest request, @RequestParam("search") String searchTerm)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
-    return pageSearchService.searchPages(url.getHost(), userName, searchTerm);
+    return pageSearchService.searchPages(getSite(request), userName, searchTerm);
   }
 
   @RequestMapping(value = "/listTags")
   public List<String> listTags(Principal principal, HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
-    return pageService.getAllTags(url.getHost(), userName);
+    return pageService.getAllTags(getSite(request), userName);
   }
 
   @PostMapping(value = {"/previewPage/{pageDescriptor}", "/previewPage/"})
@@ -202,11 +193,10 @@ public class PageController {
       HttpServletRequest request,
       @RequestBody SavePageRequest body)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = principal.getName();
     PerfTracker tracker = new PerfTracker();
     return renderService.previewPage(
-        url.getHost(), pageDescriptor.orElse(""), body.getText(), userName, tracker);
+        getHost(request), pageDescriptor.orElse(""), body.getText(), userName, tracker);
   }
 
   @PostMapping(value = {"/lock/{pageDescriptor}", "/lock/"})
@@ -216,10 +206,9 @@ public class PageController {
       HttpServletRequest request,
       @RequestParam Optional<Boolean> overrideLock)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
     return pageLockService.getPageLock(
-        url.getHost(), pageDescriptor.orElse(""), userName, overrideLock.orElse(false));
+        getHost(request), pageDescriptor.orElse(""), userName, overrideLock.orElse(false));
   }
 
   @PostMapping(value = {"/releaseLock/{pageDescriptor}/id/{lock}", "/releaseLock/id/{lock}"})
@@ -229,9 +218,9 @@ public class PageController {
       @PathVariable String lock,
       HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = getUsername(principal);
-    pageLockService.releasePageLock(url.getHost(), pageDescriptor.orElse(""), lock, userName);
+    pageLockService.releasePageLock(
+        getHost(request), pageDescriptor.orElse(""), lock, userName);
   }
 
   @PostMapping(value = {"/{pageDescriptor}/movePage"})
@@ -241,10 +230,9 @@ public class PageController {
       HttpServletRequest request,
       @RequestBody MovePageRequest movePageRequest)
       throws MalformedURLException, PageWriteException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = principal.getName();
     return pageUpdateService.movePage(
-        url.getHost(),
+        getHost(request),
         userName,
         movePageRequest.oldNS(),
         movePageRequest.oldPage(),

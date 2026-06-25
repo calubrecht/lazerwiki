@@ -48,7 +48,7 @@ class WrapMacroTest {
   @MockitoBean TOCRenderService tocRenderService;
 
   RenderContext context() {
-    return new RenderContext("localhost", "default", "page", "user", renderer, new HashMap<>());
+    return new RenderContext("default", "page", "user", renderer, new HashMap<>());
   }
 
   @Test
