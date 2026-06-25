@@ -351,7 +351,7 @@ public class PageUpdateServiceTest {
         .log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, "default", user, "testPage");
 
     assertEquals(2, captor.getAllValues().size());
-    Page invalidatedPage = captor.getAllValues().get(0);
+    Page invalidatedPage = captor.getAllValues().getFirst();
     assertEquals(1000L, invalidatedPage.getId());
     assertEquals(10L, invalidatedPage.getRevision());
     Page newPage = captor.getAllValues().get(1);
@@ -442,7 +442,7 @@ public class PageUpdateServiceTest {
         .thenReturn(oldPage);
     MoveStatus status =
         pageUpdateService.movePage("host1", "someUser", "ns1", "page2", "ns1", "deleted");
-    assertEquals(true, status.success());
+    assertTrue(status.success());
   }
 
   @Test
@@ -453,11 +453,11 @@ public class PageUpdateServiceTest {
     MoveStatus status =
         pageUpdateService.movePage("host1", "loser", "ns1", "page1", "ns2", "page2");
 
-    assertEquals(false, status.success());
+    assertFalse(status.success());
     assertEquals("You don't have permission to write in ns1", status.message());
 
     status = pageUpdateService.movePage("host1", "user2", "ns1", "page1", "ns2", "page2");
-    assertEquals(false, status.success());
+    assertFalse(status.success());
     assertEquals("You don't have permission to write in ns2", status.message());
 
     PageLockResponse lockSuccess = new PageLockResponse("", "", null, "", null, true, "");
@@ -468,17 +468,17 @@ public class PageUpdateServiceTest {
         .thenReturn(lockSuccess);
 
     status = pageUpdateService.movePage("host1", "user", "noLock", "page1", "lockable", "page1");
-    assertEquals(false, status.success());
+    assertFalse(status.success());
     assertEquals("Could not acquire page locks to move page", status.message());
 
     status = pageUpdateService.movePage("host1", "user", "lockable", "page1", "noLock", "page1");
-    assertEquals(false, status.success());
+    assertFalse(status.success());
     assertEquals("Could not acquire page locks to move page", status.message());
 
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "lockable", "page3"))
         .thenReturn(new Page());
     status = pageUpdateService.movePage("host1", "user", "lockable", "page2", "lockable", "page3");
-    assertEquals(false, status.success());
+    assertFalse(status.success());
     assertEquals("page3 already exists, move cannot overwrite it", status.message());
   }
 }
