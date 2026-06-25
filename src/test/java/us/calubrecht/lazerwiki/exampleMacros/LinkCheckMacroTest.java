@@ -21,7 +21,7 @@ import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
     classes = {
       MacroService.class,
       CustomWikiRenderer.class,
-      us.calubrecht.lazerwiki.service.DokuWikiRendererTest.TestConfig.class
+      CustomWikiRendererTest.TestConfig.class
     })
 @ActiveProfiles("test")
 public class LinkCheckMacroTest {

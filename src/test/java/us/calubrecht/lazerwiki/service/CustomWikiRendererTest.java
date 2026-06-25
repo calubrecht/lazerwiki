@@ -24,9 +24,9 @@ import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
 import us.calubrecht.lazerwiki.syntax.renderer.LinkRenderer;
 
 @SuppressWarnings({"unchecked", "HttpUrlsUsage"})
-@SpringBootTest(classes = {CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class})
+@SpringBootTest(classes = {CustomWikiRenderer.class, CustomWikiRendererTest.TestConfig.class})
 @ActiveProfiles("test")
-public class DokuWikiRendererTest {
+public class CustomWikiRendererTest {
   @Autowired CustomWikiRenderer underTest;
 
   @Configuration

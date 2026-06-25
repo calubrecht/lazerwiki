@@ -13,9 +13,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
-@SpringBootTest(classes = {CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class})
+@SpringBootTest(classes = {CustomWikiRenderer.class, CustomWikiRendererTest.TestConfig.class})
 @ActiveProfiles("test")
-public class DokuWikiRendererPlaintextTest {
+public class CustomWikiRendererPlaintextTest {
   @MockitoBean TOCRenderService tocRenderService;
 
   @Configuration

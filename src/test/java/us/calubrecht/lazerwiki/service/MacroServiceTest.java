@@ -25,7 +25,7 @@ import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 @SpringBootTest(
-    classes = {MacroService.class, CustomWikiRenderer.class, DokuWikiRendererTest.TestConfig.class},
+    classes = {MacroService.class, CustomWikiRenderer.class, CustomWikiRendererTest.TestConfig.class},
     properties = {"lazerwiki.plugin.scan.packages=us.calubrecht.lazerwiki.service"})
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
