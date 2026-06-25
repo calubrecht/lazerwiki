@@ -108,6 +108,7 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	jvmArgs("-javaagent:${configurations.testRuntimeClasspath.get().find { "mockito-core" in it.name }}")
 	finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
 }
 tasks.processResources {

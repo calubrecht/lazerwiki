@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,17 +36,7 @@ public class PageUpdateService {
 
   @Autowired NamespaceService namespaceService;
 
-  @Autowired LinkService linkService;
-
-  @Autowired LinkOverrideService linkOverrideService;
-
-  @Autowired MediaOverrideService mediaOverrideService;
-
-  @Autowired ImageRefService imageRefService;
-
-  @Autowired RegenCacheService regenCacheService;
-
-  @Autowired PageCacheRepository pageCacheRepository;
+  @Autowired PageMetaService pageMetaService;
 
   @Autowired PageLockService pageLockService;
 
@@ -104,18 +96,9 @@ public class PageUpdateService {
     newP.setModifiedBy(user);
     newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
     pageRepository.save(newP);
-    linkOverrideService.deleteOverrides(host, sPageDescriptor);
-    mediaOverrideService.deleteOverrides(host, sPageDescriptor);
     activityLogService.log(action, site, user, sPageDescriptor);
     pageLockService.releaseAnyPageLock(host, sPageDescriptor);
-    linkService.setLinksFromPage(
-        site, pageDescriptor.namespace(), pageDescriptor.pageName(), links);
-    imageRefService.setImageRefsFromPage(
-        site, pageDescriptor.namespace(), pageDescriptor.pageName(), images);
-    if (p == null || p.isDeleted()) {
-      em.flush(); // Flush so regen can work?
-      regenCacheService.regenCachesForBacklinks(site, sPageDescriptor);
-    }
+    pageMetaService.updateMetaData(host, site, pageDescriptor, p, links, images);
   }
 
   protected long getNewId() {
@@ -158,15 +141,8 @@ public class PageUpdateService {
     newP.setTags(Collections.emptyList());
     newP.setDeleted(true);
     pageRepository.save(newP);
-    linkService.deleteLinks(site, sPageDescriptor);
-    PageCache.PageCacheKey key =
-        new PageCache.PageCacheKey(site, pageDescriptor.namespace(), pageDescriptor.pageName());
-    pageCacheRepository.deleteById(key);
     activityLogService.log(ActivityType.ACTIVITY_PROTO_DELETE_PAGE, site, user, sPageDescriptor);
-    em.flush(); // Flush so regen can work?
-    regenCacheService.regenCachesForBacklinks(site, sPageDescriptor);
-    linkOverrideService.deleteOverrides(host, sPageDescriptor);
-    mediaOverrideService.deleteOverrides(host, sPageDescriptor);
+    pageMetaService.deleteMetaData(host, site, pageDescriptor);
   }
 
   @Transactional
@@ -200,13 +176,10 @@ public class PageUpdateService {
       pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId(), user);
       return new MoveStatus(false, "Could not acquire page locks to move page");
     }
-
-    linkOverrideService.createOverride(host, oldPageDescriptor, newPageDescriptor);
-    linkOverrideService.moveOverrides(host, oldPageDescriptor, newPageDescriptor);
-    mediaOverrideService.moveOverrides(host, oldPageDescriptor, newPageDescriptor);
+    Pair<List<String>, List<String>> linksAndImages = pageMetaService.moveMetaData(host, site, oldPageDescriptor, newPageDescriptor);
     Page oldPage = pageRepository.getBySiteAndNamespaceAndPagename(site, oldPageNS, oldPageName);
-    List<String> links = linkService.getLinksOnPage(site, oldPageDescriptor);
-    List<String> images = imageRefService.getImagesOnPage(site, oldPageDescriptor);
+    List<String> links = linksAndImages.getLeft();
+    List<String> images = linksAndImages.getRight();
     savePage(
         host,
         new PageDescriptor(newPageNS, newPageName).toString(),
