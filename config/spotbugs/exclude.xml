@@ -24,6 +24,15 @@
     </Match>
 
     <!--
+        Spring-injected service dependencies are stored by constructor injection —
+        the container owns the lifecycle, so storing the reference is not an exposure.
+    -->
+    <Match>
+        <Class name="~us\.calubrecht\.lazerwiki\.service\..*"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!--
         renderState is intentionally shared and mutable — renderers write into it
         to pass state between components during page rendering.
     -->
