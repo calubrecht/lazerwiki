@@ -89,6 +89,16 @@ Before opening a pull request, please run the formatter and style checks:
 
 `spotlessApply` uses google-java-format to fix whitespace and formatting automatically. `checkstyle` catches naming conventions and structural issues that require manual fixes. Both should be clean before merging.
 
+## Spots Bug
+
+Also run the spots bug check, as a failure will break the build.
+
+```bash
+./gradlew spotbugsMain
+```
+
+If necessary, extend config/spotbugs/exclude.xml, but add comment defending reasoning to ignore the warning
+
 ---
 
 ## Configuration
