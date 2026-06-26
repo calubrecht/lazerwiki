@@ -235,6 +235,7 @@ public class UserService {
                     user.getSettings().put("email", savedToken.getData());
                     userRepository.save(user);
                 });
+        tokenRepository.delete(savedToken);
     }
 
     @Transactional
@@ -255,6 +256,7 @@ public class UserService {
                     user.passwordHash = savedToken.getData();
                     userRepository.save(user);
                 });
+        tokenRepository.delete(savedToken);
     }
 
     @Transactional
