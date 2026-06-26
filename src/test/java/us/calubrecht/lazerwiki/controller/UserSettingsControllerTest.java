@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.model.User;
+import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.UserService;
 import us.calubrecht.lazerwiki.service.exception.RateLimitException;
 import us.calubrecht.lazerwiki.service.exception.VerificationException;
@@ -30,6 +31,9 @@ public class UserSettingsControllerTest {
 
     @MockitoBean
     UserService userService;
+
+    @MockitoBean
+    SiteService siteService;
 
     @Autowired
     MockMvc mockMvc;

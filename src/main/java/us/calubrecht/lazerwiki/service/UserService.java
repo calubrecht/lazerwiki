@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.repository.UserRepository;
 import us.calubrecht.lazerwiki.repository.VerificationTokenRepository;
-import us.calubrecht.lazerwiki.service.exception.RateLimitException;
 import us.calubrecht.lazerwiki.service.exception.VerificationException;
 import us.calubrecht.lazerwiki.util.DbSupport;
 import us.calubrecht.lazerwiki.util.PasswordUtil;
@@ -187,7 +186,7 @@ public class UserService {
     }
 
     @Transactional
-    public void requestSetEmail(String userName, String host, String email) throws MessagingException, RateLimitException {
+    public void requestSetEmail(String userName, String host, String email) throws MessagingException {
         emailRateLimitService.checkSetEmailRateLimit(userName);
         String site = siteService.getSiteNameForHostname(host);
         String randomKey = randomService.randomKey(8);
@@ -202,12 +201,12 @@ public class UserService {
     }
 
     @Transactional
-    public void requestResetForgottenPassword(String userName, String host, String email, String password) throws MessagingException, RateLimitException {
-        emailRateLimitService.checkPasswordResetRateLimit(email);
+    public void requestResetForgottenPassword(String userName, String host, String email, String password) throws MessagingException {
         Optional<User> u = userRepository.findByUserName(userName);
         if (u.isEmpty() || !email.equals(u.get().getSettings().get("email"))) {
             return;
         }
+        emailRateLimitService.checkPasswordResetRateLimit(email);
         String site = siteService.getSiteNameForHostname(host);
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();

@@ -1,52 +1,50 @@
 package us.calubrecht.lazerwiki.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.service.exception.RateLimitException;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class EmailRateLimitService {
 
-    private static final String RATE_LIMIT_CACHE = "email-rate-limit";
+    private final long userEmailMinutes;
+    private final long forgotPasswordMinutes;
 
-    private final long userEmailMillis;
-    private final long forgotPasswordMillis;
-
-    @Autowired
-    private CacheManager cacheManager;
+    private Cache<String, Long> setEmailCache;
+    private Cache<String, Long> resetPasswordCache;
 
     public EmailRateLimitService(
             @Value("${lazerwiki.email.user_email.throttle_minutes:5}") long userEmailMinutes,
             @Value("${lazerwiki.email.forgot_password.throttle_minutes:15}") long forgotPasswordMinutes) {
-        this.userEmailMillis = userEmailMinutes * 60 * 1000;
-        this.forgotPasswordMillis = forgotPasswordMinutes * 60 * 1000;
+        this.userEmailMinutes = userEmailMinutes;
+        this.forgotPasswordMinutes = forgotPasswordMinutes;
+    }
+
+    @PostConstruct
+    void initCaches() {
+        setEmailCache = Caffeine.newBuilder().expireAfterWrite(userEmailMinutes, TimeUnit.MINUTES).build();
+        resetPasswordCache = Caffeine.newBuilder().expireAfterWrite(forgotPasswordMinutes, TimeUnit.MINUTES).build();
     }
 
     public void checkSetEmailRateLimit(String userName) {
-        checkAndRecordLimit("user-email:" + userName, userEmailMillis,
-                "Email change requested too recently. Please try again in %d seconds.");
+        checkAndRecordLimit(setEmailCache, userName, userEmailMinutes * 60 * 1000);
     }
 
     public void checkPasswordResetRateLimit(String email) {
-        checkAndRecordLimit("forgot-password:" + email, forgotPasswordMillis,
-                "Too many password reset requests. Please try again in %d seconds.");
+        checkAndRecordLimit(resetPasswordCache, email, forgotPasswordMinutes * 60 * 1000);
     }
 
-    private void checkAndRecordLimit(String cacheKey, long throttleMillis, String messageTemplate) {
-        Cache cache = cacheManager.getCache(RATE_LIMIT_CACHE);
-        Long lastAttemptTime = cache.get(cacheKey, Long.class);
-
-        if (lastAttemptTime != null) {
-            long timeSinceLastAttempt = System.currentTimeMillis() - lastAttemptTime;
-            if (timeSinceLastAttempt < throttleMillis) {
-                long remainingSeconds = (throttleMillis - timeSinceLastAttempt + 999) / 1000;
-                throw new RateLimitException(remainingSeconds);
-            }
+    private void checkAndRecordLimit(Cache<String, Long> cache, String key, long throttleMillis) {
+        long expiresAt = System.currentTimeMillis() + throttleMillis;
+        Long existing = cache.asMap().putIfAbsent(key, expiresAt);
+        if (existing != null) {
+            long remainingSeconds = (existing - System.currentTimeMillis() + 999) / 1000;
+            throw new RateLimitException(Math.max(1, remainingSeconds));
         }
-
-        cache.put(cacheKey, System.currentTimeMillis());
     }
 }

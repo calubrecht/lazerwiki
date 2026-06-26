@@ -86,6 +86,7 @@ dependencies {
 	implementation("mysql:mysql-connector-java:8.0.33")
 	implementation("com.github.usefulness:webp-imageio:0.5.1")
 	implementation("io.gdcc:sitemapgen4j:2.1.2")
+	implementation("com.github.ben-manes.caffeine:caffeine")
 	// Gradle will pull in an older version of this if not explicit.
 	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24")
 	providedRuntime("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24")

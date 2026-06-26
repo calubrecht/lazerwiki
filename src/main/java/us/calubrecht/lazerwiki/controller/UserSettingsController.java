@@ -4,8 +4,6 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.security.Principal;
 import java.util.Map;
 
@@ -23,7 +21,7 @@ import us.calubrecht.lazerwiki.service.exception.VerificationException;
 
 @RestController
 @RequestMapping("api/users/")
-public class UserSettingsController {
+public class UserSettingsController extends LazerWikiController {
 
     @Autowired
     UserService userService;
@@ -41,8 +39,8 @@ public class UserSettingsController {
     @PostMapping("resetForgottenPassword")
     public ResponseEntity<SetPasswordResponse> setPassword(@RequestBody UserRequest passwordRequest,  HttpServletRequest request) throws MalformedURLException, MessagingException {
         try {
-            URL url = new URL(request.getRequestURL().toString());
-            userService.requestResetForgottenPassword(passwordRequest.userName(), url.getHost(), passwordRequest.email(), passwordRequest.password());
+            String host = getHost(request);
+            userService.requestResetForgottenPassword(passwordRequest.userName(), host, passwordRequest.email(), passwordRequest.password());
             return ResponseEntity.ok(new SetPasswordResponse(true, ""));
         } catch (RateLimitException rle) {
             String message = String.format("Too many password reset requests. Please try again in %d seconds.", rle.getSecondsRemaining());
@@ -57,8 +55,8 @@ public class UserSettingsController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         try {
-            URL url = new URL(request.getRequestURL().toString());
-            userService.requestSetEmail(user.userName, url.getHost(), emailRequest.email());
+            String host = getHost(request);
+            userService.requestSetEmail(user.userName, host, emailRequest.email());
             return ResponseEntity.ok(new SaveEmailResponse(true, ""));
         } catch (RateLimitException rle) {
             String message = String.format("Email change requested too recently. Please try again in %d seconds.", rle.getSecondsRemaining());
