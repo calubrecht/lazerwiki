@@ -23,7 +23,6 @@ import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 import us.calubrecht.lazerwiki.util.IOSupplier;
 import us.calubrecht.lazerwiki.util.ImageUtil;
 
-@SuppressWarnings("unchecked")
 @SpringBootTest(classes = {MediaCacheService.class})
 @ActiveProfiles("test")
 @ExtendWith(OutputCaptureExtension.class)
