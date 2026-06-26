@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "us.calubrecht"
-version = project.properties["version"]!!
+version = providers.gradleProperty("version").get()
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_25
@@ -114,7 +114,7 @@ tasks.withType<Test> {
 }
 tasks.processResources {
 	filesMatching("application.properties") {
-		expand (project.properties)
+		expand (mapOf("version" to version))
 	}
 }
 
