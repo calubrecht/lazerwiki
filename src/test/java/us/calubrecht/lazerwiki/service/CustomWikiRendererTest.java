@@ -642,6 +642,18 @@ public class CustomWikiRendererTest {
   }
 
   @Test
+  public void test_renderOListWEmptyValue() {
+    String input1 = " - Simple List\n -\n - With an empty row\n";
+    assertEquals(
+            "<ol>\n" +
+                    "<li>Simple List</li>\n" +
+                    "<li></li>\n" +
+                    "<li>With an empty row</li>\n" +
+                    "</ol>",
+            doRender(input1));
+  }
+
+  @Test
   public void test_renderOListWithValues() {
     String input1 = " - Simple List\n -{{5}}With one row value defined\n -One follow\n";
     assertEquals(

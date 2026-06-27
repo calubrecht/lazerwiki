@@ -33,7 +33,7 @@ public class ParseContext implements Iterable<String>, ReadOnlyParseContext {
   public ParseContext(String fullText, int rootPosition, ReadOnlyParseContext rootContext) {
     this.fullText = new StringBuilder(fullText);
     lines = fullText.lines().toList();
-    nextLine = lines.get(0);
+    nextLine = lines.isEmpty() ? fullText : lines.getFirst();
     rootIdx = rootPosition;
     this.rootContext = rootContext.getRootContext();
     readonly = true;
