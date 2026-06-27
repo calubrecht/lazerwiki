@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.MacroCssService;
 import us.calubrecht.lazerwiki.service.ResourceService;
+import us.calubrecht.lazerwiki.service.SiteService;
 
 @WebMvcTest(controllers = {ResourceController.class, VersionController.class})
 @ActiveProfiles("test")
@@ -28,16 +29,19 @@ class ResourceControllerTest {
 
   @MockitoBean MacroCssService cssService;
 
+  @MockitoBean SiteService siteService;
+
   @Test
   void test_getFile() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     this.mockMvc.perform(get("/_resources/someFile.jpg")).andExpect(status().isOk());
 
-    verify(resourceService).getBinaryFile(eq("localhost"), eq("someFile.jpg"));
+    verify(resourceService).getBinaryFile(eq("site1"), eq("someFile.jpg"));
 
     this.mockMvc.perform(get("/_resources/some.unknown_filetype")).andExpect(status().isOk());
-    verify(resourceService).getBinaryFile(eq("localhost"), eq("some.unknown_filetype"));
+    verify(resourceService).getBinaryFile(eq("site1"), eq("some.unknown_filetype"));
 
-    when(resourceService.getBinaryFile(eq("localhost"), eq("explosive.file")))
+    when(resourceService.getBinaryFile(eq("site1"), eq("explosive.file")))
         .thenThrow(new IOException(""));
     this.mockMvc.perform(get("/_resources/explosive.file")).andExpect(status().isNotFound());
   }

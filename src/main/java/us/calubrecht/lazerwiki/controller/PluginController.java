@@ -2,9 +2,6 @@ package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,18 +12,17 @@ import us.calubrecht.lazerwiki.service.PluginService;
 
 @RestController
 @RequestMapping("")
-public class PluginController {
+public class PluginController extends LazerWikiController {
 
   @Autowired PluginService pluginService;
 
   @GetMapping("_resources/js/pluginJS.js")
   public ResponseEntity<byte[]> getPluginJS(HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
-    String mimeType = URLConnection.guessContentTypeFromName("pluginJS.js");
+    String mimeType = "application/javascript";
     MediaType mediaType = MediaType.parseMediaType(mimeType);
     return ResponseEntity.ok()
         .contentType(mediaType)
-        .body(pluginService.getEditToolbarDefs(url.getHost()).getBytes());
+        .body(pluginService.getEditToolbarDefs(getSite(request)).getBytes());
   }
 }

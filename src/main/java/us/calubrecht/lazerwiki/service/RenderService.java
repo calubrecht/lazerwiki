@@ -28,14 +28,11 @@ public class RenderService {
 
   @Autowired MacroService macroService;
 
-  @Autowired SiteService siteService;
-
   public PageData getRenderedPage(
-      String host, String sPageDescriptor, String userName, PerfTracker perfTracker) {
+      String site, String sPageDescriptor, String userName, PerfTracker perfTracker) {
     StopWatch sw = StopWatch.createStarted();
     perfTracker.startTimer("All");
     perfTracker.startTimer("FetchPage");
-    String site = siteService.getSiteForHostname(host);
     PageData d = pageService.getPageData(site, sPageDescriptor, userName);
     d = d.addTracker(perfTracker);
     perfTracker.stopTimer("FetchPage");
@@ -139,8 +136,8 @@ public class RenderService {
       return pd;
     } catch (Exception e) {
       logger.error(
-          "Render failed! host= {} sPageDescriptor= {} user={}.",
-          host,
+          "Render failed! site= {} sPageDescriptor= {} user={}.",
+          site,
           sPageDescriptor,
           userName,
           e);
@@ -157,8 +154,7 @@ public class RenderService {
   }
 
   public PageData getHistoricalRenderedPage(
-      String host, String sPageDescriptor, long revision, String userName) {
-    String site = siteService.getSiteForHostname(host);
+      String site, String sPageDescriptor, long revision, String userName) {
     PageData d = pageService.getHistoricalPageData(site, sPageDescriptor, revision, userName);
     if (!d.flags().exists()) {
       return d;
@@ -174,8 +170,8 @@ public class RenderService {
           rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags());
     } catch (Exception e) {
       logger.error(
-          "Render failed! host= {} sPageDescriptor= {} user={}.",
-          host,
+          "Render failed! site= {} sPageDescriptor= {} user={}.",
+          site,
           sPageDescriptor,
           userName,
           e);
@@ -193,7 +189,7 @@ public class RenderService {
 
   @SuppressWarnings("unchecked")
   public void savePage(
-      String host,
+      String site,
       String sPageDescriptor,
       String text,
       List<String> tags,
@@ -201,7 +197,6 @@ public class RenderService {
       boolean force,
       String userName)
       throws PageWriteException {
-    String site = siteService.getSiteForHostname(host);
     RenderContext renderContext = new RenderContext(site, sPageDescriptor, userName);
     renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
     RenderResult res = renderer.renderWithInfo(text, renderContext);
@@ -214,7 +209,7 @@ public class RenderService {
             res.renderState()
                 .getOrDefault(RenderResult.RenderStateKeys.IMAGES.name(), Collections.emptySet());
     pageUpdateService.savePage(
-        host,
+        site,
         sPageDescriptor,
         revision,
         text,
@@ -228,10 +223,9 @@ public class RenderService {
   }
 
   public PageData previewPage(
-      String host, String sPageDescriptor, String text, String userName, PerfTracker perfTracker) {
+      String site, String sPageDescriptor, String text, String userName, PerfTracker perfTracker) {
     StopWatch sw = StopWatch.createStarted();
     perfTracker.startTimer("All");
-    String site = siteService.getSiteForHostname(host);
     try {
       RenderContext context =
           new RenderContext(site, sPageDescriptor + "<preview>", userName);
@@ -258,8 +252,8 @@ public class RenderService {
     } catch (Exception e) {
       sw.stop();
       logger.error(
-          "Render preview failed! host= {} sPageDescriptor= {} user={}.",
-          host,
+          "Render preview failed! site= {} sPageDescriptor= {} user={}.",
+          site,
           sPageDescriptor,
           userName,
           e);

@@ -2,8 +2,6 @@ package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
@@ -17,7 +15,7 @@ import us.calubrecht.lazerwiki.service.ResourceService;
 
 @RestController
 @RequestMapping("_resources/")
-public class ResourceController {
+public class ResourceController extends LazerWikiController {
 
   @Autowired ResourceService resourceService;
 
@@ -26,7 +24,7 @@ public class ResourceController {
   @RequestMapping("{fileName}")
   public ResponseEntity<byte[]> getFile(@PathVariable String fileName, HttpServletRequest request) {
     try {
-      URL url = URI.create(request.getRequestURL().toString()).toURL();
+      String site = getSite(request);
       String mimeType = URLConnection.guessContentTypeFromName(fileName);
       MediaType mediaType =
           mimeType != null
@@ -35,8 +33,8 @@ public class ResourceController {
       return ResponseEntity.ok()
           .contentType(mediaType)
           .cacheControl(CacheControl.noCache().mustRevalidate())
-          .lastModified(resourceService.getFileLastModified(url.getHost(), fileName))
-          .body(resourceService.getBinaryFile(url.getHost(), fileName));
+          .lastModified(resourceService.getFileLastModified(site, fileName))
+          .body(resourceService.getBinaryFile(site, fileName));
     } catch (IOException e) {
       return ResponseEntity.notFound().build();
     }

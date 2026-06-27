@@ -29,8 +29,6 @@ public class PageUpdateService {
 
   @Autowired IdRepository idRepository;
 
-  @Autowired SiteService siteService;
-
   @Autowired EntityManagerProxy em;
 
   @Autowired NamespaceService namespaceService;
@@ -45,7 +43,7 @@ public class PageUpdateService {
 
   @Transactional
   public void savePage(
-      String host,
+      String site,
       String sPageDescriptor,
       long lastRevision,
       String text,
@@ -56,7 +54,6 @@ public class PageUpdateService {
       String userName,
       boolean force)
       throws PageWriteException {
-    String site = siteService.getSiteForHostname(host);
     User user = userService.getUser(userName);
     // get Existing
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
@@ -96,7 +93,7 @@ public class PageUpdateService {
     newP.setTags(tags.stream().map(s -> new PageTag(newP, s)).toList());
     pageRepository.save(newP);
     activityLogService.log(action, site, user, sPageDescriptor);
-    pageLockService.releaseAnyPageLock(host, sPageDescriptor);
+    pageLockService.releaseAnyPageLock(site, sPageDescriptor);
     pageMetaService.updateMetaData(site, pageDescriptor, p, links, images);
   }
 
@@ -106,9 +103,8 @@ public class PageUpdateService {
   }
 
   @Transactional
-  public void deletePage(String host, String sPageDescriptor, String userName)
+  public void deletePage(String site, String sPageDescriptor, String userName)
       throws PageWriteException {
-    String site = siteService.getSiteForHostname(host);
     User user = userService.getUser(userName);
     PageDescriptor pageDescriptor = PageService.decodeDescriptor(sPageDescriptor);
     if (!namespaceService.canDeleteInNamespace(site, pageDescriptor.namespace(), userName)
@@ -146,15 +142,13 @@ public class PageUpdateService {
 
   @Transactional
   public MoveStatus movePage(
-      String host,
+      String site,
       String user,
       String oldPageNS,
       String oldPageName,
       String newPageNS,
       String newPageName)
       throws PageWriteException {
-    String site = siteService.getSiteForHostname(host);
-
     if (!namespaceService.canWriteNamespace(site, oldPageNS, user)) {
       return new MoveStatus(false, "You don't have permission to write in " + oldPageNS);
     }
@@ -168,11 +162,11 @@ public class PageUpdateService {
     }
     String oldPageDescriptor = new PageDescriptor(oldPageNS, oldPageName).toString();
     String newPageDescriptor = new PageDescriptor(newPageNS, newPageName).toString();
-    PageLockResponse oldPL = pageLockService.getPageLock(host, oldPageDescriptor, user, false);
-    PageLockResponse newPL = pageLockService.getPageLock(host, newPageDescriptor, user, false);
+    PageLockResponse oldPL = pageLockService.getPageLock(site, oldPageDescriptor, user, false);
+    PageLockResponse newPL = pageLockService.getPageLock(site, newPageDescriptor, user, false);
     if (!oldPL.success() || !newPL.success()) {
-      pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId(), user);
-      pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId(), user);
+      pageLockService.releasePageLock(site, oldPageDescriptor, oldPL.pageLockId(), user);
+      pageLockService.releasePageLock(site, newPageDescriptor, newPL.pageLockId(), user);
       return new MoveStatus(false, "Could not acquire page locks to move page");
     }
     Pair<List<String>, List<String>> linksAndImages =
@@ -181,7 +175,7 @@ public class PageUpdateService {
     List<String> links = linksAndImages.getLeft();
     List<String> images = linksAndImages.getRight();
     savePage(
-        host,
+        site,
         new PageDescriptor(newPageNS, newPageName).toString(),
         0,
         oldPage.getText(),
@@ -191,7 +185,7 @@ public class PageUpdateService {
         oldPage.getTitle(),
         user,
         true);
-    deletePage(host, oldPageDescriptor, user);
+    deletePage(site, oldPageDescriptor, user);
     activityLogService.log(
         ActivityType.ACTIVITY_PROTO_MOVE_PAGE,
         site,
@@ -199,8 +193,8 @@ public class PageUpdateService {
         new PageDescriptor(oldPageNS, oldPageName)
             + "->"
             + new PageDescriptor(newPageNS, newPageName));
-    pageLockService.releasePageLock(host, oldPageDescriptor, oldPL.pageLockId(), user);
-    pageLockService.releasePageLock(host, newPageDescriptor, newPL.pageLockId(), user);
+    pageLockService.releasePageLock(site, oldPageDescriptor, oldPL.pageLockId(), user);
+    pageLockService.releasePageLock(site, newPageDescriptor, newPL.pageLockId(), user);
     return new MoveStatus(true, oldPageDescriptor + " move to " + newPageDescriptor);
   }
 
@@ -217,7 +211,7 @@ public class PageUpdateService {
                 getClass().getClassLoader().getResourceAsStream("defaultSiteHomepage.tmpl")))) {
       String template = br.lines().collect(Collectors.joining(("\n")));
       savePage(
-          siteService.getHostForSitename(siteName),
+          siteName,
           "",
           0L,
           template.replaceAll("%SITENAME%", displayName),

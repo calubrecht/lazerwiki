@@ -33,9 +33,6 @@ public class UserServiceTest {
     UserRepository userRepository;
 
     @MockitoBean
-    SiteService siteService;
-
-    @MockitoBean
     VerificationTokenRepository tokenRepository;
 
     @MockitoBean
@@ -223,14 +220,13 @@ public class UserServiceTest {
 
     @Test
     void test_requestSetEmail() throws MessagingException {
-        when(siteService.getSiteNameForHostname("localhost")).thenReturn("Lazerwiki");
         when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
         when(templateService.getVerifyEmailTemplate(
                 eq("Lazerwiki"), eq("bob@super.com"), eq("Bob"), eq("ABCD-EFGH")))
                 .thenReturn("The template");
         User user = new User("Bob", "hash");
         when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
-        userService.requestSetEmail("Bob", "localhost", "bob@super.com");
+        userService.requestSetEmail("Bob", "Lazerwiki", "bob@super.com");
 
         verify(tokenRepository).deleteExpired();
         verify(tokenRepository)
@@ -242,14 +238,13 @@ public class UserServiceTest {
 
         Mockito.reset(tokenRepository);
         Mockito.reset(emailService);
-        userService.requestSetEmail("Jeff", "localhost", "bob@super.com");
+        userService.requestSetEmail("Jeff", "Lazerwiki", "bob@super.com");
         verify(tokenRepository, Mockito.never()).save(any());
         verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any());
     }
 
     @Test
     void test_requestResetForgottenPassword() throws MessagingException {
-        when(siteService.getSiteNameForHostname("localhost")).thenReturn("Lazerwiki");
         when(randomService.randomKey(8)).thenReturn("ABCD-EFGH");
         when(templateService.getVerifyEmailTemplate(
                 eq("Lazerwiki"), eq("bob@super.com"), eq("Bob"), eq("ABCD-EFGH")))
@@ -258,7 +253,7 @@ public class UserServiceTest {
         User user = new User("Bob", "hash");
         user.setSettings(Map.of("email", "bob@super.com"));
         when(userRepository.findByUserName("Bob")).thenReturn(Optional.of(user));
-        userService.requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass");
+        userService.requestResetForgottenPassword("Bob", "Lazerwiki", "bob@super.com", "pass");
 
         verify(tokenRepository).deleteExpired();
         verify(tokenRepository)
@@ -269,15 +264,15 @@ public class UserServiceTest {
                 .sendEmail(
                         eq("bob@super.com"), eq("Bob"), eq("Reset Forgotten Password"), eq("The template"));
 
-        userService.requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass");
+        userService.requestResetForgottenPassword("Bob", "Lazerwiki", "bob@super.com", "pass");
 
         Mockito.reset(tokenRepository);
         Mockito.reset(emailService);
-        userService.requestResetForgottenPassword("Bob", "localhost", "joe@super.com", "pass");
+        userService.requestResetForgottenPassword("Bob", "Lazerwiki", "joe@super.com", "pass");
         verify(tokenRepository, Mockito.never()).save(any());
         verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any());
 
-        userService.requestResetForgottenPassword("Jeff", "localhost", "bob@super.com", "pass");
+        userService.requestResetForgottenPassword("Jeff", "Lazerwiki", "bob@super.com", "pass");
         verify(tokenRepository, Mockito.never()).save(any());
         verify(emailService, Mockito.never()).sendEmail(any(), any(), any(), any());
     }

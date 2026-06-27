@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import us.calubrecht.lazerwiki.service.PluginService;
+import us.calubrecht.lazerwiki.service.SiteService;
 
 @WebMvcTest(controllers = {PluginController.class, VersionController.class})
 @ActiveProfiles("test")
@@ -23,8 +24,11 @@ class PluginControllerTest {
 
   @MockitoBean PluginService pluginService;
 
+  @MockitoBean SiteService siteService;
+
   @Test
   void test_getPluginJS() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     when(pluginService.getEditToolbarDefs(anyString())).thenReturn("ToolbarDefs");
     this.mockMvc
         .perform(get("/_resources/js/pluginJS.js"))

@@ -20,14 +20,11 @@ public class ResourceService {
   @Value("${lazerwiki.static.file.root}")
   String staticFileRoot;
 
-  @Autowired SiteService siteService;
-
   void ensureDir(String site) throws IOException {
     Files.createDirectories(Paths.get(String.join("/", staticFileRoot, site, "resources")));
   }
 
-  public byte[] getBinaryFile(String host, String fileName) throws IOException {
-    String site = siteService.getSiteForHostname(host);
+  public byte[] getBinaryFile(String site, String fileName) throws IOException {
     ensureDir(site);
     File f = new File(String.join("/", staticFileRoot, site, "resources", fileName));
     if (!f.exists()) {
@@ -44,8 +41,7 @@ public class ResourceService {
     return Files.readAllBytes(f.toPath());
   }
 
-  public long getFileLastModified(String host, String fileName) throws IOException {
-    String site = siteService.getSiteForHostname(host);
+  public long getFileLastModified(String site, String fileName) throws IOException {
     ensureDir(site);
     File f = new File(String.join("/", staticFileRoot, site, "resources", fileName));
     return f.exists() ? f.lastModified() : bootTime;

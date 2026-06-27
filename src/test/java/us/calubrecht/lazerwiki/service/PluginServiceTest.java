@@ -34,7 +34,7 @@ class PluginServiceTest {
     assertEquals(
         "var LAZERWIKI_PLUGINS=[{name:\"name\", icon:\"icon.png\", script:()=> {doSomething()}}];",
         underTest.getEditToolbarDefs("site1"));
-    when(siteService.getSettingForHostname("site2", "pluginBlacklist"))
+    when(siteService.getSettingForSite("site2", "pluginBlacklist"))
         .thenReturn(List.of("Good Plugin"));
     assertEquals("var LAZERWIKI_PLUGINS=[];", underTest.getEditToolbarDefs("site2"));
   }

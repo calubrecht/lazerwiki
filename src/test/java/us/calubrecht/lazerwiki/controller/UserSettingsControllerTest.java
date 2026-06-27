@@ -63,6 +63,7 @@ public class UserSettingsControllerTest {
 
     @Test
     void test_saveEmail() throws Exception {
+        when(siteService.getSiteNameForHostname("localhost")).thenReturn("Default Site");
         when(userService.getUser("bob")).thenReturn(new User("Bob", null));
         mockMvc
                 .perform(
@@ -72,24 +73,25 @@ public class UserSettingsControllerTest {
                                 .principal(new UsernamePasswordAuthenticationToken("bob", "")))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"success\":true, \"message\": \"\"}"));
-        verify(userService).requestSetEmail("Bob", "localhost", "bob@super.com");
+        verify(userService).requestSetEmail("Bob", "Default Site", "bob@super.com");
 
 
         mockMvc.perform(post("/api/users/saveEmail").content("{\"userName\":\"jim\", \"email\":\"jimbo@super.com\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
                 andExpect(status().isForbidden());
 
-        doThrow(new RateLimitException(60)).when(userService).requestSetEmail("Bob", "localhost", "bob@super.com");
+        doThrow(new RateLimitException(60)).when(userService).requestSetEmail("Bob", "Default Site", "bob@super.com");
         mockMvc.perform(post("/api/users/saveEmail").content("{\"userName\":\"Bob\", \"email\":\"bob@super.com\"}").contentType(MediaType.APPLICATION_JSON).principal(new UsernamePasswordAuthenticationToken("bob", ""))).
                 andExpect(status().isTooManyRequests()).andExpect(content().json("{\"success\":false}"));
     }
 
     @Test
     void resetForgottenPassword() throws Exception {
+        when(siteService.getSiteNameForHostname("localhost")).thenReturn("Default Site");
         mockMvc.perform(post("/api/users/resetForgottenPassword").content("{\"userName\":\"Bob\", \"email\":\"bob@super.com\", \"password\":\"pass1\"}").contentType(MediaType.APPLICATION_JSON)).
                 andExpect(status().isOk()).andExpect(content().json("{\"success\":true, \"message\": \"\"}"));
-        verify(userService).requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass1");
+        verify(userService).requestResetForgottenPassword("Bob", "Default Site", "bob@super.com", "pass1");
 
-        doThrow(new RateLimitException(300)).when(userService).requestResetForgottenPassword("Bob", "localhost", "bob@super.com", "pass1");
+        doThrow(new RateLimitException(300)).when(userService).requestResetForgottenPassword("Bob", "Default Site", "bob@super.com", "pass1");
         mockMvc.perform(post("/api/users/resetForgottenPassword").content("{\"userName\":\"Bob\", \"email\":\"bob@super.com\", \"password\":\"pass1\"}").contentType(MediaType.APPLICATION_JSON)).
                 andExpect(status().isTooManyRequests()).andExpect(content().json("{\"success\":false}"));
     }

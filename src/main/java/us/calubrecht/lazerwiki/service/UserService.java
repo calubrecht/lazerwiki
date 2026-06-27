@@ -36,9 +36,6 @@ public class UserService {
     UserRepository userRepository;
 
     @Autowired
-    SiteService siteService;
-
-    @Autowired
     EmailService emailService;
 
     @Autowired
@@ -186,9 +183,9 @@ public class UserService {
     }
 
     @Transactional
-    public void requestSetEmail(String userName, String host, String email) throws MessagingException {
+    public void requestSetEmail(String userName, String siteName, String email) throws MessagingException {
         emailRateLimitService.checkSetEmailRateLimit(userName);
-        String site = siteService.getSiteNameForHostname(host);
+        String site = siteName;
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();
         Optional<User> u = userRepository.findByUserName(userName);
@@ -201,13 +198,13 @@ public class UserService {
     }
 
     @Transactional
-    public void requestResetForgottenPassword(String userName, String host, String email, String password) throws MessagingException {
+    public void requestResetForgottenPassword(String userName, String siteName, String email, String password) throws MessagingException {
         Optional<User> u = userRepository.findByUserName(userName);
         if (u.isEmpty() || !email.equals(u.get().getSettings().get("email"))) {
             return;
         }
         emailRateLimitService.checkPasswordResetRateLimit(email);
-        String site = siteService.getSiteNameForHostname(host);
+        String site = siteName;
         String randomKey = randomService.randomKey(8);
         tokenRepository.deleteExpired();
         String passwordHash = passwordUtil.hashPassword(password);

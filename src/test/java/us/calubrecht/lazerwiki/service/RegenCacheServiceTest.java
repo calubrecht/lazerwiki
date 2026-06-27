@@ -37,8 +37,6 @@ class RegenCacheServiceTest {
 
   @MockitoBean PageCacheRepository pageCacheRepository;
 
-  @MockitoBean SiteService siteService;
-
   @MockitoBean MediaOverrideService mediaOverrideService;
 
   @Test
@@ -250,8 +248,6 @@ class RegenCacheServiceTest {
               return new RenderResult(
                   text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
             });
-    when(siteService.getHostForSitename("default")).thenReturn("host");
-
     underTest.regenCachesForBacklinks("default", "linkedPage");
 
     ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
@@ -306,8 +302,6 @@ class RegenCacheServiceTest {
               return new RenderResult(
                   text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
             });
-    when(siteService.getHostForSitename("default")).thenReturn("host");
-
     underTest.regenCachesForBacklinks("default", "linkedPage");
 
     ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
@@ -429,8 +423,6 @@ class RegenCacheServiceTest {
               }
               return new RenderResult(text + " rendered", "", renderState);
             });
-    when(siteService.getHostForSitename("default")).thenReturn("host");
-
     underTest.regenCachesForImageRefs("default", "ns1:img1.jpg", "ns2:img2.jpg");
 
     ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);
@@ -480,8 +472,6 @@ class RegenCacheServiceTest {
               }
               return new RenderResult(text + " rendered", "", renderState);
             });
-    when(siteService.getHostForSitename("default")).thenReturn("host");
-
     underTest.regenCachesForImageRefs("default", "ns1:img1.jpg", "ns2:img2.jpg");
 
     ArgumentCaptor<PageCache> argument = ArgumentCaptor.forClass(PageCache.class);

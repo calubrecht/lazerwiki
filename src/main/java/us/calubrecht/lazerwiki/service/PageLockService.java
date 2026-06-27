@@ -26,16 +26,13 @@ public class PageLockService {
 
   @Autowired PageRepository pageRepository;
 
-  @Autowired SiteService siteService;
-
   @Autowired UserService userService;
 
   @Value("${page.lock.minutes:20}")
   int pageLockMinutes;
 
   public synchronized PageLockResponse getPageLock(
-      String host, String sPageDescriptor, String userName, boolean overrideLock) {
-    String site = siteService.getSiteForHostname(host);
+      String site, String sPageDescriptor, String userName, boolean overrideLock) {
     PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
     PageLock lock = repository.findBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
     Long revision =
@@ -75,16 +72,14 @@ public class PageLockService {
   }
 
   public synchronized void releasePageLock(
-      String host, String sPageDescriptor, String lockId, String userName) {
-    String site = siteService.getSiteForHostname(host);
+      String site, String sPageDescriptor, String lockId, String userName) {
     PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
     User user = userService.getUser(userName);
     repository.deleteBySiteAndNamespaceAndPagenameAndLockIdAndOwner(
         site, p.namespace(), p.pageName(), lockId, user);
   }
 
-  public synchronized void releaseAnyPageLock(String host, String sPageDescriptor) {
-    String site = siteService.getSiteForHostname(host);
+  public synchronized void releaseAnyPageLock(String site, String sPageDescriptor) {
     PageDescriptor p = PageService.decodeDescriptor(sPageDescriptor);
     repository.deleteBySiteAndNamespaceAndPagename(site, p.namespace(), p.pageName());
   }

@@ -74,6 +74,19 @@ public class SiteService {
   }
 
   @Transactional(readOnly = true)
+  public Object getSettingForSite(String site, String setting) {
+    Optional<Site> sOpt = siteRepository.findById(site);
+    Site s = sOpt.filter(ss -> ss.settings.containsKey(setting)).orElse(null);
+    if (s == null) {
+      s = siteRepository.findByHostname("*");
+    }
+    if (s == null) {
+      return null;
+    }
+    return s.settings.get(setting);
+  }
+
+  @Transactional(readOnly = true)
   @Cacheable("hostForSitename")
   public String getHostForSitename(String site) {
     Optional<Site> s = siteRepository.findById(site);

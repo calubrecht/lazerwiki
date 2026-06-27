@@ -39,8 +39,8 @@ public class UserSettingsController extends LazerWikiController {
     @PostMapping("resetForgottenPassword")
     public ResponseEntity<SetPasswordResponse> setPassword(@RequestBody UserRequest passwordRequest,  HttpServletRequest request) throws MalformedURLException, MessagingException {
         try {
-            String host = getHost(request);
-            userService.requestResetForgottenPassword(passwordRequest.userName(), host, passwordRequest.email(), passwordRequest.password());
+            String siteName = siteService.getSiteNameForHostname(getHost(request));
+            userService.requestResetForgottenPassword(passwordRequest.userName(), siteName, passwordRequest.email(), passwordRequest.password());
             return ResponseEntity.ok(new SetPasswordResponse(true, ""));
         } catch (RateLimitException rle) {
             String message = String.format("Too many password reset requests. Please try again in %d seconds.", rle.getSecondsRemaining());
@@ -55,8 +55,8 @@ public class UserSettingsController extends LazerWikiController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         try {
-            String host = getHost(request);
-            userService.requestSetEmail(user.userName, host, emailRequest.email());
+            String siteName = siteService.getSiteNameForHostname(getHost(request));
+            userService.requestSetEmail(user.userName, siteName, emailRequest.email());
             return ResponseEntity.ok(new SaveEmailResponse(true, ""));
         } catch (RateLimitException rle) {
             String message = String.format("Email change requested too recently. Please try again in %d seconds.", rle.getSecondsRemaining());

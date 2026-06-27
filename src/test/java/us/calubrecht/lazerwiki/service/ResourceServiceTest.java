@@ -1,8 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,38 +18,34 @@ class ResourceServiceTest {
 
   @Autowired ResourceService underTest;
 
-  @MockitoBean SiteService siteService;
-
   @Value("${lazerwiki.static.file.root}")
   String staticFileRoot;
 
   @Test
   void test_getBinaryFile() throws IOException {
-    when(siteService.getSiteForHostname(any())).thenReturn("default");
-    byte[] bytes = underTest.getBinaryFile("localhost", "bluecircle.png");
+    byte[] bytes = underTest.getBinaryFile("default", "bluecircle.png");
     assertTrue(bytes != null);
     assertEquals(768, bytes.length);
 
     // File from src/main/resources/static
-    bytes = underTest.getBinaryFile("localhost", "site.css");
+    bytes = underTest.getBinaryFile("default", "site.css");
     assertTrue(bytes != null);
     assertEquals("/* Site specific css to override defaults */", new String(bytes).trim());
 
     // Missing File
-    assertThrows(IOException.class, () -> underTest.getBinaryFile("localhost", "what.css"));
+    assertThrows(IOException.class, () -> underTest.getBinaryFile("default", "what.css"));
   }
 
   @Test
   void test_getFileLastModified() throws IOException {
-    when(siteService.getSiteForHostname(any())).thenReturn("default");
-    long modifiedtime = underTest.getFileLastModified("localhost", "bluecircle.png");
+    long modifiedtime = underTest.getFileLastModified("default", "bluecircle.png");
 
     File f = Paths.get(staticFileRoot, "default", "resources", "bluecircle.png").toFile();
     assertEquals(f.lastModified(), modifiedtime);
 
     underTest.bootTime = 5;
 
-    assertEquals(5, underTest.getFileLastModified("localHost", "thisfileisnthere.jpg"));
+    assertEquals(5, underTest.getFileLastModified("default", "thisfileisnthere.jpg"));
   }
 
   @Test

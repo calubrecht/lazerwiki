@@ -65,14 +65,14 @@ public class PageControllerTest {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/api/page/get/testPage").principal(auth)).andExpect(status().isOk());
 
-    verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Bob"), any());
+    verify(renderService).getRenderedPage(eq("default"), eq("testPage"), eq("Bob"), any());
   }
 
   @Test
   public void test_getPageAnon() throws Exception {
     this.mockMvc.perform(get("/api/page/get/testPage")).andExpect(status().isOk());
 
-    verify(renderService).getRenderedPage(eq("localhost"), eq("testPage"), eq("Guest"), any());
+    verify(renderService).getRenderedPage(eq("default"), eq("testPage"), eq("Guest"), any());
   }
 
   @Test
@@ -130,7 +130,7 @@ public class PageControllerTest {
 
     verify(renderService)
         .savePage(
-            eq("localhost"),
+            eq("default"),
             eq("testPage"),
             eq("This is some text"),
             isNull(),
@@ -150,7 +150,7 @@ public class PageControllerTest {
 
     verify(renderService)
         .savePage(
-            eq("localhost"),
+            eq("default"),
             eq("testPage"),
             eq("This is some text"),
             isNull(),
@@ -161,7 +161,7 @@ public class PageControllerTest {
     Mockito.doThrow(new PageRevisionException("Bad"))
         .when(renderService)
         .savePage(
-            eq("localhost"),
+            eq("default"),
             eq("errorPage"),
             eq("This is some test"),
             isNull(),
@@ -218,7 +218,7 @@ public class PageControllerTest {
 
     verify(renderService)
         .savePage(
-            eq("localhost"),
+            eq("default"),
             eq("testPage"),
             eq("This is some text"),
             isNull(),
@@ -305,7 +305,7 @@ public class PageControllerTest {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(delete("/api/page/testPage").principal(auth)).andExpect(status().isOk());
 
-    verify(pageUpdateService).deletePage(eq("localhost"), eq("testPage"), eq("Bob"));
+    verify(pageUpdateService).deletePage(eq("default"), eq("testPage"), eq("Bob"));
   }
 
   @Test
@@ -321,7 +321,7 @@ public class PageControllerTest {
         .andExpect(status().isOk());
 
     verify(renderService)
-        .previewPage(eq("localhost"), eq("thisPage"), eq("This is some text"), eq("Bob"), any());
+        .previewPage(eq("default"), eq("thisPage"), eq("This is some text"), eq("Bob"), any());
     this.mockMvc
         .perform(
             post("/api/page/previewPage/")
@@ -331,7 +331,7 @@ public class PageControllerTest {
         .andExpect(status().isOk());
 
     verify(renderService)
-        .previewPage(eq("localhost"), eq(""), eq("This is some text"), eq("Bob"), any());
+        .previewPage(eq("default"), eq(""), eq("This is some text"), eq("Bob"), any());
   }
 
   @Test
@@ -342,12 +342,12 @@ public class PageControllerTest {
         .andExpect(status().isOk());
 
     verify(renderService)
-        .getHistoricalRenderedPage(eq("localhost"), eq("testPage"), eq(1L), eq("Bob"));
+        .getHistoricalRenderedPage(eq("default"), eq("testPage"), eq(1L), eq("Bob"));
 
     this.mockMvc.perform(get("/api/page/getHistorical/testPage/1")).andExpect(status().isOk());
 
     verify(renderService)
-        .getHistoricalRenderedPage(eq("localhost"), eq("testPage"), eq(1L), eq("Guest"));
+        .getHistoricalRenderedPage(eq("default"), eq("testPage"), eq(1L), eq("Guest"));
   }
 
   @Test
@@ -369,7 +369,7 @@ public class PageControllerTest {
             post("/api/page/lock/testPage").contentType(MediaType.APPLICATION_JSON).principal(auth))
         .andExpect(status().isOk());
 
-    verify(pageLockService).getPageLock(eq("localhost"), eq("testPage"), eq("Bob"), eq(false));
+    verify(pageLockService).getPageLock(eq("default"), eq("testPage"), eq("Bob"), eq(false));
 
     this.mockMvc
         .perform(
@@ -378,7 +378,7 @@ public class PageControllerTest {
                 .principal(auth))
         .andExpect(status().isOk());
 
-    verify(pageLockService).getPageLock(eq("localhost"), eq("testPage"), eq("Bob"), eq(true));
+    verify(pageLockService).getPageLock(eq("default"), eq("testPage"), eq("Bob"), eq(true));
   }
 
   @Test
@@ -391,7 +391,7 @@ public class PageControllerTest {
                 .principal(auth))
         .andExpect(status().isOk());
 
-    verify(pageLockService).releasePageLock(eq("localhost"), eq("testPage"), eq("abcd"), eq("Bob"));
+    verify(pageLockService).releasePageLock(eq("default"), eq("testPage"), eq("abcd"), eq("Bob"));
 
     this.mockMvc
         .perform(
@@ -400,7 +400,7 @@ public class PageControllerTest {
                 .principal(auth))
         .andExpect(status().isOk());
 
-    verify(pageLockService).releasePageLock(eq("localhost"), eq(""), eq("abcd"), eq("Bob"));
+    verify(pageLockService).releasePageLock(eq("default"), eq(""), eq("abcd"), eq("Bob"));
   }
 
   @Test
@@ -417,6 +417,6 @@ public class PageControllerTest {
         .andExpect(status().isOk());
 
     verify(pageUpdateService)
-        .movePage(eq("localhost"), eq("Bob"), eq("ns1"), eq("abcPage"), eq("ns2"), eq("defPage"));
+        .movePage(eq("default"), eq("Bob"), eq("ns1"), eq("abcPage"), eq("ns2"), eq("defPage"));
   }
 }

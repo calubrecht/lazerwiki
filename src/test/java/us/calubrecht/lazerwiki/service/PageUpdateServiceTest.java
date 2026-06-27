@@ -31,8 +31,6 @@ public class PageUpdateServiceTest {
 
   @MockitoBean IdRepository idRepository;
 
-  @MockitoBean SiteService siteService;
-
   @MockitoBean NamespaceService namespaceService;
 
   @MockitoBean PageMetaService pageMetaService;
@@ -50,14 +48,13 @@ public class PageUpdateServiceTest {
   @Test
   public void test_savePage() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     User user = new User("someUser", "hash");
     when(userService.getUser("someUser")).thenReturn(user);
 
     pageUpdateService.savePage(
-        "host1",
+        "site1",
         "newPage",
         0L,
         "Some text",
@@ -78,7 +75,7 @@ public class PageUpdateServiceTest {
             eq(Collections.emptyList()),
             eq(Collections.emptyList()));
     // new Page, should regen cache
-    verify(pageLockService).releaseAnyPageLock("host1", "newPage");
+    verify(pageLockService).releaseAnyPageLock("site1", "newPage");
     verify(activityLogService)
         .log(ActivityType.ACTIVITY_PROTO_CREATE_PAGE, "site1", user, "newPage");
     Page p = pageCaptor.getValue();
@@ -91,7 +88,6 @@ public class PageUpdateServiceTest {
   @Test
   public void test_savePage_Existing() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     Page p = new Page();
@@ -106,7 +102,7 @@ public class PageUpdateServiceTest {
     when(userService.getUser("someUser")).thenReturn(user);
 
     pageUpdateService.savePage(
-        "host1",
+        "site1",
         "ns:realPage",
         2L,
         "Some text",
@@ -144,7 +140,6 @@ public class PageUpdateServiceTest {
   @Test
   public void test_savePageDeleted() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     Page p = new Page();
@@ -160,7 +155,7 @@ public class PageUpdateServiceTest {
     when(userService.getUser("someUser")).thenReturn(user);
 
     pageUpdateService.savePage(
-        "host1",
+        "site1",
         "deletedPage",
         2L,
         "Some text",
@@ -193,14 +188,13 @@ public class PageUpdateServiceTest {
   @Test
   public void test_savePage_unauthorized() {
     when(idRepository.getNewId()).thenReturn(55L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(userService.getUser("Joe")).thenReturn(new User("someUser", "hash"));
 
     assertThrows(
         PageWriteException.class,
         () ->
             pageUpdateService.savePage(
-                "host1",
+                "site1",
                 "newPage",
                 0L,
                 "Some text",
@@ -215,13 +209,12 @@ public class PageUpdateServiceTest {
   @Test
   public void test_savePageWithLinks() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
     pageUpdateService.savePage(
-        "host1",
+        "site1",
         "newPage",
         0L,
         "Some text",
@@ -246,13 +239,12 @@ public class PageUpdateServiceTest {
   @Test
   public void test_savePageWithImages() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(userService.getUser("someUser")).thenReturn(new User("someUser", "hash"));
 
     pageUpdateService.savePage(
-        "host1",
+        "site1",
         "newPage",
         0L,
         "Some text",
@@ -272,7 +264,6 @@ public class PageUpdateServiceTest {
   @Test
   public void test_savePageRevisionCheck() throws PageWriteException {
     when(idRepository.getNewId()).thenReturn(55L);
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     Page p = new Page();
@@ -285,7 +276,7 @@ public class PageUpdateServiceTest {
         PageRevisionException.class,
         () ->
             pageUpdateService.savePage(
-                "host1",
+                "site1",
                 "ns:realPage",
                 1L,
                 "Some text",
@@ -298,7 +289,7 @@ public class PageUpdateServiceTest {
     verify(pageRepository, Mockito.never()).save(Mockito.any());
 
     pageUpdateService.savePage(
-        "host1",
+        "site1",
         "ns:realPage",
         1L,
         "Some text",
@@ -314,7 +305,6 @@ public class PageUpdateServiceTest {
 
   @Test
   public void test_deletePage() throws PageWriteException {
-    when(siteService.getSiteForHostname(eq("localhost"))).thenReturn("default");
     when(namespaceService.canDeleteInNamespace(eq("default"), eq(""), eq("bob"))).thenReturn(true);
     User user = new User("bob", "hash");
     when(userService.getUser("bob")).thenReturn(user);
@@ -330,19 +320,19 @@ public class PageUpdateServiceTest {
 
     assertThrows(
         PageWriteException.class,
-        () -> pageUpdateService.deletePage("localhost", "testPage", "frank"));
+        () -> pageUpdateService.deletePage("default", "testPage", "frank"));
 
     assertThrows(
-        PageWriteException.class, () -> pageUpdateService.deletePage("localhost", "", "bob"));
+        PageWriteException.class, () -> pageUpdateService.deletePage("default", "", "bob"));
 
     verify(pageMetaService, never())
         .deleteMetaData(anyString(), any(PageDescriptor.class));
 
-    pageUpdateService.deletePage("localhost", "unknownPage", "bob");
+    pageUpdateService.deletePage("default", "unknownPage", "bob");
     verify(pageMetaService, never())
         .deleteMetaData(anyString(), any(PageDescriptor.class));
 
-    pageUpdateService.deletePage("localhost", "testPage", "bob");
+    pageUpdateService.deletePage("default", "testPage", "bob");
     verify(pageMetaService)
         .deleteMetaData(eq("default"), eq(PageDescriptor.fromFullName(("testPage"))));
     ArgumentCaptor<Page> captor = ArgumentCaptor.forClass(Page.class);
@@ -366,8 +356,6 @@ public class PageUpdateServiceTest {
     when(pageRepository.getBySiteAndNamespaceAndPagename("existingSite", "", ""))
         .thenReturn(new Page());
     when(namespaceService.canWriteNamespace(eq("newSite"), any(), eq("Bob"))).thenReturn(true);
-    when(siteService.getSiteForHostname("site.com")).thenReturn("newSite");
-    when(siteService.getHostForSitename("newSite")).thenReturn("site.com");
     when(userService.getUser("Bob")).thenReturn(new User("Bob", "hash"));
 
     assertFalse(pageUpdateService.createDefaultSiteHomepage("existingSite", "New Site", "Bob"));
@@ -383,7 +371,6 @@ public class PageUpdateServiceTest {
 
   @Test
   void test_movePage() throws PageWriteException {
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canReadNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("someUser"))).thenReturn(true);
     when(namespaceService.canDeleteInNamespace(eq("site1"), any(), any())).thenReturn(true);
@@ -407,7 +394,7 @@ public class PageUpdateServiceTest {
     User user = new User("someUser", "hash");
     when(userService.getUser("someUser")).thenReturn(user);
 
-    pageUpdateService.movePage("host1", "someUser", "ns1", "page1", "ns2", "page2");
+    pageUpdateService.movePage("site1", "someUser", "ns1", "page1", "ns2", "page2");
 
     verify(pageMetaService).moveMetaData("site1", "ns1:page1", "ns2:page2");
 
@@ -441,22 +428,21 @@ public class PageUpdateServiceTest {
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "ns1", "page2"))
         .thenReturn(oldPage);
     MoveStatus status =
-        pageUpdateService.movePage("host1", "someUser", "ns1", "page2", "ns1", "deleted");
+        pageUpdateService.movePage("site1", "someUser", "ns1", "page2", "ns1", "deleted");
     assertTrue(status.success());
   }
 
   @Test
   void test_movePageFails() throws PageWriteException {
-    when(siteService.getSiteForHostname(eq("host1"))).thenReturn("site1");
     when(namespaceService.canWriteNamespace(eq("site1"), any(), eq("user"))).thenReturn(true);
     when(namespaceService.canWriteNamespace(eq("site1"), eq("ns1"), eq("user2"))).thenReturn(true);
     MoveStatus status =
-        pageUpdateService.movePage("host1", "loser", "ns1", "page1", "ns2", "page2");
+        pageUpdateService.movePage("site1", "loser", "ns1", "page1", "ns2", "page2");
 
     assertFalse(status.success());
     assertEquals("You don't have permission to write in ns1", status.message());
 
-    status = pageUpdateService.movePage("host1", "user2", "ns1", "page1", "ns2", "page2");
+    status = pageUpdateService.movePage("site1", "user2", "ns1", "page1", "ns2", "page2");
     assertFalse(status.success());
     assertEquals("You don't have permission to write in ns2", status.message());
 
@@ -467,17 +453,17 @@ public class PageUpdateServiceTest {
     when(pageLockService.getPageLock(any(), eq("lockable:page1"), any(), anyBoolean()))
         .thenReturn(lockSuccess);
 
-    status = pageUpdateService.movePage("host1", "user", "noLock", "page1", "lockable", "page1");
+    status = pageUpdateService.movePage("site1", "user", "noLock", "page1", "lockable", "page1");
     assertFalse(status.success());
     assertEquals("Could not acquire page locks to move page", status.message());
 
-    status = pageUpdateService.movePage("host1", "user", "lockable", "page1", "noLock", "page1");
+    status = pageUpdateService.movePage("site1", "user", "lockable", "page1", "noLock", "page1");
     assertFalse(status.success());
     assertEquals("Could not acquire page locks to move page", status.message());
 
     when(pageRepository.getBySiteAndNamespaceAndPagename("site1", "lockable", "page3"))
         .thenReturn(new Page());
-    status = pageUpdateService.movePage("host1", "user", "lockable", "page2", "lockable", "page3");
+    status = pageUpdateService.movePage("site1", "user", "lockable", "page2", "lockable", "page3");
     assertFalse(status.success());
     assertEquals("page3 already exists, move cannot overwrite it", status.message());
   }

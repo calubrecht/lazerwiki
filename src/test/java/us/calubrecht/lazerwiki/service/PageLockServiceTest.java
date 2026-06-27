@@ -26,21 +26,18 @@ class PageLockServiceTest {
 
   @MockitoBean PageRepository pageRepository;
 
-  @MockitoBean SiteService siteService;
-
   @MockitoBean UserService userService;
 
   @Test
   void test_getPageLock_getCleanLock() {
-    when(siteService.getSiteForHostname("host")).thenReturn("site1");
-    when(pageLockRepository.findBySiteAndNamespaceAndPagename("host", "ns", "page1"))
+    when(pageLockRepository.findBySiteAndNamespaceAndPagename("site1", "ns", "page1"))
         .thenReturn(null);
     when(pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1"))
         .thenReturn(1L);
     User user = new User("Bob", "hash");
     when(userService.getUser("Bob")).thenReturn(user);
 
-    PageLockResponse r = underTest.getPageLock("host", "ns:page1", "Bob", false);
+    PageLockResponse r = underTest.getPageLock("site1", "ns:page1", "Bob", false);
 
     // Successfully acquired a lock for user Bob. Returns latest revision and lock valid time
     assertEquals("page1", r.pagename());
@@ -61,7 +58,6 @@ class PageLockServiceTest {
 
   @Test
   void test_getPageLock_ignoreExpiredLock() {
-    when(siteService.getSiteForHostname("host")).thenReturn("site1");
     LocalDateTime lockTime = LocalDateTime.now().minusSeconds(1);
     User user = new User("Joe", "hash");
     when(userService.getUser("Joe")).thenReturn(user);
@@ -74,7 +70,7 @@ class PageLockServiceTest {
     when(pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1"))
         .thenReturn(1L);
 
-    PageLockResponse r = underTest.getPageLock("host", "ns:page1", "Bob", false);
+    PageLockResponse r = underTest.getPageLock("site1", "ns:page1", "Bob", false);
 
     // Successfully acquired a lock for user Bob. Returns latest revision and lock valid time
     assertEquals("page1", r.pagename());
@@ -95,7 +91,6 @@ class PageLockServiceTest {
 
   @Test
   void test_getPageLock_failIfLocked() {
-    when(siteService.getSiteForHostname("host")).thenReturn("site1");
     LocalDateTime lockTime = LocalDateTime.now().plusSeconds(10);
     User user = new User("Joe", "hash");
     when(userService.getUser("Joe")).thenReturn(user);
@@ -105,7 +100,7 @@ class PageLockServiceTest {
     when(pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1"))
         .thenReturn(1L);
 
-    PageLockResponse r = underTest.getPageLock("host", "ns:page1", "Bob", false);
+    PageLockResponse r = underTest.getPageLock("site1", "ns:page1", "Bob", false);
 
     // Successfully aquired a lock for user Bob. Returns latest revision and lock valid time
     assertEquals("page1", r.pagename());
@@ -120,7 +115,6 @@ class PageLockServiceTest {
 
   @Test
   void test_getPageLock_overrideLock() {
-    when(siteService.getSiteForHostname("host")).thenReturn("site1");
     LocalDateTime lockTime = LocalDateTime.now().plusSeconds(10);
     User user = new User("Joe", "hash");
     when(userService.getUser("JOe")).thenReturn(user);
@@ -132,7 +126,7 @@ class PageLockServiceTest {
     when(pageRepository.getLastRevisionBySiteAndNamespaceAndPagename("site1", "ns", "page1"))
         .thenReturn(1L);
 
-    PageLockResponse r = underTest.getPageLock("host", "ns:page1", "Bob", true);
+    PageLockResponse r = underTest.getPageLock("site1", "ns:page1", "Bob", true);
 
     // Successfully aquired a lock for user Bob. Returns latest revision and lock valid time
     assertEquals("page1", r.pagename());
@@ -150,10 +144,9 @@ class PageLockServiceTest {
 
   @Test
   void test_releasePageLock() {
-    when(siteService.getSiteForHostname("host")).thenReturn("site1");
     User user = new User("Bob", "pass");
     when(userService.getUser("Bob")).thenReturn(user);
-    underTest.releasePageLock("host", "ns:page1", "lockId", "Bob");
+    underTest.releasePageLock("site1", "ns:page1", "lockId", "Bob");
 
     verify(pageLockRepository)
         .deleteBySiteAndNamespaceAndPagenameAndLockIdAndOwner(
@@ -162,8 +155,7 @@ class PageLockServiceTest {
 
   @Test
   void test_releaseAnyPageLock() {
-    when(siteService.getSiteForHostname("host")).thenReturn("site1");
-    underTest.releaseAnyPageLock("host", "ns:page1");
+    underTest.releaseAnyPageLock("site1", "ns:page1");
 
     verify(pageLockRepository).deleteBySiteAndNamespaceAndPagename("site1", "ns", "page1");
   }

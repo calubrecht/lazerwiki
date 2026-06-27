@@ -49,7 +49,7 @@ public class PageController extends LazerWikiController {
     PerfTracker tracker = new PerfTracker();
     PageData pd =
         renderService.getRenderedPage(
-            getHost(request), pageDescriptor.orElse(""), userName, tracker);
+            getSite(request), pageDescriptor.orElse(""), userName, tracker);
     tracker.stopAll();
     return pd;
   }
@@ -84,7 +84,7 @@ public class PageController extends LazerWikiController {
       throws MalformedURLException {
     String userName = getUsername(principal);
     return renderService.getHistoricalRenderedPage(
-        getHost(request), pageDescriptor.orElse(""), revision, userName);
+        getSite(request), pageDescriptor.orElse(""), revision, userName);
   }
 
   @RequestMapping(value = {"/diff/{pageDescriptor}/{rev1}/{rev2}", "/diff/{rev1}/{rev2}"})
@@ -112,7 +112,7 @@ public class PageController extends LazerWikiController {
       HttpServletRequest request,
       @RequestBody SavePageRequest body)
       throws MalformedURLException, PageWriteException {
-    String host = getHost(request);
+    String site = getSite(request);
     String userName = getUsername(principal);
     if (userName.equals(User.GUEST)) {
       logger.info(
@@ -121,7 +121,7 @@ public class PageController extends LazerWikiController {
     try {
       PerfTracker tracker = new PerfTracker();
       renderService.savePage(
-          host,
+          site,
           pageDescriptor.orElse(""),
           body.getText(),
           body.getTags(),
@@ -129,7 +129,7 @@ public class PageController extends LazerWikiController {
           body.isForce(),
           userName);
       PageData pd =
-          renderService.getRenderedPage(host, pageDescriptor.orElse(""), userName, tracker);
+          renderService.getRenderedPage(site, pageDescriptor.orElse(""), userName, tracker);
       tracker.stopAll();
       return pd;
     } catch (PageRevisionException pre) {
@@ -142,7 +142,7 @@ public class PageController extends LazerWikiController {
       @PathVariable String pageDescriptor, Principal principal, HttpServletRequest request)
       throws MalformedURLException, PageWriteException {
     String userName = principal.getName();
-    pageUpdateService.deletePage(getHost(request), pageDescriptor, userName);
+    pageUpdateService.deletePage(getSite(request), pageDescriptor, userName);
   }
 
   @RequestMapping(value = "/listPages")
@@ -196,7 +196,7 @@ public class PageController extends LazerWikiController {
     String userName = principal.getName();
     PerfTracker tracker = new PerfTracker();
     return renderService.previewPage(
-        getHost(request), pageDescriptor.orElse(""), body.getText(), userName, tracker);
+        getSite(request), pageDescriptor.orElse(""), body.getText(), userName, tracker);
   }
 
   @PostMapping(value = {"/lock/{pageDescriptor}", "/lock/"})
@@ -208,7 +208,7 @@ public class PageController extends LazerWikiController {
       throws MalformedURLException {
     String userName = getUsername(principal);
     return pageLockService.getPageLock(
-        getHost(request), pageDescriptor.orElse(""), userName, overrideLock.orElse(false));
+        getSite(request), pageDescriptor.orElse(""), userName, overrideLock.orElse(false));
   }
 
   @PostMapping(value = {"/releaseLock/{pageDescriptor}/id/{lock}", "/releaseLock/id/{lock}"})
@@ -220,7 +220,7 @@ public class PageController extends LazerWikiController {
       throws MalformedURLException {
     String userName = getUsername(principal);
     pageLockService.releasePageLock(
-        getHost(request), pageDescriptor.orElse(""), lock, userName);
+        getSite(request), pageDescriptor.orElse(""), lock, userName);
   }
 
   @PostMapping(value = {"/{pageDescriptor}/movePage"})
@@ -232,7 +232,7 @@ public class PageController extends LazerWikiController {
       throws MalformedURLException, PageWriteException {
     String userName = principal.getName();
     return pageUpdateService.movePage(
-        getHost(request),
+        getSite(request),
         userName,
         movePageRequest.oldNS(),
         movePageRequest.oldPage(),
