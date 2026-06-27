@@ -40,7 +40,7 @@ public class SitemapService {
         wsg.addUrl(sitemapUrl);
       }
     }
-    MediaListResponse mediaList = mediaService.getAllFiles(url.getHost(), null);
+    MediaListResponse mediaList = mediaService.getAllFiles(site, null);
     for (String ns : mediaList.media().keySet().stream().sorted().toList()) {
       List<MediaRecord> mediaItems = mediaList.media().get(ns);
       for (MediaRecord media : mediaItems) {

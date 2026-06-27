@@ -19,7 +19,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 
 @RestController
 @RequestMapping("api/history/")
-public class HistoryController {
+public class HistoryController extends LazerWikiController{
   @Autowired PageService pageService;
 
   @Autowired MediaService mediaService;
@@ -27,10 +27,9 @@ public class HistoryController {
   @RequestMapping(value = "/recentChanges")
   public RecentChangesResponse recentChanges(Principal principal, HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = principal == null ? User.GUEST : principal.getName();
-    RecentChangesResponse pageChanges = pageService.recentChanges(url.getHost(), userName);
-    List<MediaHistoryRecord> mediaChanges = mediaService.getRecentChanges(url.getHost(), userName);
+    RecentChangesResponse pageChanges = pageService.recentChanges(getSite(request), userName);
+    List<MediaHistoryRecord> mediaChanges = mediaService.getRecentChanges(getSite(request), userName);
     List<Object> merged = mergePageAndMedia(pageChanges.changes(), mediaChanges);
     return new RecentChangesResponse(pageChanges.changes(), mediaChanges, merged);
   }

@@ -1,6 +1,7 @@
 package us.calubrecht.lazerwiki.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import us.calubrecht.lazerwiki.model.*;
 import us.calubrecht.lazerwiki.service.MediaService;
 import us.calubrecht.lazerwiki.service.PageService;
 import us.calubrecht.lazerwiki.service.PageServiceTest;
+import us.calubrecht.lazerwiki.service.SiteService;
 
 @WebMvcTest(controllers = {HistoryController.class, VersionController.class})
 @ActiveProfiles("test")
@@ -37,9 +39,13 @@ class HistoryControllerTest {
 
   @MockitoBean PageService pageService;
 
+  @MockitoBean SiteService siteService;
+
   @Test
   void test_recentChanges() throws Exception {
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
+
+    when(siteService.getSiteForHostname(anyString())).thenReturn("site1");
 
     List<MediaHistoryRecord> medias = new ArrayList<>();
     User user = new User("Bob", "hash");
@@ -62,21 +68,21 @@ class HistoryControllerTest {
         new RecentChangesResponse(
             pages.stream().map(RecentChangesResponse::recFor).toList(), null, null);
 
-    when(mediaService.getRecentChanges("localhost", "Bob")).thenReturn(medias);
-    when(pageService.recentChanges("localhost", "Bob")).thenReturn(pagesRes);
+    when(mediaService.getRecentChanges("site1", "Bob")).thenReturn(medias);
+    when(pageService.recentChanges("site1", "Bob")).thenReturn(pagesRes);
     this.mockMvc
         .perform(get("/api/history/recentChanges").principal(auth))
         .andExpect(status().isOk());
 
-    verify(mediaService).getRecentChanges(eq("localhost"), eq("Bob"));
-    verify(pageService).recentChanges(eq("localhost"), eq("Bob"));
+    verify(mediaService).getRecentChanges(eq("site1"), eq("Bob"));
+    verify(pageService).recentChanges(eq("site1"), eq("Bob"));
 
-    when(mediaService.getRecentChanges("localhost", "Guest")).thenReturn(Collections.emptyList());
-    when(pageService.recentChanges("localhost", "Guest"))
+    when(mediaService.getRecentChanges("site1", "Guest")).thenReturn(Collections.emptyList());
+    when(pageService.recentChanges("site1", "Guest"))
         .thenReturn(new RecentChangesResponse(Collections.emptyList(), null, null));
     this.mockMvc.perform(get("/api/history/recentChanges")).andExpect(status().isOk());
-    verify(mediaService).getRecentChanges(eq("localhost"), eq("Guest"));
-    verify(pageService).recentChanges(eq("localhost"), eq("Guest"));
+    verify(mediaService).getRecentChanges(eq("site1"), eq("Guest"));
+    verify(pageService).recentChanges(eq("site1"), eq("Guest"));
   }
 
   @Test

@@ -3,8 +3,6 @@ package us.calubrecht.lazerwiki.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLConnection;
 import java.security.Principal;
 import java.time.Duration;
@@ -30,7 +28,7 @@ import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
 @RestController
 @RequestMapping("_media/")
-public class MediaController {
+public class MediaController extends LazerWikiController {
   final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Autowired MediaService mediaService;
@@ -42,7 +40,7 @@ public class MediaController {
       Principal principal,
       HttpServletRequest request) {
     try {
-      URL url = URI.create(request.getRequestURL().toString()).toURL();
+      String site = getSite(request);
       String size = requestParams.keySet().stream().findAny().orElse(null);
       String userName = principal == null ? null : principal.getName();
       String mimeType = URLConnection.guessContentTypeFromName(fileName);
@@ -55,8 +53,8 @@ public class MediaController {
           .cacheControl(CacheControl.maxAge(Duration.ofDays(10)).mustRevalidate())
           .header("Content-Disposition", "attachment; filename=" + fileName)
           .header("X-Content-Type-Options", "nosniff")
-          .lastModified(mediaService.getFileLastModified(url.getHost(), fileName))
-          .body(mediaService.getBinaryFile(url.getHost(), userName, fileName, size));
+          .lastModified(mediaService.getFileLastModified(site, fileName))
+          .body(mediaService.getBinaryFile(site, userName, fileName, size));
     } catch (IOException e) {
       return ResponseEntity.notFound().build();
     } catch (MediaReadException | MediaWriteException e) {
@@ -72,14 +70,14 @@ public class MediaController {
       HttpServletRequest request)
       throws IOException {
     try {
-      URL url = URI.create(request.getRequestURL().toString()).toURL();
+      String site = getSite(request);
       String userName = principal.getName();
       String mimeType = URLConnection.guessContentTypeFromName(file.getOriginalFilename());
       if (!mimeType.startsWith("image/")) {
         logger.error("Upload failed invalidMimeType: {} {}", mimeType, file.getOriginalFilename());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
       }
-      mediaService.saveFile(url.getHost(), userName, file, namespace);
+      mediaService.saveFile(site, userName, file, namespace);
       return ResponseEntity.ok("Upload successful");
     } catch (MediaWriteException | MediaReadException e) {
       logger.error("Upload failed because: " + e.getMessage());
@@ -91,12 +89,12 @@ public class MediaController {
   public ResponseEntity<MoveStatus> moveFile(
       Principal principal, HttpServletRequest request, @RequestBody MoveFileRequest moveFileRequest)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
+    String site = getSite(request);
     String userName = principal.getName();
     try {
       return ResponseEntity.ok(
           mediaService.moveImage(
-              url.getHost(),
+              site,
               userName,
               moveFileRequest.oldNS(),
               moveFileRequest.oldFile(),
@@ -110,19 +108,17 @@ public class MediaController {
   @GetMapping("list")
   MediaListResponse listFiles(Principal principal, HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = principal == null ? null : principal.getName();
-    return mediaService.getAllFiles(url.getHost(), userName);
+    return mediaService.getAllFiles(getSite(request), userName);
   }
 
   @DeleteMapping("{fileName}")
   public ResponseEntity<Void> deleteFile(
       @PathVariable String fileName, Principal principal, HttpServletRequest request)
       throws IOException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = principal.getName();
     try {
-      mediaService.deleteFile(url.getHost(), fileName, userName);
+      mediaService.deleteFile(getSite(request), fileName, userName);
       return ResponseEntity.ok().build();
     } catch (MediaWriteException | MediaReadException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -132,8 +128,7 @@ public class MediaController {
   @RequestMapping(value = "/recentChanges")
   public List<MediaHistoryRecord> recentChanges(Principal principal, HttpServletRequest request)
       throws MalformedURLException {
-    URL url = URI.create(request.getRequestURL().toString()).toURL();
     String userName = principal == null ? User.GUEST : principal.getName();
-    return mediaService.getRecentChanges(url.getHost(), userName);
+    return mediaService.getRecentChanges(getSite(request), userName);
   }
 }

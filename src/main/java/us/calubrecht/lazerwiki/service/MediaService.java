@@ -32,8 +32,6 @@ import us.calubrecht.lazerwiki.util.ImageUtil;
 @Service
 public class MediaService {
   final Logger logger = LogManager.getLogger(getClass());
-  @Autowired SiteService siteService;
-
   @Autowired MediaRecordRepository mediaRecordRepository;
 
   @Autowired NamespaceService namespaceService;
@@ -87,9 +85,8 @@ public class MediaService {
   }
 
   @Transactional(readOnly = true)
-  public byte[] getBinaryFile(String host, String userName, String fileName, String size)
+  public byte[] getBinaryFile(String site, String userName, String fileName, String size)
       throws IOException, MediaReadException {
-    String site = siteService.getSiteForHostname(host);
     Pair<String, String> splitFile = getNamespace(fileName);
     if (!namespaceService.canReadNamespace(site, splitFile.getLeft(), userName)) {
       throw new MediaReadException("Not permissioned to read this file");
@@ -130,9 +127,8 @@ public class MediaService {
   }
 
   @Transactional
-  public void saveFile(String host, String userName, MultipartFile mfile, String namespace)
+  public void saveFile(String site, String userName, MultipartFile mfile, String namespace)
       throws IOException, MediaReadException, MediaWriteException {
-    String site = siteService.getSiteForHostname(host);
     if (!namespaceService.canUploadInNamespace(site, namespace, userName)) {
       throw new MediaWriteException("Not permissioned to write this file");
     }
@@ -195,14 +191,13 @@ public class MediaService {
 
   @Transactional
   public MoveStatus moveImage(
-      String host,
+      String site,
       String userName,
       String oldFileNS,
       String oldFileName,
       String newFileNS,
       String newFileName)
       throws MediaWriteException, MediaReadException, IOException {
-    String site = siteService.getSiteForHostname(host);
 
     if (!namespaceService.canUploadInNamespace(site, oldFileNS, userName)) {
       return new MoveStatus(false, "You don't have permission to upload in " + oldFileNS);
@@ -288,8 +283,7 @@ public class MediaService {
   }
 
   @Transactional(readOnly = true)
-  public MediaListResponse getAllFiles(String host, String userName) {
-    String site = siteService.getSiteForHostname(host);
+  public MediaListResponse getAllFiles(String site, String userName) {
     List<MediaRecord> mediaRecords =
         namespaceService.filterReadableMedia(
             mediaRecordRepository.findAllBySiteOrderByFileName(site), site, userName);
@@ -302,9 +296,8 @@ public class MediaService {
   }
 
   @Transactional
-  public void deleteFile(String host, String fileName, String userName)
+  public void deleteFile(String site, String fileName, String userName)
       throws IOException, MediaReadException, MediaWriteException {
-    String site = siteService.getSiteForHostname(host);
     Pair<String, String> splitFile = getNamespace(fileName);
     String nsPath = splitFile.getLeft().replace(":", "/");
     if (!namespaceService.canDeleteInNamespace(site, splitFile.getLeft(), userName)) {
@@ -328,9 +321,8 @@ public class MediaService {
     Files.delete(f.toPath());
   }
 
-  public long getFileLastModified(String host, String fileName)
+  public long getFileLastModified(String site, String fileName)
       throws IOException, MediaReadException, MediaWriteException {
-    String site = siteService.getSiteForHostname(host);
     Pair<String, String> splitFile = getNamespace(fileName);
     String nsPath = splitFile.getLeft().replace(":", "/");
     File f = getFileInNS(site, nsPath, splitFile.getRight());
@@ -339,8 +331,7 @@ public class MediaService {
   }
 
   @Transactional(readOnly = true)
-  public List<MediaHistoryRecord> getRecentChanges(String host, String user) {
-    String site = siteService.getSiteForHostname(host);
+  public List<MediaHistoryRecord> getRecentChanges(String site, String user) {
     List<String> namespaces = namespaceService.getReadableNamespaces(site, user);
     return mediaHistoryRepository.findAllBySiteAndNamespaceInOrderByTsDesc(
         Limit.of(10), site, namespaces);

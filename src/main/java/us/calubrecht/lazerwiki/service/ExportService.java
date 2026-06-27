@@ -34,8 +34,6 @@ public class ExportService {
   @Value("${lazerwiki.static.file.root}")
   String staticFileRoot;
 
-  @Autowired SiteService siteService;
-
   @Autowired PageService pageService;
 
   @Autowired MediaService mediaService;
@@ -83,14 +81,13 @@ public class ExportService {
           taos.closeArchiveEntry();
         }
       }
-      String hostName = siteService.getHostForSitename(site);
-      MediaListResponse mediaList = mediaService.getAllFiles(hostName, null);
+      MediaListResponse mediaList = mediaService.getAllFiles(site, null);
       for (String ns : mediaList.media().keySet().stream().sorted().toList()) {
         List<MediaRecord> mediaItems = mediaList.media().get(ns);
         for (MediaRecord media : mediaItems) {
           Path filePath = toPath("media", media.getNamespace(), media.getFileName());
           try {
-            byte[] data = mediaService.getBinaryFile(hostName, user, media.getPath(), null);
+            byte[] data = mediaService.getBinaryFile(site, user, media.getPath(), null);
 
             TarArchiveEntry entry = new TarArchiveEntry(filePath.toString());
             entry.setSize(data.length);

@@ -27,6 +27,7 @@ import us.calubrecht.lazerwiki.model.User;
 import us.calubrecht.lazerwiki.responses.MediaListResponse;
 import us.calubrecht.lazerwiki.responses.NsNode;
 import us.calubrecht.lazerwiki.service.MediaService;
+import us.calubrecht.lazerwiki.service.SiteService;
 import us.calubrecht.lazerwiki.service.exception.MediaReadException;
 import us.calubrecht.lazerwiki.service.exception.MediaWriteException;
 
@@ -38,25 +39,28 @@ class MediaControllerTest {
 
   @MockitoBean MediaService mediaService;
 
+  @MockitoBean SiteService siteService;
+
   @Test
   void test_getFile() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/_media/someFile.jpg").principal(auth)).andExpect(status().isOk());
 
-    verify(mediaService).getBinaryFile(eq("localhost"), eq("Bob"), eq("someFile.jpg"), isNull());
+    verify(mediaService).getBinaryFile(eq("site1"), eq("Bob"), eq("someFile.jpg"), isNull());
 
     this.mockMvc.perform(get("/_media/some.unknown_filetype")).andExpect(status().isOk());
     verify(mediaService)
-        .getBinaryFile(eq("localhost"), eq(null), eq("some.unknown_filetype"), isNull());
+        .getBinaryFile(eq("site1"), eq(null), eq("some.unknown_filetype"), isNull());
 
-    when(mediaService.getBinaryFile(eq("localhost"), eq("Bob"), eq("explosive.file"), isNull()))
+    when(mediaService.getBinaryFile(eq("site1"), eq("Bob"), eq("explosive.file"), isNull()))
         .thenThrow(new IOException(""));
     this.mockMvc
         .perform(get("/_media/explosive.file").principal(auth))
         .andExpect(status().isNotFound());
 
     Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
-    when(mediaService.getBinaryFile(eq("localhost"), eq("Joe"), any(), isNull()))
+    when(mediaService.getBinaryFile(eq("site1"), eq("Joe"), any(), isNull()))
         .thenThrow(new MediaReadException(""));
     this.mockMvc
         .perform(get("/_media/forbidden.file").principal(authJoe))
@@ -65,16 +69,18 @@ class MediaControllerTest {
 
   @Test
   public void test_getFile_WithSize() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(get("/_media/someFile.jpg?10x10").principal(auth))
         .andExpect(status().isOk());
 
-    verify(mediaService).getBinaryFile(eq("localhost"), eq("Bob"), eq("someFile.jpg"), eq("10x10"));
+    verify(mediaService).getBinaryFile(eq("site1"), eq("Bob"), eq("someFile.jpg"), eq("10x10"));
   }
 
   @Test
   void test_saveFile() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     MockMultipartFile mfile =
         new MockMultipartFile(
@@ -85,12 +91,12 @@ class MediaControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().string("Upload successful"));
 
-    verify(mediaService).saveFile(eq("localhost"), eq("Bob"), eq(mfile), eq("ns"));
+    verify(mediaService).saveFile(eq("site1"), eq("Bob"), eq(mfile), eq("ns"));
 
     Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
     Mockito.doThrow(new MediaWriteException(""))
         .when(mediaService)
-        .saveFile(eq("localhost"), eq("Joe"), eq(mfile), eq("ns"));
+        .saveFile(eq("site1"), eq("Joe"), eq(mfile), eq("ns"));
     this.mockMvc
         .perform(
             multipart("/_media/upload").file(mfile).param("namespace", "ns").principal(authJoe))
@@ -138,15 +144,16 @@ class MediaControllerTest {
 
   @Test
   void test_deleteFile() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc
         .perform(delete("/_media/delete.file.jpg").principal(auth))
         .andExpect(status().isOk());
-    verify(mediaService).deleteFile("localhost", "delete.file.jpg", "Bob");
+    verify(mediaService).deleteFile("site1", "delete.file.jpg", "Bob");
 
     Mockito.doThrow(new MediaWriteException(""))
         .when(mediaService)
-        .deleteFile(eq("localhost"), eq("unauthfile.jpg"), eq("Joe"));
+        .deleteFile(eq("site1"), eq("unauthfile.jpg"), eq("Joe"));
     Authentication authJoe = new UsernamePasswordAuthenticationToken("Joe", "password1");
     this.mockMvc
         .perform(delete("/_media/unauthfile.jpg").principal(authJoe))
@@ -155,17 +162,19 @@ class MediaControllerTest {
 
   @Test
   void test_recentChanges() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     this.mockMvc.perform(get("/_media/recentChanges").principal(auth)).andExpect(status().isOk());
 
-    verify(mediaService).getRecentChanges(eq("localhost"), eq("Bob"));
+    verify(mediaService).getRecentChanges(eq("site1"), eq("Bob"));
 
     this.mockMvc.perform(get("/_media/recentChanges")).andExpect(status().isOk());
-    verify(mediaService).getRecentChanges(eq("localhost"), eq("Guest"));
+    verify(mediaService).getRecentChanges(eq("site1"), eq("Guest"));
   }
 
   @Test
   void test_moveFile() throws Exception {
+    when(siteService.getSiteForHostname("localhost")).thenReturn("site1");
     Authentication auth = new UsernamePasswordAuthenticationToken("Bob", "password1");
     String data =
         "{\"oldNS\": \"ns1\", \"oldFile\": \"img.jpg\", \"newNS\": \"ns2\", \"newFile\": \"img2.jpg\"}";
@@ -177,10 +186,10 @@ class MediaControllerTest {
                 .principal(auth))
         .andExpect(status().isOk());
 
-    verify(mediaService).moveImage("localhost", "Bob", "ns1", "img.jpg", "ns2", "img2.jpg");
+    verify(mediaService).moveImage("site1", "Bob", "ns1", "img.jpg", "ns2", "img2.jpg");
 
     // Check error.
-    when(mediaService.moveImage("localhost", "Bob", "ns1", "img.jpg", "ns2", "img3.jpg"))
+    when(mediaService.moveImage("site1", "Bob", "ns1", "img.jpg", "ns2", "img3.jpg"))
         .thenThrow(new MediaWriteException("File already exists"));
     String data2 =
         "{\"oldNS\": \"ns1\", \"oldFile\": \"img.jpg\", \"newNS\": \"ns2\", \"newFile\": \"img3.jpg\"}";

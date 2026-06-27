@@ -41,9 +41,6 @@ class ExportServiceTest {
     @MockitoBean
     MediaService mediaService;
 
-    @MockitoBean
-    SiteService siteService;
-
     @Value("${lazerwiki.static.file.root}")
     String staticFileRoot;
 
@@ -106,7 +103,6 @@ class ExportServiceTest {
 
     @Test
     void test_createExportBundle() throws IOException, MediaReadException, MediaWriteException {
-        when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
         Map<String, List<PageDesc>> pages =
                 Map.of(
                         "", List.of(desc("", ""), desc("", "FirstPage")),
@@ -131,7 +127,7 @@ class ExportServiceTest {
                                 "", List.of(circle),
                                 "ns", List.of(circleDot)),
                         null);
-        when(mediaService.getAllFiles(eq("localhost"), isNull())).thenReturn(mediaList);
+        when(mediaService.getAllFiles(eq("default"), isNull())).thenReturn(mediaList);
         when(mediaService.getBinaryFile(anyString(), anyString(), eq("circle.png"), isNull()))
                 .thenReturn(getBinaryFile("circle.png"));
         when(mediaService.getBinaryFile(anyString(), anyString(), eq("ns/circleWdot.png"), isNull()))
@@ -209,7 +205,6 @@ class ExportServiceTest {
     @Test
     void test_createExportBunde_MissingFile()
             throws MediaReadException, MediaWriteException, IOException {
-        when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
         Map<String, List<PageDesc>> pages = Map.of("", List.of(desc("", "")));
         PageData rootPage = new PageData("", "This is the root page", List.of("root"), null, null);
         when(pageService.getPageData(eq("default"), eq(""), eq("george"))).thenReturn(rootPage);
@@ -224,7 +219,7 @@ class ExportServiceTest {
                                 "", List.of(circle),
                                 "ns", List.of(circleDot)),
                         null);
-        when(mediaService.getAllFiles(eq("localhost"), isNull())).thenReturn(mediaList);
+        when(mediaService.getAllFiles(eq("default"), isNull())).thenReturn(mediaList);
 
         when(mediaService.getBinaryFile(anyString(), anyString(), eq("circle.png"), isNull()))
                 .thenReturn(getBinaryFile("circle.png"));
@@ -265,7 +260,6 @@ class ExportServiceTest {
 
     @Test
     void test_createExportBunde_MediaReadException() throws MediaReadException, IOException {
-        when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
         Map<String, List<PageDesc>> pages = Map.of("", List.of(desc("", "")));
         PageData rootPage = new PageData("", "This is the root page", List.of("root"), null, null);
         when(pageService.getPageData(eq("default"), eq(""), eq("george"))).thenReturn(rootPage);
@@ -280,7 +274,7 @@ class ExportServiceTest {
                                 "", List.of(circle),
                                 "ns", List.of(circleDot)),
                         null);
-        when(mediaService.getAllFiles(eq("localhost"), isNull())).thenReturn(mediaList);
+        when(mediaService.getAllFiles(eq("default"), isNull())).thenReturn(mediaList);
 
         when(mediaService.getBinaryFile(anyString(), anyString(), eq("circle.png"), isNull()))
                 .thenReturn(getBinaryFile("circle.png"));
@@ -324,7 +318,6 @@ class ExportServiceTest {
     @Test
     public void test_createExportBundle_MissingResources() throws IOException {
         underTest.staticFileRoot = Path.of(staticFileRoot, "missingDir").toString();
-        when(siteService.getHostForSitename(anyString())).thenReturn("localhost");
         Map<String, List<PageDesc>> pages =
                 Map.of(
                         "", List.of(desc("", "")));
@@ -333,7 +326,7 @@ class ExportServiceTest {
         PageListResponse response = new PageListResponse(pages, null);
         when(pageService.getAllPages(eq("default"), eq("george"))).thenReturn(response);
         MediaListResponse mediaList = new MediaListResponse(Map.of(), null);
-        when(mediaService.getAllFiles(eq("localhost"), isNull())).thenReturn(mediaList);
+        when(mediaService.getAllFiles(eq("default"), isNull())).thenReturn(mediaList);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 

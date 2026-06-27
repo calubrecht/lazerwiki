@@ -54,7 +54,7 @@ public class SitemapServiceTest {
     when(pageService.getAllPages(eq("default"), isNull())).thenReturn(pageResponse);
     Map<String, List<MediaRecord>> mediaMap = new HashMap<>();
     MediaListResponse mediaResponse = new MediaListResponse(mediaMap, null);
-    when(mediaService.getAllFiles(eq("localhost"), isNull())).thenReturn(mediaResponse);
+    when(mediaService.getAllFiles(eq("default"), isNull())).thenReturn(mediaResponse);
     String res = underTest.getSitemap(new URL("http://localhost:8080/sitemap.xml"));
     DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
     Document doc = builder.parse(new InputSource(new StringReader(res)));
@@ -82,7 +82,7 @@ public class SitemapServiceTest {
     mediaMap.put("", List.of(mediaRecord("", "file.jpg", 1010)));
     mediaMap.put("ns1", List.of(mediaRecord("ns1", "file2.jpg", 0)));
     MediaListResponse mediaResponse = new MediaListResponse(mediaMap, null);
-    when(mediaService.getAllFiles(eq("localhost"), isNull())).thenReturn(mediaResponse);
+    when(mediaService.getAllFiles(eq("default"), isNull())).thenReturn(mediaResponse);
     String res = underTest.getSitemap(new URL("http://localhost:8080/sitemap.xml"));
     DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
     Document doc = builder.parse(new InputSource(new StringReader(res)));
