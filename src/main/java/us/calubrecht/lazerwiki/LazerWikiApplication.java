@@ -27,6 +27,9 @@ public class LazerWikiApplication extends SpringBootServletInitializer {
   @Value("${app.version}")
   private String appVersion;
 
+  @Value("${server.servlet.session.cookie.secure:true}")
+  private boolean sessionCookieSecure;
+
   public static void main(String[] args) {
     SpringApplication.run(LazerWikiApplication.class, args);
   }
@@ -40,7 +43,7 @@ public class LazerWikiApplication extends SpringBootServletInitializer {
   public void onStartup(@NonNull ServletContext servletContext) throws ServletException {
     super.onStartup(servletContext);
     servletContext.getSessionCookieConfig().setMaxAge(90 * 24 * 60 * 60);
-    servletContext.getSessionCookieConfig().setSecure(true);
+    servletContext.getSessionCookieConfig().setSecure(sessionCookieSecure);
     servletContext.setSessionTimeout(90 * 24 * 60);
   }
 
