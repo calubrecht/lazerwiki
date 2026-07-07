@@ -46,14 +46,14 @@ public class SiteService {
     if (s != null) {
       return s.name;
     }
-    return siteRepository.findByHostname("*").name;
+    return getDefaultSite().name;
   }
 
   @Transactional(readOnly = true)
   public String getSiteNameForHostname(String hostname) {
     Site s = siteRepository.findByHostname(hostname.toLowerCase());
     if (s == null) {
-      s = siteRepository.findByHostname("*");
+      s = getDefaultSite();
     }
     if (s == null || s.siteName == null) {
       return defaultTitle;
@@ -61,24 +61,16 @@ public class SiteService {
     return s.siteName;
   }
 
-  @Transactional(readOnly = true)
-  public Object getSettingForHostname(String hostname, String setting) {
-    Site s = siteRepository.findByHostname(hostname.toLowerCase());
-    if (s == null || !s.settings.containsKey(setting)) {
-      s = siteRepository.findByHostname("*");
-    }
-    if (s == null) {
-      return null;
-    }
-    return s.settings.get(setting);
+  public Site getDefaultSite() {
+    return siteRepository.findByHostname("*");
   }
 
   @Transactional(readOnly = true)
   public Object getSettingForSite(String site, String setting) {
     Optional<Site> sOpt = siteRepository.findById(site);
     Site s = sOpt.filter(ss -> ss.settings.containsKey(setting)).orElse(null);
-    if (s == null) {
-      s = siteRepository.findByHostname("*");
+    if (s == null ) {
+      s = getDefaultSite();
     }
     if (s == null) {
       return null;

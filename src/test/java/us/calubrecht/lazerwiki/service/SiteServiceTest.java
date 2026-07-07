@@ -69,24 +69,24 @@ public class SiteServiceTest {
    * <p>return null; } return s.settings.get(setting); }
    */
   @Test
-  public void test_getSettingForHostname() {
+  public void test_getSettingForSite() {
     Site noSettingSite = new Site();
     noSettingSite.settings = Map.of();
     Site defSite = new Site();
     defSite.settings = Map.of("setting1", "value");
     Site settingSite = new Site();
     settingSite.settings = Map.of("setting1", "othervalue");
-    when(repository.findByHostname("site1")).thenReturn(noSettingSite);
-    when(repository.findByHostname("site2")).thenReturn(settingSite);
+    when(repository.findById("site1")).thenReturn(Optional.of(noSettingSite));
+    when(repository.findById("site2")).thenReturn(Optional.of(settingSite));
     when(repository.findByHostname("*")).thenReturn(defSite);
 
-    assertEquals("value", underTest.getSettingForHostname("site1", "setting1"));
-    assertEquals("othervalue", underTest.getSettingForHostname("site2", "setting1"));
+    assertEquals("value", underTest.getSettingForSite("site1", "setting1"));
+    assertEquals("othervalue", underTest.getSettingForSite("site2", "setting1"));
   }
 
   @Test
-  public void test_getSettingForHostnameNoSettings() {
-    assertEquals(null, underTest.getSettingForHostname("site1", "setting1"));
+  public void test_getSettingForSiteNoSettings() {
+    assertEquals(null, underTest.getSettingForSite("site1", "setting1"));
   }
 
   @Test
