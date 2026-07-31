@@ -297,6 +297,8 @@ public class MacroService {
       subrenderContext.renderState().putAll(renderContext.renderState());
       // Allow inner page render to generate its own title
       subrenderContext.renderState().remove(RenderResult.RenderStateKeys.TITLE.name());
+      // Suppress TOC on inner page render
+      subrenderContext.renderState().put(RenderResult.RenderStateKeys.TOC.name(), false);
       RenderResult res = renderContext.renderer().renderWithInfo(markup, subrenderContext);
       return new RenderOutputImpl(res.renderedText(), res.renderState());
     }
