@@ -2,8 +2,6 @@ package us.calubrecht.lazerwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +17,7 @@ import us.calubrecht.lazerwiki.service.PageService;
 
 @RestController
 @RequestMapping("api/history/")
-public class HistoryController extends LazerWikiController{
+public class HistoryController extends LazerWikiController {
   @Autowired PageService pageService;
 
   @Autowired MediaService mediaService;

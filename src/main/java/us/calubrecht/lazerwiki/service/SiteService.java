@@ -69,7 +69,7 @@ public class SiteService {
   public Object getSettingForSite(String site, String setting) {
     Optional<Site> sOpt = siteRepository.findById(site);
     Site s = sOpt.filter(ss -> ss.settings.containsKey(setting)).orElse(null);
-    if (s == null ) {
+    if (s == null) {
       s = getDefaultSite();
     }
     if (s == null) {
