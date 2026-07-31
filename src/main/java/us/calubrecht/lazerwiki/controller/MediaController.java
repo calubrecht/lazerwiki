@@ -51,7 +51,7 @@ public class MediaController extends LazerWikiController {
       return ResponseEntity.ok()
           .contentType(mediaType)
           .cacheControl(CacheControl.maxAge(Duration.ofDays(10)).mustRevalidate())
-          .header("Content-Disposition", "attachment; filename=" + fileName)
+            .header("Content-Disposition", "inline; filename=" + fileName)
           .header("X-Content-Type-Options", "nosniff")
           .lastModified(mediaService.getFileLastModified(site, fileName))
           .body(mediaService.getBinaryFile(site, userName, fileName, size));
