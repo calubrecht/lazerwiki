@@ -345,6 +345,16 @@ public class PageService {
     return m.matches();
   }
 
+  boolean nsIn(String ns, String rootNS) {
+    if (ns.equals(rootNS)) { // A NS isn't in itself
+      return false;
+    }
+    if (rootNS.isEmpty()) { // Every NS is in the root NS
+      return true;
+    }
+    return ns.startsWith(rootNS + ":");
+  }
+
   List<String> getNamespaces(String rootNS, List<PageDesc> pages) {
     return pages.stream()
         .map(PageDesc::getNamespace)
@@ -360,7 +370,7 @@ public class PageService {
               return namespaces.stream();
             })
         .distinct()
-        .filter(ns -> ns.startsWith(rootNS) && !ns.equals(rootNS))
+        .filter(ns -> nsIn(ns, rootNS))
         .filter(ns -> !ns.substring(rootNS.length() + 1).contains(":"))
         .sorted()
         .toList();
