@@ -67,8 +67,7 @@ public class PageController extends LazerWikiController {
     String userName = getUsername(principal);
     try {
       return ResponseEntity.ok(
-          pageService.getPageHistory(
-              getSite(request), pageDescriptor.orElse(""), userName));
+          pageService.getPageHistory(getSite(request), pageDescriptor.orElse(""), userName));
     } catch (PageReadException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -219,8 +218,7 @@ public class PageController extends LazerWikiController {
       HttpServletRequest request)
       throws MalformedURLException {
     String userName = getUsername(principal);
-    pageLockService.releasePageLock(
-        getSite(request), pageDescriptor.orElse(""), lock, userName);
+    pageLockService.releasePageLock(getSite(request), pageDescriptor.orElse(""), lock, userName);
   }
 
   @PostMapping(value = {"/{pageDescriptor}/movePage"})

@@ -25,7 +25,11 @@ import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 @SpringBootTest(
-    classes = {MacroService.class, CustomWikiRenderer.class, CustomWikiRendererTest.TestConfig.class},
+    classes = {
+      MacroService.class,
+      CustomWikiRenderer.class,
+      CustomWikiRendererTest.TestConfig.class
+    },
     properties = {"lazerwiki.plugin.scan.packages=us.calubrecht.lazerwiki.service"})
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -97,8 +101,7 @@ class MacroServiceTest {
   @Test
   @Order(4)
   void test_macroContextImplRenderPage() {
-    RenderContext context =
-        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    RenderContext context = new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     PageData page = new PageData(null, "**Hi**", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("existsPage"), anyString())).thenReturn(page);
@@ -165,8 +168,7 @@ class MacroServiceTest {
             "", "", null, null, new PageData.PageFlags(true, false, false, true, true, false));
     when(pageService.getPageData(any(), eq("noPage"), any())).thenReturn(none);
     when(pageService.getPageData(any(), eq("forbiddenPage"), any())).thenReturn(forbidden);
-    RenderContext context =
-        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    RenderContext context = new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     assertEquals("", macroContext.getCachedRender("noPage").getHtml());
     assertEquals("", macroContext.getCachedRender("forbiddenPage").getHtml());
@@ -232,8 +234,7 @@ class MacroServiceTest {
                     "plaintextCache",
                     true)));
 
-    RenderContext context =
-        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    RenderContext context = new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     Map<String, Macro.MacroContext.RenderOutput> res =
         macroContext.getCachedRenders(
@@ -251,8 +252,7 @@ class MacroServiceTest {
   @Test
   @Order(7)
   void test_setPageDontCache() {
-    RenderContext context =
-        new RenderContext("default", "page", "user", renderer, new HashMap<>());
+    RenderContext context = new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     macroContext.setPageDontCache();
     assertEquals(true, context.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));

@@ -31,7 +31,7 @@ public class CustomWikiRendererTest {
 
   @Configuration
   @ComponentScan({"us.calubrecht.lazerwiki.syntax"})
-  public static class TestConfig {} 
+  public static class TestConfig {}
 
   @MockitoBean PageService pageService;
 
@@ -247,8 +247,7 @@ public class CustomWikiRendererTest {
   @Test
   public void test_renderLinkeSanitize() {
     String maliciousText = "[[ns:page|<script>someScript</script>]]";
-    RenderResult renderRes =
-        underTest.renderWithInfo(maliciousText, "site", "page", "user");
+    RenderResult renderRes = underTest.renderWithInfo(maliciousText, "site", "page", "user");
     assertEquals(
         "<div><a class=\"wikiLinkMissing\" href=\"/page/ns:page\">&lt;script&gt;someScript&lt;/script&gt;</a></div>",
         renderRes.renderedText());
@@ -292,8 +291,7 @@ public class CustomWikiRendererTest {
   public void test_renderSanitizeHtmlInText() {
     String sourcetoSanitize =
         "This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>";
-    RenderResult renderRes =
-        underTest.renderWithInfo(sourcetoSanitize, "site", "page", "user");
+    RenderResult renderRes = underTest.renderWithInfo(sourcetoSanitize, "site", "page", "user");
     assertEquals(
         "<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>",
         renderRes.renderedText());
@@ -572,8 +570,7 @@ public class CustomWikiRendererTest {
   @Test
   public void test_renderImageSanitize() {
     String maliciousTitle = "Check {{file.jpg|\" onerror=\"alert(1)\"}}";
-    RenderResult renderRes =
-        underTest.renderWithInfo(maliciousTitle, "site", "page", "user");
+    RenderResult renderRes = underTest.renderWithInfo(maliciousTitle, "site", "page", "user");
     assertEquals(
         "<div>Check <img src=\"/_media/file.jpg\" class=\"media\" title=\"&quot; onerror=&quot;alert(1)&quot;\" loading=\"lazy\"></div>",
         renderRes.renderedText());
@@ -645,12 +642,12 @@ public class CustomWikiRendererTest {
   public void test_renderOListWEmptyValue() {
     String input1 = " - Simple List\n -\n - With an empty row\n";
     assertEquals(
-            "<ol>\n" +
-                    "<li>Simple List</li>\n" +
-                    "<li></li>\n" +
-                    "<li>With an empty row</li>\n" +
-                    "</ol>",
-            doRender(input1));
+        "<ol>\n"
+            + "<li>Simple List</li>\n"
+            + "<li></li>\n"
+            + "<li>With an empty row</li>\n"
+            + "</ol>",
+        doRender(input1));
   }
 
   @Test
@@ -1069,8 +1066,7 @@ public class CustomWikiRendererTest {
         "<div class=\"hidden\"><input id=\"hiddenToggle7\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle7\" class=\"hdn-toggle\" data-named=\"true\">Bark</label><div class=\"collapsible\">Something in  here</div></div>",
         doRender(namedHidden));
     String maliciousName = "<hidden name=\"<script>runsomething</script>\">Hidden</hidden>";
-    RenderResult renderRes =
-        underTest.renderWithInfo(maliciousName, "site", "page", "user");
+    RenderResult renderRes = underTest.renderWithInfo(maliciousName, "site", "page", "user");
     assertEquals(
         "<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\" data-named=\"true\">&lt;script&gt;runsomething&lt;/script&gt;</label><div class=\"collapsible\">Hidden</div></div>",
         renderRes.renderedText());

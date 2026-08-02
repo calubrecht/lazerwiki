@@ -194,7 +194,8 @@ public class MediaCacheServiceTest {
   }
 
   @Test
-  public void test_clearCache_deleteFails(CapturedOutput output) throws IOException, MediaReadException {
+  public void test_clearCache_deleteFails(CapturedOutput output)
+      throws IOException, MediaReadException {
     mockScaleImage();
 
     // Create cached file

@@ -2,11 +2,9 @@ package us.calubrecht.lazerwiki.controller;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.net.MalformedURLException;
 import java.security.Principal;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,67 +21,83 @@ import us.calubrecht.lazerwiki.service.exception.VerificationException;
 @RequestMapping("api/users/")
 public class UserSettingsController extends LazerWikiController {
 
-    @Autowired
-    UserService userService;
+  @Autowired UserService userService;
 
-    @PostMapping("setPassword")
-    public ResponseEntity<SetPasswordResponse> setPassword(Principal principal, @RequestBody UserRequest passwordRequest) {
-        User user = userService.getUser(principal.getName());
-        if (!user.userName.equals(passwordRequest.userName())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        userService.resetPassword(user.userName, passwordRequest.password(), user);
-        return ResponseEntity.ok(new SetPasswordResponse(true, ""));
+  @PostMapping("setPassword")
+  public ResponseEntity<SetPasswordResponse> setPassword(
+      Principal principal, @RequestBody UserRequest passwordRequest) {
+    User user = userService.getUser(principal.getName());
+    if (!user.userName.equals(passwordRequest.userName())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    userService.resetPassword(user.userName, passwordRequest.password(), user);
+    return ResponseEntity.ok(new SetPasswordResponse(true, ""));
+  }
 
-    @PostMapping("resetForgottenPassword")
-    public ResponseEntity<SetPasswordResponse> setPassword(@RequestBody UserRequest passwordRequest,  HttpServletRequest request) throws MalformedURLException, MessagingException {
-        try {
-            String siteName = siteService.getSiteNameForHostname(getHost(request));
-            userService.requestResetForgottenPassword(passwordRequest.userName(), siteName, passwordRequest.email(), passwordRequest.password());
-            return ResponseEntity.ok(new SetPasswordResponse(true, ""));
-        } catch (RateLimitException rle) {
-            String message = String.format("Too many password reset requests. Please try again in %d seconds.", rle.getSecondsRemaining());
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new SetPasswordResponse(false, message));
-        }
+  @PostMapping("resetForgottenPassword")
+  public ResponseEntity<SetPasswordResponse> setPassword(
+      @RequestBody UserRequest passwordRequest, HttpServletRequest request)
+      throws MalformedURLException, MessagingException {
+    try {
+      String siteName = siteService.getSiteNameForHostname(getHost(request));
+      userService.requestResetForgottenPassword(
+          passwordRequest.userName(),
+          siteName,
+          passwordRequest.email(),
+          passwordRequest.password());
+      return ResponseEntity.ok(new SetPasswordResponse(true, ""));
+    } catch (RateLimitException rle) {
+      String message =
+          String.format(
+              "Too many password reset requests. Please try again in %d seconds.",
+              rle.getSecondsRemaining());
+      return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+          .body(new SetPasswordResponse(false, message));
     }
+  }
 
-    @PostMapping("saveEmail")
-    public ResponseEntity<SaveEmailResponse> saveEmail(Principal principal, @RequestBody UserRequest emailRequest, HttpServletRequest request) throws MalformedURLException, MessagingException {
-        User user = userService.getUser(principal.getName());
-        if (!user.userName.equals(emailRequest.userName())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        try {
-            String siteName = siteService.getSiteNameForHostname(getHost(request));
-            userService.requestSetEmail(user.userName, siteName, emailRequest.email());
-            return ResponseEntity.ok(new SaveEmailResponse(true, ""));
-        } catch (RateLimitException rle) {
-            String message = String.format("Email change requested too recently. Please try again in %d seconds.", rle.getSecondsRemaining());
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new SaveEmailResponse(false, message));
-        }
+  @PostMapping("saveEmail")
+  public ResponseEntity<SaveEmailResponse> saveEmail(
+      Principal principal, @RequestBody UserRequest emailRequest, HttpServletRequest request)
+      throws MalformedURLException, MessagingException {
+    User user = userService.getUser(principal.getName());
+    if (!user.userName.equals(emailRequest.userName())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    try {
+      String siteName = siteService.getSiteNameForHostname(getHost(request));
+      userService.requestSetEmail(user.userName, siteName, emailRequest.email());
+      return ResponseEntity.ok(new SaveEmailResponse(true, ""));
+    } catch (RateLimitException rle) {
+      String message =
+          String.format(
+              "Email change requested too recently. Please try again in %d seconds.",
+              rle.getSecondsRemaining());
+      return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+          .body(new SaveEmailResponse(false, message));
+    }
+  }
 
-    @PostMapping("verifyEmailToken")
-    public ResponseEntity<SaveEmailResponse> verifyEmailToken(
-            Principal principal, @RequestBody String token) {
-        User user = userService.getUser(principal.getName());
-        try {
-            userService.verifyEmailToken(user.userName, token);
-            return ResponseEntity.ok(new SaveEmailResponse(true, ""));
-        } catch (VerificationException ve) {
-            return ResponseEntity.ok(new SaveEmailResponse(false, ve.getMessage()));
-        }
+  @PostMapping("verifyEmailToken")
+  public ResponseEntity<SaveEmailResponse> verifyEmailToken(
+      Principal principal, @RequestBody String token) {
+    User user = userService.getUser(principal.getName());
+    try {
+      userService.verifyEmailToken(user.userName, token);
+      return ResponseEntity.ok(new SaveEmailResponse(true, ""));
+    } catch (VerificationException ve) {
+      return ResponseEntity.ok(new SaveEmailResponse(false, ve.getMessage()));
     }
+  }
 
-    @PostMapping("verifyPasswordToken")
-    public ResponseEntity<SaveEmailResponse> verifyPasswordToken(
-            @RequestBody Map<String, String> request) {
-        try {
-            userService.verifyPasswordToken(request.get("username"), request.get("token"));
-            return ResponseEntity.ok(new SaveEmailResponse(true, ""));
-        } catch (VerificationException ve) {
-            return ResponseEntity.ok(new SaveEmailResponse(false, ve.getMessage()));
-        }
+  @PostMapping("verifyPasswordToken")
+  public ResponseEntity<SaveEmailResponse> verifyPasswordToken(
+      @RequestBody Map<String, String> request) {
+    try {
+      userService.verifyPasswordToken(request.get("username"), request.get("token"));
+      return ResponseEntity.ok(new SaveEmailResponse(true, ""));
+    } catch (VerificationException ve) {
+      return ResponseEntity.ok(new SaveEmailResponse(false, ve.getMessage()));
     }
+  }
 }

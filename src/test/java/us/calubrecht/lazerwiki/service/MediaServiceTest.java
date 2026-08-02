@@ -128,8 +128,7 @@ class MediaServiceTest {
   void test_getBinaryFileNoRecord() throws IOException, MediaReadException, MediaWriteException {
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("Bob"))).thenReturn(true);
     assertThrows(
-        IOException.class,
-        () -> underTest.getBinaryFile("default", "Bob", "nothere.png", "10x10"));
+        IOException.class, () -> underTest.getBinaryFile("default", "Bob", "nothere.png", "10x10"));
     // No MediaRecord, can't try to resize, don't look in cache.
     verify(cacheService, never())
         .getBinaryFile(any(), any(), any(), anyInt(), anyInt(), anyBoolean());
@@ -274,8 +273,7 @@ class MediaServiceTest {
     when(mediaRecordRepository.findBySiteAndNamespaceAndFileName("default", "", "small.bin"))
         .thenReturn(existingRecord);
     // Frank cannot delete, so cannot overwrite.
-    assertThrows(
-        MediaWriteException.class, () -> underTest.saveFile("default", "Frank", file, ""));
+    assertThrows(MediaWriteException.class, () -> underTest.saveFile("default", "Frank", file, ""));
 
     underTest.saveFile("default", "Bob", file, "");
 
@@ -436,8 +434,7 @@ class MediaServiceTest {
       fos.write(1);
     }
 
-    MoveStatus status =
-        underTest.moveImage("default", "Bob", "ns1", "img1.jpg", "ns2", "img2.jpg");
+    MoveStatus status = underTest.moveImage("default", "Bob", "ns1", "img1.jpg", "ns2", "img2.jpg");
     assertTrue(status.success());
 
     verify(mediaOverrideService).createOverride("default", "ns1", "img1.jpg", "ns2", "img2.jpg");

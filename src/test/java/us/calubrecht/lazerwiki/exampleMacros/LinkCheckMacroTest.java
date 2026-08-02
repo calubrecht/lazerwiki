@@ -49,8 +49,7 @@ public class LinkCheckMacroTest {
   public void test_checklinks() {
     RenderContext renderContext =
         new RenderContext("default", "page", "user", renderer, new HashMap<>());
-    when(pageService.getAllPagesFlat("default", "user"))
-        .thenReturn(List.of("", "page2", "page3"));
+    when(pageService.getAllPagesFlat("default", "user")).thenReturn(List.of("", "page2", "page3"));
     when(pageService.isReadable(eq("default"), anyString(), anyString())).thenReturn(true);
     when(linkService.getLinksOnPage("default", "")).thenReturn(List.of("page2", "page5"));
     when(linkService.getLinksOnPage("default", "page2")).thenReturn(List.of("ns:page8"));
@@ -171,8 +170,7 @@ public class LinkCheckMacroTest {
   public void test_checklinksForReadable() {
     RenderContext renderContext =
         new RenderContext("default", "page", "user", renderer, new HashMap<>());
-    when(pageService.getAllPagesFlat("default", "user"))
-        .thenReturn(List.of("", "page2", "page3"));
+    when(pageService.getAllPagesFlat("default", "user")).thenReturn(List.of("", "page2", "page3"));
     when(pageService.isReadable(eq("default"), eq("page5"), anyString())).thenReturn(true);
     when(linkService.getLinksOnPage("default", "")).thenReturn(List.of("page2", "page5"));
     when(linkService.getLinksOnPage("default", "page2")).thenReturn(List.of("ns:page8"));

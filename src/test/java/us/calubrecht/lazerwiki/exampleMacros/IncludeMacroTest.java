@@ -80,11 +80,7 @@ class IncludeMacroTest {
 
     RenderContext plaintextContext =
         new RenderContext(
-            "default",
-            "page",
-            "user",
-            renderer,
-            new HashMap<>(Map.of("plainText", true)));
+            "default", "page", "user", renderer, new HashMap<>(Map.of("plainText", true)));
     assertEquals("", macroService.renderMacro("include:includedPage", "", plaintextContext));
   }
 

@@ -27,7 +27,8 @@ public class HistoryController extends LazerWikiController {
       throws MalformedURLException {
     String userName = principal == null ? User.GUEST : principal.getName();
     RecentChangesResponse pageChanges = pageService.recentChanges(getSite(request), userName);
-    List<MediaHistoryRecord> mediaChanges = mediaService.getRecentChanges(getSite(request), userName);
+    List<MediaHistoryRecord> mediaChanges =
+        mediaService.getRecentChanges(getSite(request), userName);
     List<Object> merged = mergePageAndMedia(pageChanges.changes(), mediaChanges);
     return new RecentChangesResponse(pageChanges.changes(), mediaChanges, merged);
   }

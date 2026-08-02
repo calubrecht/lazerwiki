@@ -308,8 +308,9 @@ public class MediaService {
     ensureDir(site, nsPath);
     logger.info("Deleting file " + f.getAbsoluteFile());
     User user = userService.getUser(userName);
-    MediaRecord record = mediaRecordRepository.findBySiteAndNamespaceAndFileName(
-        site, splitFile.getLeft(), splitFile.getRight());
+    MediaRecord record =
+        mediaRecordRepository.findBySiteAndNamespaceAndFileName(
+            site, splitFile.getLeft(), splitFile.getRight());
     mediaCacheService.clearCache(site, record);
     mediaRecordRepository.deleteBySiteAndFilenameAndNamespace(
         site, splitFile.getRight(), splitFile.getLeft());

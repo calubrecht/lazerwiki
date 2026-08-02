@@ -227,8 +227,7 @@ public class RenderService {
     StopWatch sw = StopWatch.createStarted();
     perfTracker.startTimer("All");
     try {
-      RenderContext context =
-          new RenderContext(site, sPageDescriptor + "<preview>", userName);
+      RenderContext context = new RenderContext(site, sPageDescriptor + "<preview>", userName);
       context.renderState().put(ID_SUFFIX.name(), "_previewPage");
       perfTracker.startTimer("Render");
       PageData pd =

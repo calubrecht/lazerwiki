@@ -490,8 +490,7 @@ public class PageServiceTest {
 
     assertEquals(3, pageService.getPageHistory("default", "ns:page1", "Bob").size());
     assertThrows(
-        PageReadException.class,
-        () -> pageService.getPageHistory("default", "ns:page1", "Frank"));
+        PageReadException.class, () -> pageService.getPageHistory("default", "ns:page1", "Frank"));
   }
 
   @Test
@@ -522,8 +521,7 @@ public class PageServiceTest {
         PageReadException.class,
         () -> pageService.getPageDiff("default", "thisPage", 1L, 20L, "bob"));
 
-    List<Pair<Integer, String>> out =
-        pageService.getPageDiff("default", "thisPage", 1L, 5L, "bob");
+    List<Pair<Integer, String>> out = pageService.getPageDiff("default", "thisPage", 1L, 5L, "bob");
 
     assertEquals(2, out.size());
     assertEquals(1, out.get(0).getFirst());

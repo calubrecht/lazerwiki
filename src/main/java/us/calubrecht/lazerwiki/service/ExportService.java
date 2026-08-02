@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
@@ -55,7 +54,7 @@ public class ExportService {
     PageListResponse pageList = pageService.getAllPages(site, user);
     logger.info("Creating export file for {}", site);
     try (GzipCompressorOutputStream gos = new GzipCompressorOutputStream(out);
-         TarArchiveOutputStream taos = new TarArchiveOutputStream(gos)) {
+        TarArchiveOutputStream taos = new TarArchiveOutputStream(gos)) {
       for (String ns : pageList.pages().keySet().stream().sorted().toList()) {
         List<PageDesc> pages = pageList.pages().get(ns);
         for (PageDesc page : pages) {

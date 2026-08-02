@@ -228,11 +228,7 @@ public class PageUpdateServiceTest {
     ArgumentCaptor<List<String>> linksCaptor = ArgumentCaptor.forClass(List.class);
     verify(pageMetaService)
         .updateMetaData(
-            anyString(),
-            any(),
-            any(),
-            linksCaptor.capture(),
-            eq(Collections.emptyList()));
+            anyString(), any(), any(), linksCaptor.capture(), eq(Collections.emptyList()));
     assertEquals(List.of("page1", "page2"), linksCaptor.getValue());
   }
 
@@ -256,8 +252,7 @@ public class PageUpdateServiceTest {
         false);
 
     ArgumentCaptor<List<String>> imageCaptor = ArgumentCaptor.forClass(List.class);
-    verify(pageMetaService)
-        .updateMetaData(anyString(), any(), any(), any(), imageCaptor.capture());
+    verify(pageMetaService).updateMetaData(anyString(), any(), any(), any(), imageCaptor.capture());
     assertEquals(List.of("image1.jpg", "image2.jpg"), imageCaptor.getValue());
   }
 
@@ -325,12 +320,10 @@ public class PageUpdateServiceTest {
     assertThrows(
         PageWriteException.class, () -> pageUpdateService.deletePage("default", "", "bob"));
 
-    verify(pageMetaService, never())
-        .deleteMetaData(anyString(), any(PageDescriptor.class));
+    verify(pageMetaService, never()).deleteMetaData(anyString(), any(PageDescriptor.class));
 
     pageUpdateService.deletePage("default", "unknownPage", "bob");
-    verify(pageMetaService, never())
-        .deleteMetaData(anyString(), any(PageDescriptor.class));
+    verify(pageMetaService, never()).deleteMetaData(anyString(), any(PageDescriptor.class));
 
     pageUpdateService.deletePage("default", "testPage", "bob");
     verify(pageMetaService)

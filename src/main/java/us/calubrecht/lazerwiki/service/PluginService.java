@@ -47,8 +47,7 @@ public class PluginService {
   @SuppressWarnings("unchecked")
   public String getEditToolbarDefs(String site) {
     List<String> blackListedPlugins =
-        Optional.ofNullable(
-                (List<String>) siteService.getSettingForSite(site, "pluginBlacklist"))
+        Optional.ofNullable((List<String>) siteService.getSettingForSite(site, "pluginBlacklist"))
             .orElse(Collections.emptyList());
 
     //        toolbarDefs.addAll(plugin.getEditToolbarDefinitions());
