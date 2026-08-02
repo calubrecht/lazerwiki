@@ -72,7 +72,7 @@ class RegenCacheServiceTest {
                 links.add("ns:page4");
               }
               return new RenderResult(
-                  text, "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text, "", Map.of(RenderStateKeys.LINKS, links));
             });
 
     underTest.regenLinks("default");
@@ -116,7 +116,7 @@ class RegenCacheServiceTest {
                 links.add("ns:page4");
               }
               return new RenderResult(
-                  text, "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text, "", Map.of(RenderStateKeys.LINKS, links));
             });
 
     underTest.regenLinks("default");
@@ -153,7 +153,7 @@ class RegenCacheServiceTest {
               List<String> links = new ArrayList<>();
               String text = inv.getArgument(0, String.class);
               return new RenderResult(
-                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderStateKeys.LINKS, links));
             });
 
     underTest.regenCache("default");
@@ -195,7 +195,7 @@ class RegenCacheServiceTest {
                 throw new RuntimeException("oops");
               }
               return new RenderResult(
-                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderStateKeys.LINKS, links));
             });
 
     underTest.regenCache("default");
@@ -246,7 +246,7 @@ class RegenCacheServiceTest {
               List<String> links = new ArrayList<>();
               String text = inv.getArgument(0, String.class);
               return new RenderResult(
-                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderStateKeys.LINKS, links));
             });
     underTest.regenCachesForBacklinks("default", "linkedPage");
 
@@ -300,7 +300,7 @@ class RegenCacheServiceTest {
                 throw new RuntimeException("oops");
               }
               return new RenderResult(
-                  text + " rendered", "", Map.of(RenderResult.RenderStateKeys.LINKS.name(), links));
+                  text + " rendered", "", Map.of(RenderStateKeys.LINKS, links));
             });
     underTest.regenCachesForBacklinks("default", "linkedPage");
 
@@ -336,9 +336,9 @@ class RegenCacheServiceTest {
                   text + " rendered",
                   "",
                   Map.of(
-                      RenderResult.RenderStateKeys.LINKS.name(),
+                      RenderStateKeys.LINKS,
                       links,
-                      RenderResult.RenderStateKeys.DONT_CACHE.name(),
+                      RenderStateKeys.DONT_CACHE,
                       true));
             });
 
@@ -371,9 +371,9 @@ class RegenCacheServiceTest {
                   text + " rendered",
                   "",
                   Map.of(
-                      RenderResult.RenderStateKeys.LINKS.name(),
+                      RenderStateKeys.LINKS,
                       links,
-                      RenderResult.RenderStateKeys.DONT_CACHE.name(),
+                      RenderStateKeys.DONT_CACHE,
                       true));
             });
 
@@ -417,10 +417,10 @@ class RegenCacheServiceTest {
             inv -> {
               List<String> links = new ArrayList<>();
               String text = inv.getArgument(0, String.class);
-              Map<String, Object> renderState = new HashMap<>();
-              renderState.put(RenderResult.RenderStateKeys.LINKS.name(), links);
+              Map<RenderStateKeys, Object> renderState = new HashMap<>();
+              renderState.put(RenderStateKeys.LINKS, links);
               if (text.equals("text5")) {
-                renderState.put(RenderResult.RenderStateKeys.DONT_CACHE.name(), true);
+                renderState.put(RenderStateKeys.DONT_CACHE, true);
               }
               return new RenderResult(text + " rendered", "", renderState);
             });
@@ -467,8 +467,8 @@ class RegenCacheServiceTest {
             inv -> {
               List<String> links = new ArrayList<>();
               String text = inv.getArgument(0, String.class);
-              Map<String, Object> renderState = new HashMap<>();
-              renderState.put(RenderResult.RenderStateKeys.LINKS.name(), links);
+              Map<RenderStateKeys, Object> renderState = new HashMap<>();
+              renderState.put(RenderStateKeys.LINKS, links);
               if (text.equals("text2")) {
                 throw new RuntimeException();
               }

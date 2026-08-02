@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.ERRORS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.ERRORS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public abstract class AbstractRenderer implements ITreeRenderer {
   @SuppressWarnings("unchecked")
   protected void addError(RenderContext renderContext, String error) {
     ((List<String>)
-            renderContext.renderState().computeIfAbsent(ERRORS.name(), (k) -> new ArrayList<>()))
+            renderContext.renderState().computeIfAbsent(ERRORS, (k) -> new ArrayList<>()))
         .add(error);
   }
 }

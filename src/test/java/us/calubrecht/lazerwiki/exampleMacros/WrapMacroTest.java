@@ -3,7 +3,7 @@ package us.calubrecht.lazerwiki.exampleMacros;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.LINKS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.LINKS;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -86,14 +86,14 @@ class WrapMacroTest {
     macroService.renderMacro("wrap:withLink:[[aLink]]", "", renderContext);
 
     assertEquals(
-        new HashSet<>(Arrays.asList("aLink")), renderContext.renderState().get(LINKS.name()));
+        new HashSet<>(Arrays.asList("aLink")), renderContext.renderState().get(LINKS));
 
     renderContext = context();
-    renderContext.renderState().put(LINKS.name(), new HashSet<>(Arrays.asList("existingLink")));
+    renderContext.renderState().put(LINKS, new HashSet<>(Arrays.asList("existingLink")));
     macroService.renderMacro("wrap:withLink:[[aLink]]", "", renderContext);
 
     assertEquals(
         new HashSet<>(Arrays.asList("aLink", "existingLink")),
-        renderContext.renderState().get(LINKS.name()));
+        renderContext.renderState().get(LINKS));
   }
 }

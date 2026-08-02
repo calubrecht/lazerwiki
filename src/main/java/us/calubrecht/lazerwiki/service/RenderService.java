@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.ID_SUFFIX;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.ID_SUFFIX;
 
 import java.util.*;
 import org.apache.commons.lang3.time.StopWatch;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PerfTracker;
 import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -97,7 +98,7 @@ public class RenderService {
     }
     try {
       RenderContext renderContext = new RenderContext(site, sPageDescriptor, userName);
-      renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+      renderContext.renderState().put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
       perfTracker.startTimer("Render");
       RenderResult cacheRender = renderer.renderWithInfo(d.source(), renderContext);
       perfTracker.stopTimer("Render");
@@ -164,7 +165,7 @@ public class RenderService {
     }
     try {
       RenderContext context = new RenderContext(site, sPageDescriptor, userName);
-      context.renderState().put(ID_SUFFIX.name(), "_historyView");
+      context.renderState().put(ID_SUFFIX, "_historyView");
       RenderResult rendered = renderer.renderWithInfo(d.source(), context);
       return new PageData(
           rendered.renderedText(), d.source(), d.title(), d.tags(), d.backlinks(), d.flags());
@@ -198,16 +199,14 @@ public class RenderService {
       String userName)
       throws PageWriteException {
     RenderContext renderContext = new RenderContext(site, sPageDescriptor, userName);
-    renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+    renderContext.renderState().put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
     RenderResult res = renderer.renderWithInfo(text, renderContext);
     Collection<String> links =
         (Collection<String>)
-            res.renderState()
-                .getOrDefault(RenderResult.RenderStateKeys.LINKS.name(), Collections.emptySet());
+            res.renderState().getOrDefault(RenderStateKeys.LINKS, Collections.emptySet());
     Collection<String> images =
         (Collection<String>)
-            res.renderState()
-                .getOrDefault(RenderResult.RenderStateKeys.IMAGES.name(), Collections.emptySet());
+            res.renderState().getOrDefault(RenderStateKeys.IMAGES, Collections.emptySet());
     pageUpdateService.savePage(
         site,
         sPageDescriptor,
@@ -228,7 +227,7 @@ public class RenderService {
     perfTracker.startTimer("All");
     try {
       RenderContext context = new RenderContext(site, sPageDescriptor + "<preview>", userName);
-      context.renderState().put(ID_SUFFIX.name(), "_previewPage");
+      context.renderState().put(ID_SUFFIX, "_previewPage");
       perfTracker.startTimer("Render");
       PageData pd =
           new PageData(

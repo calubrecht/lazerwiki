@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.exampleMacros;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.LINKS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.LINKS;
 
 import java.util.Collection;
 import us.calubrecht.lazerwiki.macro.CustomMacro;

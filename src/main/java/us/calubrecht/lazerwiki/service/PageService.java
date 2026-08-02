@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.OVERRIDE_STATS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.OVERRIDE_STATS;
 
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
@@ -303,11 +303,9 @@ public class PageService {
     newCache.plaintextCache = rendered.plainText();
     newCache.useCache =
         !(Boolean)
-            rendered
-                .renderState()
-                .getOrDefault(RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
+            rendered.renderState().getOrDefault(RenderStateKeys.DONT_CACHE, Boolean.FALSE);
     newCache.source = adjustSource(source, rendered);
-    newCache.title = (String) rendered.renderState().get(RenderResult.RenderStateKeys.TITLE.name());
+    newCache.title = (String) rendered.renderState().get(RenderStateKeys.TITLE);
     newCache.errors = getErrors(rendered);
     pageCacheRepository.save(newCache);
   }
@@ -318,15 +316,15 @@ public class PageService {
 
   @SuppressWarnings("unchecked")
   public static List<String> getErrors(RenderResult rendered) {
-    return (List<String>) rendered.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+    return (List<String>) rendered.renderState().get(RenderStateKeys.ERRORS);
   }
 
   public static String doAdjustSource(String source, RenderResult rendered) {
-    if (rendered.renderState().containsKey(OVERRIDE_STATS.name())) {
+    if (rendered.renderState().containsKey(OVERRIDE_STATS)) {
       @SuppressWarnings("unchecked")
       List<LinkOverrideInstance> overrides =
           new ArrayList<>(
-              (List<LinkOverrideInstance>) rendered.renderState().get(OVERRIDE_STATS.name()));
+              (List<LinkOverrideInstance>) rendered.renderState().get(OVERRIDE_STATS));
       Collections.reverse(overrides);
       StringBuilder sb = new StringBuilder(source);
       overrides.forEach(

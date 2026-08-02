@@ -52,18 +52,18 @@ public class RegenCacheService {
                 new RenderContext(siteKey, desc.toString(), UserService.SYS_USER);
             renderContext
                 .renderState()
-                .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+                .put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
             RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
             Collection<String> links =
                 (Collection<String>)
                     res.renderState()
                         .getOrDefault(
-                            RenderResult.RenderStateKeys.LINKS.name(), Collections.emptySet());
+                            RenderStateKeys.LINKS, Collections.emptySet());
             Collection<String> images =
                 (Collection<String>)
                     res.renderState()
                         .getOrDefault(
-                            RenderResult.RenderStateKeys.IMAGES.name(), Collections.emptySet());
+                            RenderStateKeys.IMAGES, Collections.emptySet());
             logger.info(
                 "Setting "
                     + links.size()
@@ -115,7 +115,7 @@ public class RegenCacheService {
                 new RenderContext(siteKey, desc.toString(), UserService.SYS_USER);
             renderContext
                 .renderState()
-                .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+                .put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
             logger.info("Render: {}", desc);
             RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
             PageCache newCache = new PageCache();
@@ -132,7 +132,7 @@ public class RegenCacheService {
                 !(Boolean)
                     res.renderState()
                         .getOrDefault(
-                            RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
+                            RenderStateKeys.DONT_CACHE, Boolean.FALSE);
             logger.info(
                 "Caching rendered page for {}:{} useCache={}",
                 pd.getNamespace(),
@@ -178,7 +178,7 @@ public class RegenCacheService {
                     new RenderContext(site, pd.toString(), UserService.SYS_USER);
                 renderContext
                     .renderState()
-                    .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+                    .put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
                 RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
                 PageCache newCache = new PageCache();
                 newCache.site = site;
@@ -194,7 +194,7 @@ public class RegenCacheService {
                     !(Boolean)
                         res.renderState()
                             .getOrDefault(
-                                RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
+                                RenderStateKeys.DONT_CACHE, Boolean.FALSE);
                 logger.info(
                     "Recaching rendered page for {}:{} after link change useCache={}",
                     pd.namespace(),
@@ -235,7 +235,7 @@ public class RegenCacheService {
                     new RenderContext(site, pd.toString(), UserService.SYS_USER);
                 renderContext
                     .renderState()
-                    .put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+                    .put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
                 RenderResult res = renderer.renderWithInfo(p.getText(), renderContext);
                 PageCache newCache = new PageCache();
                 newCache.site = site;
@@ -251,7 +251,7 @@ public class RegenCacheService {
                     !(Boolean)
                         res.renderState()
                             .getOrDefault(
-                                RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
+                                RenderStateKeys.DONT_CACHE, Boolean.FALSE);
                 logger.info(
                     "Recaching rendered page for {}:{} for imageref change useCache={}",
                     pd.namespace(),

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.service.*;
@@ -57,7 +57,7 @@ class IncludeMacroTest {
         "<div class=\"include\"><div>This Page</div><a href=\"/page/includedPage#Edit\" className=\"includePageLink\">Edit includedPage</a></div>",
         macroService.renderMacro("include:includedPage", "", renderContext));
     assertTrue(
-        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderStateKeys.DONT_CACHE));
     // without write  rights.
     PageData roPage =
         new PageData(
@@ -67,7 +67,7 @@ class IncludeMacroTest {
         "<div class=\"include\"><div>RO Page</div></div>",
         macroService.renderMacro("include:roPage", "", renderContext));
     assertTrue(
-        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderStateKeys.DONT_CACHE));
 
     PageData notpage =
         new PageData(null, "", null, null, new PageFlags(false, false, true, false, false, false));
@@ -76,11 +76,15 @@ class IncludeMacroTest {
         "<div class=\"include\"></div>",
         macroService.renderMacro("include:nothingPage", "", renderContext));
     assertTrue(
-        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderStateKeys.DONT_CACHE));
 
     RenderContext plaintextContext =
         new RenderContext(
-            "default", "page", "user", renderer, new HashMap<>(Map.of("plainText", true)));
+            "default",
+            "page",
+            "user",
+            renderer,
+            new HashMap<>(Map.of(RenderStateKeys.PLAIN_TEXT, true)));
     assertEquals("", macroService.renderMacro("include:includedPage", "", plaintextContext));
   }
 
@@ -88,7 +92,7 @@ class IncludeMacroTest {
   public void test_includeMacroForCache() {
     RenderContext renderContext =
         new RenderContext("default", "page", "user", renderer, new HashMap<>());
-    renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+    renderContext.renderState().put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
     PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
     assertEquals(
@@ -97,6 +101,6 @@ class IncludeMacroTest {
             "include:includedPage", "~~MACRO~~include:1~~/MACRO~~", renderContext));
     // Did not render macro, safe to cache.
     assertNull(
-        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderStateKeys.DONT_CACHE));
   }
 }

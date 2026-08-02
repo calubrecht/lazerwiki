@@ -2,7 +2,7 @@ package us.calubrecht.lazerwiki.syntax.renderer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.OVERRIDE_STATS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.OVERRIDE_STATS;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -136,7 +136,7 @@ class ImageRendererTest {
         renderer.renderHtml(imageNode, renderContext).toString());
     @SuppressWarnings("unchecked")
     List<LinkOverrideInstance> overrideStats =
-        (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
+        (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS);
     assertEquals(1, overrideStats.size());
     LinkOverrideInstance override = overrideStats.get(0);
     assertEquals("img.jpg", override.src());
@@ -161,7 +161,7 @@ class ImageRendererTest {
         renderer.renderHtml(imageNode, renderContext).toString());
     @SuppressWarnings("unchecked")
     List<LinkOverrideInstance> overrideStats =
-        (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS.name());
+        (List<LinkOverrideInstance>) renderContext.renderState().get(OVERRIDE_STATS);
     assertEquals(1, overrideStats.size());
     LinkOverrideInstance override = overrideStats.get(0);
     assertEquals("img.jpg", override.src());

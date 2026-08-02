@@ -18,7 +18,7 @@ import us.calubrecht.lazerwiki.macro.CustomMacro;
 import us.calubrecht.lazerwiki.macro.Macro;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
-import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.responses.SearchResult;
@@ -255,14 +255,14 @@ class MacroServiceTest {
     RenderContext context = new RenderContext("default", "page", "user", renderer, new HashMap<>());
     MacroService.MacroContextImpl macroContext = underTest.new MacroContextImpl(context);
     macroContext.setPageDontCache();
-    assertEquals(true, context.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+    assertEquals(true, context.renderState().get(RenderStateKeys.DONT_CACHE));
   }
 
   @Test
   @Order(2)
   void test_renderMacroForCache() {
     RenderContext context = new RenderContext("default", "page", "user");
-    context.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+    context.renderState().put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
     // Renders as expected because macro is not no-cache
     assertEquals("Good Macro", underTest.renderMacro("Good", "", context));
   }
@@ -277,11 +277,11 @@ class MacroServiceTest {
   @Test
   void test_noCacheMacro() {
     RenderContext context = new RenderContext("default", "page", "user");
-    context.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+    context.renderState().put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
     String fullText = "~~MACRO~~NoCache~~/MACRO~~";
     String cached = underTest.renderMacro("NoCache", fullText, context);
     assertEquals(fullText, cached);
-    context.renderState().remove(RenderResult.RenderStateKeys.FOR_CACHE.name());
+    context.renderState().remove(RenderStateKeys.FOR_CACHE);
     assertEquals("Only render post cache", underTest.postRender(fullText, context));
   }
 

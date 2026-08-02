@@ -14,6 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PerfTracker;
 import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.PageData.PageFlags;
 import us.calubrecht.lazerwiki.service.exception.PageWriteException;
@@ -133,7 +134,7 @@ public class RenderServiceTest {
     when(renderer.renderWithInfo(eq("text"), any(RenderContext.class)))
         .thenReturn(
             new RenderResult(
-                "rendered", "", Map.of(RenderResult.RenderStateKeys.TITLE.name(), "The Title")));
+                "rendered", "", Map.of(RenderStateKeys.TITLE, "The Title")));
     when(macroService.postRender(any(), any())).thenAnswer(inv -> inv.getArgument(0, String.class));
     underTest.savePage("default", "pageName", "text", Collections.emptyList(), 10, false, "user");
 
@@ -160,9 +161,9 @@ public class RenderServiceTest {
                 "rendered",
                 "",
                 Map.of(
-                    RenderResult.RenderStateKeys.TITLE.name(),
+                    RenderStateKeys.TITLE,
                     "The Title",
-                    RenderResult.RenderStateKeys.LINKS.name(),
+                    RenderStateKeys.LINKS,
                     links)));
     when(macroService.postRender(any(), any())).thenAnswer(inv -> inv.getArgument(0, String.class));
     underTest.savePage("default", "pageName", "text", Collections.emptyList(), 10, false, "user");
@@ -183,7 +184,7 @@ public class RenderServiceTest {
   @Test
   public void test_previewPage() {
     RenderContext context = new RenderContext("default", "thisPage<preview>", "Bob");
-    context.renderState().put("ID_SUFFIX", "_previewPage");
+    context.renderState().put(RenderStateKeys.ID_SUFFIX, "_previewPage");
     when(renderer.renderToString("goodSource", context)).thenReturn("This rendered");
     assertEquals(
         "This rendered",
@@ -253,7 +254,7 @@ public class RenderServiceTest {
   public void test_getHistoricalRenderedPage() {
     PageData pd = new PageData(null, "This is raw page text", null, null, PageData.ALL_RIGHTS);
     RenderContext context = new RenderContext("default", "ns:realPage", "Bob");
-    context.renderState().put("ID_SUFFIX", "_historyView");
+    context.renderState().put(RenderStateKeys.ID_SUFFIX, "_historyView");
     when(renderer.renderWithInfo(eq("This is raw page text"), eq(context)))
         .thenReturn(new RenderResult("This is Rendered Text", "", new HashMap<>()));
     when(pageService.getHistoricalPageData(any(), eq("ns:realPage"), eq(1L), any())).thenReturn(pd);
@@ -303,7 +304,7 @@ public class RenderServiceTest {
     when(pageService.getHistoricalPageData(any(), eq("badRender"), anyLong(), any()))
         .thenReturn(badRender);
     context = new RenderContext("default", "badRender", "Bob");
-    context.renderState().put("ID_SUFFIX", "_historyView");
+    context.renderState().put(RenderStateKeys.ID_SUFFIX, "_historyView");
     when(renderer.renderWithInfo(eq("BAD"), eq(context))).thenThrow(new RuntimeException("OUTCH"));
     assertEquals(
         new PageData(

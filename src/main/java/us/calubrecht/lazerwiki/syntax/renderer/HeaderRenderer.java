@@ -1,12 +1,12 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.HEADERS;
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.ID_SUFFIX;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.HEADERS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.ID_SUFFIX;
 
 import java.util.*;
 import org.springframework.stereotype.Component;
 import us.calubrecht.lazerwiki.model.HeaderRef;
-import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.nodes.HeaderNode;
@@ -26,22 +26,20 @@ public class HeaderRenderer extends ContainerRenderer {
     @SuppressWarnings("unchecked")
     List<HeaderRef> headers =
         ((List<HeaderRef>)
-            renderContext.renderState().computeIfAbsent(HEADERS.name(), (k) -> new ArrayList<>()));
+            renderContext.renderState().computeIfAbsent(HEADERS, (k) -> new ArrayList<>()));
     HeaderRef headerRef =
         new HeaderRef(headerNode.getLevel(), plainTextHeader, toId(plainTextHeader, headers));
     headers.add(headerRef);
     StringBuilder outBuffer = new StringBuilder();
     String id =
-        headerRef.id() + renderContext.renderState().getOrDefault(ID_SUFFIX.name(), "").toString();
+        headerRef.id() + renderContext.renderState().getOrDefault(ID_SUFFIX, "").toString();
     outBuffer.append("<").append(hTag).append(" id=\"").append(id).append("\">");
     outBuffer.append(super.renderHtml(node, renderContext).toString().strip());
     outBuffer.append("</").append(hTag).append(">\n");
-    if (!renderContext.renderState().containsKey(RenderResult.RenderStateKeys.TITLE.name())) {
+    if (!renderContext.renderState().containsKey(RenderStateKeys.TITLE)) {
       renderContext
           .renderState()
-          .put(
-              RenderResult.RenderStateKeys.TITLE.name(),
-              renderPlaintext(node, renderContext).toString().strip());
+          .put(RenderStateKeys.TITLE, renderPlaintext(node, renderContext).toString().strip());
     }
     return outBuffer;
   }

@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.framework;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.ERRORS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.ERRORS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,9 +36,7 @@ public interface ITreeRenderer {
             String.format(
                 "Suspicious text at %s. Raw text =[%s]", node.getPosition().getLeft(), text);
         ((List<String>)
-                renderContext
-                    .renderState()
-                    .computeIfAbsent(ERRORS.name(), (k) -> new ArrayList<>()))
+                renderContext.renderState().computeIfAbsent(ERRORS, (k) -> new ArrayList<>()))
             .add(error);
       }
       return new StringBuilder(sanitizeLeaveQuotes(text));

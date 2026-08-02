@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.LinkOverride;
-import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.service.*;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -67,7 +67,7 @@ public class LinkCheckMacroTest {
     assertEquals(3, split[1].split("<tr>").length);
 
     assertTrue(
-        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderStateKeys.DONT_CACHE));
   }
 
   @Test
@@ -152,7 +152,7 @@ public class LinkCheckMacroTest {
   public void test_linkCheckMacroForCache() {
     RenderContext renderContext =
         new RenderContext("default", "page", "user", renderer, new HashMap<>());
-    renderContext.renderState().put(RenderResult.RenderStateKeys.FOR_CACHE.name(), Boolean.TRUE);
+    renderContext.renderState().put(RenderStateKeys.FOR_CACHE, Boolean.TRUE);
     PageData page = new PageData(null, "This Page", null, null, PageData.ALL_RIGHTS);
     when(pageService.getPageData(anyString(), eq("includedPage"), anyString())).thenReturn(page);
     assertEquals(
@@ -163,7 +163,7 @@ public class LinkCheckMacroTest {
             renderContext));
     // Did not render macro, safe to cache.
     assertNull(
-        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderStateKeys.DONT_CACHE));
   }
 
   @Test
@@ -203,6 +203,6 @@ public class LinkCheckMacroTest {
     assertTrue(split[1].split("<tr>")[2].contains("page3"));
 
     assertTrue(
-        (Boolean) renderContext.renderState().get(RenderResult.RenderStateKeys.DONT_CACHE.name()));
+        (Boolean) renderContext.renderState().get(RenderStateKeys.DONT_CACHE));
   }
 }

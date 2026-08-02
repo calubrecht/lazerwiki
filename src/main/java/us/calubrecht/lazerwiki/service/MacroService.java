@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.LINKS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.LINKS;
 
 import jakarta.annotation.PostConstruct;
 import java.util.*;
@@ -24,6 +24,7 @@ import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.PageCache;
 import us.calubrecht.lazerwiki.model.PageDescriptor;
 import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.responses.PageData;
 import us.calubrecht.lazerwiki.responses.SearchResult;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
@@ -72,15 +73,14 @@ public class MacroService {
     return StringEscapeUtils.escapeHtml4(input).replace("&quot;", "\"");
   }
 
+  @SuppressWarnings("unchecked")
   public String renderMacro(String macroText, String fullText, RenderContext renderContext) {
     String[] parts = macroText.split(":", 2);
     String macroName = parts[0];
     String macroArgs = parts.length > 1 ? parts[1] : "";
 
     boolean forCache =
-        BooleanUtils.isTrue(
-            (Boolean)
-                renderContext.renderState().get(RenderResult.RenderStateKeys.FOR_CACHE.name()));
+        BooleanUtils.isTrue((Boolean) renderContext.renderState().get(RenderStateKeys.FOR_CACHE));
 
     Macro macro = macros.get(macroName);
     if (macro == null) {
@@ -89,16 +89,19 @@ public class MacroService {
     if (forCache && !macro.allowCache(new MacroContextImpl(renderContext), macroArgs)) {
       return fullText;
     }
-    String macroKey = "macroRunning:" + macroName;
-    if (renderContext.renderState().containsKey(macroKey)) {
+    Set<String> runningMacros =
+        (Set<String>)
+            renderContext
+                .renderState()
+                .computeIfAbsent(RenderStateKeys.MACRO_GUARD, (k) -> new HashSet<>());
+    if (!runningMacros.add(macroName)) {
       // Prevent recursive macro calls
       return "";
     }
-    renderContext.renderState().put(macroKey, "1");
     try {
       return macro.render(new MacroContextImpl(renderContext), macroArgs);
     } finally {
-      renderContext.renderState().remove(macroKey);
+      runningMacros.remove(macroName);
     }
   }
 
@@ -136,7 +139,7 @@ public class MacroService {
       PageCache pageCache = pageService.getCachedPage(renderContext.site(), pageDescriptor);
       if (pageCache != null && pageCache.useCache) {
         Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
-        renderState.put(RenderResult.RenderStateKeys.TITLE.name(), page.title());
+        renderState.put(RenderStateKeys.TITLE.name(), page.title());
         String rendered = postRender(pageCache.renderedCache, renderContext);
         return new RenderOutputImpl(rendered, renderState);
       }
@@ -155,9 +158,9 @@ public class MacroService {
               new HashMap<>());
       subrenderContext.renderState().putAll(renderContext.renderState());
       // Allow inner page render to generate its own title
-      subrenderContext.renderState().remove(RenderResult.RenderStateKeys.TITLE.name());
+      subrenderContext.renderState().remove(RenderStateKeys.TITLE);
       RenderResult res = renderContext.renderer().renderWithInfo(page.source(), subrenderContext);
-      Map<String, Object> renderState = new HashMap<>(res.renderState());
+      Map<String, Object> renderState = toPublicState(res.renderState());
       renderState.putAll(page.flags().toMap());
       return new RenderOutputImpl(res.renderedText(), renderState);
     }
@@ -175,7 +178,7 @@ public class MacroService {
       long fetchedCache = System.currentTimeMillis();
       if (pageCache != null) { // In this case, ignore useCache flag
         Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
-        renderState.put(RenderResult.RenderStateKeys.TITLE.name(), page.title());
+        renderState.put(RenderStateKeys.TITLE.name(), page.title());
         String rendered = postRender(pageCache.renderedCache, renderContext);
         long end = System.currentTimeMillis();
         logger.info(
@@ -226,7 +229,7 @@ public class MacroService {
             if (pageCache != null) { // In this case, ignore useCache flag
               numCachedPages.addAndGet(1);
               Map<String, Object> renderState = new HashMap<>(page.flags().toMap());
-              renderState.put(RenderResult.RenderStateKeys.TITLE.name(), page.title());
+              renderState.put(RenderStateKeys.TITLE.name(), page.title());
               String rendered = postRender(pageCache.renderedCache, renderContext);
               outputMap.put(pd, new RenderOutputImpl(rendered, renderState));
               return;
@@ -296,21 +299,21 @@ public class MacroService {
               new HashMap<>());
       subrenderContext.renderState().putAll(renderContext.renderState());
       // Allow inner page render to generate its own title
-      subrenderContext.renderState().remove(RenderResult.RenderStateKeys.TITLE.name());
+      subrenderContext.renderState().remove(RenderStateKeys.TITLE);
       // Suppress TOC on inner page render
-      subrenderContext.renderState().put(RenderResult.RenderStateKeys.TOC.name(), false);
+      subrenderContext.renderState().put(RenderStateKeys.TOC, false);
       RenderResult res = renderContext.renderer().renderWithInfo(markup, subrenderContext);
-      return new RenderOutputImpl(res.renderedText(), res.renderState());
+      return new RenderOutputImpl(res.renderedText(), toPublicState(res.renderState()));
     }
 
     @Override
     public void setPageDontCache() {
-      renderContext.renderState().put(RenderResult.RenderStateKeys.DONT_CACHE.name(), true);
+      renderContext.renderState().put(RenderStateKeys.DONT_CACHE, true);
     }
 
     @Override
     public boolean isPlaintextRender() {
-      return Boolean.TRUE.equals(renderContext.renderState().get("plainText"));
+      return Boolean.TRUE.equals(renderContext.renderState().get(RenderStateKeys.PLAIN_TEXT));
     }
 
     @Override
@@ -321,9 +324,19 @@ public class MacroService {
       @SuppressWarnings("unchecked")
       Collection<String> existingLinks =
           (Collection<String>)
-              renderContext.renderState().computeIfAbsent(LINKS.name(), (_) -> new HashSet<>());
+              renderContext.renderState().computeIfAbsent(LINKS, (_) -> new HashSet<>());
       existingLinks.addAll(newLinks);
     }
+  }
+
+  /**
+   * Convert internal enum-keyed render state into the String-keyed map exposed by the public
+   * Macro API ({@link Macro.MacroContext.RenderOutput#getState()}).
+   */
+  private static Map<String, Object> toPublicState(Map<RenderStateKeys, Object> internalState) {
+    Map<String, Object> publicState = new HashMap<>();
+    internalState.forEach((key, value) -> publicState.put(key.name(), value));
+    return publicState;
   }
 
   public static class RenderOutputImpl extends Macro.MacroContext.RenderOutput {

@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.*;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -54,7 +54,7 @@ public class LinkRenderer extends ContainerRenderer {
         linkTarget = "none:invalidPage";
       }
       ((Set<String>)
-              renderContext.renderState().computeIfAbsent(LINKS.name(), (k) -> new HashSet<>()))
+              renderContext.renderState().computeIfAbsent(LINKS, (k) -> new HashSet<>()))
           .add(linkTarget);
     }
     String linkURL =
@@ -137,14 +137,14 @@ public class LinkRenderer extends ContainerRenderer {
   @SuppressWarnings("unchecked")
   String doOverrides(String page, LinkNode link, RenderContext renderContext, boolean recordStats) {
     Map<String, LinkOverride> overrides =
-        (Map<String, LinkOverride>) renderContext.renderState().get(LINK_OVERRIDES.name());
+        (Map<String, LinkOverride>) renderContext.renderState().get(LINK_OVERRIDES);
     if (overrides == null) {
       List<LinkOverride> overrideList =
           linkOverrideService.getOverrides(renderContext.site(), renderContext.page());
       overrides =
           overrideList.stream()
               .collect(Collectors.toMap(LinkOverride::getTarget, Function.identity(), (a, b) -> b));
-      renderContext.renderState().put(LINK_OVERRIDES.name(), overrides);
+      renderContext.renderState().put(LINK_OVERRIDES, overrides);
     }
     if (overrides.containsKey(page)) {
       String override = overrides.get(page).getNewTarget();
@@ -152,7 +152,7 @@ public class LinkRenderer extends ContainerRenderer {
         ((List<LinkOverrideInstance>)
                 renderContext
                     .renderState()
-                    .computeIfAbsent(OVERRIDE_STATS.name(), (k) -> new ArrayList<>()))
+                    .computeIfAbsent(OVERRIDE_STATS, (k) -> new ArrayList<>()))
             .add(
                 new LinkOverrideInstance(
                     page,

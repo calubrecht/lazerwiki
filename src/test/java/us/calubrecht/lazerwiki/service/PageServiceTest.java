@@ -2,7 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.OVERRIDE_STATS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.OVERRIDE_STATS;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -395,7 +395,8 @@ public class PageServiceTest {
 
   @Test
   public void test_savePage() {
-    RenderResult rendered = new RenderResult("rendered", "notRendered", Map.of("DONT_CACHE", true));
+    RenderResult rendered =
+        new RenderResult("rendered", "notRendered", Map.of(RenderStateKeys.DONT_CACHE, true));
     Page p = new Page();
     p.setPagename("TOCACHE");
     p.setNamespace("ns");
@@ -431,7 +432,9 @@ public class PageServiceTest {
   public void test_savePage_recordsErrors() {
     RenderResult rendered =
         new RenderResult(
-            "rendered", "notRendered", Map.of("ERRORS", List.of("Suspicious text at 1:1")));
+            "rendered",
+            "notRendered",
+            Map.of(RenderStateKeys.ERRORS, List.of("Suspicious text at 1:1")));
     Page p = new Page();
     p.setPagename("TOCACHE");
     p.setNamespace("ns");
@@ -612,7 +615,7 @@ public class PageServiceTest {
         List.of(
             new LinkOverrideInstance("some", "moreText", 2, 6),
             new LinkOverrideInstance("or other", "short", 17, 25));
-    renderResult.renderState().put(OVERRIDE_STATS.name(), overrides);
+    renderResult.renderState().put(OVERRIDE_STATS, overrides);
 
     String adjusted = pageService.adjustSource("[[some|source]][[or other]]", renderResult);
     assertEquals("[[moreText|source]][[short]]", adjusted);

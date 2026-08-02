@@ -3,7 +3,7 @@ package us.calubrecht.lazerwiki.syntax.renderer;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.stereotype.Component;
-import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ITreeNode;
 import us.calubrecht.lazerwiki.syntax.nodes.ControlRowNode;
@@ -21,11 +21,11 @@ public class ControlRowRenderer extends AbstractRenderer {
     ControlRowNode controlRowNode = (ControlRowNode) node;
     String token = controlRowNode.getToken();
     if (token.equals("~~YESTOC~~")) {
-      renderContext.renderState().put(RenderResult.RenderStateKeys.TOC.name(), true);
+      renderContext.renderState().put(RenderStateKeys.TOC, true);
     } else // if (!context.NO_TOC_TOKEN().isEmpty()) {
     {
       // ~~NOTOC~~
-      renderContext.renderState().put(RenderResult.RenderStateKeys.TOC.name(), false);
+      renderContext.renderState().put(RenderStateKeys.TOC, false);
     }
     return new StringBuilder();
   }

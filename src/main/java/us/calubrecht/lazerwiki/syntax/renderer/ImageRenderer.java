@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.syntax.renderer;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.*;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -56,7 +56,7 @@ public class ImageRenderer extends AbstractRenderer {
     Map<String, String> options = parseOptions(imgNode.getOptions(), imgNode.getSource());
     String size = options.getOrDefault("size", "");
     ((Set<String>)
-            renderContext.renderState().computeIfAbsent(IMAGES.name(), (k) -> new HashSet<>()))
+            renderContext.renderState().computeIfAbsent(IMAGES, (k) -> new HashSet<>()))
         .add(src);
     if (options.getOrDefault("linkType", "").equals("linkonly")) {
       return renderLinkOnly(src, imgNode.getTitle(), size);
@@ -169,7 +169,7 @@ public class ImageRenderer extends AbstractRenderer {
   @SuppressWarnings("unchecked")
   String doOverrides(String file, ImageNode node, RenderContext renderContext) {
     Map<String, MediaOverride> overrides =
-        (Map<String, MediaOverride>) renderContext.renderState().get(MEDIA_OVERRIDES.name());
+        (Map<String, MediaOverride>) renderContext.renderState().get(MEDIA_OVERRIDES);
     if (overrides == null) {
       List<MediaOverride> mediaOverrideList =
           mediaOverrideService.getOverrides(renderContext.site(), renderContext.page());
@@ -177,16 +177,14 @@ public class ImageRenderer extends AbstractRenderer {
           mediaOverrideList.stream()
               .collect(
                   Collectors.toMap(MediaOverride::getTarget, Function.identity(), (a, b) -> b));
-      renderContext.renderState().put(MEDIA_OVERRIDES.name(), overrides);
+      renderContext.renderState().put(MEDIA_OVERRIDES, overrides);
     }
     if (overrides.containsKey(file)) {
       String override = overrides.get(file).getNewTarget();
       int startIndex = node.getSourcePosition().getLeft();
       int endIndex = node.getSourcePosition().getRight() + 1;
       ((List<LinkOverrideInstance>)
-              renderContext
-                  .renderState()
-                  .computeIfAbsent(OVERRIDE_STATS.name(), (k) -> new ArrayList<>()))
+              renderContext.renderState().computeIfAbsent(OVERRIDE_STATS, (k) -> new ArrayList<>()))
           .add(new LinkOverrideInstance(file, override, startIndex, endIndex));
       return override;
     }

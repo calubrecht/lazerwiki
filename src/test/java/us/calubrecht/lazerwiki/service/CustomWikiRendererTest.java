@@ -2,7 +2,7 @@ package us.calubrecht.lazerwiki.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.OVERRIDE_STATS;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.OVERRIDE_STATS;
 
 import java.util.List;
 import java.util.Set;
@@ -18,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.model.LinkOverride;
 import us.calubrecht.lazerwiki.model.LinkOverrideInstance;
 import us.calubrecht.lazerwiki.model.RenderResult;
+import us.calubrecht.lazerwiki.model.RenderStateKeys;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 import us.calubrecht.lazerwiki.syntax.framework.ParseContext;
 import us.calubrecht.lazerwiki.syntax.nodes.LinkNode;
@@ -192,7 +193,7 @@ public class CustomWikiRendererTest {
             "page",
             "user");
     Set<String> links =
-        (Set<String>) result.renderState().get(RenderResult.RenderStateKeys.LINKS.name());
+        (Set<String>) result.renderState().get(RenderStateKeys.LINKS);
     assertEquals(Set.of("oneLink", "oneLinkWithText", "ns:ThirdLink"), links);
   }
 
@@ -214,7 +215,7 @@ public class CustomWikiRendererTest {
         "<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>",
         underTest.renderToString(source, context));
     List<LinkOverrideInstance> overrideInstances =
-        (List<LinkOverrideInstance>) context.renderState().get(OVERRIDE_STATS.name());
+        (List<LinkOverrideInstance>) context.renderState().get(OVERRIDE_STATS);
     assertEquals(2, overrideInstances.size());
     LinkOverrideInstance o1 = overrideInstances.get(0);
     LinkOverrideInstance o2 = overrideInstances.get(1);
@@ -231,7 +232,7 @@ public class CustomWikiRendererTest {
         "<div>AnotherParagraph</div>\n<div><a class=\"wikiLink\" href=\"/page/new\">new</a> <a class=\"wikiLink\" href=\"/page/ns2:wns2\">wtitle</a></div>",
         underTest.renderToString(source2, context));
     overrideInstances =
-        (List<LinkOverrideInstance>) context.renderState().get(OVERRIDE_STATS.name());
+        (List<LinkOverrideInstance>) context.renderState().get(OVERRIDE_STATS);
     assertEquals(2, overrideInstances.size());
     o1 = overrideInstances.get(0);
     o2 = overrideInstances.get(1);
@@ -252,7 +253,7 @@ public class CustomWikiRendererTest {
         "<div><a class=\"wikiLinkMissing\" href=\"/page/ns:page\">&lt;script&gt;someScript&lt;/script&gt;</a></div>",
         renderRes.renderedText());
     List<String> parseErrors =
-        (List<String>) renderRes.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+        (List<String>) renderRes.renderState().get(RenderStateKeys.ERRORS);
     assertEquals(
         "Suspicious link source at 0. Raw text =[[[ns:page|<script>someScript</script>]]]",
         parseErrors.get(0));
@@ -296,7 +297,7 @@ public class CustomWikiRendererTest {
         "<div>This &lt;b&gt;source&lt;/b&gt; has markup and &lt;script&gt;console.log(\"hey buddy\");&lt;/script&gt;</div>",
         renderRes.renderedText());
     List<String> parseErrors =
-        (List<String>) renderRes.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+        (List<String>) renderRes.renderState().get(RenderStateKeys.ERRORS);
     assertEquals(
         "Suspicious text at 0. Raw text =[This <b>source</b> has markup and <script>console.log(\"hey buddy\");</script>]",
         parseErrors.get(0));
@@ -559,12 +560,12 @@ public class CustomWikiRendererTest {
     RenderResult renderRes = underTest.renderWithInfo(imageInput, "site", "page", "user");
     assertEquals(
         Set.of("image.jpg"),
-        renderRes.renderState().get(RenderResult.RenderStateKeys.IMAGES.name()));
+        renderRes.renderState().get(RenderStateKeys.IMAGES));
     String linkOnlyInput = "{{image.jpg?linkonly}}";
     renderRes = underTest.renderWithInfo(linkOnlyInput, "site", "page", "user");
     assertEquals(
         Set.of("image.jpg"),
-        renderRes.renderState().get(RenderResult.RenderStateKeys.IMAGES.name()));
+        renderRes.renderState().get(RenderStateKeys.IMAGES));
   }
 
   @Test
@@ -575,7 +576,7 @@ public class CustomWikiRendererTest {
         "<div>Check <img src=\"/_media/file.jpg\" class=\"media\" title=\"&quot; onerror=&quot;alert(1)&quot;\" loading=\"lazy\"></div>",
         renderRes.renderedText());
     List<String> parseErrors =
-        (List<String>) renderRes.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+        (List<String>) renderRes.renderState().get(RenderStateKeys.ERRORS);
     assertEquals(
         "Suspicious img tag title at 6. Raw text =[\" onerror=\"alert(1)\"]", parseErrors.get(0));
 
@@ -585,7 +586,7 @@ public class CustomWikiRendererTest {
         "<div>Check <img src=\"/_media/invalidSource.none\" class=\"media\" title=\"text\" loading=\"lazy\"></div>",
         renderRes.renderedText());
     parseErrors =
-        (List<String>) renderRes.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+        (List<String>) renderRes.renderState().get(RenderStateKeys.ERRORS);
     assertEquals(
         "Suspicious img tag src at 6. Raw text =[\" onerror=\"alert(1)\"]", parseErrors.get(0));
 
@@ -595,7 +596,7 @@ public class CustomWikiRendererTest {
         "<div><img src=\"/_media/javascript:ortext\" class=\"media\" title=\"text\" loading=\"lazy\"></div>",
         renderRes.renderedText());
     parseErrors =
-        (List<String>) renderRes.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+        (List<String>) renderRes.renderState().get(RenderStateKeys.ERRORS);
     assertEquals("Suspicious img tag src at 0. Raw text =[javascript:ortext]", parseErrors.get(0));
   }
 
@@ -848,11 +849,11 @@ public class CustomWikiRendererTest {
   @Test
   public void test_renderWithContext() {
     RenderContext context = new RenderContext("localhost", "page", "user");
-    context.renderState().put("rememberedState", "State");
+    context.renderState().put(RenderStateKeys.ID_SUFFIX, "State");
     RenderResult res = underTest.renderWithInfo("===Some Header===", context);
-    assertEquals("Some Header", res.renderState().get(RenderResult.RenderStateKeys.TITLE.name()));
+    assertEquals("Some Header", res.renderState().get(RenderStateKeys.TITLE));
     // State sent in to render should remain when returned
-    assertEquals("State", res.renderState().get("rememberedState"));
+    assertEquals("State", res.renderState().get(RenderStateKeys.ID_SUFFIX));
   }
 
   @Test
@@ -1071,7 +1072,7 @@ public class CustomWikiRendererTest {
         "<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\" data-named=\"true\">&lt;script&gt;runsomething&lt;/script&gt;</label><div class=\"collapsible\">Hidden</div></div>",
         renderRes.renderedText());
     List<String> parseErrors =
-        (List<String>) renderRes.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+        (List<String>) renderRes.renderState().get(RenderStateKeys.ERRORS);
     assertEquals(
         "Suspicious hidden tag name at 0. Raw text =[<script>runsomething</script>]",
         parseErrors.get(0));
@@ -1082,7 +1083,7 @@ public class CustomWikiRendererTest {
         "<div class=\"hidden\"><input id=\"hiddenToggle11\" class=\"toggle\" type=\"checkbox\"><label for=\"hiddenToggle11\" class=\"hdn-toggle\">Hidden</label><div class=\"collapsible\">Something in  here</div></div>",
         renderRes.renderedText());
     parseErrors =
-        (List<String>) renderRes.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
+        (List<String>) renderRes.renderState().get(RenderStateKeys.ERRORS);
     assertEquals("Unknown attribute \"fling\" in hidden tag at 0", parseErrors.get(0));
 
     String hiddeonOnItsOwnLine = "<hidden>\n - Hidden with list\n -A list\n</hidden>";

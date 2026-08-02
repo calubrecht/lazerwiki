@@ -1,6 +1,6 @@
 package us.calubrecht.lazerwiki.service;
 
-import static us.calubrecht.lazerwiki.model.RenderResult.RenderStateKeys.*;
+import static us.calubrecht.lazerwiki.model.RenderStateKeys.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public class CustomWikiRenderer implements IMarkupRenderer {
             renderContext.user(),
             this,
             new HashMap<>());
-    plaintextContext.renderState().put("plainText", true);
+    plaintextContext.renderState().put(PLAIN_TEXT, true);
     String plainText = renderer.renderPlaintext(node, plaintextContext);
     return new RenderResult(toc + rendered, plainText, renderContext.renderState());
   }
@@ -66,12 +66,12 @@ public class CustomWikiRenderer implements IMarkupRenderer {
   private String renderToC(RenderContext renderContext) {
     List<HeaderRef> headers =
         (List<HeaderRef>)
-            renderContext.renderState().getOrDefault(HEADERS.name(), Collections.emptyList());
-    Object forceTOC = renderContext.renderState().get(TOC.name());
+            renderContext.renderState().getOrDefault(HEADERS, Collections.emptyList());
+    Object forceTOC = renderContext.renderState().get(TOC);
     if (Boolean.FALSE.equals(forceTOC) || (headers.size() < 3) && !Boolean.TRUE.equals(forceTOC)) {
       return "";
     }
-    String idSuffix = renderContext.renderState().getOrDefault(ID_SUFFIX.name(), "").toString();
+    String idSuffix = renderContext.renderState().getOrDefault(ID_SUFFIX, "").toString();
     return tocRenderService.renderTOC(headers, idSuffix);
   }
 }
