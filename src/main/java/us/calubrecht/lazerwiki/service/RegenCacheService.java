@@ -127,6 +127,7 @@ public class RegenCacheService {
             newCache.title =
                 PageService.getTitle(new PageDescriptor(pd.getNamespace(), pd.getPagename()), p);
             newCache.source = PageService.doAdjustSource(p.getText(), res);
+            newCache.errors = PageService.getErrors(res);
             newCache.useCache =
                 !(Boolean)
                     res.renderState()
@@ -188,6 +189,7 @@ public class RegenCacheService {
                 newCache.title =
                     PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
                 newCache.source = PageService.doAdjustSource(p.getText(), res);
+                newCache.errors = PageService.getErrors(res);
                 newCache.useCache =
                     !(Boolean)
                         res.renderState()
@@ -244,6 +246,7 @@ public class RegenCacheService {
                 newCache.title =
                     PageService.getTitle(new PageDescriptor(pd.namespace(), pd.pageName()), p);
                 newCache.source = PageService.doAdjustSource(p.getText(), res);
+                newCache.errors = PageService.getErrors(res);
                 newCache.useCache =
                     !(Boolean)
                         res.renderState()

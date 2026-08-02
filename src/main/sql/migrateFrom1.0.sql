@@ -170,3 +170,6 @@ ALTER TABLE mediaHistory MODIFY COLUMN ts TIMESTAMP DEFAULT current_timestamp() 
 ALTER TABLE lazerwiki.mediaRecord ADD modified TIMESTAMP DEFAULT current_timestamp();
 
 ALTER TABLE page ADD INDEX `PageModifiedTime` (`site`, `deleted`, `validTS`, `modified`) USING BTREE;
+
+-- Fix #104 - Record render errors found while rendering a page
+ALTER TABLE pageCache ADD `errors` JSON NULL DEFAULT NULL;

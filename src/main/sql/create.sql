@@ -264,6 +264,7 @@ CREATE TABLE `pageCache` (
 	`plaintextCache` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
 	`source` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NULL DEFAULT NULL,
 	`useCache` BIT(1) NOT NULL DEFAULT b'1',
+	`errors` JSON NULL DEFAULT NULL,
 	PRIMARY KEY (`site`, `namespace`, `pageName`) USING BTREE,
 	FULLTEXT INDEX `PageCachePlaintextSearch` (`plaintextCache`),
 	FULLTEXT INDEX `PageCachePageNameSearch` (`title`, `pageName`),

@@ -428,6 +428,29 @@ public class PageServiceTest {
   }
 
   @Test
+  public void test_savePage_recordsErrors() {
+    RenderResult rendered =
+        new RenderResult(
+            "rendered", "notRendered", Map.of("ERRORS", List.of("Suspicious text at 1:1")));
+    Page p = new Page();
+    p.setPagename("TOCACHE");
+    p.setNamespace("ns");
+    when(pageRepository.getBySiteAndNamespaceAndPagename("default", "ns", "toCache")).thenReturn(p);
+    pageService.saveCache("default", "ns:toCache", "some source", rendered);
+    PageCache cached = new PageCache();
+    cached.site = "default";
+    cached.namespace = "ns";
+    cached.pageName = "TOCACHE";
+    cached.renderedCache = "rendered";
+    cached.plaintextCache = "notRendered";
+    cached.useCache = true;
+    cached.source = "some source";
+    cached.errors = List.of("Suspicious text at 1:1");
+
+    verify(pageCacheRepository).save(cached);
+  }
+
+  @Test
   public void test_historicalPageData() {
     when(namespaceService.canReadNamespace(eq("default"), any(), eq("bob"))).thenReturn(true);
 

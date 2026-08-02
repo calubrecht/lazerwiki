@@ -5,7 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity(name = "pageCache")
 @IdClass(PageCache.PageCacheKey.class)
@@ -41,6 +44,9 @@ public class PageCache implements PageDesc {
   public String title;
   public boolean useCache;
 
+  @JdbcTypeCode(SqlTypes.JSON)
+  public List<String> errors;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -52,13 +58,14 @@ public class PageCache implements PageDesc {
         && Objects.equals(pageName, pageCache.pageName)
         && Objects.equals(renderedCache, pageCache.renderedCache)
         && Objects.equals(plaintextCache, pageCache.plaintextCache)
-        && Objects.equals(title, pageCache.title);
+        && Objects.equals(title, pageCache.title)
+        && Objects.equals(errors, pageCache.errors);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        site, namespace, pageName, renderedCache, plaintextCache, source, useCache, title);
+        site, namespace, pageName, renderedCache, plaintextCache, source, useCache, title, errors);
   }
 
   @JsonIgnore

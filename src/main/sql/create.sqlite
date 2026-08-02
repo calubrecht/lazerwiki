@@ -248,7 +248,7 @@ CREATE INDEX "IMAGEREF_SOURCE_IDX" ON "imageRefs" (
 	"sourcePageName"
 );
 
-CREATE VIRTUAL TABLE pageCache USING fts5("site", "namespace", "pageName", "title", "renderedCache", "plaintextCache", "source", "useCache");
+CREATE VIRTUAL TABLE pageCache USING fts5("site", "namespace", "pageName", "title", "renderedCache", "plaintextCache", "source", "useCache", "errors");
 
 
 

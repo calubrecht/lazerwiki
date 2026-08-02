@@ -308,11 +308,17 @@ public class PageService {
                 .getOrDefault(RenderResult.RenderStateKeys.DONT_CACHE.name(), Boolean.FALSE);
     newCache.source = adjustSource(source, rendered);
     newCache.title = (String) rendered.renderState().get(RenderResult.RenderStateKeys.TITLE.name());
+    newCache.errors = getErrors(rendered);
     pageCacheRepository.save(newCache);
   }
 
   public String adjustSource(String source, RenderResult rendered) {
     return doAdjustSource(source, rendered);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static List<String> getErrors(RenderResult rendered) {
+    return (List<String>) rendered.renderState().get(RenderResult.RenderStateKeys.ERRORS.name());
   }
 
   public static String doAdjustSource(String source, RenderResult rendered) {
