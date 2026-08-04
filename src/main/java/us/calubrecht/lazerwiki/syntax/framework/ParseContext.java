@@ -16,11 +16,12 @@ public class ParseContext implements Iterable<String>, ReadOnlyParseContext {
   boolean readonly;
   int rootIdx = 0;
   ReadOnlyParseContext rootContext = this;
+  List<Integer> lineCounts = new ArrayList<>();
 
   public ParseContext(String fullText) {
     this.fullText = new StringBuilder(fullText);
     lines = fullText.lines().toList();
-    nextLine = lines.get(0);
+    nextLine = lines.getFirst();
     readonly = true;
   }
 
@@ -179,5 +180,16 @@ public class ParseContext implements Iterable<String>, ReadOnlyParseContext {
 
   public String getFullText() {
     return fullText.toString();
+  }
+
+  public int translatePosition(int line, int charIdx) {
+     if (lineCounts.isEmpty()) {
+       int counter = 0;
+       for (String nextLine: lines) {
+         lineCounts.add(counter);
+         counter += 1 + nextLine.length();
+       }
+     }
+     return lineCounts.get(line) + charIdx;
   }
 }
