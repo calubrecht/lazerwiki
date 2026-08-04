@@ -5,6 +5,9 @@ import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.*;
 import org.commonmark.parser.IncludeSourceSpans;
+import org.commonmark.parser.Parser;
+import org.commonmark.parser.SourceLine;
+import org.commonmark.parser.block.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -37,7 +40,7 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
 
     @Override
     public RenderResult renderWithInfo(String markup, RenderContext renderContext) {
-        List<Extension> extensions = Arrays.asList(TablesExtension.create());
+        List<Extension> extensions = Arrays.asList(TablesExtension.create(), new MacroExtension());
         org.commonmark.parser.Parser parser = org.commonmark.parser.Parser.builder()
                 .extensions(extensions)
                 .includeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
@@ -124,7 +127,7 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
             container.setPosition(Pair.of(0, fullText.length()));
             root = container;
             nodeStack.push(container);
-            document.getFirstChild().accept(this);
+            childAccept(document);
             nodeStack.pop();
             next(document);
         }
@@ -148,7 +151,7 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
         public void visit(Heading heading) {
             HeaderNode node = new HeaderNode(heading.getLevel());
             node.setParseContext(fullContext);
-            node.setPosition(getPosition(heading.getSourceSpans().getFirst()));
+            node.setPosition(getPosition(heading.getSourceSpans()));
             openNode().addChild(node);
             nodeStack.push(node);
             heading.getFirstChild().accept(this);
@@ -185,7 +188,7 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
         public void visit(Link link) {
            LinkNode node = new LinkNode(link.getDestination());
            node.setParseContext(fullContext);
-           node.setPosition(getPosition(link.getSourceSpans().getFirst()));
+           node.setPosition(getPosition(link.getSourceSpans()));
            openNode().addChild(node);
            nodeStack.add(node);
            childAccept(link);
@@ -207,17 +210,21 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
         public void visit(Paragraph paragraph) {
             TaggedContainerNode node = new TaggedContainerNode(TaggedContainerNode.TYPE.PARAGRAPH);
             node.setParseContext(fullContext);
-            node.setPosition(getPosition(paragraph.getSourceSpans().getFirst()));
+            node.setPosition(getPosition(paragraph.getSourceSpans()));
             openNode().addChild(node);
             nodeStack.push(node);
-            paragraph.getFirstChild().accept(this);
+            childAccept(paragraph);
             nodeStack.pop();
             next(paragraph);
         }
 
         @Override
         public void visit(SoftLineBreak softLineBreak) {
-
+            TextNode node = new TextNode("\n");
+            node.setParseContext(fullContext);
+            node.setPosition(getPosition(softLineBreak.getSourceSpans()));
+            openNode().addChild(node);
+            next(softLineBreak);
         }
 
         @Override
@@ -227,11 +234,30 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
 
         @Override
         public void visit(Text text) {
-            TextNode node = new TextNode(text.getLiteral());
-            node.setParseContext(fullContext);
-            node.setPosition(getPosition(text.getSourceSpans().getFirst()));
-            openNode().addChild(node);
-            next(text);
+            StringBuilder content = new StringBuilder();
+            Node node = text;
+            List<SourceSpan> sourceSpans = new ArrayList<>();
+            do {
+                if (node instanceof Text) {
+                    content.append(((Text)node).getLiteral());
+                    sourceSpans.addAll(node.getSourceSpans());
+                    node  = node.getNext();
+                }
+                else if (node instanceof SoftLineBreak) {
+                    content.append("\n");
+                    node  = node.getNext();
+                }
+                else {
+                    break;
+                }
+            } while (node != null);
+            TextNode textNode = new TextNode(content.toString());
+            textNode.setParseContext(fullContext);
+            textNode.setPosition(getPosition(sourceSpans));
+            openNode().addChild(textNode);
+            if (node != null) {
+                node.accept(this);
+            }
         }
 
         @Override
@@ -241,7 +267,13 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
 
         @Override
         public void visit(CustomBlock customBlock) {
-
+            if (customBlock instanceof MacroBlock macroBlock) {
+                MacroNode node = new MacroNode(macroBlock.getMacroText(), macroBlock.getMacroFullText());
+                node.setParseContext(fullContext);
+                node.setPosition(getPosition(macroBlock.getSourceSpans()));
+                openNode().addChild(node);
+            }
+            next(customBlock);
         }
 
         @Override
@@ -266,14 +298,106 @@ public class MarkdownWikiRenderer implements IMarkupRenderer {
             return nodeStack.peek();
         }
 
-        Pair<Integer, Integer> getPosition(SourceSpan sourceSpan) {
-            int start = fullContext.translatePosition(sourceSpan.getLineIndex(), sourceSpan.getColumnIndex());
-            int end = start + sourceSpan.getLength() - 1;
+        Pair<Integer, Integer> getPosition(List<SourceSpan> sourceSpans) {
+            int start = fullContext.translatePosition(sourceSpans.getFirst().getLineIndex(), sourceSpans.getFirst().getColumnIndex());
+            int end = fullContext.translatePosition(sourceSpans.getLast().getLineIndex(), sourceSpans.getLast().getColumnIndex()) + sourceSpans.getLast().getLength() - 1;
             return Pair.of(start, end);
         }
 
         public ITreeNode getTree() {
             return root;
+        }
+    }
+
+    public static class MacroExtension implements Parser.ParserExtension {
+
+        @Override
+        public void extend(Parser.Builder parserBuilder) {
+            parserBuilder.customBlockParserFactory(new MacroBlockParser.Factory());
+        }
+    }
+
+    public static class MacroBlock extends CustomBlock {
+        private String macroText;
+        private String macroFullText;
+
+        public String getMacroText() {
+            return macroText;
+        }
+
+        public String getMacroFullText() {
+            return macroFullText;
+        }
+    }
+
+    public static class MacroBlockParser extends AbstractBlockParser {
+        static final String MACRO_START = "~~MACRO~~";
+        static final String MACRO_END = "~~/MACRO~~";
+        static final java.util.regex.Pattern MACRO_TOKEN =
+                java.util.regex.Pattern.compile("~~(/)?MACRO~~");
+
+        private final MacroBlock block = new MacroBlock();
+        private final StringBuilder raw = new StringBuilder();
+        private int macroCount = 0;
+        private boolean done = false;
+
+        @Override
+        public Block getBlock() {
+            return block;
+        }
+
+        @Override
+        public BlockContinue tryContinue(ParserState parserState) {
+            if (done) {
+                return BlockContinue.none();
+            }
+            return BlockContinue.atIndex(parserState.getIndex());
+        }
+
+        @Override
+        public void addLine(SourceLine line) {
+            if (!raw.isEmpty()) {
+                raw.append('\n');
+            }
+            String content = line.getContent().toString();
+            java.util.regex.Matcher matcher = MACRO_TOKEN.matcher(content);
+            while (matcher.find()) {
+                if (matcher.group(1) == null) {
+                    macroCount++;
+                } else {
+                    macroCount--;
+                    if (macroCount == 0) {
+                        raw.append(content, 0, matcher.end());
+                        done = true;
+                        return;
+                    }
+                }
+            }
+            raw.append(content);
+        }
+
+        @Override
+        public void closeBlock() {
+            String fullText = raw.toString();
+            block.macroFullText = fullText;
+            block.macroText =
+                    done
+                            ? fullText.substring(MACRO_START.length(), fullText.length() - MACRO_END.length())
+                            : fullText;
+        }
+
+        public static class Factory extends AbstractBlockParserFactory {
+
+            @Override
+            public BlockStart tryStart(ParserState state, MatchedBlockParser matchedBlockParser) {
+                CharSequence line = state.getLine().getContent();
+                int nextNonSpace = state.getNextNonSpaceIndex();
+                String content = line.toString();
+                if (!content.startsWith(MACRO_START, nextNonSpace)) {
+                    return BlockStart.none();
+                }
+                return BlockStart.of(new MacroBlockParser()).atIndex(nextNonSpace);
+            }
         }
     }
 }
