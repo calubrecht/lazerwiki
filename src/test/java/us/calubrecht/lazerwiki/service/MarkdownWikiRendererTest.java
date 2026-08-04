@@ -11,7 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import us.calubrecht.lazerwiki.service.renderhelpers.RenderContext;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {MarkdownWikiRenderer.class, MarkdownWikiRendererTest.TestConfig.class})
@@ -101,6 +101,15 @@ class MarkdownWikiRendererTest {
         assertEquals(
                 "<div><a class=\"wikiLink\" href=\"/page/exists\">This Page Exists</a></div>",
                 doRender("[](exists)"));
+    }
+
+    @Test
+    public void test_macro() {
+        String inputMacro = "~~MACRO~~macro1: macro~~/MACRO~~";
+        when(macroService.renderMacro(eq("macro1: macro"), anyString(), any()))
+                .thenReturn("<div>MACRO- Unknown Macro macro1</div>");
+        String render = underTest.renderToString(inputMacro, "", "page", "");
+        assertEquals("<div>MACRO- Unknown Macro macro1</div>", render);
     }
 
 }
