@@ -81,6 +81,9 @@ dependencies {
 	implementation("org.xerial:sqlite-jdbc:3.49.1.0")
 	implementation("org.hibernate.orm:hibernate-community-dialects")
 	implementation("org.hibernate.orm:hibernate-core:7.3.5.Final")
+	implementation("org.commonmark:commonmark:0.20.0")
+	implementation("org.commonmark:commonmark-ext-gfm-tables:0.20.0")
+
 
 	runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 	implementation("mysql:mysql-connector-java:8.0.33")
