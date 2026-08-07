@@ -12,6 +12,22 @@ import us.calubrecht.lazerwiki.syntax.nodes.TextNode;
 
 @Component
 public class TableParser extends AbstractTreeParser {
+  /** Parse Table syntax into a TableNode containing lists of lists of TableCellNode
+   * Base syntax is cells separated by | or ^ characters. A cell that starts with ^ is a Header cell, others are data
+   * cells.
+   * ^ Header 1 ^ Header 2 ^
+   * | Data 1 | Data 2 |
+   * | Data 3 | Data 4|
+   *
+   * A cell can cover multiple rows with the rowspan token (::)
+   * | Data 1 | This cell extends into next row |
+   * | Data 2 | :: |
+   *
+   * A cell can cover multiple columns by leaving a cell blank
+   * | This cell extends to next column ||
+   *
+   * Alignment is set by leading and trailing spaces ( Leading space = right align, trailing space = left align, leading and trailing space = center)
+   */
   final Pattern tablePattern = Pattern.compile("[|^].*[|^]");
 
   @Override
