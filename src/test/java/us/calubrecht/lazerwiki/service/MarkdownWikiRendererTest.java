@@ -54,6 +54,15 @@ class MarkdownWikiRendererTest {
     }
 
     @Test
+    void test_renderHeaderSanitize() {
+        String source = "# <script>doAlert(\"Gotcha\");</script>";
+
+        assertEquals(
+                "<h1 id=\"header__script_doAlert__Gotcha_____script_\">&lt;script&gt;doAlert(\"Gotcha\");&lt;/script&gt;</h1>",
+                doRender(source));
+    }
+
+    @Test
     void test_renderPlaintext() {
         String source = "# Big header\n ### Smaller Header";
 
